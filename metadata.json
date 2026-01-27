@@ -1,0 +1,8 @@
+{
+  "name": "Gestion de Parque Vehicular ft Google Sheets",
+  "description": "Sistema integral de gestión de flotas con control de vehículos, choferes, combustible e incidencias, sincronizado con Google Sheets.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}

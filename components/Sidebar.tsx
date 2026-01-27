@@ -1,0 +1,101 @@
+
+import React from 'react';
+import { View, User } from '../types';
+
+interface SidebarProps {
+  activeView: View;
+  onViewChange: (view: View) => void;
+  appName: string;
+  currentUser: User | null;
+  onLogout: () => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange, appName, currentUser, onLogout }) => {
+  const menuItems = [
+    { id: View.DASHBOARD, label: 'Inicio', icon: 'dashboard' },
+    { id: View.VEHICLES, label: 'Vehículos', icon: 'directions_car' },
+    { id: View.DRIVERS, label: 'Choferes', icon: 'person' },
+    { id: View.MAINTENANCE, label: 'Mantenimiento', icon: 'handyman' },
+    { id: View.PLANNING, label: 'Planeación', icon: 'calendar_month' },
+    { id: View.TRAVEL_LOGS, label: 'Viajes', icon: 'route' },
+    { id: View.FUEL, label: 'Combustible', icon: 'local_gas_station' },
+    { id: View.INCIDENTS, label: 'Incidencias', icon: 'report_problem' },
+  ];
+
+  return (
+    <aside 
+      className="w-64 flex flex-col shrink-0 z-50 transition-all duration-300"
+      style={{ backgroundColor: 'var(--secondary-color, #0f172a)' }}
+    >
+      <div className="p-6 flex-1 flex flex-col">
+        <div className="flex items-center gap-3 mb-10">
+          <div className="bg-primary size-10 rounded-lg flex items-center justify-center text-white shadow-lg shadow-blue-500/20 overflow-hidden">
+            <span className="material-symbols-outlined filled text-2xl">directions_car</span>
+          </div>
+          <div className="flex flex-col">
+            <h1 className="text-white text-lg font-black leading-none tracking-tight">{appName}</h1>
+            <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-1">Gestión de Activos</p>
+          </div>
+        </div>
+
+        <nav className="flex flex-col gap-1.5 flex-1 overflow-y-auto custom-scrollbar pr-1">
+          {menuItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => onViewChange(item.id)}
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group ${
+                activeView === item.id ? 'bg-primary text-white shadow-lg' : 'text-slate-400 hover:bg-white/10 hover:text-white'
+              }`}
+            >
+              <span className={`material-symbols-outlined ${activeView === item.id ? 'filled' : ''}`}>{item.icon}</span>
+              <p className={`text-sm ${activeView === item.id ? 'font-bold' : 'font-medium'}`}>{item.label}</p>
+            </button>
+          ))}
+          
+          {currentUser?.role === 'admin' && (
+            <>
+              <div className="my-6 border-t border-white/10"></div>
+              <button
+                onClick={() => onViewChange(View.USERS)}
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                  activeView === View.USERS ? 'bg-primary text-white' : 'text-slate-400 hover:bg-white/10 hover:text-white'
+                }`}
+              >
+                <span className="material-symbols-outlined">group</span>
+                <p className="text-sm font-medium">Usuarios</p>
+              </button>
+            </>
+          )}
+
+          <button
+            onClick={() => onViewChange(View.SETTINGS)}
+            className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+              activeView === View.SETTINGS ? 'bg-primary text-white' : 'text-slate-400 hover:bg-white/10 hover:text-white'
+            }`}
+          >
+            <span className="material-symbols-outlined">settings</span>
+            <p className="text-sm font-medium">Ajustes</p>
+          </button>
+        </nav>
+
+        <div className="mt-auto pt-6 border-t border-white/10">
+          <div className="flex items-center gap-3 mb-4 px-2">
+             <div className="size-10 rounded-lg bg-white/10 flex items-center justify-center text-white font-black text-xs">
+                {currentUser?.name[0].toUpperCase()}
+             </div>
+             <div className="flex flex-col min-w-0">
+                <p className="text-white text-xs font-black truncate">{currentUser?.name}</p>
+                <p className="text-slate-500 text-[9px] font-bold uppercase tracking-widest truncate">{currentUser?.role}</p>
+             </div>
+          </div>
+          <button onClick={onLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-rose-400 hover:bg-rose-500/10 transition-all">
+            <span className="material-symbols-outlined">logout</span>
+            <p className="text-sm font-black uppercase tracking-widest">Cerrar Sesión</p>
+          </button>
+        </div>
+      </div>
+    </aside>
+  );
+};
+
+export default Sidebar;
