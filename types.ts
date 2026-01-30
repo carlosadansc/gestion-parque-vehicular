@@ -11,7 +11,8 @@ export enum View {
   INSPECTIONS = 'inspections',
   USERS = 'users',
   SETTINGS = 'settings',
-  LOGIN = 'login'
+  LOGIN = 'login',
+  REPORTS = 'reports'
 }
 
 export type UserRole = 'admin' | 'operator' | 'viewer';

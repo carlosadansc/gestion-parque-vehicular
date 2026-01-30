@@ -13,6 +13,7 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange, appName, currentUser, onLogout }) => {
   const menuItems = [
     { id: View.DASHBOARD, label: 'Inicio', icon: 'dashboard' },
+    { id: View.REPORTS, label: 'Reportes', icon: 'bar_chart' },
     { id: View.VEHICLES, label: 'Vehículos', icon: 'directions_car' },
     { id: View.DRIVERS, label: 'Choferes', icon: 'person' },
     { id: View.INSPECTIONS, label: 'Revisiones', icon: 'fact_check' },

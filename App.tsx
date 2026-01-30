@@ -15,13 +15,14 @@ import TravelLogs from './components/TravelLogs';
 import Maintenance from './components/Maintenance';
 import Inspections from './components/Inspections';
 import Users from './components/Users';
+import Reports from './components/Reports';
 import { googleSheets } from './services/googleSheets';
 
 const DEFAULT_SETTINGS: AppSetting[] = [
   { key: 'APP_NAME', value: 'DIF La Paz Flota' },
   { key: 'PRIMARY_COLOR', value: '#9e1b32' },
   { key: 'SECONDARY_COLOR', value: '#0f172a' },
-  { key: 'APP_LOGO', value: 'https://i.ibb.co/3ykMvS8/escudo-paz.png' },
+  { key: 'APP_LOGO', value: './assets/logo.png' },
   { key: 'INSTITUTION_NAME', value: 'SISTEMA PARA EL DESARROLLO INTEGRAL DE LA FAMILIA' },
   { key: 'INSTITUTION_HEAD_NAME', value: 'Director General' },
   { key: 'INSTITUTION_HEAD_POS', value: 'DIRECTOR GENERAL DEL SMDIF LA PAZ' },
@@ -465,6 +466,7 @@ const App: React.FC = () => {
       case View.TRAVEL_LOGS: return <TravelLogs travelLogs={travelLogs} vehicles={vehicles} drivers={drivers} areas={areas} settings={appSettings} onAddTravelLog={handleAddTravelLog} onUpdateTravelLog={handleUpdateTravelLog} onSync={handleSync} />;
       case View.PLANNING: return <PlanningComponent plannings={plannings} vehicles={vehicles} drivers={drivers} areas={areas} onAddPlanning={handleAddPlanning} onUpdatePlanning={handleUpdatePlanning} onAddArea={handleAddArea} settings={appSettings} />;
       case View.INSPECTIONS: return <Inspections inspections={inspections} vehicles={vehicles} onAddInspection={handleAddInspection} currentUser={currentUser} settings={appSettings} />;
+      case View.REPORTS: return <Reports vehicles={vehicles} fuelEntries={fuelEntries} maintenanceRecords={maintenanceRecords} incidents={incidents} settings={appSettings} />;
       case View.USERS: return <Users users={appUsers} onAddUser={handleAddUser} onUpdateUser={handleUpdateUser} currentUser={currentUser} />;
       case View.SETTINGS: return <Settings settings={appSettings} onUpdateSetting={handleUpdateSetting} onUrlChange={handleSync} />;
       default: return <Dashboard vehicles={vehicles} drivers={drivers} fuelEntries={fuelEntries} incidents={incidents} />;

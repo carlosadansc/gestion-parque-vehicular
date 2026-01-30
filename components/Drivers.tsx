@@ -1,6 +1,6 @@
 
 import React, { useMemo, useState } from 'react';
-import { Driver, Vehicle } from '../types';
+import { Driver, Vehicle, AppSetting } from '../types';
 
 interface DriversProps {
   drivers: Driver[];
@@ -8,12 +8,22 @@ interface DriversProps {
   searchQuery: string;
   onAddDriver: (d: Omit<Driver, 'id'>) => Promise<void>;
   onUpdateDriver: (d: Driver) => Promise<void>;
+  settings?: AppSetting[];
 }
 
-const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAddDriver, onUpdateDriver }) => {
+const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAddDriver, onUpdateDriver, settings = [] }) => {
   const [showModal, setShowModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [editingDriver, setEditingDriver] = useState<Driver | null>(null);
+  const [showPrintPreview, setShowPrintPreview] = useState(false);
+  const [selectedDriver, setSelectedDriver] = useState<Driver | null>(null);
+
+  const settingsMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    settings.forEach(s => { map[s.key] = s.value; });
+    return map;
+  }, [settings]);
+
   const [formData, setFormData] = useState({
     name: '',
     licenseType: 'Tipo A',
@@ -47,6 +57,11 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
       assignedVehicleId: driver.assignedVehicleId || ''
     });
     setShowModal(true);
+  };
+
+  const handlePrintRequest = (driver: Driver) => {
+    setSelectedDriver(driver);
+    setShowPrintPreview(true);
   };
 
   const handleOpenNew = () => {
@@ -90,18 +105,36 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
     }
   };
 
+  // Variables institucionales para impresión
+  const appLogo = settingsMap['APP_LOGO'] || 'https://i.ibb.co/3ykMvS8/escudo-paz.png';
+  const directorName = settingsMap['INSTITUTION_HEAD_NAME'] || 'Director General';
+  const managerName = settingsMap['VEHICLE_MANAGER_NAME'] || 'Encargado del Parque Vehicular';
+
+  const assignedVehicleForPrint = selectedDriver ? (vehicles.find(v => v.assignedDriverId === selectedDriver.id) || vehicles.find(v => v.id === selectedDriver.assignedVehicleId)) : null;
+
   return (
-    <div className="space-y-8 animate-in zoom-in-95 duration-500">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-8 animate-in zoom-in-95 duration-500 pb-20">
+      <style>{`
+        @media print {
+          body * { visibility: hidden; }
+          #driver-printable, #driver-printable * { visibility: visible; }
+          #driver-printable { 
+            position: absolute; left: 0; top: 0; width: 100%; padding: 0; margin: 0;
+            background: white !important; font-family: 'Inter', sans-serif;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+          .no-print { display: none !important; }
+          @page { margin: 0.5cm; size: letter; }
+        }
+      `}</style>
+
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 no-print">
         <div>
           <h2 className="text-2xl font-black text-slate-900 tracking-tight">Directorio de Choferes</h2>
           <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mt-1">Gestión administrativa del personal operativo.</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 text-[11px] font-black uppercase tracking-widest rounded-xl hover:bg-slate-50 transition-all shadow-sm">
-            <span className="material-symbols-outlined text-xl">file_download</span>
-            Exportar
-          </button>
           <button 
             onClick={handleOpenNew}
             className="flex items-center gap-2 px-6 py-2.5 bg-[#135bec] text-white text-[11px] font-black uppercase tracking-widest rounded-xl hover:bg-blue-600 transition-all shadow-lg shadow-blue-500/20"
@@ -112,7 +145,7 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+      <div className="flex flex-wrap items-center gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm no-print">
         <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] pl-2">Filtrar por:</span>
         <select className="bg-slate-50 border-slate-200 text-[11px] font-black uppercase tracking-widest rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500/10 min-w-[160px] text-slate-700 shadow-sm">
           <option>Todos los Estados</option>
@@ -121,19 +154,29 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
         </select>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 no-print">
         {filteredDrivers.map((driver) => {
           // Buscamos si algún vehículo tiene este ID de chofer asignado (o el chofer tiene el ID del vehículo)
           const assignedVehicle = vehicles.find(v => v.assignedDriverId === driver.id) || vehicles.find(v => v.id === driver.assignedVehicleId);
           
           return (
             <div key={driver.id} className="group bg-white border border-slate-200 rounded-[2rem] overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative">
-              <button 
-                onClick={() => handleEdit(driver)}
-                className="absolute top-6 right-6 size-10 rounded-xl bg-white border border-slate-100 shadow-sm text-slate-400 hover:text-[#135bec] hover:shadow-md transition-all flex items-center justify-center z-10 opacity-0 group-hover:opacity-100"
-              >
-                <span className="material-symbols-outlined text-xl">edit</span>
-              </button>
+              <div className="absolute top-6 right-6 flex gap-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button 
+                    onClick={() => handlePrintRequest(driver)}
+                    className="size-10 rounded-xl bg-white border border-slate-100 shadow-sm text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all flex items-center justify-center"
+                    title="Imprimir Ficha"
+                >
+                    <span className="material-symbols-outlined text-xl">file_present</span>
+                </button>
+                <button 
+                    onClick={() => handleEdit(driver)}
+                    className="size-10 rounded-xl bg-white border border-slate-100 shadow-sm text-slate-400 hover:text-[#135bec] hover:bg-blue-50 transition-all flex items-center justify-center"
+                    title="Editar"
+                >
+                    <span className="material-symbols-outlined text-xl">edit</span>
+                </button>
+              </div>
 
               <div className="p-8">
                 <div className="flex justify-between items-start mb-6">
@@ -181,7 +224,7 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
 
       {/* MODAL PARA AGREGAR/EDITAR CHOFER */}
       {showModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-300 no-print">
           <div className="bg-white rounded-[2.5rem] w-full max-w-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
             <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
               <div>
@@ -309,6 +352,116 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
               </div>
             </form>
           </div>
+        </div>
+      )}
+
+      {/* VISTA PREVIA DE IMPRESIÓN (FICHA OPERADOR) */}
+      {showPrintPreview && selectedDriver && (
+        <div className="fixed inset-0 z-[200] bg-white flex flex-col no-print overflow-y-auto">
+           <div className="sticky top-0 bg-slate-900 p-4 flex justify-between items-center text-white shadow-lg">
+             <div className="flex items-center gap-4">
+               <button onClick={() => setShowPrintPreview(false)} className="bg-white/10 px-4 py-2 rounded-lg font-bold text-xs hover:bg-white/20 transition-all">Cerrar</button>
+               <h3 className="font-black uppercase tracking-widest text-sm">Vista Previa</h3>
+             </div>
+             <button onClick={() => window.print()} className="bg-primary px-8 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-blue-500/20">
+               <span className="material-symbols-outlined text-lg">picture_as_pdf</span> Imprimir Ficha PDF
+             </button>
+           </div>
+           <div className="flex-1 bg-slate-100 p-10 flex justify-center">
+              <div id="driver-printable" className="bg-white w-[21.59cm] min-h-[27.94cm] p-[1.5cm] shadow-2xl relative text-slate-900 border border-slate-200">
+                
+                {/* Header Institucional */}
+                <div className="flex justify-between items-center mb-10 border-b-4 border-slate-900 pb-6">
+                  <div className="flex items-center gap-6">
+                    <img src={appLogo} alt="Logo" className="h-24 w-auto object-contain" />
+                    <div className="flex flex-col">
+                      <span className="text-lg font-black text-slate-900 uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
+                      <span className="text-lg font-black text-slate-900 uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>
+                      <span className="text-[8pt] font-bold uppercase text-slate-400 mt-2 tracking-[0.2em]">Parque Vehicular • Recursos Humanos</span>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="inline-block bg-slate-900 text-white px-4 py-1.5 font-black text-[10pt] uppercase tracking-widest rounded-sm mb-2">
+                        Ficha de Operador
+                    </div>
+                    <p className="text-xs font-bold text-slate-600">ID SISTEMA: <span className="font-black text-slate-900 text-lg ml-1">{(selectedDriver.id || '---').slice(-6).toUpperCase()}</span></p>
+                    <p className="text-[9pt] text-slate-400 font-bold mt-1">Emisión: {new Date().toLocaleDateString('es-ES', {year: 'numeric', month: 'long', day: 'numeric'})}</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-10 mb-10">
+                    <div className="w-48 h-60 bg-slate-100 border border-slate-300 rounded-lg overflow-hidden flex-shrink-0">
+                        <img src={selectedDriver.image} className="w-full h-full object-cover" alt="Foto Operador" />
+                    </div>
+                    <div className="flex-1 space-y-6">
+                        <div>
+                            <p className="text-[8pt] font-black text-slate-400 uppercase tracking-widest mb-1">Nombre del Operador</p>
+                            <p className="text-3xl font-black text-slate-900 uppercase leading-tight border-b-2 border-slate-100 pb-2">{selectedDriver.name}</p>
+                        </div>
+                        <div className="grid grid-cols-2 gap-6">
+                            <div>
+                                <p className="text-[8pt] font-black text-slate-400 uppercase tracking-widest mb-1">Tipo de Licencia</p>
+                                <p className="text-lg font-bold text-slate-800 uppercase">{selectedDriver.licenseType}</p>
+                            </div>
+                            <div>
+                                <p className="text-[8pt] font-black text-slate-400 uppercase tracking-widest mb-1">Teléfono</p>
+                                <p className="text-lg font-bold text-slate-800">{selectedDriver.phone}</p>
+                            </div>
+                        </div>
+                        <div>
+                            <p className="text-[8pt] font-black text-slate-400 uppercase tracking-widest mb-1">Estado Actual</p>
+                            <span className={`inline-block px-3 py-1 rounded border text-xs font-black uppercase tracking-widest ${
+                                selectedDriver.status === 'available' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                                selectedDriver.status === 'en-route' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                                'bg-amber-50 text-amber-700 border-amber-200'
+                            }`}>
+                                {selectedDriver.status === 'available' ? 'Disponible' : selectedDriver.status === 'en-route' ? 'En Ruta' : 'De Descanso'}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="mb-12">
+                   <h4 className="bg-slate-900 text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">Asignación de Unidad</h4>
+                   <div className="border-2 border-slate-100 rounded-xl p-6 bg-slate-50/50">
+                      {assignedVehicleForPrint ? (
+                          <div className="grid grid-cols-2 gap-8">
+                              <div>
+                                  <p className="text-[8pt] font-black text-slate-400 uppercase tracking-widest mb-1">Vehículo</p>
+                                  <p className="text-xl font-black text-slate-900 uppercase">{assignedVehicleForPrint.model}</p>
+                                  <p className="text-[10pt] font-bold text-primary uppercase mt-1">{assignedVehicleForPrint.brand} {assignedVehicleForPrint.line}</p>
+                              </div>
+                              <div className="text-right">
+                                  <p className="text-[8pt] font-black text-slate-400 uppercase tracking-widest mb-1">Placas</p>
+                                  <div className="inline-block border-4 border-slate-800 px-4 py-1 rounded bg-white">
+                                      <p className="text-xl font-black text-slate-900 uppercase tracking-widest">{assignedVehicleForPrint.plate}</p>
+                                  </div>
+                              </div>
+                          </div>
+                      ) : (
+                          <p className="text-center text-slate-400 font-bold uppercase py-4">Sin unidad asignada actualmente</p>
+                      )}
+                   </div>
+                </div>
+
+                {/* Firmas */}
+                <div className="absolute bottom-[1.5cm] left-[1.5cm] right-[1.5cm]">
+                    <div className="grid grid-cols-2 gap-24 text-center">
+                    <div className="border-t-2 border-slate-900 pt-4">
+                        <p className="text-[9pt] font-black uppercase text-slate-900">{selectedDriver.name}</p>
+                        <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Firma del Operador</p>
+                    </div>
+                    <div className="border-t-2 border-slate-900 pt-4">
+                        <p className="text-[9pt] font-black uppercase text-slate-900">{managerName}</p>
+                        <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Autorización</p>
+                    </div>
+                    </div>
+                    <div className="text-center mt-8 border-t border-slate-200 pt-2">
+                        <p className="text-[7pt] font-black text-slate-300 uppercase tracking-[0.3em]">Sistema de Control Flota Pro • DIF Municipal La Paz</p>
+                    </div>
+                </div>
+              </div>
+           </div>
         </div>
       )}
     </div>
