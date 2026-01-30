@@ -216,7 +216,9 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
   };
 
   // --- Variables para Impresión ---
-  const appLogo = settingsMap['APP_LOGO'] || 'https://i.ibb.co/3ykMvS8/escudo-paz.png';
+  // Normalizar la ruta del logo (convertir rutas relativas a absolutas)
+  const rawLogo = settingsMap['APP_LOGO'] || '/images/logo-dif.png';
+  const appLogo = rawLogo.startsWith('./') ? rawLogo.replace('./', '/') : rawLogo;
   const directorName = settingsMap['INSTITUTION_HEAD_NAME'] || 'Director General';
   const vehicleManager = settingsMap['VEHICLE_MANAGER_NAME'] || 'Encargado del Parque Vehicular';
 
@@ -281,17 +283,195 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-20">
       <style>{`
+        /* ========================================
+           PRINT STYLES - WEEKLY PLANNING REPORT
+           FORMAL DOCUMENT DESIGN
+           ======================================== */
         @media print {
-          body * { visibility: hidden; }
-          #planning-printable, #planning-printable * { visibility: visible; }
-          #planning-printable { 
-            position: absolute; left: 0; top: 0; width: 100%; padding: 0; margin: 0;
-            background: white !important; font-family: 'Inter', sans-serif;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
+          /* Page Setup - Letter Landscape */
+          @page {
+            size: letter landscape;
+            margin: 1.5cm 1.5cm 2cm 1.5cm;
           }
+          
+          /* Hide everything except printable area */
+          body * {
+            visibility: hidden;
+          }
+          
+          #planning-printable, #planning-printable * {
+            visibility: visible;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+          }
+          
+          #planning-printable {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            padding: 0;
+            margin: 0;
+            background: white !important;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-size: 10pt;
+            line-height: 1.4;
+          }
+          
           .no-print { display: none !important; }
-          @page { margin: 0.5cm; size: letter landscape; }
+          
+          /* ========================================
+             TYPOGRAPHY - FORMAL DOCUMENT STANDARDS
+             ======================================== */
+          #planning-printable h1,
+          #planning-printable h2,
+          #planning-printable h3,
+          #planning-printable h4 {
+            page-break-after: avoid;
+            orphans: 3;
+            widows: 3;
+          }
+          
+          #planning-printable p {
+            orphans: 3;
+            widows: 3;
+          }
+          
+          /* ========================================
+             PAGE BREAK CONTROLS
+             ======================================== */
+          #planning-printable .break-inside-avoid {
+            page-break-inside: avoid;
+            break-inside: avoid;
+          }
+          
+          /* ========================================
+             OVERFLOW HANDLING - CONTENT VALIDATION
+             ======================================== */
+          #planning-printable .overflow-truncate,
+          #planning-printable .print-truncate {
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+          
+          #planning-printable .overflow-wrap {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+            max-width: 200px;
+          }
+          
+          /* Long text cells */
+          #planning-printable .text-wrap {
+            white-space: normal;
+            word-wrap: break-word;
+            max-width: 250px;
+          }
+          
+          /* ========================================
+             TABLE STYLING - FORMAL DOCUMENT
+             ======================================== */
+          #planning-printable table {
+            width: 100% !important;
+            font-size: 9pt !important;
+            border-collapse: collapse;
+            page-break-inside: auto;
+          }
+          
+          #planning-printable thead {
+            display: table-header-group;
+          }
+          
+          #planning-printable tfoot {
+            display: table-footer-group;
+          }
+          
+          #planning-printable tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
+          }
+          
+          #planning-printable th,
+          #planning-printable td {
+            padding: 8px 10px !important;
+            border: 1px solid #cbd5e1 !important;
+            vertical-align: middle;
+          }
+          
+          #planning-printable th {
+            background-color: #f1f5f9 !important;
+            font-weight: 800;
+            text-transform: uppercase;
+            font-size: 8pt;
+            letter-spacing: 0.05em;
+          }
+          
+          /* Day header rows */
+          #planning-printable .day-header {
+            background-color: #e2e8f0 !important;
+            font-weight: 800;
+          }
+          
+          /* ========================================
+             FORMAL DOCUMENT ELEMENTS
+             ======================================== */
+          /* Header styling */
+          #planning-printable .print-header {
+            border-bottom: 3px solid #1e293b;
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+          }
+          
+          /* Section titles */
+          #planning-printable .section-title {
+            background-color: #1e293b !important;
+            color: white !important;
+            padding: 6px 12px;
+            font-size: 9pt;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+            display: inline-block;
+          }
+          
+          /* ========================================
+             SIGNATURE SECTION - FIXED POSITION
+             ======================================== */
+          #planning-printable .signature-section {
+            position: fixed;
+            bottom: 1.5cm;
+            left: 1.5cm;
+            right: 1.5cm;
+            page-break-inside: avoid;
+          }
+          
+          #planning-printable .signature-line {
+            border-top: 2px solid #1e293b;
+            padding-top: 0.5rem;
+            min-width: 200px;
+          }
+          
+          /* ========================================
+             FOOTER STYLING
+             ======================================== */
+          #planning-printable .print-footer {
+            border-top: 1px solid #e2e8f0;
+            padding-top: 0.5rem;
+            font-size: 7pt;
+            color: #94a3b8;
+            text-align: center;
+          }
+          
+          /* ========================================
+             ZEBRA STRIPING FOR READABILITY
+             ======================================== */
+          #planning-printable tbody tr:nth-child(even):not(.day-header) {
+            background-color: #f8fafc !important;
+          }
         }
       `}</style>
       
@@ -466,8 +646,8 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
            <div className="flex-1 bg-slate-100 p-10 flex justify-center">
               <div id="planning-printable" className="bg-white w-[27.94cm] min-h-[21.59cm] p-[1.5cm] shadow-2xl relative text-slate-900 border border-slate-200">
                 
-                {/* Header Institucional */}
-                <div className="flex justify-between items-center mb-8 border-b-4 border-slate-900 pb-6">
+                {/* Header Institucional - Formal Design */}
+                <div className="print-header flex justify-between items-center mb-8 border-b-4 border-slate-900 pb-6">
                   <div className="flex items-center gap-6">
                     <img src={appLogo} alt="Logo" className="h-20 w-auto object-contain" />
                     <div className="flex flex-col">
@@ -483,19 +663,23 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
                     <p className="text-[9pt] text-slate-400 font-bold mt-1 uppercase">
                       Semana: {weekDays[0].toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })} - {weekDays[6].toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}
                     </p>
+                    <p className="text-[8pt] text-slate-300 font-bold mt-1">
+                      Generado: {new Date().toLocaleDateString('es-ES', {day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'})}
+                    </p>
                   </div>
                 </div>
 
-                {/* Tabla de Planeación */}
-                <div className="mb-8">
+                {/* Tabla de Planeación - Formal Table */}
+                <div className="mb-8 break-inside-avoid">
                   <table className="w-full border-collapse border border-slate-300">
                     <thead className="bg-slate-100">
                       <tr>
-                        <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-slate-600 w-24">Fecha</th>
-                        <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-slate-600 w-20">Horario</th>
-                        <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-slate-600">Unidad / Chofer</th>
-                        <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-slate-600">Destino / Actividad</th>
-                        <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-slate-600 w-32">Área Solicitante</th>
+                        <th className="border border-slate-300 px-3 py-3 text-[8pt] font-black uppercase text-slate-600 w-24">Fecha</th>
+                        <th className="border border-slate-300 px-3 py-3 text-[8pt] font-black uppercase text-slate-600 w-20">Horario</th>
+                        <th className="border border-slate-300 px-3 py-3 text-[8pt] font-black uppercase text-slate-600">Unidad / Chofer</th>
+                        <th className="border border-slate-300 px-3 py-3 text-[8pt] font-black uppercase text-slate-600">Destino / Actividad</th>
+                        <th className="border border-slate-300 px-3 py-3 text-[8pt] font-black uppercase text-slate-600 w-28">Estado</th>
+                        <th className="border border-slate-300 px-3 py-3 text-[8pt] font-black uppercase text-slate-600 w-32">Área Solicitante</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -506,33 +690,38 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
                         return (
                           <React.Fragment key={day.toISOString()}>
                             {/* Header del día para separar visualmente */}
-                            <tr className="bg-slate-50 border-b border-slate-300">
-                              <td colSpan={5} className="px-3 py-1 text-[8pt] font-black uppercase text-slate-900 bg-slate-200/50">
+                            <tr className="day-header bg-slate-200/50 border-b border-slate-300">
+                              <td colSpan={6} className="px-3 py-2 text-[8pt] font-black uppercase text-slate-900">
                                 {day.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
                               </td>
                             </tr>
-                            {dayPlans.map(plan => {
+                            {dayPlans.map((plan, planIdx) => {
                               const vehicle = vehicles.find(v => v.id === plan.vehicleId);
                               const driver = drivers.find(d => d.id === plan.driverId);
                               const area = areas.find(a => a.id === plan.areaId);
+                              const statusLabel = plan.status === 'completed' ? 'COMPLETADO' : plan.status === 'cancelled' ? 'CANCELADO' : 'PROGRAMADO';
+                              const statusClass = plan.status === 'completed' ? 'text-green-700 bg-green-50' : plan.status === 'cancelled' ? 'text-rose-700 bg-rose-50 line-through' : 'text-slate-700 bg-slate-50';
                               
                               return (
-                                <tr key={plan.id} className="border-b border-slate-300">
-                                  <td className="px-2 py-2 text-[8pt] font-bold text-center text-slate-500">
+                                <tr key={plan.id} className={`border-b border-slate-300 ${planIdx % 2 === 1 ? 'bg-slate-50/50' : ''}`}>
+                                  <td className="px-3 py-2 text-[8pt] font-bold text-center text-slate-500">
                                     {day.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' })}
                                   </td>
-                                  <td className="px-2 py-2 text-[8pt] font-bold text-center">
+                                  <td className="px-3 py-2 text-[8pt] font-bold text-center">
                                     {formatTime(plan.departureTime)}
                                   </td>
-                                  <td className="px-2 py-2 text-[8pt]">
-                                    <div className="font-black text-slate-900">{vehicle?.model || '---'}</div>
+                                  <td className="px-3 py-2 text-[8pt]">
+                                    <div className="font-black text-slate-900 print-truncate" style={{maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{vehicle?.model || '---'}</div>
                                     <div className="text-[7pt] uppercase text-slate-500">{driver?.name || '---'}</div>
                                   </td>
-                                  <td className="px-2 py-2 text-[8pt]">
-                                    <div className="font-bold text-slate-800 uppercase">{plan.destination}</div>
-                                    {plan.notes && <div className="text-[7pt] italic text-slate-500">{plan.notes}</div>}
+                                  <td className="px-3 py-2 text-[8pt]">
+                                    <div className="font-bold text-slate-800 uppercase overflow-wrap" style={{maxWidth: '200px', wordWrap: 'break-word'}}>{plan.destination || '---'}</div>
+                                    {plan.notes && <div className="text-[7pt] italic text-slate-500 print-truncate" style={{maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{plan.notes}</div>}
                                   </td>
-                                  <td className="px-2 py-2 text-[8pt] font-bold text-center uppercase">
+                                  <td className={`px-3 py-2 text-[7pt] font-black text-center uppercase ${statusClass}`}>
+                                    {statusLabel}
+                                  </td>
+                                  <td className="px-3 py-2 text-[8pt] font-bold text-center uppercase">
                                     {area?.name || '---'}
                                   </td>
                                 </tr>
@@ -543,7 +732,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
                       })}
                       {weekDays.every(day => getDayPlannings(day).length === 0) && (
                         <tr>
-                          <td colSpan={5} className="px-4 py-8 text-center text-[9pt] font-bold text-slate-400 uppercase italic">
+                          <td colSpan={6} className="px-4 py-8 text-center text-[9pt] font-bold text-slate-400 uppercase italic">
                             Sin actividades programadas para esta semana.
                           </td>
                         </tr>
@@ -552,20 +741,24 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
                   </table>
                 </div>
 
-                {/* Firmas */}
-                <div className="absolute bottom-[1.5cm] left-[1.5cm] right-[1.5cm]">
+                {/* Signature Section - Fixed Position */}
+                <div className="signature-section absolute bottom-[1.5cm] left-[1.5cm] right-[1.5cm]">
                     <div className="grid grid-cols-2 gap-24 text-center">
-                    <div className="border-t-2 border-slate-900 pt-4">
-                        <p className="text-[9pt] font-black uppercase text-slate-900">{vehicleManager}</p>
-                        <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Elaboró</p>
+                      <div className="signature-line border-t-2 border-slate-900 pt-4">
+                          <p className="text-[9pt] font-black uppercase text-slate-900">{vehicleManager}</p>
+                          <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Elaboró</p>
+                      </div>
+                      <div className="signature-line border-t-2 border-slate-900 pt-4">
+                          <p className="text-[9pt] font-black uppercase text-slate-900">{directorName}</p>
+                          <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Visto Bueno</p>
+                      </div>
                     </div>
-                    <div className="border-t-2 border-slate-900 pt-4">
-                        <p className="text-[9pt] font-black uppercase text-slate-900">{directorName}</p>
-                        <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Visto Bueno</p>
-                    </div>
-                    </div>
-                    <div className="text-center mt-8 border-t border-slate-200 pt-2">
-                        <p className="text-[7pt] font-black text-slate-300 uppercase tracking-[0.3em]">Sistema de Control Flota Pro • DIF Municipal La Paz</p>
+                    <div className="print-footer text-center mt-8 border-t border-slate-200 pt-3">
+                        <div className="flex justify-between items-center text-[7pt] text-slate-400">
+                            <span>Sistema de Control Flota Pro</span>
+                            <span className="font-black uppercase tracking-[0.2em]">DIF Municipal La Paz B.C.S.</span>
+                            <span>Documento válido con firmas autógrafas</span>
+                        </div>
                     </div>
                 </div>
               </div>

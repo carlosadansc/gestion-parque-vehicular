@@ -106,7 +106,9 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
   };
 
   // Variables institucionales para impresión
-  const appLogo = settingsMap['APP_LOGO'] || 'https://i.ibb.co/3ykMvS8/escudo-paz.png';
+  // Normalizar la ruta del logo (convertir rutas relativas a absolutas)
+  const rawLogo = settingsMap['APP_LOGO'] || '/images/logo-dif.png';
+  const appLogo = rawLogo.startsWith('./') ? rawLogo.replace('./', '/') : rawLogo;
   const directorName = settingsMap['INSTITUTION_HEAD_NAME'] || 'Director General';
   const managerName = settingsMap['VEHICLE_MANAGER_NAME'] || 'Encargado del Parque Vehicular';
 
@@ -116,16 +118,31 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
     <div className="space-y-8 animate-in zoom-in-95 duration-500 pb-20">
       <style>{`
         @media print {
-          body * { visibility: hidden; }
-          #driver-printable, #driver-printable * { visibility: visible; }
+          body * { 
+            visibility: hidden; 
+          }
+          #driver-printable, #driver-printable * { 
+            visibility: visible; 
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
           #driver-printable { 
-            position: absolute; left: 0; top: 0; width: 100%; padding: 0; margin: 0;
-            background: white !important; font-family: 'Inter', sans-serif;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
+            position: absolute; 
+            left: 0; 
+            top: 0; 
+            width: 100%; 
+            padding: 0; 
+            margin: 0;
+            background: white !important; 
+            font-family: 'Inter', sans-serif;
           }
           .no-print { display: none !important; }
           @page { margin: 0.5cm; size: letter; }
+          /* Ensure content fits on portrait page */
+          #driver-printable img {
+            max-width: 100% !important;
+            height: auto !important;
+          }
         }
       `}</style>
 
@@ -181,9 +198,9 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
               <div className="p-8">
                 <div className="flex justify-between items-start mb-6">
                   <div className="relative">
-                    <div className="size-20 rounded-3xl bg-slate-100 overflow-hidden border-2 border-white shadow-md ring-4 ring-slate-50 group-hover:ring-blue-500/10 transition-all">
+                    {/* <div className="size-20 rounded-3xl bg-slate-100 overflow-hidden border-2 border-white shadow-md ring-4 ring-slate-50 group-hover:ring-blue-500/10 transition-all">
                       <img src={driver.image} alt={driver.name} className="w-full h-full object-cover" />
-                    </div>
+                    </div> */}
                     <div className={`absolute -bottom-1 -right-1 size-6 border-4 border-white rounded-full ${
                       driver.status === 'available' ? 'bg-emerald-500' :
                       driver.status === 'en-route' ? 'bg-blue-500' :
@@ -373,7 +390,7 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
                 {/* Header Institucional */}
                 <div className="flex justify-between items-center mb-10 border-b-4 border-slate-900 pb-6">
                   <div className="flex items-center gap-6">
-                    <img src={appLogo} alt="Logo" className="h-24 w-auto object-contain" />
+                    <img src={appLogo} alt="Logo" className="w-24 object-contain" />
                     <div className="flex flex-col">
                       <span className="text-lg font-black text-slate-900 uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
                       <span className="text-lg font-black text-slate-900 uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>
@@ -390,9 +407,9 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
                 </div>
 
                 <div className="flex gap-10 mb-10">
-                    <div className="w-48 h-60 bg-slate-100 border border-slate-300 rounded-lg overflow-hidden flex-shrink-0">
+                    {/* <div className="w-48 h-60 bg-slate-100 border border-slate-300 rounded-lg overflow-hidden flex-shrink-0">
                         <img src={selectedDriver.image} className="w-full h-full object-cover" alt="Foto Operador" />
-                    </div>
+                    </div> */}
                     <div className="flex-1 space-y-6">
                         <div>
                             <p className="text-[8pt] font-black text-slate-400 uppercase tracking-widest mb-1">Nombre del Operador</p>

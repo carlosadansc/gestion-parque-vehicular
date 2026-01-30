@@ -134,23 +134,69 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
     setShowPrintPreview(true);
   };
 
-  const appLogo = settingsMap['APP_LOGO'] || 'https://i.ibb.co/3ykMvS8/escudo-paz.png';
+  // Normalizar la ruta del logo (convertir rutas relativas a absolutas)
+  const rawLogo = settingsMap['APP_LOGO'] || '/images/logo-dif.png';
+  const appLogo = rawLogo.startsWith('./') ? rawLogo.replace('./', '/') : rawLogo;
   const directorName = settingsMap['INSTITUTION_HEAD_NAME']; 
 
   return (
     <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500 pb-20">
       <style>{`
         @media print {
-          body * { visibility: hidden; }
-          #tech-sheet-printable, #tech-sheet-printable * { visibility: visible; }
+          @page { margin: 0.5cm; size: letter; }
+          body * { 
+            visibility: hidden; 
+          }
+          #tech-sheet-printable, #tech-sheet-printable * { 
+            visibility: visible; 
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
           #tech-sheet-printable { 
-            position: absolute; left: 0; top: 0; width: 100%; padding: 0; margin: 0;
-            background: white !important; font-family: 'Inter', sans-serif;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
+            position: absolute; 
+            left: 0; 
+            top: 0; 
+            width: 100%; 
+            padding: 0; 
+            margin: 0;
+            background: white !important; 
+            font-family: 'Inter', sans-serif;
           }
           .no-print { display: none !important; }
-          @page { margin: 0.5cm; size: letter; }
+          
+          /* Ensure content fits on portrait page */
+          #tech-sheet-printable .grid {
+            width: 100% !important;
+            gap: 0.5rem !important;
+          }
+          
+          /* Prevent page breaks inside sections */
+          #tech-sheet-printable .break-inside-avoid {
+            page-break-inside: avoid;
+            break-inside: avoid;
+          }
+          
+          /* Table styling */
+          #tech-sheet-printable table {
+            width: 100% !important;
+            page-break-inside: avoid;
+          }
+          
+          /* Overflow handling for long content */
+          #tech-sheet-printable .overflow-truncate {
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+          
+          /* Ensure signature section stays at bottom */
+          #tech-sheet-printable .signature-section {
+            position: fixed;
+            bottom: 1.5cm;
+            left: 1.5cm;
+            right: 1.5cm;
+          }
         }
       `}</style>
 
@@ -197,14 +243,14 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
                       <div className="flex items-center gap-4">
                          <img src={vehicle.image} className="size-10 rounded-lg object-cover" />
                          <div>
-                           <p className="font-black text-slate-900 tracking-tight">{vehicle.model}</p>
-                           <p className="text-[10px] text-primary font-bold uppercase">{vehicle.brand} {vehicle.line}</p>
+                            <p className="font-black text-slate-900 tracking-tight">{vehicle.model}</p>
+                            <p className="text-[10px] text-primary font-bold uppercase">{vehicle.brand} {vehicle.line}</p>
                          </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 font-black text-slate-700">{vehicle.plate}</td>
                     <td className="px-6 py-4 text-center">
-                       <span className="text-xs font-bold text-slate-600 uppercase">{driver?.name || '---'}</span>
+                       <span className="text-xs font-bold text-slate-600 uppercase overflow-truncate">{driver?.name || '---'}</span>
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-1">
@@ -269,7 +315,7 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
                   <InputField label="Año / Modelo" value={formData.year} onChange={v => setFormData({...formData, year: v})} type="number" />
                   <InputField label="Línea" value={formData.line} onChange={v => setFormData({...formData, line: v})} />
                   <InputField label="Kilometraje Actual" value={formData.odometer} onChange={v => setFormData({...formData, odometer: v})} type="number" />
-                  <SelectField label="Combustible" value={formData.fuelType} onChange={v => setFormData({...formData, fuelType: v})} options={[{v:'Gasolina', l:'Gasolina'}, {v:'Diésel', l:'Diésel'}, {v:'Híbrido', l:'Híbrido'}]} />
+                  <SelectField label="Combustible" value={formData.fuelType} onChange={v => setFormData({...formData, fuelType: v})} options={[{v:'Gasolina', l:'Gasolina'}, {v:'Diiesel', l:'Diiesel'}, {v:'Hibrido', l:'Hibrido'}]} />
                   <InputField label="Cilindros" value={formData.cylinders} onChange={v => setFormData({...formData, cylinders: v})} type="number" />
                   <div className="col-span-1 md:col-span-3">
                     <InputField label="Serie VIN" value={formData.vin} onChange={v => setFormData({...formData, vin: v})} />
@@ -393,7 +439,7 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
                 </div>
                 
                 {/* Datos Principales */}
-                <div className="mb-8 mt-6">
+                <div className="mb-8 mt-6 break-inside-avoid">
                     <table className="w-full border-collapse">
                         <tbody>
                             <tr className="border-b border-slate-200">
@@ -433,7 +479,7 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
                 </div>
 
                 {/* Diagnostico Mecanico */}
-                <div className="mb-8">
+                <div className="mb-8 break-inside-avoid">
                    <h4 className="bg-slate-900 text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">Estado General (16 Puntos)</h4>
                    <div className="grid grid-cols-4 gap-y-3 gap-x-6 border-2 border-slate-100 p-6 rounded-xl">
                       <ConditionPrint label="1. Motor" status={selectedForPrint.engineStatus} />
@@ -458,7 +504,7 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
                    </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-8 mb-10">
+                <div className="grid grid-cols-2 gap-8 mb-10 break-inside-avoid">
                    <div className="space-y-2">
                       <h4 className="text-[9pt] font-black uppercase border-b-2 border-slate-200 pb-1 text-primary">Accesorios Registrados</h4>
                       <div className="bg-slate-50 p-4 rounded-lg min-h-[80px] border border-slate-100">
@@ -475,7 +521,7 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
                    </div>
                 </div>
 
-                <div className="absolute bottom-[1.5cm] left-[1.5cm] right-[1.5cm]">
+                <div className="signature-section">
                     <div className="grid grid-cols-2 gap-24 text-center">
                     <div className="border-t-2 border-slate-900 pt-4">
                         <p className="text-[9pt] font-black uppercase text-slate-900">Jefe de Recursos Materiales</p>
@@ -483,7 +529,7 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
                     </div>
                     <div className="border-t-2 border-slate-900 pt-4">
                         <p className="text-[9pt] font-black uppercase text-slate-900">{directorName || 'Director General'}</p>
-                        <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Visto Bueno</p>
+                        <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Vo. Bo. y Sello</p>
                     </div>
                     </div>
                     <div className="text-center mt-8 border-t border-slate-200 pt-2">
@@ -498,19 +544,44 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
   );
 };
 
-// Helpers
-const InputField = ({ label, value, onChange, placeholder = '', type = 'text' }) => (
+// Helper Components
+const StatusFilterBtn = ({ active, onClick, label, color }: any) => (
+  <button onClick={onClick} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${active ? 'bg-primary text-white' : 'bg-white border border-slate-200 text-slate-500'}`}>
+    <div className={`size-2 rounded-full ${color}`}></div>
+    {label}
+  </button>
+);
+
+const TabBtn = ({ active, onClick, label, icon }: any) => (
+  <button onClick={onClick} className={`flex items-center gap-2 px-6 py-4 text-[10px] font-black uppercase tracking-widest transition-all border-b-2 ${active ? 'border-primary text-primary' : 'border-transparent text-slate-400 hover:text-slate-600'}`}>
+    <span className="material-symbols-outlined text-sm">{icon}</span>
+    {label}
+  </button>
+);
+
+const InputField = ({ label, value, onChange, type = 'text', placeholder = '' }: any) => (
   <div className="space-y-2">
     <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">{label}</label>
-    <input type={type} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none focus:ring-4 focus:ring-primary/10 transition-all" value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} />
+    <input type={type} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none focus:ring-4 focus:ring-primary/10 transition-all" />
   </div>
 );
 
-const SelectField = ({ label, value, onChange, options }) => (
+const SelectField = ({ label, value, onChange, options }: any) => (
   <div className="space-y-2">
     <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">{label}</label>
-    <select className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none" value={value} onChange={e => onChange(e.target.value)}>
-      {options.map(o => <option key={o.v} value={o.v}>{o.l}</option>)}
+    <select value={value} onChange={(e) => onChange(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none focus:ring-4 focus:ring-primary/10 transition-all">
+      {options.map((opt: any) => <option key={opt.v} value={opt.v}>{opt.l}</option>)}
+    </select>
+  </div>
+);
+
+const ConditionInput = ({ label, value, onChange }: any) => (
+  <div className="space-y-2">
+    <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">{label}</label>
+    <select value={value} onChange={(e) => onChange(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none">
+      <option value="Bien">Bien</option>
+      <option value="Regular">Regular</option>
+      <option value="Mal">Mal</option>
     </select>
   </div>
 );
@@ -520,26 +591,10 @@ const getStatusColorClass = (status: string) => {
   if (s === 'BIEN') return 'bg-green-500';
   if (s === 'REGULAR') return 'bg-amber-500';
   if (s === 'MAL') return 'bg-orange-600';
-  if (s === 'MUY MAL') return 'bg-rose-700';
   return 'bg-slate-300';
 };
 
-const ConditionInput = ({ label, value, onChange }) => (
-  <div className="space-y-2">
-    <div className="flex items-center gap-2 ml-1">
-       <div className={`size-2 rounded-full ${getStatusColorClass(value)}`}></div>
-       <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{label}</label>
-    </div>
-    <select className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold outline-none focus:ring-4 focus:ring-primary/10 transition-all" value={value} onChange={e => onChange(e.target.value)}>
-      <option value="Bien">Bien</option>
-      <option value="Regular">Regular</option>
-      <option value="Mal">Mal</option>
-      <option value="Muy Mal">Muy Mal</option>
-    </select>
-  </div>
-);
-
-const ConditionPrint = ({ label, status }) => {
+const ConditionPrint = ({ label, status }: any) => {
   const colorClass = getStatusColorClass(status);
   return (
     <div className="flex items-center gap-3">
@@ -551,18 +606,5 @@ const ConditionPrint = ({ label, status }) => {
     </div>
   );
 };
-
-const TabBtn = ({ active, onClick, label, icon }) => (
-  <button onClick={onClick} className={`flex items-center gap-2 py-6 px-6 border-b-2 transition-all whitespace-nowrap ${active ? 'border-primary text-primary' : 'border-transparent text-slate-400 hover:text-slate-600'}`}>
-    <span className="material-symbols-outlined text-xl">{icon}</span>
-    <span className="text-[10px] font-black uppercase tracking-widest">{label}</span>
-  </button>
-);
-
-const StatusFilterBtn = ({ label, color, onClick, active }) => (
-  <button onClick={onClick} className={`px-4 py-2 rounded-lg bg-white border text-[10px] font-black uppercase tracking-widest transition-all shadow-sm flex items-center gap-2 ${active ? 'border-primary text-primary ring-2 ring-blue-500/10' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
-    <span className={`size-2 ${color} rounded-full`}></span> {label}
-  </button>
-);
 
 export default Vehicles;

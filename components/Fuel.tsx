@@ -105,7 +105,9 @@ const Fuel: React.FC<FuelProps> = ({ fuelHistory = [], vehicles = [], drivers = 
   };
 
   // Variables institucionales para impresión
-  const appLogo = settingsMap['APP_LOGO'] || 'https://i.ibb.co/3ykMvS8/escudo-paz.png';
+  // Normalizar la ruta del logo (convertir rutas relativas a absolutas)
+  const rawLogo = settingsMap['APP_LOGO'] || '/images/logo-dif.png';
+  const appLogo = rawLogo.startsWith('./') ? rawLogo.replace('./', '/') : rawLogo;
   const directorName = settingsMap['INSTITUTION_HEAD_NAME'] || 'Director General';
   const managerName = settingsMap['VEHICLE_MANAGER_NAME'] || 'Encargado del Parque Vehicular';
 
@@ -113,16 +115,31 @@ const Fuel: React.FC<FuelProps> = ({ fuelHistory = [], vehicles = [], drivers = 
     <div className="space-y-8 animate-in slide-in-from-right-4 duration-500 pb-20">
       <style>{`
         @media print {
-          body * { visibility: hidden; }
-          #fuel-printable, #fuel-printable * { visibility: visible; }
+          body * { 
+            visibility: hidden; 
+          }
+          #fuel-printable, #fuel-printable * { 
+            visibility: visible; 
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
           #fuel-printable { 
-            position: absolute; left: 0; top: 0; width: 100%; padding: 0; margin: 0;
-            background: white !important; font-family: 'Inter', sans-serif;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
+            position: absolute; 
+            left: 0; 
+            top: 0; 
+            width: 100%; 
+            padding: 0; 
+            margin: 0;
+            background: white !important; 
+            font-family: 'Inter', sans-serif;
           }
           .no-print { display: none !important; }
           @page { margin: 0.5cm; size: letter landscape; }
+          /* Ensure tables fit on landscape page */
+          #fuel-printable table {
+            width: 100% !important;
+            font-size: 8pt !important;
+          }
         }
       `}</style>
 
@@ -359,7 +376,7 @@ const Fuel: React.FC<FuelProps> = ({ fuelHistory = [], vehicles = [], drivers = 
                 {/* Header Institucional */}
                 <div className="flex justify-between items-center mb-8 border-b-4 border-slate-900 pb-6">
                   <div className="flex items-center gap-6">
-                    <img src={appLogo} alt="Logo" className="h-20 w-auto object-contain" />
+                    <img src={appLogo} alt="Logo" className="w-24 object-contain" />
                     <div className="flex flex-col">
                       <span className="text-lg font-black text-slate-900 uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
                       <span className="text-lg font-black text-slate-900 uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>

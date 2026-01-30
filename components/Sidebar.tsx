@@ -26,21 +26,21 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange, appName, cu
 
   return (
     <aside 
-      className="w-64 flex flex-col shrink-0 z-50 transition-all duration-300"
+      className="w-64 md:w-72 flex flex-col shrink-0 z-50 transition-all duration-300 min-h-0"
       style={{ backgroundColor: 'var(--secondary-color, #0f172a)' }}
     >
-      <div className="p-6 flex-1 flex flex-col">
-        <div className="flex items-center gap-3 mb-10">
-          <div className="bg-primary size-10 rounded-lg flex items-center justify-center text-white shadow-lg shadow-blue-500/20 overflow-hidden">
-            <span className="material-symbols-outlined filled text-2xl">directions_car</span>
+      <div className="p-6 md:p-8 flex-1 flex flex-col min-h-0">
+        <div className="flex items-center gap-4 mb-12">
+          <div className="bg-white h-12 w-13 px-2 rounded-lg flex items-center justify-center shadow-lg overflow-hidden">
+            <img alt="DIF Logo" className="w-full h-full object-contain" src="../images/logo-dif.png" />
           </div>
-          <div className="flex flex-col">
-            <h1 className="text-white text-lg font-black leading-none tracking-tight">{appName}</h1>
+          <div className="flex flex-col min-w-0">
+            <h1 className="text-white text-lg md:text-xl font-black leading-none tracking-tight truncate">{appName}</h1>
             <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-1">Gestión de Activos</p>
           </div>
         </div>
 
-        <nav className="flex flex-col gap-1.5 flex-1 overflow-y-auto custom-scrollbar pr-1">
+        <nav className="flex flex-col gap-1.5 flex-1 overflow-y-auto custom-scrollbar pr-1 min-h-0">
           {menuItems.map((item) => (
             <button
               key={item.id}
@@ -90,9 +90,9 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange, appName, cu
                 <p className="text-slate-500 text-[9px] font-bold uppercase tracking-widest truncate">{currentUser?.role}</p>
              </div>
           </div>
-          <button onClick={onLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-rose-400 hover:bg-rose-500/10 transition-all">
+          <button onClick={onLogout} className="w-full flex  items-center gap-3 py-2 px-1 rounded-lg text-rose-400 hover:bg-rose-500/10 transition-all">
             <span className="material-symbols-outlined">logout</span>
-            <p className="text-sm font-black uppercase tracking-widest">Cerrar Sesión</p>
+            <p className="text-xs font-black uppercase tracking-widest">Cerrar Sesión</p>
           </button>
         </div>
       </div>

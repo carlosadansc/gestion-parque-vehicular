@@ -75,24 +75,206 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
   };
 
   // Variables institucionales
-  const appLogo = settingsMap['APP_LOGO'] || 'https://i.ibb.co/3ykMvS8/escudo-paz.png';
+  // Normalizar la ruta del logo (convertir rutas relativas a absolutas)
+  const rawLogo = settingsMap['APP_LOGO'] || '/images/logo-dif.png';
+  const appLogo = rawLogo.startsWith('./') ? rawLogo.replace('./', '/') : rawLogo;
   const managerName = settingsMap['VEHICLE_MANAGER_NAME'] || 'ENCARGADO DE PARQUE VEHICULAR';
   const managerPos = settingsMap['VEHICLE_MANAGER_POS'] || 'VALIDACIÓN TÉCNICA';
 
   return (
     <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500 pb-20">
       <style>{`
+        /* ========================================
+           PRINT STYLES - VEHICLE INSPECTION REPORT
+           FORMAL DOCUMENT DESIGN
+           ======================================== */
         @media print {
-          body * { visibility: hidden; }
-          #inspection-printable, #inspection-printable * { visibility: visible; }
-          #inspection-printable { 
-            position: absolute; left: 0; top: 0; width: 100%; padding: 0; margin: 0;
-            background: white !important; font-family: 'Inter', sans-serif;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
+          /* Page Setup - Letter Portrait */
+          @page {
+            size: letter portrait;
+            margin: 1.5cm 1.5cm 2.5cm 1.5cm;
           }
+          
+          /* Hide everything except printable area */
+          body * {
+            visibility: hidden;
+          }
+          
+          #inspection-printable, #inspection-printable * {
+            visibility: visible;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+          }
+          
+          #inspection-printable {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            padding: 0;
+            margin: 0;
+            background: white !important;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-size: 10pt;
+            line-height: 1.4;
+          }
+          
           .no-print { display: none !important; }
-          @page { margin: 0.5cm; size: letter; }
+          
+          /* ========================================
+             TYPOGRAPHY - FORMAL DOCUMENT STANDARDS
+             ======================================== */
+          #inspection-printable h1,
+          #inspection-printable h2,
+          #inspection-printable h3,
+          #inspection-printable h4 {
+            page-break-after: avoid;
+            orphans: 3;
+            widows: 3;
+          }
+          
+          #inspection-printable p {
+            orphans: 3;
+            widows: 3;
+          }
+          
+          /* ========================================
+             PAGE BREAK CONTROLS
+             ======================================== */
+          #inspection-printable .break-inside-avoid {
+            page-break-inside: avoid;
+            break-inside: avoid;
+          }
+          
+          /* ========================================
+             OVERFLOW HANDLING - CONTENT VALIDATION
+             ======================================== */
+          #inspection-printable .overflow-truncate,
+          #inspection-printable .print-truncate {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+          
+          #inspection-printable .overflow-wrap {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+            max-width: 250px;
+          }
+          
+          /* Long text cells */
+          #inspection-printable .text-wrap {
+            white-space: normal;
+            word-wrap: break-word;
+            max-width: 300px;
+          }
+          
+          /* ========================================
+             TABLE STYLING - FORMAL DOCUMENT
+             ======================================== */
+          #inspection-printable table {
+            width: 100% !important;
+            border-collapse: collapse;
+            page-break-inside: avoid;
+          }
+          
+          #inspection-printable th,
+          #inspection-printable td {
+            padding: 8px 12px !important;
+            border: 1px solid #e2e8f0 !important;
+            vertical-align: middle;
+          }
+          
+          #inspection-printable th {
+            background-color: #f8fafc !important;
+            font-weight: 800;
+            text-transform: uppercase;
+            font-size: 8pt;
+            letter-spacing: 0.05em;
+          }
+          
+          /* ========================================
+             FORMAL DOCUMENT ELEMENTS
+             ======================================== */
+          /* Header styling */
+          #inspection-printable .print-header {
+            border-bottom: 3px solid #1e293b;
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+          }
+          
+          /* Section titles */
+          #inspection-printable .section-title {
+            background-color: #1e293b !important;
+            color: white !important;
+            padding: 6px 12px;
+            font-size: 9pt;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+            display: inline-block;
+          }
+          
+          /* Checklist grid */
+          #inspection-printable .checklist-grid {
+            border: 2px solid #e2e8f0 !important;
+            padding: 16px !important;
+            border-radius: 8px;
+            page-break-inside: avoid;
+          }
+          
+          /* Status indicators */
+          #inspection-printable .status-indicator {
+            width: 12px !important;
+            height: 12px !important;
+            border-radius: 50%;
+            display: inline-block;
+          }
+          
+          /* ========================================
+             SIGNATURE SECTION - FIXED POSITION
+             ======================================== */
+          #inspection-printable .signature-section {
+            position: fixed;
+            bottom: 2cm;
+            left: 1.5cm;
+            right: 1.5cm;
+            page-break-inside: avoid;
+          }
+          
+          #inspection-printable .signature-line {
+            border-top: 2px solid #1e293b;
+            padding-top: 0.5rem;
+            min-width: 200px;
+          }
+          
+          /* ========================================
+             FOOTER STYLING
+             ======================================== */
+          #inspection-printable .print-footer {
+            border-top: 1px solid #e2e8f0;
+            padding-top: 0.5rem;
+            font-size: 7pt;
+            color: #94a3b8;
+            text-align: center;
+          }
+          
+          /* ========================================
+             OBSERVATIONS BOX
+             ======================================== */
+          #inspection-printable .observations-box {
+            background-color: #f8fafc !important;
+            border: 1px solid #e2e8f0 !important;
+            padding: 16px !important;
+            border-radius: 8px;
+            min-height: 100px;
+            max-height: 150px;
+            overflow: hidden;
+          }
         }
       `}</style>
 
@@ -255,14 +437,14 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
            <div className="flex-1 bg-slate-100 p-10 flex justify-center">
               <div id="inspection-printable" className="bg-white w-[21.59cm] min-h-[27.94cm] p-[1.5cm] shadow-2xl relative text-slate-900 border border-slate-200">
                 
-                {/* Header Institucional */}
-                <div className="flex justify-between items-center mb-8 border-b-4 border-slate-900 pb-6">
+                {/* Header Institucional - Formal Design */}
+                <div className="print-header flex justify-between items-center mb-8 border-b-4 border-slate-900 pb-6">
                   <div className="flex items-center gap-6">
                     <img src={appLogo} alt="Logo" className="h-24 w-auto object-contain" />
                     <div className="flex flex-col">
                       <span className="text-lg font-black text-slate-900 uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
                       <span className="text-lg font-black text-slate-900 uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>
-                      <span className="text-[8pt] font-bold uppercase text-slate-400 mt-2 tracking-[0.2em]">Parque Vehicular • Inspecciones Técnicas</span>
+                      <span className="text-[8pt] font-bold uppercase text-slate-400 mt-2 tracking-[0.2em]">Coordinación de Parque Vehicular • Inspecciones Técnicas</span>
                     </div>
                   </div>
                   <div className="text-right">
@@ -271,37 +453,47 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
                     </div>
                     <p className="text-xs font-bold text-slate-600">FOLIO: <span className="font-black text-slate-900 text-lg ml-1">{(selectedInspection.id || '---').slice(-6).toUpperCase()}</span></p>
                     <p className="text-[9pt] text-slate-400 font-bold mt-1">Fecha: {new Date(selectedInspection.date).toLocaleDateString('es-ES', {year: 'numeric', month: 'long', day: 'numeric'})}</p>
+                    <p className="text-[8pt] text-slate-300 font-bold mt-1">Generado: {new Date().toLocaleDateString('es-ES', {day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'})}</p>
                   </div>
                 </div>
 
-                {/* Datos Principales */}
-                <div className="mb-8 mt-6">
+                {/* Datos Principales - Formal Table */}
+                <div className="mb-8 mt-6 break-inside-avoid">
+                    <div className="section-title bg-slate-900 text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">
+                        Datos del Vehículo
+                    </div>
                     <table className="w-full border-collapse">
                         <tbody>
                             <tr className="border-b border-slate-200">
-                                <td className="py-2 text-[9pt] font-black text-slate-400 uppercase w-48">Placas</td>
-                                <td className="py-2 text-[16pt] font-black text-slate-900 tracking-widest">{vehicles.find(v => v.id === selectedInspection.vehicleId)?.plate || '---'}</td>
+                                <td className="py-3 text-[9pt] font-black text-slate-400 uppercase w-48">Placas</td>
+                                <td className="py-3 text-[16pt] font-black text-slate-900 tracking-widest">{vehicles.find(v => v.id === selectedInspection.vehicleId)?.plate || '---'}</td>
                             </tr>
                             <tr className="border-b border-slate-200">
-                                <td className="py-2 text-[9pt] font-black text-slate-400 uppercase">Unidad / Modelo</td>
-                                <td className="py-2 text-[11pt] font-bold text-slate-900">{vehicles.find(v => v.id === selectedInspection.vehicleId)?.model || '---'}</td>
+                                <td className="py-3 text-[9pt] font-black text-slate-400 uppercase">Unidad / Modelo</td>
+                                <td className="py-3 text-[11pt] font-bold text-slate-900 overflow-wrap" style={{maxWidth: '300px', wordWrap: 'break-word'}}>{vehicles.find(v => v.id === selectedInspection.vehicleId)?.model || '---'}</td>
                             </tr>
                             <tr className="border-b border-slate-200">
-                                <td className="py-2 text-[9pt] font-black text-slate-400 uppercase">Inspector Responsable</td>
-                                <td className="py-2 text-[11pt] font-bold text-slate-900">{selectedInspection.inspectorName}</td>
+                                <td className="py-3 text-[9pt] font-black text-slate-400 uppercase">Inspector Responsable</td>
+                                <td className="py-3 text-[11pt] font-bold text-slate-900">{selectedInspection.inspectorName}</td>
+                            </tr>
+                            <tr className="border-b border-slate-200">
+                                <td className="py-3 text-[9pt] font-black text-slate-400 uppercase">Kilometraje Registrado</td>
+                                <td className="py-3 text-[11pt] font-bold text-slate-900">{(Number(selectedInspection.odometer) || 0).toLocaleString()} km</td>
                             </tr>
                             <tr>
-                                <td className="py-2 text-[9pt] font-black text-slate-400 uppercase">Kilometraje Registrado</td>
-                                <td className="py-2 text-[11pt] font-bold text-slate-900">{(Number(selectedInspection.odometer) || 0).toLocaleString()} km</td>
+                                <td className="py-3 text-[9pt] font-black text-slate-400 uppercase">Hora de Inspección</td>
+                                <td className="py-3 text-[11pt] font-bold text-slate-900">{new Date(selectedInspection.date).toLocaleTimeString('es-ES', {hour: '2-digit', minute: '2-digit', hour12: true})}</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
 
-                {/* Checklist Diagnostico */}
-                <div className="mb-8">
-                   <h4 className="bg-slate-900 text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">Evaluación de Componentes (16 Puntos)</h4>
-                   <div className="grid grid-cols-4 gap-y-3 gap-x-6 border-2 border-slate-100 p-6 rounded-xl">
+                {/* Checklist Diagnostico - Formal Grid */}
+                <div className="mb-8 break-inside-avoid">
+                   <div className="section-title bg-slate-900 text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">
+                       Evaluación de Componentes (16 Puntos)
+                   </div>
+                   <div className="checklist-grid grid grid-cols-4 gap-y-4 gap-x-6 border-2 border-slate-100 p-6 rounded-xl">
                       <ConditionPrint label="1. Motor" status={selectedInspection.engineStatus} />
                       <ConditionPrint label="2. Transmisión" status={selectedInspection.transmissionStatus} />
                       <ConditionPrint label="3. Clutch" status={selectedInspection.clutchStatus} />
@@ -324,28 +516,36 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
                    </div>
                 </div>
 
-                <div className="space-y-2 mb-12">
-                   <h4 className="text-[9pt] font-black uppercase border-b-2 border-slate-200 pb-1 text-primary">Observaciones del Inspector</h4>
-                   <div className="bg-slate-50 p-6 rounded-lg min-h-[120px] border border-slate-100">
-                     <p className="text-[10pt] text-slate-700 leading-relaxed italic">
+                {/* Observations - With Overflow Handling */}
+                <div className="space-y-2 mb-24 break-inside-avoid">
+                   <div className="section-title bg-slate-900 text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">
+                       Observaciones del Inspector
+                   </div>
+                   <div className="observations-box bg-slate-50 p-6 rounded-lg min-h-[80px] max-h-[120px] border border-slate-100 overflow-hidden">
+                     <p className="text-[10pt] text-slate-700 leading-relaxed italic" style={{wordWrap: 'break-word', overflowWrap: 'break-word', maxHeight: '90px', overflow: 'hidden', textOverflow: 'ellipsis'}}>
                         {selectedInspection.observations || 'Sin observaciones particulares registradas durante la inspección.'}
                      </p>
                    </div>
                 </div>
 
-                <div className="absolute bottom-[1.5cm] left-[1.5cm] right-[1.5cm]">
+                {/* Signature Section - Fixed Position (simplified) */}
+                <div className="signature-section absolute bottom-[2cm] left-[1.5cm] right-[1.5cm]">
                     <div className="grid grid-cols-2 gap-24 text-center">
-                    <div className="border-t-2 border-slate-900 pt-4">
-                        <p className="text-[9pt] font-black uppercase text-slate-900">{selectedInspection.inspectorName}</p>
-                        <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Firma del Inspector</p>
+                      <div className="signature-line border-t-2 border-slate-900 pt-4">
+                          <p className="text-[9pt] font-black uppercase text-slate-900">{selectedInspection.inspectorName}</p>
+                          <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Firma del Inspector</p>
+                      </div>
+                      <div className="signature-line border-t-2 border-slate-900 pt-4">
+                          <p className="text-[9pt] font-black uppercase text-slate-900">{managerName}</p>
+                          <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">{managerPos}</p>
+                      </div>
                     </div>
-                    <div className="border-t-2 border-slate-900 pt-4">
-                        <p className="text-[9pt] font-black uppercase text-slate-900">{managerName}</p>
-                        <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">{managerPos}</p>
-                    </div>
-                    </div>
-                    <div className="text-center mt-8 border-t border-slate-200 pt-2">
-                        <p className="text-[7pt] font-black text-slate-300 uppercase tracking-[0.3em]">Sistema de Control Flota Pro • DIF Municipal La Paz</p>
+                    <div className="print-footer text-center mt-8 border-t border-slate-200 pt-3">
+                        <div className="flex justify-between items-center text-[7pt] text-slate-400">
+                            <span>Sistema de Control Flota Pro</span>
+                            <span className="font-black uppercase tracking-[0.2em]">DIF Municipal La Paz B.C.S.</span>
+                            <span>Documento válido con firmas autógrafas</span>
+                        </div>
                     </div>
                 </div>
               </div>

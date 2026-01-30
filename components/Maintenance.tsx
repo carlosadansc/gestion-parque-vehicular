@@ -173,23 +173,184 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
   };
 
   // Variables institucionales para impresión
-  const appLogo = settingsMap['APP_LOGO'] || 'https://i.ibb.co/3ykMvS8/escudo-paz.png';
+  // Normalizar la ruta del logo (convertir rutas relativas a absolutas)
+  const rawLogo = settingsMap['APP_LOGO'] || '/images/logo-dif.png';
+  const appLogo = rawLogo.startsWith('./') ? rawLogo.replace('./', '/') : rawLogo;
   const directorName = settingsMap['INSTITUTION_HEAD_NAME'] || 'Director General';
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-20">
       <style>{`
+        /* ========================================
+           PRINT STYLES - MAINTENANCE SERVICE ORDER
+           FORMAL DOCUMENT DESIGN
+           ======================================== */
         @media print {
-          body * { visibility: hidden; }
-          #maintenance-printable, #maintenance-printable * { visibility: visible; }
-          #maintenance-printable { 
-            position: absolute; left: 0; top: 0; width: 100%; padding: 0; margin: 0;
-            background: white !important; font-family: 'Inter', sans-serif;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
+          /* Page Setup - Letter Portrait */
+          @page {
+            size: letter portrait;
+            margin: 1.5cm 1.5cm 2.5cm 1.5cm;
           }
+          
+          /* Hide everything except printable area */
+          body * {
+            visibility: hidden;
+          }
+          
+          #maintenance-printable, #maintenance-printable * {
+            visibility: visible;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+          }
+          
+          #maintenance-printable {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            padding: 0;
+            margin: 0;
+            background: white !important;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-size: 10pt;
+            line-height: 1.4;
+          }
+          
           .no-print { display: none !important; }
-          @page { margin: 0.5cm; size: letter; }
+          
+          /* ========================================
+             TYPOGRAPHY - FORMAL DOCUMENT STANDARDS
+             ======================================== */
+          #maintenance-printable h1,
+          #maintenance-printable h2,
+          #maintenance-printable h3,
+          #maintenance-printable h4 {
+            page-break-after: avoid;
+            orphans: 3;
+            widows: 3;
+          }
+          
+          #maintenance-printable p {
+            orphans: 3;
+            widows: 3;
+          }
+          
+          /* ========================================
+             PAGE BREAK CONTROLS
+             ======================================== */
+          #maintenance-printable .break-inside-avoid {
+            page-break-inside: avoid;
+            break-inside: avoid;
+          }
+          
+          /* ========================================
+             OVERFLOW HANDLING - CONTENT VALIDATION
+             ======================================== */
+          #maintenance-printable .overflow-truncate,
+          #maintenance-printable .print-truncate {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+          
+          #maintenance-printable .overflow-wrap {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+            max-width: 250px;
+          }
+          
+          /* Long text cells */
+          #maintenance-printable .text-wrap {
+            white-space: normal;
+            word-wrap: break-word;
+            max-width: 300px;
+          }
+          
+          /* ========================================
+             TABLE STYLING - FORMAL DOCUMENT
+             ======================================== */
+          #maintenance-printable table {
+            width: 100% !important;
+            border-collapse: collapse;
+            page-break-inside: avoid;
+          }
+          
+          #maintenance-printable th,
+          #maintenance-printable td {
+            padding: 8px 12px !important;
+            border: 1px solid #e2e8f0 !important;
+            vertical-align: middle;
+          }
+          
+          #maintenance-printable th {
+            background-color: #f8fafc !important;
+            font-weight: 800;
+            text-transform: uppercase;
+            font-size: 8pt;
+            letter-spacing: 0.05em;
+          }
+          
+          /* ========================================
+             FORMAL DOCUMENT ELEMENTS
+             ======================================== */
+          /* Header styling */
+          #maintenance-printable .print-header {
+            border-bottom: 3px solid #1e293b;
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+          }
+          
+          /* Section titles */
+          #maintenance-printable .section-title {
+            background-color: #1e293b !important;
+            color: white !important;
+            padding: 6px 12px;
+            font-size: 9pt;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+            display: inline-block;
+          }
+          
+          /* Info boxes */
+          #maintenance-printable .info-box {
+            border: 1px solid #e2e8f0 !important;
+            background-color: #f8fafc !important;
+            padding: 16px !important;
+            border-radius: 8px;
+          }
+          
+          /* ========================================
+             SIGNATURE SECTION - FIXED POSITION
+             ======================================== */
+          #maintenance-printable .signature-section {
+            position: fixed;
+            bottom: 2cm;
+            left: 1.5cm;
+            right: 1.5cm;
+            page-break-inside: avoid;
+          }
+          
+          #maintenance-printable .signature-line {
+            border-top: 2px solid #1e293b;
+            padding-top: 0.5rem;
+            min-width: 200px;
+          }
+          
+          /* ========================================
+             FOOTER STYLING
+             ======================================== */
+          #maintenance-printable .print-footer {
+            border-top: 1px solid #e2e8f0;
+            padding-top: 0.5rem;
+            font-size: 7pt;
+            color: #94a3b8;
+            text-align: center;
+          }
         }
       `}</style>
 
@@ -254,7 +415,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                     </td>
                     <td className="px-8 py-5">
                       <p className="font-black text-slate-900 text-[13px] tracking-tight">{vehicle?.plate || 'S/P'} - {vehicle?.model || 'Desconocido'}</p>
-                      <p className="text-[10px] text-primary font-bold uppercase tracking-widest">{record.provider}</p>
+                      <p className="text-[10px] text-primary font-bold uppercase tracking-widest overflow-truncate">{record.provider}</p>
                       {record.providerContact && <p className="text-[9px] text-slate-400 font-bold uppercase">Enc: {record.providerContact}</p>}
                     </td>
                     <td className="px-8 py-5">
@@ -513,14 +674,14 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
            <div className="flex-1 bg-slate-100 p-10 flex justify-center">
               <div id="maintenance-printable" className="bg-white w-[21.59cm] min-h-[27.94cm] p-[1.5cm] shadow-2xl relative text-slate-900 border border-slate-200">
                 
-                {/* Header Institucional */}
-                <div className="flex justify-between items-center mb-8 border-b-4 border-slate-900 pb-6">
+                {/* Header Institucional - Formal Design */}
+                <div className="print-header flex justify-between items-center mb-8 border-b-4 border-slate-900 pb-6">
                   <div className="flex items-center gap-6">
                     <img src={appLogo} alt="Logo" className="h-24 w-auto object-contain" />
                     <div className="flex flex-col">
                       <span className="text-lg font-black text-slate-900 uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
                       <span className="text-lg font-black text-slate-900 uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>
-                      <span className="text-[8pt] font-bold uppercase text-slate-400 mt-2 tracking-[0.2em]">Parque Vehicular • Solicitud de Servicio</span>
+                      <span className="text-[8pt] font-bold uppercase text-slate-400 mt-2 tracking-[0.2em]">Coordinación de Parque Vehicular • Solicitud de Servicio</span>
                     </div>
                   </div>
                   <div className="text-right">
@@ -529,36 +690,39 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                     </div>
                     <p className="text-xs font-bold text-slate-600">FOLIO INTERNO: <span className="font-black text-slate-900 text-lg ml-1">{(selectedRecord.internalDocumentNumber || 'S/N').toUpperCase()}</span></p>
                     <p className="text-[9pt] text-slate-400 font-bold mt-1">Fecha: {new Date(selectedRecord.date).toLocaleDateString('es-ES', {year: 'numeric', month: 'long', day: 'numeric'})}</p>
+                    <p className="text-[8pt] text-slate-300 font-bold mt-1">Generado: {new Date().toLocaleDateString('es-ES', {day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'})}</p>
                   </div>
                 </div>
 
-                {/* Datos del Vehículo */}
-                <div className="mb-8 mt-6">
-                    <h4 className="text-[9pt] font-black uppercase border-b-2 border-slate-200 pb-1 text-primary mb-4">Datos de Identificación del Vehículo</h4>
+                {/* Datos del Vehículo - Formal Table */}
+                <div className="mb-8 mt-6 break-inside-avoid">
+                    <div className="section-title bg-slate-900 text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">
+                        Datos de Identificación del Vehículo
+                    </div>
                     <table className="w-full border-collapse">
                         <tbody>
                             <tr className="border-b border-slate-200">
-                                <td className="py-2 text-[9pt] font-black text-slate-400 uppercase w-48">Unidad / Marca</td>
-                                <td className="py-2 text-[11pt] font-bold text-slate-900">{vehicles.find(v => v.id === selectedRecord.vehicleId)?.model || '---'}</td>
-                                <td className="py-2 text-[9pt] font-black text-slate-400 uppercase w-32 text-right pr-4">Placas</td>
-                                <td className="py-2 text-[14pt] font-black text-slate-900 tracking-widest">{vehicles.find(v => v.id === selectedRecord.vehicleId)?.plate || '---'}</td>
+                                <td className="py-3 text-[9pt] font-black text-slate-400 uppercase w-48">Unidad / Marca</td>
+                                <td className="py-3 text-[11pt] font-bold text-slate-900 overflow-wrap" style={{maxWidth: '200px', wordWrap: 'break-word'}}>{vehicles.find(v => v.id === selectedRecord.vehicleId)?.model || '---'}</td>
+                                <td className="py-3 text-[9pt] font-black text-slate-400 uppercase w-32 text-right pr-4">Placas</td>
+                                <td className="py-3 text-[14pt] font-black text-slate-900 tracking-widest">{vehicles.find(v => v.id === selectedRecord.vehicleId)?.plate || '---'}</td>
                             </tr>
-                            <tr>
-                                <td className="py-2 text-[9pt] font-black text-slate-400 uppercase">Kilometraje</td>
-                                <td className="py-2 text-[11pt] font-bold text-slate-900">{(Number(selectedRecord.odometer) || 0).toLocaleString()} km</td>
-                                <td className="py-2 text-[9pt] font-black text-slate-400 uppercase text-right pr-4">ID Sistema</td>
-                                <td className="py-2 text-[11pt] font-bold text-slate-900">{selectedRecord.vehicleId}</td>
+                            <tr className="border-b border-slate-200">
+                                <td className="py-3 text-[9pt] font-black text-slate-400 uppercase">Kilometraje</td>
+                                <td className="py-3 text-[11pt] font-bold text-slate-900">{(Number(selectedRecord.odometer) || 0).toLocaleString()} km</td>
+                                <td className="py-3 text-[9pt] font-black text-slate-400 uppercase text-right pr-4">Fecha Ingreso</td>
+                                <td className="py-3 text-[11pt] font-bold text-slate-900">{selectedRecord.entryDate ? new Date(selectedRecord.entryDate).toLocaleDateString('es-ES', {day: '2-digit', month: 'short', year: 'numeric'}) : '---'}</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
 
-                {/* Datos del Proveedor y Cotización */}
-                <div className="mb-8 bg-slate-50 border border-slate-200 rounded-lg p-6">
+                {/* Datos del Proveedor y Cotización - Info Box */}
+                <div className="mb-8 info-box bg-slate-50 border border-slate-200 rounded-lg p-6 break-inside-avoid">
                    <div className="grid grid-cols-2 gap-8">
                       <div>
                          <p className="text-[8pt] font-black text-slate-400 uppercase tracking-widest mb-1">Taller / Proveedor</p>
-                         <p className="text-[12pt] font-black text-slate-900 uppercase">{selectedRecord.provider}</p>
+                         <p className="text-[12pt] font-black text-slate-900 uppercase overflow-wrap" style={{maxWidth: '250px', wordWrap: 'break-word'}}>{selectedRecord.provider}</p>
                          <p className="text-[9pt] font-bold text-slate-500 uppercase mt-1">Contacto: {selectedRecord.providerContact || 'Gerencia'}</p>
                       </div>
                       <div className="text-right border-l border-slate-200 pl-8">
@@ -569,31 +733,37 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                    </div>
                 </div>
 
-                {/* Descripción del Servicio */}
-                <div className="space-y-2 mb-12">
-                   <h4 className="text-[9pt] font-black uppercase border-b-2 border-slate-200 pb-1 text-primary">Descripción de la Falla / Servicio Solicitado</h4>
-                   <div className="bg-white p-4 rounded-lg min-h-[150px] border border-slate-200">
+                {/* Descripción del Servicio - With Overflow Handling */}
+                <div className="space-y-2 mb-12 break-inside-avoid">
+                   <div className="section-title bg-slate-900 text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">
+                       Descripción de la Falla / Servicio Solicitado
+                   </div>
+                   <div className="bg-white p-4 rounded-lg min-h-[120px] max-h-[200px] border border-slate-200 overflow-hidden">
                      <p className="text-[10pt] font-bold text-slate-900 uppercase mb-2 block">{selectedRecord.serviceType}</p>
-                     <p className="text-[10pt] text-slate-700 leading-relaxed whitespace-pre-line">
+                     <p className="text-[10pt] text-slate-700 leading-relaxed text-wrap" style={{wordWrap: 'break-word', overflowWrap: 'break-word', maxHeight: '140px', overflow: 'hidden'}}>
                         {selectedRecord.description || 'Sin descripción detallada.'}
                      </p>
                    </div>
                 </div>
 
-                {/* Firmas */}
-                <div className="absolute bottom-[1.5cm] left-[1.5cm] right-[1.5cm]">
+                {/* Firmas - Formal Signature Section */}
+                <div className="signature-section">
                     <div className="grid grid-cols-2 gap-24 text-center">
-                    <div className="border-t-2 border-slate-900 pt-4">
-                        <p className="text-[9pt] font-black uppercase text-slate-900">Jefe de Recursos Materiales</p>
-                        <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Revisión y Validación</p>
+                      <div className="signature-line border-t-2 border-slate-900 pt-4">
+                          <p className="text-[9pt] font-black uppercase text-slate-900">Jefe de Recursos Materiales</p>
+                          <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Revisión y Validación</p>
+                      </div>
+                      <div className="signature-line border-t-2 border-slate-900 pt-4">
+                          <p className="text-[9pt] font-black uppercase text-slate-900">{directorName}</p>
+                          <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Autorización / Visto Bueno</p>
+                      </div>
                     </div>
-                    <div className="border-t-2 border-slate-900 pt-4">
-                        <p className="text-[9pt] font-black uppercase text-slate-900">{directorName}</p>
-                        <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Autorización / Visto Bueno</p>
-                    </div>
-                    </div>
-                    <div className="text-center mt-8 border-t border-slate-200 pt-2">
-                        <p className="text-[7pt] font-black text-slate-300 uppercase tracking-[0.3em]">Sistema de Control Flota Pro • DIF Municipal La Paz</p>
+                    <div className="print-footer text-center mt-8 border-t border-slate-200 pt-3">
+                        <div className="flex justify-between items-center text-[7pt] text-slate-400">
+                            <span>Sistema de Control Flota Pro</span>
+                            <span className="font-black uppercase tracking-[0.2em]">DIF Municipal La Paz B.C.S.</span>
+                            <span>Documento válido con firmas autógrafas</span>
+                        </div>
                     </div>
                 </div>
               </div>

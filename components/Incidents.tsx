@@ -99,7 +99,9 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, searchQuery, onAddInci
   const instName = settingsMap['INSTITUTION_NAME'] || 'SISTEMA PARA EL DESARROLLO INTEGRAL DE LA FAMILIA';
   const managerName = settingsMap['VEHICLE_MANAGER_NAME'] || 'RESPONSABLE DE ÁREA';
   const managerPos = settingsMap['VEHICLE_MANAGER_POS'] || 'ENCARGADO DE PARQUE VEHICULAR';
-  const appLogo = settingsMap['APP_LOGO'] || 'https://i.ibb.co/3ykMvS8/escudo-paz.png';
+  // Normalizar la ruta del logo (convertir rutas relativas a absolutas)
+  const rawLogo = settingsMap['APP_LOGO'] || '/images/logo-dif.png';
+  const appLogo = rawLogo.startsWith('./') ? rawLogo.replace('./', '/') : rawLogo;
 
   const reportVehicle = selectedIncident ? vehicles.find(v => v.id === selectedIncident.vehicleId) : null;
   const reportDriver = selectedIncident ? drivers.find(d => d.id === selectedIncident.driverId) : null;
@@ -123,13 +125,23 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, searchQuery, onAddInci
     <div className="space-y-8 animate-in slide-in-from-top-4 duration-500">
       <style>{`
         @media print {
-          body * { visibility: hidden; }
-          #incident-printable, #incident-printable * { visibility: visible; }
+          body * { 
+            visibility: hidden; 
+          }
+          #incident-printable, #incident-printable * { 
+            visibility: visible; 
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
           #incident-printable { 
-            position: absolute; left: 0; top: 0; width: 100%; padding: 0; margin: 0;
-            background: white !important; font-family: 'Inter', sans-serif;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
+            position: absolute; 
+            left: 0; 
+            top: 0; 
+            width: 100%; 
+            padding: 0; 
+            margin: 0;
+            background: white !important; 
+            font-family: 'Inter', sans-serif;
           }
           .no-print { display: none !important; }
           @page { margin: 0.5cm; size: letter; }

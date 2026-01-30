@@ -22,7 +22,7 @@ const DEFAULT_SETTINGS: AppSetting[] = [
   { key: 'APP_NAME', value: 'DIF La Paz Flota' },
   { key: 'PRIMARY_COLOR', value: '#9e1b32' },
   { key: 'SECONDARY_COLOR', value: '#0f172a' },
-  { key: 'APP_LOGO', value: './assets/logo.png' },
+  { key: 'APP_LOGO', value: '/images/logo-dif.png' },
   { key: 'INSTITUTION_NAME', value: 'SISTEMA PARA EL DESARROLLO INTEGRAL DE LA FAMILIA' },
   { key: 'INSTITUTION_HEAD_NAME', value: 'Director General' },
   { key: 'INSTITUTION_HEAD_POS', value: 'DIRECTOR GENERAL DEL SMDIF LA PAZ' },
@@ -537,8 +537,8 @@ const App: React.FC = () => {
       <Sidebar activeView={currentView} onViewChange={v => { setCurrentView(v); setSearchQuery(''); }} appName={settingsMap['APP_NAME'] || 'Flota Pro'} currentUser={currentUser} onLogout={handleLogout} />
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <Header title={currentView.toUpperCase()} isSyncing={isSyncing} syncStatus={syncStatus} onSync={handleSync} view={currentView} searchQuery={searchQuery} onSearchChange={setSearchQuery} />
-        <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
-          <div className="max-w-7xl mx-auto">{renderContent()}</div>
+        <div className="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar">
+          <div className="max-w-7xl mx-auto w-full">{renderContent()}</div>
         </div>
       </main>
     </div>

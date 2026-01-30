@@ -47,9 +47,174 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
+        /* ========================================
+           SHARED PRINT STYLES - FORMAL DOCUMENTS
+           Standard design for all printable documents
+           ======================================== */
         @media print {
+            /* Hide non-printable elements */
             .no-print { display: none !important; }
-            body { background: white !important; }
+            
+            /* Base body styles */
+            body {
+                background: white !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+            }
+            
+            /* Color preservation */
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+                box-shadow: none !important;
+                text-shadow: none !important;
+            }
+            
+            /* Default page setup */
+            @page {
+                margin: 1.5cm;
+                size: auto;
+            }
+            
+            /* ========================================
+               TYPOGRAPHY - FORMAL DOCUMENT STANDARDS
+               ======================================== */
+            h1, h2, h3, h4, h5, h6 {
+                page-break-after: avoid;
+                orphans: 3;
+                widows: 3;
+            }
+            
+            p, li {
+                orphans: 3;
+                widows: 3;
+            }
+            
+            /* ========================================
+               PAGE BREAK CONTROLS
+               ======================================== */
+            .break-inside-avoid,
+            .print-section {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            
+            .break-before {
+                page-break-before: always;
+                break-before: page;
+            }
+            
+            .break-after {
+                page-break-after: always;
+                break-after: page;
+            }
+            
+            /* ========================================
+               OVERFLOW HANDLING - CONTENT VALIDATION
+               ======================================== */
+            .overflow-truncate,
+            .print-truncate {
+                max-width: 200px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            
+            .overflow-wrap,
+            .print-wrap {
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+                hyphens: auto;
+            }
+            
+            .text-wrap {
+                white-space: normal;
+                word-wrap: break-word;
+            }
+            
+            /* ========================================
+               TABLE STYLING - FORMAL DOCUMENT
+               ======================================== */
+            table {
+                border-collapse: collapse;
+                page-break-inside: auto;
+            }
+            
+            thead {
+                display: table-header-group;
+            }
+            
+            tfoot {
+                display: table-footer-group;
+            }
+            
+            tr {
+                page-break-inside: avoid;
+                page-break-after: auto;
+            }
+            
+            /* ========================================
+               FORMAL DOCUMENT ELEMENTS
+               ======================================== */
+            /* Header styling */
+            .print-header {
+                border-bottom: 3px solid #1e293b;
+                padding-bottom: 1rem;
+                margin-bottom: 1.5rem;
+            }
+            
+            /* Footer styling */
+            .print-footer {
+                border-top: 1px solid #e2e8f0;
+                padding-top: 0.5rem;
+                font-size: 7pt;
+                color: #94a3b8;
+            }
+            
+            /* Signature lines */
+            .signature-line {
+                border-top: 2px solid #1e293b;
+                padding-top: 0.5rem;
+                min-width: 200px;
+            }
+            
+            /* Section titles */
+            .section-title {
+                background-color: #1e293b !important;
+                color: white !important;
+                padding: 6px 12px;
+                font-size: 9pt;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+            }
+            
+            /* ========================================
+               SIGNATURE SECTION - FIXED POSITION
+               ======================================== */
+            .signature-section {
+                page-break-inside: avoid;
+            }
+            
+            /* ========================================
+               UTILITY CLASSES FOR PRINT
+               ======================================== */
+            .print-only {
+                display: block !important;
+            }
+            
+            .screen-only {
+                display: none !important;
+            }
+        }
+        
+        /* Screen-only styles (hidden in print) */
+        @media screen {
+            .print-only {
+                display: none !important;
+            }
         }
     </style>
 <script type="importmap">

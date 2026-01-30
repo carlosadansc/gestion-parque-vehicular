@@ -136,7 +136,7 @@ const Dashboard: React.FC<DashboardProps> = ({ vehicles = [], drivers = [], fuel
       {/* HEADER DE BIENVENIDA */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-black text-slate-900 tracking-tighter">Panel General</h2>
+          <h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tighter">Panel General</h2>
           <p className="text-slate-500 font-medium mt-1">Resumen ejecutivo del estado de la flota.</p>
         </div>
         <div className="flex gap-2">
@@ -147,7 +147,7 @@ const Dashboard: React.FC<DashboardProps> = ({ vehicles = [], drivers = [], fuel
       </div>
 
       {/* KPI CARDS (DISEÑO MÁS VISUAL) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
         {/* Salud de Flota */}
         <div className="bg-slate-900 rounded-[2rem] p-6 text-white relative overflow-hidden group shadow-xl shadow-slate-900/20">
           <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
@@ -216,17 +216,17 @@ const Dashboard: React.FC<DashboardProps> = ({ vehicles = [], drivers = [], fuel
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         {/* Gráfico Financiero */}
-        <div className="lg:col-span-2 bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm">
+        <div className="lg:col-span-2 bg-white p-8 md:p-10 rounded-[2.5rem] border border-slate-200 shadow-sm">
           <div className="flex justify-between items-center mb-8">
             <div>
-              <h3 className="text-xl font-black text-slate-900 tracking-tight">Tendencia de Gastos</h3>
+              <h3 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">Tendencia de Gastos</h3>
               <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Combustible (Últimos 6 Meses)</p>
             </div>
             <div className="hidden sm:flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500 bg-slate-50 px-3 py-1.5 rounded-lg">
                 <span className="size-2 rounded-full bg-blue-600"></span> MXN (Neto)
             </div>
           </div>
-          <div className="h-[300px] w-full">
+          <div className="h-[300px] md:h-[350px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={financialData}>
                 <defs>
@@ -251,12 +251,12 @@ const Dashboard: React.FC<DashboardProps> = ({ vehicles = [], drivers = [], fuel
         </div>
 
         {/* Gráfico de Incidencias */}
-        <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm flex flex-col">
+        <div className="bg-white p-8 md:p-10 rounded-[2.5rem] border border-slate-200 shadow-sm flex flex-col">
           <div className="mb-6">
-            <h3 className="text-xl font-black text-slate-900 tracking-tight">Incidencias</h3>
+            <h3 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">Incidencias</h3>
             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Distribución por Tipo</p>
           </div>
-          <div className="flex-1 min-h-[250px] relative">
+          <div className="flex-1 min-h-[250px] md:min-h-[300px] relative">
              <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -303,11 +303,11 @@ const Dashboard: React.FC<DashboardProps> = ({ vehicles = [], drivers = [], fuel
         
         {/* Top Gastos */}
         <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden">
-           <div className="p-8 border-b border-slate-100 bg-slate-50/50">
-              <h3 className="text-lg font-black text-slate-900 tracking-tight">Mayores Consumidores</h3>
+           <div className="p-8 md:p-10 border-b border-slate-100 bg-slate-50/50">
+              <h3 className="text-lg md:text-xl font-black text-slate-900 tracking-tight">Mayores Consumidores</h3>
               <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Vehículos con mayor gasto acumulado</p>
            </div>
-           <div className="p-4">
+           <div className="p-4 md:p-6">
               {topSpenders.length > 0 ? topSpenders.map((item, idx) => (
                 <div key={item.id} className="flex items-center justify-between p-4 hover:bg-slate-50 rounded-2xl transition-colors group">
                    <div className="flex items-center gap-4">
@@ -329,11 +329,11 @@ const Dashboard: React.FC<DashboardProps> = ({ vehicles = [], drivers = [], fuel
 
         {/* Actividad Reciente (Refinada) */}
         <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden">
-           <div className="p-8 border-b border-slate-100 bg-slate-50/50">
-              <h3 className="text-lg font-black text-slate-900 tracking-tight">Bitácora Reciente</h3>
+           <div className="p-8 md:p-10 border-b border-slate-100 bg-slate-50/50">
+              <h3 className="text-lg md:text-xl font-black text-slate-900 tracking-tight">Bitácora Reciente</h3>
               <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Últimos movimientos registrados</p>
            </div>
-           <div className="p-4 space-y-2">
+           <div className="p-4 md:p-6 space-y-2">
               {/* Combinamos incidencias y combustible para el feed */}
               {[
                 ...incidents.slice(0, 3).map(i => ({...i, metaType: 'incident'})),
