@@ -15,6 +15,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange, appName, cu
     { id: View.DASHBOARD, label: 'Inicio', icon: 'dashboard' },
     { id: View.VEHICLES, label: 'Vehículos', icon: 'directions_car' },
     { id: View.DRIVERS, label: 'Choferes', icon: 'person' },
+    { id: View.INSPECTIONS, label: 'Revisiones', icon: 'fact_check' },
     { id: View.MAINTENANCE, label: 'Mantenimiento', icon: 'handyman' },
     { id: View.PLANNING, label: 'Planeación', icon: 'calendar_month' },
     { id: View.TRAVEL_LOGS, label: 'Viajes', icon: 'route' },

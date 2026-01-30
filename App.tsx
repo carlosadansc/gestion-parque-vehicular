@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { View, Vehicle, Driver, FuelEntry, Incident, Planning, Area, TravelLog, MaintenanceRecord, AppSetting, User } from './types';
+import { View, Vehicle, Driver, FuelEntry, Incident, Planning, Area, TravelLog, MaintenanceRecord, AppSetting, User, VehicleInspection, MaintenanceType } from './types';
 import { VEHICLES as initialVehicles, DRIVERS as initialDrivers, INCIDENTS as initialIncidents, FUEL_HISTORY as initialFuel } from './constants';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
@@ -13,6 +13,7 @@ import Settings from './components/Settings';
 import PlanningComponent from './components/Planning';
 import TravelLogs from './components/TravelLogs';
 import Maintenance from './components/Maintenance';
+import Inspections from './components/Inspections';
 import Users from './components/Users';
 import { googleSheets } from './services/googleSheets';
 
@@ -20,18 +21,30 @@ const DEFAULT_SETTINGS: AppSetting[] = [
   { key: 'APP_NAME', value: 'DIF La Paz Flota' },
   { key: 'PRIMARY_COLOR', value: '#9e1b32' },
   { key: 'SECONDARY_COLOR', value: '#0f172a' },
-  { key: 'APP_LOGO', value: 'directions_car' },
+  { key: 'APP_LOGO', value: 'https://i.ibb.co/3ykMvS8/escudo-paz.png' },
   { key: 'INSTITUTION_NAME', value: 'SISTEMA PARA EL DESARROLLO INTEGRAL DE LA FAMILIA' },
-  { key: 'INSTITUTION_HEAD_NAME', value: 'ING. MANUEL SALVADOR MÁRQUEZ VENTURA' },
+  { key: 'INSTITUTION_HEAD_NAME', value: 'Director General' },
   { key: 'INSTITUTION_HEAD_POS', value: 'DIRECTOR GENERAL DEL SMDIF LA PAZ' },
   { key: 'VEHICLE_MANAGER_NAME', value: 'ING. CARLOS ADÁN SÁNCHEZ CESEÑA' },
   { key: 'VEHICLE_MANAGER_POS', value: 'ENCARGADO DE PARQUE VEHICULAR' }
+];
+
+const DEFAULT_MAINTENANCE_TYPES: MaintenanceType[] = [
+  { id: 'MT-1', name: 'Afinación Mayor' },
+  { id: 'MT-2', name: 'Cambio de Aceite' },
+  { id: 'MT-3', name: 'Llantas' },
+  { id: 'MT-4', name: 'Frenos' },
+  { id: 'MT-5', name: 'Suspensión' },
+  { id: 'MT-6', name: 'Eléctrico' },
+  { id: 'MT-7', name: 'Hojalatería y Pintura' },
+  { id: 'MT-8', name: 'Reparación Mayor' },
 ];
 
 const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loginUsername, setLoginUsername] = useState('');
   const [loginPass, setLoginPass] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState('');
   
   const [currentView, setCurrentView] = useState<View>(View.DASHBOARD);
@@ -47,6 +60,8 @@ const App: React.FC = () => {
   const [areas, setAreas] = useState<Area[]>([]);
   const [travelLogs, setTravelLogs] = useState<TravelLog[]>([]);
   const [maintenanceRecords, setMaintenanceRecords] = useState<MaintenanceRecord[]>([]);
+  const [maintenanceTypes, setMaintenanceTypes] = useState<MaintenanceType[]>(DEFAULT_MAINTENANCE_TYPES);
+  const [inspections, setInspections] = useState<VehicleInspection[]>([]);
   const [appSettings, setAppSettings] = useState<AppSetting[]>(DEFAULT_SETTINGS);
   const [appUsers, setAppUsers] = useState<User[]>([]);
 
@@ -86,8 +101,10 @@ const App: React.FC = () => {
         if (data.areas) setAreas(data.areas);
         if (data.travelLogs) setTravelLogs(data.travelLogs);
         if (data.maintenanceRecords) setMaintenanceRecords(data.maintenanceRecords);
+        if (data.maintenanceTypes && data.maintenanceTypes.length > 0) setMaintenanceTypes(data.maintenanceTypes);
         if (data.settings && data.settings.length > 0) setAppSettings(data.settings);
         if (data.users) setAppUsers(data.users);
+        if (data.inspections) setInspections(data.inspections);
         setSyncStatus('synced');
       } else { setSyncStatus('error'); }
     } catch (err: any) { setSyncStatus('error'); } finally { setIsSyncing(false); }
@@ -161,6 +178,8 @@ const App: React.FC = () => {
     await googleSheets.pushData('update-setting', { key, value });
   };
 
+  // --- VEHICLE HANDLERS WITH SYNC ---
+
   const handleAddVehicle = async (newVehicle: Omit<Vehicle, 'id'>) => {
     const formatted = { 
       ...newVehicle, 
@@ -168,8 +187,20 @@ const App: React.FC = () => {
       model: newVehicle.model.toUpperCase() 
     };
     const vehicleWithId = { ...formatted, id: `V-${Date.now()}` };
-    setVehicles([vehicleWithId, ...vehicles]);
+    
+    // 1. Guardar Vehículo
+    setVehicles(prev => [vehicleWithId, ...prev]);
     await googleSheets.pushData('vehicle', vehicleWithId);
+
+    // 2. Sincronizar Chofer (si se asignó uno)
+    if (vehicleWithId.assignedDriverId) {
+      const driverToUpdate = drivers.find(d => d.id === vehicleWithId.assignedDriverId);
+      if (driverToUpdate) {
+        const updatedDriver = { ...driverToUpdate, assignedVehicleId: vehicleWithId.id };
+        setDrivers(prev => prev.map(d => d.id === updatedDriver.id ? updatedDriver : d));
+        await googleSheets.pushData('update-driver', updatedDriver);
+      }
+    }
   };
 
   const handleUpdateVehicle = async (updatedVehicle: Vehicle) => {
@@ -178,9 +209,40 @@ const App: React.FC = () => {
       plate: updatedVehicle.plate.toUpperCase(), 
       model: updatedVehicle.model.toUpperCase() 
     };
+
+    // Obtenemos el estado anterior para comparar
+    const oldVehicle = vehicles.find(v => v.id === formatted.id);
+    const oldDriverId = oldVehicle?.assignedDriverId;
+    const newDriverId = formatted.assignedDriverId;
+
+    // 1. Actualizar Vehículo
     setVehicles(vehicles.map(v => v.id === formatted.id ? formatted : v));
     await googleSheets.pushData('update-vehicle', formatted);
+
+    // 2. Sincronizar Choferes (si hubo cambio)
+    if (oldDriverId !== newDriverId) {
+      // A. Desvincular al chofer anterior (si existía)
+      if (oldDriverId) {
+        const oldDriver = drivers.find(d => d.id === oldDriverId);
+        if (oldDriver) {
+          const updatedOldDriver = { ...oldDriver, assignedVehicleId: '' };
+          setDrivers(prev => prev.map(d => d.id === updatedOldDriver.id ? updatedOldDriver : d));
+          await googleSheets.pushData('update-driver', updatedOldDriver);
+        }
+      }
+      // B. Vincular al nuevo chofer (si se asignó)
+      if (newDriverId) {
+        const newDriver = drivers.find(d => d.id === newDriverId);
+        if (newDriver) {
+          const updatedNewDriver = { ...newDriver, assignedVehicleId: formatted.id };
+          setDrivers(prev => prev.map(d => d.id === updatedNewDriver.id ? updatedNewDriver : d));
+          await googleSheets.pushData('update-driver', updatedNewDriver);
+        }
+      }
+    }
   };
+
+  // --- DRIVER HANDLERS WITH SYNC ---
 
   const handleAddDriver = async (newDriver: Omit<Driver, 'id'>) => {
     const formatted = { 
@@ -189,8 +251,20 @@ const App: React.FC = () => {
       licenseType: newDriver.licenseType.toUpperCase() 
     };
     const driverWithId = { ...formatted, id: `D-${Date.now()}` };
-    setDrivers([driverWithId, ...drivers]);
+    
+    // 1. Guardar Chofer
+    setDrivers(prev => [driverWithId, ...prev]);
     await googleSheets.pushData('driver', driverWithId);
+
+    // 2. Sincronizar Vehículo (si se asignó uno)
+    if (driverWithId.assignedVehicleId) {
+      const vehicleToUpdate = vehicles.find(v => v.id === driverWithId.assignedVehicleId);
+      if (vehicleToUpdate) {
+        const updatedVehicle = { ...vehicleToUpdate, assignedDriverId: driverWithId.id };
+        setVehicles(prev => prev.map(v => v.id === updatedVehicle.id ? updatedVehicle : v));
+        await googleSheets.pushData('update-vehicle', updatedVehicle);
+      }
+    }
   };
 
   const handleUpdateDriver = async (updatedDriver: Driver) => {
@@ -199,9 +273,40 @@ const App: React.FC = () => {
       name: updatedDriver.name.toUpperCase(), 
       licenseType: updatedDriver.licenseType.toUpperCase() 
     };
+
+    // Obtenemos estado anterior
+    const oldDriver = drivers.find(d => d.id === formatted.id);
+    const oldVehicleId = oldDriver?.assignedVehicleId;
+    const newVehicleId = formatted.assignedVehicleId;
+
+    // 1. Actualizar Chofer
     setDrivers(drivers.map(d => d.id === formatted.id ? formatted : d));
     await googleSheets.pushData('update-driver', formatted);
+
+    // 2. Sincronizar Vehículos (si hubo cambio)
+    if (oldVehicleId !== newVehicleId) {
+      // A. Desvincular vehículo anterior
+      if (oldVehicleId) {
+        const oldVehicle = vehicles.find(v => v.id === oldVehicleId);
+        if (oldVehicle) {
+          const updatedOldVehicle = { ...oldVehicle, assignedDriverId: '' };
+          setVehicles(prev => prev.map(v => v.id === updatedOldVehicle.id ? updatedOldVehicle : v));
+          await googleSheets.pushData('update-vehicle', updatedOldVehicle);
+        }
+      }
+      // B. Vincular nuevo vehículo
+      if (newVehicleId) {
+        const newVehicle = vehicles.find(v => v.id === newVehicleId);
+        if (newVehicle) {
+          const updatedNewVehicle = { ...newVehicle, assignedDriverId: formatted.id };
+          setVehicles(prev => prev.map(v => v.id === updatedNewVehicle.id ? updatedNewVehicle : v));
+          await googleSheets.pushData('update-vehicle', updatedNewVehicle);
+        }
+      }
+    }
   };
+
+  // --- OTHER HANDLERS ---
 
   const handleAddFuel = async (newFuel: Omit<FuelEntry, 'id'>) => {
     const fuelWithId = { 
@@ -228,10 +333,21 @@ const App: React.FC = () => {
     await googleSheets.pushData('incident', incidentWithId);
   };
 
+  const handleUpdateIncident = async (updatedIncident: Incident) => {
+    const formatted = { 
+      ...updatedIncident, 
+      title: updatedIncident.title.toUpperCase(), 
+      description: updatedIncident.description.toUpperCase() 
+    };
+    setIncidents(incidents.map(i => i.id === formatted.id ? formatted : i));
+    await googleSheets.pushData('update-incident', formatted);
+  };
+
   const handleAddPlanning = async (newPlanning: Omit<Planning, 'id'>) => {
     const formatted = { 
       ...newPlanning, 
-      notes: newPlanning.notes?.toUpperCase() 
+      notes: newPlanning.notes?.toUpperCase(),
+      destination: newPlanning.destination?.toUpperCase()
     };
     const pWithId = { ...formatted, id: `P-${Date.now()}` };
     setPlannings([pWithId, ...plannings]);
@@ -241,7 +357,8 @@ const App: React.FC = () => {
   const handleUpdatePlanning = async (updatedPlanning: Planning) => {
     const formatted = { 
       ...updatedPlanning, 
-      notes: updatedPlanning.notes?.toUpperCase() 
+      notes: updatedPlanning.notes?.toUpperCase(),
+      destination: updatedPlanning.destination?.toUpperCase()
     };
     setPlannings(plannings.map(p => p.id === formatted.id ? formatted : p));
     await googleSheets.pushData('update-planning', formatted);
@@ -304,6 +421,12 @@ const App: React.FC = () => {
     await googleSheets.pushData('update-maintenance', formatted);
   };
 
+  const handleAddMaintenanceType = async (name: string) => {
+    const newType = { id: `MT-${Date.now()}`, name: name.toUpperCase() };
+    setMaintenanceTypes([...maintenanceTypes, newType]);
+    await googleSheets.pushData('maintenance-type', newType);
+  };
+
   const handleAddUser = async (newUser: Omit<User, 'id'>) => {
     const formatted = { 
       ...newUser, 
@@ -325,16 +448,23 @@ const App: React.FC = () => {
     await googleSheets.pushData('update-user', formatted);
   };
 
+  const handleAddInspection = async (newInspection: Omit<VehicleInspection, 'id'>) => {
+    const inspectionWithId = { ...newInspection, id: `INS-${Date.now()}` };
+    setInspections([inspectionWithId, ...inspections]);
+    await googleSheets.pushData('inspection' as any, inspectionWithId); 
+  };
+
   const renderContent = () => {
     switch (currentView) {
       case View.DASHBOARD: return <Dashboard vehicles={vehicles} drivers={drivers} fuelEntries={fuelEntries} incidents={incidents} />;
-      case View.VEHICLES: return <Vehicles vehicles={vehicles} drivers={drivers} searchQuery={searchQuery} onAddVehicle={handleAddVehicle} onUpdateVehicle={handleUpdateVehicle} />;
+      case View.VEHICLES: return <Vehicles vehicles={vehicles} drivers={drivers} searchQuery={searchQuery} settings={appSettings} onAddVehicle={handleAddVehicle} onUpdateVehicle={handleUpdateVehicle} />;
       case View.DRIVERS: return <Drivers drivers={drivers} vehicles={vehicles} searchQuery={searchQuery} onAddDriver={handleAddDriver} onUpdateDriver={handleUpdateDriver} />;
       case View.FUEL: return <Fuel fuelHistory={fuelEntries} vehicles={vehicles} drivers={drivers} onAddFuel={handleAddFuel} onSync={handleSync} />;
-      case View.INCIDENTS: return <Incidents incidents={incidents} searchQuery={searchQuery} onAddIncident={handleAddIncident} vehicles={vehicles} drivers={drivers} settings={appSettings} />;
-      case View.MAINTENANCE: return <Maintenance records={maintenanceRecords} vehicles={vehicles} settings={appSettings} onAddRecord={handleAddMaintenance} onUpdateRecord={handleUpdateMaintenance} onSync={handleSync} />;
+      case View.INCIDENTS: return <Incidents incidents={incidents} searchQuery={searchQuery} onAddIncident={handleAddIncident} onUpdateIncident={handleUpdateIncident} vehicles={vehicles} drivers={drivers} settings={appSettings} />;
+      case View.MAINTENANCE: return <Maintenance records={maintenanceRecords} vehicles={vehicles} maintenanceTypes={maintenanceTypes} settings={appSettings} onAddRecord={handleAddMaintenance} onUpdateRecord={handleUpdateMaintenance} onAddMaintenanceType={handleAddMaintenanceType} onSync={handleSync} />;
       case View.TRAVEL_LOGS: return <TravelLogs travelLogs={travelLogs} vehicles={vehicles} drivers={drivers} areas={areas} settings={appSettings} onAddTravelLog={handleAddTravelLog} onUpdateTravelLog={handleUpdateTravelLog} onSync={handleSync} />;
-      case View.PLANNING: return <PlanningComponent plannings={plannings} vehicles={vehicles} drivers={drivers} areas={areas} onAddPlanning={handleAddPlanning} onUpdatePlanning={handleUpdatePlanning} onAddArea={handleAddArea} />;
+      case View.PLANNING: return <PlanningComponent plannings={plannings} vehicles={vehicles} drivers={drivers} areas={areas} onAddPlanning={handleAddPlanning} onUpdatePlanning={handleUpdatePlanning} onAddArea={handleAddArea} settings={appSettings} />;
+      case View.INSPECTIONS: return <Inspections inspections={inspections} vehicles={vehicles} onAddInspection={handleAddInspection} currentUser={currentUser} settings={appSettings} />;
       case View.USERS: return <Users users={appUsers} onAddUser={handleAddUser} onUpdateUser={handleUpdateUser} currentUser={currentUser} />;
       case View.SETTINGS: return <Settings settings={appSettings} onUpdateSetting={handleUpdateSetting} onUrlChange={handleSync} />;
       default: return <Dashboard vehicles={vehicles} drivers={drivers} fuelEntries={fuelEntries} incidents={incidents} />;
@@ -359,13 +489,38 @@ const App: React.FC = () => {
           <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2">
               <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Nombre de Usuario</label>
-              <input type="text" required className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-bold text-sm outline-none focus:ring-4 focus:ring-primary/10 transition-all" placeholder="admin" value={loginUsername} onChange={e => setLoginUsername(e.target.value)} />
+              <input 
+                type="text" 
+                required 
+                className={`w-full bg-slate-50 border rounded-2xl px-6 py-4 font-bold text-sm outline-none transition-all ${loginError ? 'border-rose-300 ring-4 ring-rose-50' : 'border-slate-200 focus:ring-4 focus:ring-primary/10'}`}
+                placeholder="admin" 
+                value={loginUsername} 
+                onChange={e => { setLoginUsername(e.target.value); setLoginError(''); }} 
+              />
             </div>
             <div className="space-y-2">
               <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Contraseña</label>
-              <input type="password" required className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-bold text-sm outline-none focus:ring-4 focus:ring-primary/10 transition-all" placeholder="••••••••" value={loginPass} onChange={e => setLoginPass(e.target.value)} />
+              <div className="relative">
+                <input 
+                  type={showPassword ? "text" : "password"} 
+                  required 
+                  className={`w-full bg-slate-50 border rounded-2xl px-6 py-4 pr-12 font-bold text-sm outline-none transition-all ${loginError ? 'border-rose-300 ring-4 ring-rose-50' : 'border-slate-200 focus:ring-4 focus:ring-primary/10'}`}
+                  placeholder="••••••••" 
+                  value={loginPass} 
+                  onChange={e => { setLoginPass(e.target.value); setLoginError(''); }} 
+                />
+                <button 
+                  type="button" 
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                  <span className="material-symbols-outlined text-xl">
+                    {showPassword ? 'visibility_off' : 'visibility'}
+                  </span>
+                </button>
+              </div>
             </div>
-            {loginError && <p className="text-rose-500 text-[11px] font-black text-center uppercase tracking-widest bg-rose-50 p-3 rounded-xl border border-rose-100">{loginError}</p>}
+            {loginError && <p className="text-rose-500 text-[11px] font-black text-center uppercase tracking-widest bg-rose-50 p-3 rounded-xl border border-rose-100 animate-in slide-in-from-top-2">{loginError}</p>}
             <button type="submit" disabled={isSyncing} className="w-full bg-primary text-white py-4 rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-blue-500/30 hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50">
               {isSyncing ? 'Iniciando...' : 'Acceder al Sistema'}
             </button>

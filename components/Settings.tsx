@@ -44,7 +44,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onUpdateSetting, onUrlCha
 
   const appsScriptCode = `
 /** 
- * API FLOTA PRO v7.5 - FICHA TÉCNICA DETALLADA (DIF LA PAZ)
+ * API FLOTA PRO v8.0 - PLANEACIÓN ACTUALIZADA (ESTADO)
  */
 
 const CONFIG = {
@@ -54,16 +54,21 @@ const CONFIG = {
       "inventory", "condition", "location", "vin", "odometer", "brand", "year", "type", "line", "color", "cylinders", "fuelType",
       "engineStatus", "clutchStatus", "transmissionStatus", "shifterStatus", "steeringStatus", "suspensionStatus", "tempGaugeStatus", "oilGaugeStatus",
       "tiresStatus", "shocksStatus", "brakesStatus", "batteryStatus", "lightsStatus", "hornStatus", "wipersStatus", "speedoStatus",
-      "hasRadio", "hasAntenna", "hasMats", "hasLeftMirror", "hasRearMirror", "hasRims", "hasOilCap", "hasGasCap", "hasTireCaps", "hasSpareTire",
-      "observations"
+      "observations", "accessories_notes"
+    ],
+    "Revisiones": [
+      "id", "date", "vehicleId", "inspectorName", "odometer", "observations",
+      "engineStatus", "clutchStatus", "transmissionStatus", "shifterStatus", "steeringStatus", "suspensionStatus", "tempGaugeStatus", "oilGaugeStatus",
+      "tiresStatus", "shocksStatus", "brakesStatus", "batteryStatus", "lightsStatus", "hornStatus", "wipersStatus", "speedoStatus"
     ],
     "Choferes": ["id", "name", "licenseType", "phone", "status", "assignedVehicleId", "image"],
     "Combustible": ["id", "date", "vehicleId", "driverId", "liters", "cost", "odometer"],
     "Incidencias": ["id", "date", "type", "title", "description", "vehicleId", "driverId", "status"],
-    "Planeacion": ["id", "date", "vehicleId", "driverId", "areaId", "notes"],
+    "Planeacion": ["id", "date", "vehicleId", "driverId", "areaId", "notes", "departureTime", "arrivalTime", "destination", "status"],
     "Areas": ["id", "name", "description"],
-    "BitacorasViaje": ["id", "date", "departureTime", "arrivalTime", "driverId", "vehicleId", "initialOdometer", "finalOdometer", "destination", "areaId", "notes"],
-    "Mantenimiento": ["id", "date", "vehicleId", "serviceType", "description", "quoteNumber", "quoteCost", "invoiceNumber", "invoiceAmount", "odometer", "provider", "entryDate", "exitDate", "status"],
+    "BitacorasViaje": ["id", "date", "departureTime", "arrivalTime", "driverId", "vehicleId", "initialOdometer", "finalOdometer", "destination", "areaId", "notes", "initialFuelLevel", "finalFuelLevel"],
+    "Mantenimiento": ["id", "date", "vehicleId", "serviceType", "description", "quoteNumber", "quoteCost", "invoiceNumber", "invoiceAmount", "odometer", "provider", "entryDate", "exitDate", "status", "estimatedDeliveryDate", "internalDocumentNumber", "providerContact"],
+    "TiposMantenimiento": ["id", "name"],
     "Ajustes": ["key", "value"],
     "Usuarios": ["id", "name", "username", "password", "role", "status", "lastLogin"]
   }
@@ -86,6 +91,7 @@ function doGet(e) {
   
   const response = {
     vehicles: data.vehiculos,
+    inspections: data.revisiones,
     drivers: data.choferes,
     fuelEntries: data.combustible,
     incidents: data.incidencias,
@@ -93,6 +99,7 @@ function doGet(e) {
     areas: data.areas,
     travelLogs: data.bitacorasviaje,
     maintenanceRecords: data.mantenimiento,
+    maintenanceTypes: data.tiposmantenimiento,
     settings: data.ajustes,
     users: data.usuarios
   };
@@ -117,11 +124,13 @@ function doPost(e) {
     if (action === 'fuel') sheetName = "Combustible";
     else if (action === 'incident') sheetName = "Incidencias";
     else if (action === 'vehicle' || action === 'update-vehicle') sheetName = "Vehiculos";
+    else if (action === 'inspection') sheetName = "Revisiones";
     else if (action === 'driver' || action === 'update-driver') sheetName = "Choferes";
     else if (action === 'planning' || action === 'update-planning') sheetName = "Planeacion";
     else if (action === 'area') sheetName = "Areas";
     else if (action === 'travel-log' || action === 'update-travel-log') sheetName = "BitacorasViaje";
     else if (action === 'maintenance' || action === 'update-maintenance') sheetName = "Mantenimiento";
+    else if (action === 'maintenance-type') sheetName = "TiposMantenimiento";
     else if (action === 'user' || action === 'update-user') {
       sheetName = "Usuarios";
       if (d.password) d.password = Utilities.base64Encode(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, d.password));
@@ -260,7 +269,7 @@ function getSheetData(ss, name) {
               </div>
               <div className="bg-slate-900 rounded-xl p-6 shadow-inner">
                 <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Apps Script (v7.5 - Auditoría de Acceso y Mapeo Dinámico)</h4>
+                  <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Apps Script (v8.0 - Planeación Status)</h4>
                   <button onClick={() => { navigator.clipboard.writeText(appsScriptCode); alert("¡Copiado!"); }} className="bg-slate-800 hover:bg-slate-700 text-white text-[10px] font-black py-1.5 px-3 rounded-lg transition-colors border border-slate-700">COPIAR CÓDIGO</button>
                 </div>
                 <pre className="text-[10px] font-mono text-slate-400 overflow-x-auto max-h-48 custom-scrollbar leading-relaxed">{appsScriptCode}</pre>
@@ -271,19 +280,19 @@ function getSheetData(ss, name) {
 
         <div className="xl:col-span-4 space-y-6">
           <div className="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm sticky top-28">
-            <h3 className="text-lg font-black text-slate-900 mb-6">Seguridad V7.5</h3>
+            <h3 className="text-lg font-black text-slate-900 mb-6">Seguridad V8.0</h3>
             <ul className="space-y-6">
               <li className="flex gap-4">
                 <span className="size-6 bg-primary text-white text-[10px] font-black flex items-center justify-center rounded-full shrink-0">1</span>
-                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Personalización</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Ahora puedes editar los colores primario y secundario (del menú) de forma independiente.</p></div>
+                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Actualización BD</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Se agregó campo 'status' a Planeación (Programado/Completado/Cancelado).</p></div>
               </li>
               <li className="flex gap-4">
                 <span className="size-6 bg-primary text-white text-[10px] font-black flex items-center justify-center rounded-full shrink-0">2</span>
-                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Identidad</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">El logo de la app ha sido actualizado al icono oficial de parque vehicular.</p></div>
+                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Importante</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Debes actualizar el código en Apps Script para guardar el estado de los viajes.</p></div>
               </li>
               <li className="flex gap-4">
                 <span className="size-6 bg-primary text-white text-[10px] font-black flex items-center justify-center rounded-full shrink-0">3</span>
-                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Sincronización</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Todos los ajustes de color se guardan en la pestaña "Ajustes" de tu Google Sheet.</p></div>
+                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Sincronización</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Al guardar el nuevo script, la hoja "Planeacion" añadirá la columna automáticamente.</p></div>
               </li>
             </ul>
           </div>

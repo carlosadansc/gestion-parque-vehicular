@@ -8,6 +8,7 @@ export enum View {
   PLANNING = 'planning',
   TRAVEL_LOGS = 'travel_logs',
   MAINTENANCE = 'maintenance',
+  INSPECTIONS = 'inspections',
   USERS = 'users',
   SETTINGS = 'settings',
   LOGIN = 'login'
@@ -80,6 +81,32 @@ export interface Vehicle {
   observations?: string;
 }
 
+export interface VehicleInspection {
+  id: string;
+  date: string; // ISO string with time
+  vehicleId: string;
+  inspectorName: string;
+  odometer: number;
+  observations: string;
+  // Snapshot of conditions
+  engineStatus?: string;
+  clutchStatus?: string;
+  transmissionStatus?: string;
+  shifterStatus?: string;
+  steeringStatus?: string;
+  suspensionStatus?: string;
+  tempGaugeStatus?: string;
+  oilGaugeStatus?: string;
+  tiresStatus?: string;
+  shocksStatus?: string;
+  brakesStatus?: string;
+  batteryStatus?: string;
+  lightsStatus?: string;
+  hornStatus?: string;
+  wipersStatus?: string;
+  speedoStatus?: string;
+}
+
 export interface Driver {
   id: string;
   name: string;
@@ -112,34 +139,44 @@ export interface TravelLog {
   destination: string;
   areaId: string;
   notes?: string;
+  initialFuelLevel?: number; // 0-100 percentage
+  finalFuelLevel?: number; // 0-100 percentage
+}
+
+export interface MaintenanceType {
+  id: string;
+  name: string;
 }
 
 export interface MaintenanceRecord {
   id: string;
   date: string;
   vehicleId: string;
-  serviceType: 'tuning' | 'tires' | 'oil' | 'brakes' | 'suspension' | 'electrical' | 'other';
+  serviceType: string; // Changed from enum to string to support dynamic types
   description: string;
   quoteNumber: string;
   quoteCost: number;
   invoiceNumber?: string;
   invoiceAmount?: number;
   odometer: number;
-  provider: string;
+  provider: string; // Nombre Comercial (Taller)
+  providerContact?: string; // Nuevo: Nombre del Encargado
   entryDate: string;
   exitDate?: string;
+  estimatedDeliveryDate?: string;
+  internalDocumentNumber?: string;
   status: 'scheduled' | 'in-progress' | 'completed' | 'cancelled';
 }
 
 export interface Incident {
   id: string;
-  type: 'mechanical' | 'traffic' | 'accident';
+  type: 'mechanical' | 'traffic' | 'accident' | 'theft';
   title: string;
   description: string;
   date: string;
   vehicleId: string;
   driverId: string;
-  status: 'critical' | 'pending' | 'resolved' | 'in-workshop';
+  status: 'critical' | 'pending' | 'resolved' | 'in-workshop' | 'in-resolution';
 }
 
 export interface Planning {
@@ -149,6 +186,10 @@ export interface Planning {
   driverId: string;
   areaId: string;
   notes?: string;
+  departureTime?: string;
+  arrivalTime?: string;
+  destination?: string;
+  status?: 'scheduled' | 'completed' | 'cancelled'; // Added status field
 }
 
 export interface Area {

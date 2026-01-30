@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { Vehicle, Driver } from '../types';
+import { Vehicle, Driver, AppSetting } from '../types';
 
 interface VehiclesProps {
   vehicles: Vehicle[];
@@ -8,9 +8,10 @@ interface VehiclesProps {
   searchQuery: string;
   onAddVehicle: (v: Omit<Vehicle, 'id'>) => Promise<void>;
   onUpdateVehicle: (v: Vehicle) => Promise<void>;
+  settings?: AppSetting[];
 }
 
-const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onAddVehicle, onUpdateVehicle }) => {
+const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onAddVehicle, onUpdateVehicle, settings = [] }) => {
   const [statusFilter, setStatusFilter] = useState<string>('todos');
   const [showModal, setShowModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -21,6 +22,12 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
 
   const [newAccessory, setNewAccessory] = useState('');
   const [accessoriesList, setAccessoriesList] = useState<string[]>([]);
+
+  const settingsMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    settings.forEach(s => { map[s.key] = s.value; });
+    return map;
+  }, [settings]);
 
   // Fix: explicitly type the status field to prevent narrowing to just 'active'
   const initialFormState = {
@@ -104,6 +111,7 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
         cylinders: Number(formData.cylinders) || 0,
         plate: formData.plate.toUpperCase(),
         model: formData.model.toUpperCase(),
+        color: formData.color.toUpperCase(),
         accessories_notes: accessoriesList.join(', '),
         image: formData.image || `https://picsum.photos/seed/${formData.plate}/200`
       } as any;
@@ -126,6 +134,9 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
     setShowPrintPreview(true);
   };
 
+  const appLogo = settingsMap['APP_LOGO'] || 'https://i.ibb.co/3ykMvS8/escudo-paz.png';
+  const directorName = settingsMap['INSTITUTION_HEAD_NAME']; 
+
   return (
     <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500 pb-20">
       <style>{`
@@ -133,10 +144,13 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
           body * { visibility: hidden; }
           #tech-sheet-printable, #tech-sheet-printable * { visibility: visible; }
           #tech-sheet-printable { 
-            position: absolute; left: 0; top: 0; width: 100%; padding: 0;
+            position: absolute; left: 0; top: 0; width: 100%; padding: 0; margin: 0;
             background: white !important; font-family: 'Inter', sans-serif;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
           }
           .no-print { display: none !important; }
+          @page { margin: 0.5cm; size: letter; }
         }
       `}</style>
 
@@ -220,7 +234,7 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
             <div className="flex border-b border-slate-100 bg-white px-10 overflow-x-auto">
               <TabBtn active={activeTab === 'general'} onClick={() => setActiveTab('general')} label="Generales" icon="info" />
               <TabBtn active={activeTab === 'technical'} onClick={() => setActiveTab('technical')} label="Técnicos" icon="settings_suggest" />
-              <TabBtn active={activeTab === 'condition'} onClick={() => setActiveTab('condition')} label="Estado Mecánico" icon="health_and_safety" />
+              <TabBtn active={activeTab === 'condition'} onClick={() => setActiveTab('condition')} label="Estado Mecánico (16 Puntos)" icon="health_and_safety" />
               <TabBtn active={activeTab === 'accessories'} onClick={() => setActiveTab('accessories')} label="Accesorios / Notas" icon="construction" />
             </div>
             
@@ -231,6 +245,7 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
                     <InputField label="Placa / Matrícula" value={formData.plate} onChange={v => setFormData({...formData, plate: v})} placeholder="CF-66-803" />
                     <InputField label="Descripción / Nombre" value={formData.model} onChange={v => setFormData({...formData, model: v})} placeholder="Frontier Doble Cabina" />
                     <InputField label="Número de Inventario" value={formData.inventory} onChange={v => setFormData({...formData, inventory: v})} placeholder="1140000001139" />
+                    <InputField label="Color de la Unidad" value={formData.color} onChange={v => setFormData({...formData, color: v})} placeholder="BLANCO" />
                   </div>
                   <div className="space-y-4">
                     <SelectField label="Estado de Operación" value={formData.status} onChange={v => setFormData({...formData, status: v as any})} options={[{v:'active', l:'Activo'}, {v:'workshop', l:'Taller'}, {v:'inactive', l:'Inactivo'}]} />
@@ -264,22 +279,22 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
 
               {activeTab === 'condition' && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6 animate-in slide-in-from-left-4">
-                  <ConditionInput label="Motor" value={formData.engineStatus} onChange={v => setFormData({...formData, engineStatus: v})} />
-                  <ConditionInput label="Clutch" value={formData.clutchStatus} onChange={v => setFormData({...formData, clutchStatus: v})} />
-                  <ConditionInput label="Transmisión" value={formData.transmissionStatus} onChange={v => setFormData({...formData, transmissionStatus: v})} />
-                  <ConditionInput label="Palanca Vel." value={formData.shifterStatus} onChange={v => setFormData({...formData, shifterStatus: v})} />
-                  <ConditionInput label="Frenos" value={formData.brakesStatus} onChange={v => setFormData({...formData, brakesStatus: v})} />
-                  <ConditionInput label="Dirección" value={formData.steeringStatus} onChange={v => setFormData({...formData, steeringStatus: v})} />
-                  <ConditionInput label="Suspensión" value={formData.suspensionStatus} onChange={v => setFormData({...formData, suspensionStatus: v})} />
-                  <ConditionInput label="Amortiguadores" value={formData.shocksStatus} onChange={v => setFormData({...formData, shocksStatus: v})} />
-                  <ConditionInput label="Batería" value={formData.batteryStatus} onChange={v => setFormData({...formData, batteryStatus: v})} />
-                  <ConditionInput label="Llantas" value={formData.tiresStatus} onChange={v => setFormData({...formData, tiresStatus: v})} />
-                  <ConditionInput label="Luces" value={formData.lightsStatus} onChange={v => setFormData({...formData, lightsStatus: v})} />
-                  <ConditionInput label="Claxon" value={formData.hornStatus} onChange={v => setFormData({...formData, hornStatus: v})} />
-                  <ConditionInput label="Medidor Temp." value={formData.tempGaugeStatus} onChange={v => setFormData({...formData, tempGaugeStatus: v})} />
-                  <ConditionInput label="Medidor Aceite" value={formData.oilGaugeStatus} onChange={v => setFormData({...formData, oilGaugeStatus: v})} />
-                  <ConditionInput label="Limpiadores" value={formData.wipersStatus} onChange={v => setFormData({...formData, wipersStatus: v})} />
-                  <ConditionInput label="Velocímetro" value={formData.speedoStatus} onChange={v => setFormData({...formData, speedoStatus: v})} />
+                  <ConditionInput label="1. Motor" value={formData.engineStatus} onChange={v => setFormData({...formData, engineStatus: v})} />
+                  <ConditionInput label="2. Transmisión" value={formData.transmissionStatus} onChange={v => setFormData({...formData, transmissionStatus: v})} />
+                  <ConditionInput label="3. Clutch" value={formData.clutchStatus} onChange={v => setFormData({...formData, clutchStatus: v})} />
+                  <ConditionInput label="4. Frenos" value={formData.brakesStatus} onChange={v => setFormData({...formData, brakesStatus: v})} />
+                  <ConditionInput label="5. Dirección" value={formData.steeringStatus} onChange={v => setFormData({...formData, steeringStatus: v})} />
+                  <ConditionInput label="6. Suspensión" value={formData.suspensionStatus} onChange={v => setFormData({...formData, suspensionStatus: v})} />
+                  <ConditionInput label="7. Amortiguadores" value={formData.shocksStatus} onChange={v => setFormData({...formData, shocksStatus: v})} />
+                  <ConditionInput label="8. Llantas" value={formData.tiresStatus} onChange={v => setFormData({...formData, tiresStatus: v})} />
+                  <ConditionInput label="9. Batería" value={formData.batteryStatus} onChange={v => setFormData({...formData, batteryStatus: v})} />
+                  <ConditionInput label="10. Luces" value={formData.lightsStatus} onChange={v => setFormData({...formData, lightsStatus: v})} />
+                  <ConditionInput label="11. Limpiadores" value={formData.wipersStatus} onChange={v => setFormData({...formData, wipersStatus: v})} />
+                  <ConditionInput label="12. Claxon" value={formData.hornStatus} onChange={v => setFormData({...formData, hornStatus: v})} />
+                  <ConditionInput label="13. Palanca Vel." value={formData.shifterStatus} onChange={v => setFormData({...formData, shifterStatus: v})} />
+                  <ConditionInput label="14. Velocímetro" value={formData.speedoStatus} onChange={v => setFormData({...formData, speedoStatus: v})} />
+                  <ConditionInput label="15. Medidor Temp." value={formData.tempGaugeStatus} onChange={v => setFormData({...formData, tempGaugeStatus: v})} />
+                  <ConditionInput label="16. Medidor Aceite" value={formData.oilGaugeStatus} onChange={v => setFormData({...formData, oilGaugeStatus: v})} />
                 </div>
               )}
 
@@ -349,89 +364,131 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
 
       {showPrintPreview && selectedForPrint && (
         <div className="fixed inset-0 z-[200] bg-white flex flex-col no-print overflow-y-auto">
-           <div className="p-4 bg-slate-900 flex justify-between items-center text-white sticky top-0 z-50">
-             <button onClick={() => setShowPrintPreview(false)} className="bg-white/10 px-4 py-2 rounded-lg font-bold text-xs">Cerrar</button>
-             <button onClick={() => window.print()} className="bg-primary px-8 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center gap-2">
-               <span className="material-symbols-outlined text-sm">print</span> Imprimir Ficha Técnica
+           <div className="p-4 bg-slate-900 flex justify-between items-center text-white sticky top-0 z-50 shadow-md">
+             <button onClick={() => setShowPrintPreview(false)} className="bg-white/10 px-4 py-2 rounded-lg font-bold text-xs hover:bg-white/20 transition-all">Cerrar</button>
+             <button onClick={() => window.print()} className="bg-primary px-8 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-blue-500/20">
+               <span className="material-symbols-outlined text-lg">picture_as_pdf</span> Imprimir Ficha PDF
              </button>
            </div>
            <div className="flex-1 bg-slate-100 p-10 flex justify-center">
-              <div id="tech-sheet-printable" className="bg-white w-[21.59cm] p-[1.5cm] shadow-2xl relative text-slate-900">
-                <div className="flex justify-between items-start mb-10 border-b-2 border-slate-900 pb-8">
-                  <div className="flex flex-col">
-                    <span className="text-4xl font-black text-primary">DIF <span className="text-slate-900">LA PAZ</span></span>
-                    <span className="text-[8pt] font-black uppercase text-slate-400 mt-1 tracking-widest">Control Patrimonial SMDIF La Paz v7.5</span>
+              <div id="tech-sheet-printable" className="bg-white w-[21.59cm] min-h-[27.94cm] p-[1.5cm] shadow-2xl relative text-slate-900 border border-slate-200">
+                
+                {/* Header Institucional */}
+                <div className="flex justify-between items-center mb-8 border-b-4 border-slate-900 pb-6">
+                  <div className="flex items-center gap-6">
+                    <img src={appLogo} alt="Logo" className="h-24 w-auto object-contain" />
+                    <div className="flex flex-col">
+                      <span className="text-lg font-black text-slate-900 uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
+                      <span className="text-lg font-black text-slate-900 uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>
+                      <span className="text-[8pt] font-bold uppercase text-slate-400 mt-2 tracking-[0.2em]">Parque Vehicular • Control Patrimonial</span>
+                    </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-lg font-black uppercase tracking-tight">Ficha Técnica de Control Vehicular</p>
-                    <p className="text-sm font-bold">N° INVENTARIO: <span className="underline">{selectedForPrint.inventory || 'SIN ASIGNAR'}</span></p>
+                    <div className="inline-block bg-slate-900 text-white px-4 py-1.5 font-black text-[10pt] uppercase tracking-widest rounded-sm mb-2">
+                        Ficha Técnica
+                    </div>
+                    <p className="text-xs font-bold text-slate-600">N° INVENTARIO: <span className="font-black text-slate-900 text-lg ml-1">{selectedForPrint.inventory || 'SIN ASIGNAR'}</span></p>
+                    <p className="text-[9pt] text-slate-400 font-bold mt-1">Fecha de Emisión: {new Date().toLocaleDateString('es-ES', {year: 'numeric', month: 'long', day: 'numeric'})}</p>
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-8 mb-8">
-                   <div className="space-y-4">
-                      <h4 className="bg-slate-900 text-white px-3 py-1.5 text-[8pt] font-black uppercase tracking-widest">Datos Generales</h4>
-                      <DataRow label="Marca" value={selectedForPrint.brand} />
-                      <DataRow label="Modelo (Año)" value={selectedForPrint.year} />
-                      <DataRow label="Línea / Tipo" value={`${selectedForPrint.line || ''} ${selectedForPrint.type || ''}`} />
-                      <DataRow label="Serie / VIN" value={selectedForPrint.vin} fontMono />
-                      <DataRow label="Placas" value={selectedForPrint.plate} />
-                   </div>
-                   <div className="space-y-4">
-                      <h4 className="bg-slate-900 text-white px-3 py-1.5 text-[8pt] font-black uppercase tracking-widest">Especificaciones</h4>
-                      <DataRow label="Chofer Asignado" value={drivers.find(d => d.id === selectedForPrint.assignedDriverId)?.name || '---'} />
-                      <DataRow label="Color" value={selectedForPrint.color} />
-                      <DataRow label="Cilindros" value={selectedForPrint.cylinders} />
-                      <DataRow label="Combustible" value={selectedForPrint.fuelType} />
-                      <DataRow label="Kilometraje" value={`${(selectedForPrint.odometer || 0).toLocaleString()} KM`} />
-                      <DataRow label="Ubicación" value={selectedForPrint.location} />
-                   </div>
+                {/* Datos Principales */}
+                <div className="mb-8 mt-6">
+                    <table className="w-full border-collapse">
+                        <tbody>
+                            <tr className="border-b border-slate-200">
+                                <td className="py-3 text-[9pt] font-black text-slate-400 uppercase w-48">Placas</td>
+                                <td className="py-3 text-[16pt] font-black text-slate-900 tracking-widest">{selectedForPrint.plate}</td>
+                            </tr>
+                            <tr className="border-b border-slate-200">
+                                <td className="py-2 text-[9pt] font-black text-slate-400 uppercase">Marca/Línea</td>
+                                <td className="py-2 text-[11pt] font-bold text-slate-900">{selectedForPrint.brand} {selectedForPrint.line}</td>
+                            </tr>
+                            <tr className="border-b border-slate-200">
+                                <td className="py-2 text-[9pt] font-black text-slate-400 uppercase">Modelo (Año)</td>
+                                <td className="py-2 text-[11pt] font-bold text-slate-900">{selectedForPrint.year}</td>
+                            </tr>
+                            <tr className="border-b border-slate-200">
+                                <td className="py-2 text-[9pt] font-black text-slate-400 uppercase">Descripción</td>
+                                <td className="py-2 text-[11pt] font-bold text-slate-900">{selectedForPrint.model}</td>
+                            </tr>
+                            <tr className="border-b border-slate-200">
+                                <td className="py-2 text-[9pt] font-black text-slate-400 uppercase">Serie VIN</td>
+                                <td className="py-2 text-[11pt] font-bold text-slate-900 font-mono tracking-wider">{selectedForPrint.vin || '---'}</td>
+                            </tr>
+                            <tr className="border-b border-slate-200">
+                                <td className="py-2 text-[9pt] font-black text-slate-400 uppercase">Motor/Cilindros</td>
+                                <td className="py-2 text-[11pt] font-bold text-slate-900">{selectedForPrint.cylinders} Cilindros / {selectedForPrint.fuelType}</td>
+                            </tr>
+                            <tr className="border-b border-slate-200">
+                                <td className="py-2 text-[9pt] font-black text-slate-400 uppercase">Color</td>
+                                <td className="py-2 text-[11pt] font-bold text-slate-900">{selectedForPrint.color}</td>
+                            </tr>
+                            <tr>
+                                <td className="py-2 text-[9pt] font-black text-slate-400 uppercase">Resguardo</td>
+                                <td className="py-2 text-[11pt] font-bold text-slate-900">{drivers.find(d => d.id === selectedForPrint.assignedDriverId)?.name || 'SIN ASIGNAR'}</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
 
-                <div className="space-y-6 mb-8">
-                   <h4 className="bg-slate-900 text-white px-3 py-1.5 text-[8pt] font-black uppercase tracking-widest">Diagnóstico Mecánico</h4>
-                   <div className="grid grid-cols-3 gap-y-4 border p-6 rounded-xl border-slate-200">
-                      <ConditionPrint label="Motor" status={selectedForPrint.engineStatus} />
-                      <ConditionPrint label="Clutch" status={selectedForPrint.clutchStatus} />
-                      <ConditionPrint label="Transmisión" status={selectedForPrint.transmissionStatus} />
-                      <ConditionPrint label="Frenos" status={selectedForPrint.brakesStatus} />
-                      <ConditionPrint label="Suspensión" status={selectedForPrint.suspensionStatus} />
-                      <ConditionPrint label="Dirección" status={selectedForPrint.steeringStatus} />
-                      <ConditionPrint label="Palanca Vel." status={selectedForPrint.shifterStatus} />
-                      <ConditionPrint label="Amortiguadores" status={selectedForPrint.shocksStatus} />
-                      <ConditionPrint label="Batería" status={selectedForPrint.batteryStatus} />
-                      <ConditionPrint label="Llantas" status={selectedForPrint.tiresStatus} />
-                      <ConditionPrint label="Luces" status={selectedForPrint.lightsStatus} />
-                      <ConditionPrint label="Claxon" status={selectedForPrint.hornStatus} />
-                      <ConditionPrint label="Medidor Temp." status={selectedForPrint.tempGaugeStatus} />
-                      <ConditionPrint label="Medidor Aceite" status={selectedForPrint.oilGaugeStatus} />
-                      <ConditionPrint label="Limpiadores" status={selectedForPrint.wipersStatus} />
-                      <ConditionPrint label="Velocímetro" status={selectedForPrint.speedoStatus} />
+                {/* Diagnostico Mecanico */}
+                <div className="mb-8">
+                   <h4 className="bg-slate-900 text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">Estado General (16 Puntos)</h4>
+                   <div className="grid grid-cols-4 gap-y-3 gap-x-6 border-2 border-slate-100 p-6 rounded-xl">
+                      <ConditionPrint label="1. Motor" status={selectedForPrint.engineStatus} />
+                      <ConditionPrint label="2. Transmisión" status={selectedForPrint.transmissionStatus} />
+                      <ConditionPrint label="3. Clutch" status={selectedForPrint.clutchStatus} />
+                      <ConditionPrint label="4. Frenos" status={selectedForPrint.brakesStatus} />
+                      
+                      <ConditionPrint label="5. Dirección" status={selectedForPrint.steeringStatus} />
+                      <ConditionPrint label="6. Suspensión" status={selectedForPrint.suspensionStatus} />
+                      <ConditionPrint label="7. Amortiguadores" status={selectedForPrint.shocksStatus} />
+                      <ConditionPrint label="8. Llantas" status={selectedForPrint.tiresStatus} />
+                      
+                      <ConditionPrint label="9. Batería" status={selectedForPrint.batteryStatus} />
+                      <ConditionPrint label="10. Luces" status={selectedForPrint.lightsStatus} />
+                      <ConditionPrint label="11. Limpiadores" status={selectedForPrint.wipersStatus} />
+                      <ConditionPrint label="12. Claxon" status={selectedForPrint.hornStatus} />
+                      
+                      <ConditionPrint label="13. Palanca Vel." status={selectedForPrint.shifterStatus} />
+                      <ConditionPrint label="14. Velocímetro" status={selectedForPrint.speedoStatus} />
+                      <ConditionPrint label="15. Medidor Temp." status={selectedForPrint.tempGaugeStatus} />
+                      <ConditionPrint label="16. Medidor Aceite" status={selectedForPrint.oilGaugeStatus} />
                    </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-8 mb-10">
-                   <div className="space-y-3">
-                      <h4 className="text-[8pt] font-black uppercase border-b border-slate-100 pb-1 text-primary">Accesorios y Equipo</h4>
-                      <p className="text-[8pt] font-bold text-slate-800 leading-relaxed uppercase">
-                        {selectedForPrint.accessories_notes || 'SIN ACCESORIOS REGISTRADOS.'}
-                      </p>
+                   <div className="space-y-2">
+                      <h4 className="text-[9pt] font-black uppercase border-b-2 border-slate-200 pb-1 text-primary">Accesorios Registrados</h4>
+                      <div className="bg-slate-50 p-4 rounded-lg min-h-[80px] border border-slate-100">
+                        <p className="text-[8pt] font-bold text-slate-700 leading-relaxed uppercase">
+                            {selectedForPrint.accessories_notes || 'SIN ACCESORIOS REGISTRADOS.'}
+                        </p>
+                      </div>
                    </div>
-                   <div className="space-y-3">
-                      <h4 className="text-[8pt] font-black uppercase border-b border-slate-100 pb-1">Observaciones</h4>
-                      <p className="text-[7.5pt] text-slate-600 leading-relaxed italic">{selectedForPrint.observations || 'Sin daños visibles.'}</p>
+                   <div className="space-y-2">
+                      <h4 className="text-[9pt] font-black uppercase border-b-2 border-slate-200 pb-1 text-primary">Observaciones Generales</h4>
+                      <div className="bg-slate-50 p-4 rounded-lg min-h-[80px] border border-slate-100">
+                        <p className="text-[8pt] text-slate-600 leading-relaxed italic">{selectedForPrint.observations || 'Sin observaciones de carrocería o daños visibles.'}</p>
+                      </div>
                    </div>
                 </div>
 
-                <div className="mt-40 grid grid-cols-2 gap-24 text-center">
-                  <div className="border-t-2 border-slate-900 pt-5">
-                    <p className="text-xs font-black uppercase">Jefe de Recursos Materiales</p>
-                    <p className="text-[8pt] font-bold opacity-50 mt-1">Firma y Sello Oficial</p>
-                  </div>
-                  <div className="border-t-2 border-slate-900 pt-5">
-                    <p className="text-xs font-black uppercase">Encargado del Parque Vehicular</p>
-                    <p className="text-[8pt] font-bold opacity-50 mt-1">Responsable Operativo</p>
-                  </div>
+                <div className="absolute bottom-[1.5cm] left-[1.5cm] right-[1.5cm]">
+                    <div className="grid grid-cols-2 gap-24 text-center">
+                    <div className="border-t-2 border-slate-900 pt-4">
+                        <p className="text-[9pt] font-black uppercase text-slate-900">Jefe de Recursos Materiales</p>
+                        <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Validación</p>
+                    </div>
+                    <div className="border-t-2 border-slate-900 pt-4">
+                        <p className="text-[9pt] font-black uppercase text-slate-900">{directorName || 'Director General'}</p>
+                        <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Visto Bueno</p>
+                    </div>
+                    </div>
+                    <div className="text-center mt-8 border-t border-slate-200 pt-2">
+                        <p className="text-[7pt] font-black text-slate-300 uppercase tracking-[0.3em]">Sistema de Control Flota Pro • DIF Municipal La Paz</p>
+                    </div>
                 </div>
               </div>
            </div>
@@ -485,20 +542,15 @@ const ConditionInput = ({ label, value, onChange }) => (
 const ConditionPrint = ({ label, status }) => {
   const colorClass = getStatusColorClass(status);
   return (
-    <div className="flex items-center gap-2">
-       <div className={`size-2 rounded-full ${colorClass}`}></div>
-       <span className="text-[7.5pt] font-black uppercase text-slate-400 w-24 truncate">{label}:</span>
-       <span className="text-[7.5pt] font-black text-slate-900 uppercase">{status || 'BIEN'}</span>
+    <div className="flex items-center gap-3">
+       <div className={`size-3 rounded-full border border-slate-200 ${colorClass} print:border-0`} style={{printColorAdjust: 'exact', WebkitPrintColorAdjust: 'exact'}}></div>
+       <div className="flex flex-col">
+         <span className="text-[7pt] font-black uppercase text-slate-400 leading-none">{label}</span>
+         <span className="text-[8pt] font-bold text-slate-900 uppercase leading-tight">{status || 'BIEN'}</span>
+       </div>
     </div>
   );
 };
-
-const DataRow = ({ label, value, fontMono = false }) => (
-  <div className="flex justify-between border-b border-slate-100 pb-1">
-    <span className="text-[8pt] font-black uppercase text-slate-400">{label}:</span>
-    <span className={`text-[8.5pt] font-bold text-slate-900 ${fontMono ? 'font-mono' : ''}`}>{value || '---'}</span>
-  </div>
-);
 
 const TabBtn = ({ active, onClick, label, icon }) => (
   <button onClick={onClick} className={`flex items-center gap-2 py-6 px-6 border-b-2 transition-all whitespace-nowrap ${active ? 'border-primary text-primary' : 'border-transparent text-slate-400 hover:text-slate-600'}`}>

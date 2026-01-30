@@ -92,6 +92,15 @@ const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUs
     }
   };
 
+  const getRoleLabel = (role: string) => {
+    switch(role) {
+      case 'admin': return 'ADMINISTRADOR';
+      case 'operator': return 'OPERADOR';
+      case 'viewer': return 'OBSERVADOR';
+      default: return role.toUpperCase();
+    }
+  };
+
   return (
     <div className="space-y-8 animate-in slide-in-from-bottom-6 duration-700">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -139,7 +148,9 @@ const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUs
                         <p className="font-black text-slate-900 text-[15px] tracking-tight">{user.name}</p>
                         <div className="flex items-center gap-1.5 mt-0.5">
                            <span className={`size-2 rounded-full ${user.status === 'active' ? 'bg-green-500' : 'bg-slate-300'}`}></span>
-                           <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{user.status}</span>
+                           <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                             {user.status === 'active' ? 'ACTIVO' : 'INACTIVO'}
+                           </span>
                         </div>
                       </div>
                     </div>
@@ -153,12 +164,12 @@ const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUs
                       user.role === 'operator' ? 'bg-blue-50 text-blue-700 border-blue-100' :
                       'bg-slate-100 text-slate-500 border-slate-200'
                     }`}>
-                      {user.role}
+                      {getRoleLabel(user.role)}
                     </span>
                   </td>
                   <td className="px-10 py-6">
                     <p className="text-xs font-bold text-slate-400">
-                      {user.lastLogin ? new Date(user.lastLogin).toLocaleString() : 'Nunca ha ingresado'}
+                      {user.lastLogin ? new Date(user.lastLogin).toLocaleString('es-ES') : 'Nunca ha ingresado'}
                     </p>
                   </td>
                   <td className="px-10 py-6 text-right">
