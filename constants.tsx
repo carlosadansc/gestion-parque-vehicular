@@ -19,14 +19,14 @@ export const DRIVERS: Driver[] = [
 
 export const INCIDENTS: Incident[] = [
   // Fixed: Use vehicleId and driverId instead of plate and driver
-  { id: '1', type: 'mechanical', title: 'Sobrecalentamiento Motor', description: 'Humo blanco en autopista norte. Requiere grúa inmediata.', date: 'Hace 2h', vehicleId: '1', driverId: '1', status: 'pending' },
-  { id: '2', type: 'traffic', title: 'Exceso de Velocidad', description: 'Radar detectado: 65km/h en zona escolar (30km/h).', date: 'Ayer, 14:15', vehicleId: '2', driverId: '2', status: 'pending' },
-  { id: '3', type: 'accident', title: 'Colisión Lateral', description: 'Impacto en cruce de vías. Vehículo inmovilizado. Conductor ileso.', date: 'Hoy, 10:45', vehicleId: '3', driverId: '3', status: 'critical' },
+  { id: '1', type: 'mechanical', title: 'Sobrecalentamiento Motor', description: 'Humo blanco en autopista norte. Requiere grúa inmediata.', date: '2026-02-01', vehicleId: '1', driverId: '1', status: 'pending' },
+  { id: '2', type: 'traffic', title: 'Exceso de Velocidad', description: 'Radar detectado: 65km/h en zona escolar (30km/h).', date: '2026-02-02', vehicleId: '2', driverId: '2', status: 'pending' },
+  { id: '3', type: 'accident', title: 'Colisión Lateral', description: 'Impacto en cruce de vías. Vehículo inmovilizado. Conductor ileso.', date: '2026-02-03', vehicleId: '3', driverId: '3', status: 'critical' },
 ];
 
 export const FUEL_HISTORY: FuelEntry[] = [
   // Fixed: Use vehicleId and driverId instead of vehicle and driver
-  { id: '1', date: '14 Oct, 2023', vehicleId: '3', driverId: '1', liters: 45, cost: 920, odometer: 124500 },
-  { id: '2', date: '12 Oct, 2023', vehicleId: '1', driverId: '2', liters: 60, cost: 1230, odometer: 88210 },
-  { id: '3', date: '10 Oct, 2023', vehicleId: '2', driverId: '3', liters: 35, cost: 715, odometer: 45120 },
+  { id: '1', date: '2026-02-01', vehicleId: '3', driverId: '1', liters: 45, cost: 920, odometer: 124500 },
+  { id: '2', date: '2026-02-02', vehicleId: '1', driverId: '2', liters: 60, cost: 1230, odometer: 88210 },
+  { id: '3', date: '2026-02-03', vehicleId: '2', driverId: '3', liters: 35, cost: 715, odometer: 45120 },
 ];

@@ -235,6 +235,36 @@ function getSheetData(ss, name) {
                 <input className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm font-bold outline-none focus:border-primary transition-all" value={localSettings['APP_NAME'] || ''} onChange={e => handleUpdate('APP_NAME', e.target.value)} />
               </div>
               
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Jefe de Recursos Materiales</label>
+                <input className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm font-bold outline-none focus:border-primary transition-all" value={localSettings['HEAD_OF_MATERIAL_RESOURCES'] || ''} onChange={e => handleUpdate('HEAD_OF_MATERIAL_RESOURCES', e.target.value)} placeholder="Nombre del jefe de recursos materiales" />
+              </div>
+              
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Director General</label>
+                <input className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm font-bold outline-none focus:border-primary transition-all" value={localSettings['INSTITUTION_HEAD_NAME'] || ''} onChange={e => handleUpdate('INSTITUTION_HEAD_NAME', e.target.value)} placeholder="Nombre del director general" />
+              </div>
+              
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Encargado de Parque Vehicular</label>
+                <input className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm font-bold outline-none focus:border-primary transition-all" value={localSettings['VEHICLE_MANAGER_NAME'] || ''} onChange={e => handleUpdate('VEHICLE_MANAGER_NAME', e.target.value)} placeholder="Nombre del encargado de parque vehicular" />
+              </div>
+              
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Cargo del Director General</label>
+                <input className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm font-bold outline-none focus:border-primary transition-all" value={localSettings['INSTITUTION_HEAD_POS'] || ''} onChange={e => handleUpdate('INSTITUTION_HEAD_POS', e.target.value)} placeholder="Cargo del director general" />
+              </div>
+              
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Cargo del Encargado de Parque Vehicular</label>
+                <input className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm font-bold outline-none focus:border-primary transition-all" value={localSettings['VEHICLE_MANAGER_POS'] || ''} onChange={e => handleUpdate('VEHICLE_MANAGER_POS', e.target.value)} placeholder="Cargo del encargado de parque vehicular" />
+              </div>
+              
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Cargo del Jefe de Recursos Materiales</label>
+                <input className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm font-bold outline-none focus:border-primary transition-all" value={localSettings['HEAD_OF_MATERIAL_RESOURCES_POS'] || ''} onChange={e => handleUpdate('HEAD_OF_MATERIAL_RESOURCES_POS', e.target.value)} placeholder="Cargo del jefe de recursos materiales" />
+              </div>
+              
               <div className="space-y-6">
                 <div className="space-y-3">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Color Principal (Botones/Acentos)</label>

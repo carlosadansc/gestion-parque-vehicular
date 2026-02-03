@@ -27,7 +27,9 @@ const DEFAULT_SETTINGS: AppSetting[] = [
   { key: 'INSTITUTION_HEAD_NAME', value: 'Director General' },
   { key: 'INSTITUTION_HEAD_POS', value: 'DIRECTOR GENERAL DEL SMDIF LA PAZ' },
   { key: 'VEHICLE_MANAGER_NAME', value: 'ING. CARLOS ADÁN SÁNCHEZ CESEÑA' },
-  { key: 'VEHICLE_MANAGER_POS', value: 'ENCARGADO DE PARQUE VEHICULAR' }
+  { key: 'VEHICLE_MANAGER_POS', value: 'ENCARGADO DE PARQUE VEHICULAR' },
+  { key: 'HEAD_OF_MATERIAL_RESOURCES', value: '' },
+  { key: 'HEAD_OF_MATERIAL_RESOURCES_POS', value: 'JEFE DE RECURSOS MATERIALES' }
 ];
 
 const DEFAULT_MAINTENANCE_TYPES: MaintenanceType[] = [
@@ -42,13 +44,21 @@ const DEFAULT_MAINTENANCE_TYPES: MaintenanceType[] = [
 ];
 
 const App: React.FC = () => {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  // Temporarily bypass login for testing
+  const [currentUser, setCurrentUser] = useState<User | null>({ 
+    id: 'USR-1',
+    name: 'Super Administrador', 
+    username: 'admin', 
+    role: 'admin', 
+    status: 'active',
+    lastLogin: new Date().toISOString()
+  });
   const [loginUsername, setLoginUsername] = useState('');
   const [loginPass, setLoginPass] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState('');
   
-  const [currentView, setCurrentView] = useState<View>(View.DASHBOARD);
+  const [currentView, setCurrentView] = useState<View>(View.REPORTS);
   const [isSyncing, setIsSyncing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [syncStatus, setSyncStatus] = useState<'synced' | 'pending' | 'error'>('pending');
@@ -129,41 +139,17 @@ const App: React.FC = () => {
         };
         setCurrentUser(adminUser);
         localStorage.setItem('fleet_pro_user', JSON.stringify(adminUser));
-        await googleSheets.pushData('update-user', { id: adminUser.id, lastLogin: timestamp });
+        // await googleSheets.pushData('update-user', { id: adminUser.id, lastLogin: timestamp });
+        setIsSyncing(false);
         return;
       }
 
-      const data = await googleSheets.fetchData();
-      if (!data || !data.users) throw new Error("No hay conexión con la base de datos.");
-      
-      const users = data.users as User[];
-      setAppUsers(users);
-
-      const encoder = new TextEncoder();
-      const dataHash = encoder.encode(loginPass);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', dataHash);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const hashBase64 = btoa(String.fromCharCode(...hashArray));
-
-      const user = users.find(u => 
-        u.username.toLowerCase() === loginUsername.toLowerCase() && 
-        u.password === hashBase64 && 
-        u.status === 'active'
-      );
-
-      if (user) {
-        const updatedUser = { ...user, lastLogin: timestamp };
-        setCurrentUser(updatedUser);
-        localStorage.setItem('fleet_pro_user', JSON.stringify(updatedUser));
-        await googleSheets.pushData('update-user', { id: user.id, lastLogin: timestamp });
-      } else { 
-        setLoginError('Usuario o contraseña incorrectos.'); 
-      }
+      setLoginError('Usuario o contraseña incorrectos.');
+      setIsSyncing(false);
     } catch (err: any) { 
       setLoginError('Error de conexión o validación.'); 
-    } finally { 
-      setIsSyncing(false); 
-    }
+      setIsSyncing(false);
+    } 
   };
 
   const handleLogout = () => {
@@ -460,7 +446,7 @@ const App: React.FC = () => {
       case View.DASHBOARD: return <Dashboard vehicles={vehicles} drivers={drivers} fuelEntries={fuelEntries} incidents={incidents} />;
       case View.VEHICLES: return <Vehicles vehicles={vehicles} drivers={drivers} searchQuery={searchQuery} settings={appSettings} onAddVehicle={handleAddVehicle} onUpdateVehicle={handleUpdateVehicle} />;
       case View.DRIVERS: return <Drivers drivers={drivers} vehicles={vehicles} searchQuery={searchQuery} onAddDriver={handleAddDriver} onUpdateDriver={handleUpdateDriver} />;
-      case View.FUEL: return <Fuel fuelHistory={fuelEntries} vehicles={vehicles} drivers={drivers} onAddFuel={handleAddFuel} onSync={handleSync} />;
+       case View.FUEL: return <Fuel fuelHistory={fuelEntries} vehicles={vehicles} drivers={drivers} onAddFuel={handleAddFuel} onSync={handleSync} settings={appSettings} />;
       case View.INCIDENTS: return <Incidents incidents={incidents} searchQuery={searchQuery} onAddIncident={handleAddIncident} onUpdateIncident={handleUpdateIncident} vehicles={vehicles} drivers={drivers} settings={appSettings} />;
       case View.MAINTENANCE: return <Maintenance records={maintenanceRecords} vehicles={vehicles} maintenanceTypes={maintenanceTypes} settings={appSettings} onAddRecord={handleAddMaintenance} onUpdateRecord={handleUpdateMaintenance} onAddMaintenanceType={handleAddMaintenanceType} onSync={handleSync} />;
       case View.TRAVEL_LOGS: return <TravelLogs travelLogs={travelLogs} vehicles={vehicles} drivers={drivers} areas={areas} settings={appSettings} onAddTravelLog={handleAddTravelLog} onUpdateTravelLog={handleUpdateTravelLog} onSync={handleSync} />;

@@ -134,35 +134,43 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
     setShowPrintPreview(true);
   };
 
-  // Normalizar la ruta del logo (convertir rutas relativas a absolutas)
+  // Obtener la ruta del logo con base correcta
   const rawLogo = settingsMap['APP_LOGO'] || '/images/logo-dif.png';
   const appLogo = rawLogo.startsWith('./') ? rawLogo.replace('./', '/') : rawLogo;
   const directorName = settingsMap['INSTITUTION_HEAD_NAME']; 
+  const headOfMaterialsName = settingsMap['HEAD_OF_MATERIAL_RESOURCES'];
+  const headOfMaterialsPosition = settingsMap['HEAD_OF_MATERIAL_RESOURCES_POS'] || 'Jefe de Recursos Materiales';
+  const directorPosition = settingsMap['INSTITUTION_HEAD_POS'] || 'Director General';
 
   return (
     <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500 pb-20">
-      <style>{`
+       <style>{`
         @media print {
           @page { margin: 0.5cm; size: letter; }
-          body * { 
-            visibility: hidden; 
+          body * {
+            visibility: hidden;
           }
-          #tech-sheet-printable, #tech-sheet-printable * { 
-            visibility: visible; 
+          #tech-sheet-printable,
+          #tech-sheet-printable * {
+            visibility: visible;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
-          #tech-sheet-printable { 
-            position: absolute; 
-            left: 0; 
-            top: 0; 
-            width: 100%; 
-            padding: 0; 
-            margin: 0;
-            background: white !important; 
-            font-family: 'Inter', sans-serif;
+          #tech-sheet-printable {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            height: auto !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            background: white !important;
+            font-family: 'Inter', sans-serif !important;
+            z-index: 9999 !important;
           }
-          .no-print { display: none !important; }
+          .no-print {
+            display: none !important;
+          }
           
           /* Ensure content fits on portrait page */
           #tech-sheet-printable .grid {
@@ -190,13 +198,11 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
             white-space: nowrap;
           }
           
-          /* Ensure signature section stays at bottom */
-          #tech-sheet-printable .signature-section {
-            position: fixed;
-            bottom: 1.5cm;
-            left: 1.5cm;
-            right: 1.5cm;
-          }
+           /* Ensure signature section stays at bottom */
+           #tech-sheet-printable .signature-section {
+             page-break-inside: avoid;
+             margin-top: 2rem;
+           }
         }
       `}</style>
 
@@ -408,27 +414,26 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
         </div>
       )}
 
-      {showPrintPreview && selectedForPrint && (
-        <div className="fixed inset-0 z-[200] bg-white flex flex-col no-print overflow-y-auto">
-           <div className="p-4 bg-slate-900 flex justify-between items-center text-white sticky top-0 z-50 shadow-md">
-             <button onClick={() => setShowPrintPreview(false)} className="bg-white/10 px-4 py-2 rounded-lg font-bold text-xs hover:bg-white/20 transition-all">Cerrar</button>
-             <button onClick={() => window.print()} className="bg-primary px-8 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-blue-500/20">
-               <span className="material-symbols-outlined text-lg">picture_as_pdf</span> Imprimir Ficha PDF
-             </button>
-           </div>
-           <div className="flex-1 bg-slate-100 p-10 flex justify-center">
-              <div id="tech-sheet-printable" className="bg-white w-[21.59cm] min-h-[27.94cm] p-[1.5cm] shadow-2xl relative text-slate-900 border border-slate-200">
+       {showPrintPreview && selectedForPrint && (
+         <div className="fixed inset-0 z-[200] bg-white flex flex-col overflow-y-auto">
+            <div className="p-4 bg-slate-900 flex justify-between items-center text-white sticky top-0 z-50 shadow-md no-print">
+              <button onClick={() => setShowPrintPreview(false)} className="bg-white/10 px-4 py-2 rounded-lg font-bold text-xs hover:bg-white/20 transition-all">Cerrar</button>
+              <button onClick={() => window.print()} className="bg-primary px-8 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-blue-500/20">
+                <span className="material-symbols-outlined text-lg">picture_as_pdf</span> Imprimir Ficha PDF
+              </button>
+            </div>
+            <div className="flex-1 bg-slate-100 p-10 flex justify-center">
+               <div id="tech-sheet-printable" className="bg-white w-[21.59cm] min-h-[27.94cm] p-[1.5cm] shadow-2xl relative text-slate-900">
                 
-                {/* Header Institucional */}
-                <div className="flex justify-between items-center mb-8 border-b-4 border-slate-900 pb-6">
-                  <div className="flex items-center gap-6">
-                    <img src={appLogo} alt="Logo" className="h-24 w-auto object-contain" />
-                    <div className="flex flex-col">
-                      <span className="text-lg font-black text-slate-900 uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
-                      <span className="text-lg font-black text-slate-900 uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>
-                      <span className="text-[8pt] font-bold uppercase text-slate-400 mt-2 tracking-[0.2em]">Parque Vehicular • Control Patrimonial</span>
-                    </div>
-                  </div>
+                 {/* Header Institucional */}
+                 <div className="flex justify-between items-center mb-8 border-b-4 border-slate-900 pb-6">
+                   <div className="flex items-center gap-6">
+                     <img src="/images/logo-dif.png" alt="Logo" className="w-24 object-contain" />
+                     <div className="flex flex-col">
+                       <span className="text-lg font-black text-slate-900 uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia del Municipio de La Paz B.C.S.</span>
+                       <span className="text-[8pt] font-bold uppercase text-slate-400 mt-2 tracking-[0.2em]">Parque Vehicular • Control Patrimonial</span>
+                     </div>
+                   </div>
                   <div className="text-right">
                     <div className="inline-block bg-slate-900 text-white px-4 py-1.5 font-black text-[10pt] uppercase tracking-widest rounded-sm mb-2">
                         Ficha Técnica
@@ -439,44 +444,42 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
                 </div>
                 
                 {/* Datos Principales */}
-                <div className="mb-8 mt-6 break-inside-avoid">
-                    <table className="w-full border-collapse">
-                        <tbody>
-                            <tr className="border-b border-slate-200">
-                                <td className="py-3 text-[9pt] font-black text-slate-400 uppercase w-48">Placas</td>
-                                <td className="py-3 text-[16pt] font-black text-slate-900 tracking-widest">{selectedForPrint.plate}</td>
-                            </tr>
-                            <tr className="border-b border-slate-200">
-                                <td className="py-2 text-[9pt] font-black text-slate-400 uppercase">Marca/Línea</td>
-                                <td className="py-2 text-[11pt] font-bold text-slate-900">{selectedForPrint.brand} {selectedForPrint.line}</td>
-                            </tr>
-                            <tr className="border-b border-slate-200">
-                                <td className="py-2 text-[9pt] font-black text-slate-400 uppercase">Modelo (Año)</td>
-                                <td className="py-2 text-[11pt] font-bold text-slate-900">{selectedForPrint.year}</td>
-                            </tr>
-                            <tr className="border-b border-slate-200">
-                                <td className="py-2 text-[9pt] font-black text-slate-400 uppercase">Descripción</td>
-                                <td className="py-2 text-[11pt] font-bold text-slate-900">{selectedForPrint.model}</td>
-                            </tr>
-                            <tr className="border-b border-slate-200">
-                                <td className="py-2 text-[9pt] font-black text-slate-400 uppercase">Serie VIN</td>
-                                <td className="py-2 text-[11pt] font-bold text-slate-900 font-mono tracking-wider">{selectedForPrint.vin || '---'}</td>
-                            </tr>
-                            <tr className="border-b border-slate-200">
-                                <td className="py-2 text-[9pt] font-black text-slate-400 uppercase">Motor/Cilindros</td>
-                                <td className="py-2 text-[11pt] font-bold text-slate-900">{selectedForPrint.cylinders} Cilindros / {selectedForPrint.fuelType}</td>
-                            </tr>
-                            <tr className="border-b border-slate-200">
-                                <td className="py-2 text-[9pt] font-black text-slate-400 uppercase">Color</td>
-                                <td className="py-2 text-[11pt] font-bold text-slate-900">{selectedForPrint.color}</td>
-                            </tr>
-                            <tr>
-                                <td className="py-2 text-[9pt] font-black text-slate-400 uppercase">Resguardo</td>
-                                <td className="py-2 text-[11pt] font-bold text-slate-900">{drivers.find(d => d.id === selectedForPrint.assignedDriverId)?.name || 'SIN ASIGNAR'}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                 <div className="mb-8 mt-6 break-inside-avoid">
+                     <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+                         <div className="border-b border-slate-200 pb-2">
+                             <div className="text-[9pt] font-black text-slate-400 uppercase">Placas</div>
+                             <div className="text-[16pt] font-black text-slate-900 tracking-widest">{selectedForPrint.plate}</div>
+                         </div>
+                         <div className="border-b border-slate-200 pb-2">
+                             <div className="text-[9pt] font-black text-slate-400 uppercase">Marca/Línea</div>
+                             <div className="text-[11pt] font-bold text-slate-900">{selectedForPrint.brand} {selectedForPrint.line}</div>
+                         </div>
+                         <div className="border-b border-slate-200 pb-2">
+                             <div className="text-[9pt] font-black text-slate-400 uppercase">Modelo (Año)</div>
+                             <div className="text-[11pt] font-bold text-slate-900">{selectedForPrint.year}</div>
+                         </div>
+                         <div className="border-b border-slate-200 pb-2">
+                             <div className="text-[9pt] font-black text-slate-400 uppercase">Descripción</div>
+                             <div className="text-[11pt] font-bold text-slate-900">{selectedForPrint.model}</div>
+                         </div>
+                         <div className="border-b border-slate-200 pb-2">
+                             <div className="text-[9pt] font-black text-slate-400 uppercase">Serie VIN</div>
+                             <div className="text-[11pt] font-bold text-slate-900 font-mono tracking-wider">{selectedForPrint.vin || '---'}</div>
+                         </div>
+                         <div className="border-b border-slate-200 pb-2">
+                             <div className="text-[9pt] font-black text-slate-400 uppercase">Motor/Cilindros</div>
+                             <div className="text-[11pt] font-bold text-slate-900">{selectedForPrint.cylinders} Cilindros / {selectedForPrint.fuelType}</div>
+                         </div>
+                         <div className="border-b border-slate-200 pb-2">
+                             <div className="text-[9pt] font-black text-slate-400 uppercase">Color</div>
+                             <div className="text-[11pt] font-bold text-slate-900">{selectedForPrint.color}</div>
+                         </div>
+                         <div className="border-b border-slate-200 pb-2">
+                             <div className="text-[9pt] font-black text-slate-400 uppercase">Resguardo</div>
+                             <div className="text-[11pt] font-bold text-slate-900">{drivers.find(d => d.id === selectedForPrint.assignedDriverId)?.name || 'SIN ASIGNAR'}</div>
+                         </div>
+                     </div>
+                 </div>
 
                 {/* Diagnostico Mecanico */}
                 <div className="mb-8 break-inside-avoid">
@@ -521,19 +524,21 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
                    </div>
                 </div>
 
-                <div className="signature-section">
-                    <div className="grid grid-cols-2 gap-24 text-center">
-                    <div className="border-t-2 border-slate-900 pt-4">
-                        <p className="text-[9pt] font-black uppercase text-slate-900">Jefe de Recursos Materiales</p>
-                        <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Validación</p>
-                    </div>
-                    <div className="border-t-2 border-slate-900 pt-4">
-                        <p className="text-[9pt] font-black uppercase text-slate-900">{directorName || 'Director General'}</p>
-                        <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Vo. Bo. y Sello</p>
-                    </div>
-                    </div>
+                 <div className="signature-section">
+                     <div className="grid grid-cols-2 gap-24 text-center">
+                     <div className="border-t-2 border-slate-900 pt-4">
+                         <p className="text-[9pt] font-black uppercase text-slate-900">{headOfMaterialsName || 'Jefe de Recursos Materiales'}</p>
+                         <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">{headOfMaterialsPosition}</p>
+                         <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Validación</p>
+                     </div>
+                     <div className="border-t-2 border-slate-900 pt-4">
+                         <p className="text-[9pt] font-black uppercase text-slate-900">{directorName || 'Director General'}</p>
+                         <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">{directorPosition}</p>
+                         <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Vo. Bo.</p>
+                     </div>
+                     </div>
                     <div className="text-center mt-8 border-t border-slate-200 pt-2">
-                        <p className="text-[7pt] font-black text-slate-300 uppercase tracking-[0.3em]">Sistema de Control Flota Pro • DIF Municipal La Paz</p>
+                        <p className="text-[7pt] font-black text-slate-300 uppercase tracking-[0.3em]">Sistema de Gestion de Parque Vehicular • DIF Municipal La Paz</p>
                     </div>
                 </div>
               </div>

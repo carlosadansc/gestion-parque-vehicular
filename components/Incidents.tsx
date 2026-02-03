@@ -123,30 +123,44 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, searchQuery, onAddInci
 
   return (
     <div className="space-y-8 animate-in slide-in-from-top-4 duration-500">
-      <style>{`
-        @media print {
-          body * { 
-            visibility: hidden; 
-          }
-          #incident-printable, #incident-printable * { 
-            visibility: visible; 
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-          }
-          #incident-printable { 
-            position: absolute; 
-            left: 0; 
-            top: 0; 
-            width: 100%; 
-            padding: 0; 
-            margin: 0;
-            background: white !important; 
-            font-family: 'Inter', sans-serif;
-          }
-          .no-print { display: none !important; }
-          @page { margin: 0.5cm; size: letter; }
-        }
-      `}</style>
+       <style>{`
+         @media print {
+           body * { 
+             visibility: hidden; 
+           }
+           #incident-printable, #incident-printable * { 
+             visibility: visible; 
+             -webkit-print-color-adjust: exact !important;
+             print-color-adjust: exact !important;
+           }
+           #incident-printable { 
+             position: absolute; 
+             left: 0; 
+             top: 0; 
+             width: 100%; 
+             padding: 0; 
+             margin: 0;
+             background: white !important; 
+             font-family: 'Inter', sans-serif;
+           }
+           .no-print { display: none !important; }
+           @page { margin: 0.5cm; size: letter; }
+           
+            /* ========================================
+               SIGNATURE SECTION - FLOWING WITH CONTENT
+               ======================================== */
+            #incident-printable .signature-section {
+              page-break-inside: avoid;
+              margin-top: 2rem;
+            }
+            
+            #incident-printable .signature-line {
+              border-top: 2px solid #1e293b;
+              padding-top: 0.5rem;
+              min-width: 200px;
+            }
+         }
+       `}</style>
 
       <div className="flex justify-between items-center no-print">
         <div>
@@ -360,8 +374,8 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, searchQuery, onAddInci
 
       {/* VISTA PREVIA DE REPORTE FORMAL (ESTILO FICHA VEHICULO) */}
       {showPrintPreview && selectedIncident && (
-        <div className="fixed inset-0 z-[200] bg-white flex flex-col no-print overflow-y-auto">
-          <div className="sticky top-0 bg-slate-900 p-4 flex justify-between items-center text-white shadow-lg">
+        <div className="fixed inset-0 z-[200] bg-white flex flex-col overflow-y-auto">
+           <div className="sticky top-0 bg-slate-900 p-4 flex justify-between items-center text-white shadow-lg no-print">
              <div className="flex items-center gap-4">
                 <button onClick={() => setShowPrintPreview(false)} className="bg-white/10 px-4 py-2 rounded-lg font-bold text-xs hover:bg-white/20 transition-all">Cerrar</button>
                 <h3 className="font-black text-sm uppercase tracking-widest">Vista Previa</h3>
@@ -372,12 +386,12 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, searchQuery, onAddInci
           </div>
           
           <div className="flex-1 bg-slate-100 p-10 flex justify-center">
-            <div id="incident-printable" className="bg-white w-[21.59cm] min-h-[27.94cm] p-[1.5cm] shadow-2xl relative text-slate-900 border border-slate-200">
+            <div id="incident-printable" className="bg-white w-[21.59cm] min-h-[27.94cm] p-[1.5cm] shadow-2xl relative text-slate-900">
               
               {/* Header Institucional */}
               <div className="flex justify-between items-center mb-8 border-b-4 border-slate-900 pb-6">
                 <div className="flex items-center gap-6">
-                  <img src={appLogo} alt="Logo" className="h-24 w-auto object-contain" />
+                  <img src="/images/logo-dif.png" alt="Logo" className="w-24 object-contain" />
                   <div className="flex flex-col">
                     <span className="text-lg font-black text-slate-900 uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
                     <span className="text-lg font-black text-slate-900 uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>
@@ -437,22 +451,24 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, searchQuery, onAddInci
                  </p>
               </div>
 
-              {/* Firmas */}
-              <div className="absolute bottom-[1.5cm] left-[1.5cm] right-[1.5cm]">
-                  <div className="grid grid-cols-2 gap-24 text-center">
-                  <div className="border-t-2 border-slate-900 pt-4">
-                      <p className="text-[9pt] font-black uppercase text-slate-900">{reportDriver?.name || 'OPERADOR RESPONSABLE'}</p>
-                      <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Firma del Conductor / Operador</p>
-                  </div>
-                  <div className="border-t-2 border-slate-900 pt-4">
-                      <p className="text-[9pt] font-black uppercase text-slate-900">{managerName}</p>
-                      <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">{managerPos}</p>
-                  </div>
-                  </div>
-                  <div className="text-center mt-8 border-t border-slate-200 pt-2">
-                      <p className="text-[7pt] font-black text-slate-300 uppercase tracking-[0.3em]">Sistema de Control Flota Pro • DIF Municipal La Paz</p>
-                  </div>
-              </div>
+               {/* Firmas - Formal Signature Section */}
+               <div className="signature-section absolute bottom-[1.5cm] left-[1.5cm] right-[1.5cm]">
+                   <div className="grid grid-cols-2 gap-24 text-center">
+                       <div className="signature-line border-t-2 border-slate-900 pt-4">
+                           <p className="text-[9pt] font-black uppercase text-slate-900">{reportDriver?.name || 'OPERADOR RESPONSABLE'}</p>
+                           <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Operador</p>
+                           <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Aviso de Incidencia</p>
+                       </div>
+                       <div className="signature-line border-t-2 border-slate-900 pt-4">
+                           <p className="text-[9pt] font-black uppercase text-slate-900">{managerName}</p>
+                           <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">{managerPos}</p>
+                           <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Validación</p>
+                       </div>
+                   </div>
+                   <div className="text-center mt-8 border-t border-slate-200 pt-2">
+                       <p className="text-[7pt] font-black text-slate-300 uppercase tracking-[0.3em]">Sistema de Gestion de Parque Vehicular • DIF Municipal La Paz</p>
+                   </div>
+               </div>
 
             </div>
           </div>

@@ -324,22 +324,19 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
             border-radius: 8px;
           }
           
-          /* ========================================
-             SIGNATURE SECTION - FIXED POSITION
-             ======================================== */
-          #maintenance-printable .signature-section {
-            position: fixed;
-            bottom: 2cm;
-            left: 1.5cm;
-            right: 1.5cm;
-            page-break-inside: avoid;
-          }
-          
-          #maintenance-printable .signature-line {
-            border-top: 2px solid #1e293b;
-            padding-top: 0.5rem;
-            min-width: 200px;
-          }
+           /* ========================================
+              SIGNATURE SECTION - FLOWING WITH CONTENT
+              ======================================== */
+           #maintenance-printable .signature-section {
+             page-break-inside: avoid;
+             margin-top: 2rem;
+           }
+           
+           #maintenance-printable .signature-line {
+             border-top: 2px solid #1e293b;
+             padding-top: 0.5rem;
+             min-width: 200px;
+           }
           
           /* ========================================
              FOOTER STYLING
@@ -354,7 +351,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
         }
       `}</style>
 
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 no-print">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-black text-slate-900 tracking-tight">Gestión de Mantenimiento</h2>
           <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mt-1">Control de servicios, presupuestos y facturación.</p>
@@ -664,20 +661,20 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
 
       {/* VISTA DE IMPRESIÓN (FORMATO DE SERVICIO) */}
       {showPrintPreview && selectedRecord && (
-        <div className="fixed inset-0 z-[200] bg-white flex flex-col no-print overflow-y-auto">
-           <div className="sticky top-0 bg-slate-900 p-4 flex justify-between items-center text-white shadow-lg">
+        <div className="fixed inset-0 z-[200] bg-white flex flex-col overflow-y-auto">
+           <div className="sticky top-0 bg-slate-900 p-4 flex justify-between items-center text-white shadow-lg no-print">
              <button onClick={() => setShowPrintPreview(false)} className="bg-white/10 px-4 py-2 rounded-lg font-bold text-xs hover:bg-white/20 transition-all">Cerrar</button>
              <button onClick={() => window.print()} className="bg-primary px-8 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-blue-500/20">
                <span className="material-symbols-outlined text-lg">picture_as_pdf</span> Imprimir Formato PDF
              </button>
            </div>
            <div className="flex-1 bg-slate-100 p-10 flex justify-center">
-              <div id="maintenance-printable" className="bg-white w-[21.59cm] min-h-[27.94cm] p-[1.5cm] shadow-2xl relative text-slate-900 border border-slate-200">
+              <div id="maintenance-printable" className="bg-white w-[21.59cm] min-h-[27.94cm] p-[1.5cm] shadow-2xl relative text-slate-900">
                 
                 {/* Header Institucional - Formal Design */}
                 <div className="print-header flex justify-between items-center mb-8 border-b-4 border-slate-900 pb-6">
                   <div className="flex items-center gap-6">
-                    <img src={appLogo} alt="Logo" className="h-24 w-auto object-contain" />
+                    <img src="/images/logo-dif.png" alt="Logo" className="w-24 object-contain" />
                     <div className="flex flex-col">
                       <span className="text-lg font-black text-slate-900 uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
                       <span className="text-lg font-black text-slate-900 uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>
@@ -746,26 +743,24 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                    </div>
                 </div>
 
-                {/* Firmas - Formal Signature Section */}
-                <div className="signature-section">
-                    <div className="grid grid-cols-2 gap-24 text-center">
-                      <div className="signature-line border-t-2 border-slate-900 pt-4">
-                          <p className="text-[9pt] font-black uppercase text-slate-900">Jefe de Recursos Materiales</p>
-                          <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Revisión y Validación</p>
-                      </div>
-                      <div className="signature-line border-t-2 border-slate-900 pt-4">
-                          <p className="text-[9pt] font-black uppercase text-slate-900">{directorName}</p>
-                          <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Autorización / Visto Bueno</p>
-                      </div>
-                    </div>
-                    <div className="print-footer text-center mt-8 border-t border-slate-200 pt-3">
-                        <div className="flex justify-between items-center text-[7pt] text-slate-400">
-                            <span>Sistema de Control Flota Pro</span>
-                            <span className="font-black uppercase tracking-[0.2em]">DIF Municipal La Paz B.C.S.</span>
-                            <span>Documento válido con firmas autógrafas</span>
-                        </div>
-                    </div>
-                </div>
+                 {/* Firmas - Formal Signature Section */}
+                 <div className="signature-section">
+                     <div className="grid grid-cols-2 gap-24 text-center">
+                       <div className="signature-line border-t-2 border-slate-900 pt-4">
+                           <p className="text-[9pt] font-black uppercase text-slate-900">Jefe de Recursos Materiales</p>
+                           <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Jefe de Recursos Materiales</p>
+                           <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Revisión</p>
+                       </div>
+                       <div className="signature-line border-t-2 border-slate-900 pt-4">
+                           <p className="text-[9pt] font-black uppercase text-slate-900">{directorName}</p>
+                           <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Director General</p>
+                           <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Vo. Bo.</p>
+                       </div>
+                     </div>
+                          <div className="text-center mt-8 border-t border-slate-200 pt-2">
+                       <p className="text-[7pt] font-black text-slate-300 uppercase tracking-[0.3em]">Sistema de Gestion de Parque Vehicular • DIF Municipal La Paz</p>
+                   </div>
+                 </div>
               </div>
            </div>
         </div>
