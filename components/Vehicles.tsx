@@ -32,7 +32,7 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
   // Fix: explicitly type the status field to prevent narrowing to just 'active'
   const initialFormState = {
     plate: '', model: '', assignedDriverId: '', status: 'active' as Vehicle['status'], image: '',
-    inventory: '', condition: 'Bueno', location: '', vin: '', odometer: '',
+    economicNumber: '', inventory: '', condition: 'Bueno', location: '', vin: '', odometer: '',
     brand: '', year: new Date().getFullYear().toString(), type: '', line: '', color: '',
     cylinders: '4', fuelType: 'Gasolina',
     engineStatus: 'Bien', clutchStatus: 'Bien', transmissionStatus: 'Bien', shifterStatus: 'Bien',
@@ -296,6 +296,7 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
                   <div className="space-y-4">
                     <InputField label="Placa / Matrícula" value={formData.plate} onChange={v => setFormData({...formData, plate: v})} placeholder="CF-66-803" />
                     <InputField label="Descripción / Nombre" value={formData.model} onChange={v => setFormData({...formData, model: v})} placeholder="Frontier Doble Cabina" />
+                    <InputField label="Número Económico" value={formData.economicNumber} onChange={v => setFormData({...formData, economicNumber: v})} placeholder="2023001" />
                     <InputField label="Número de Inventario" value={formData.inventory} onChange={v => setFormData({...formData, inventory: v})} placeholder="1140000001139" />
                     <InputField label="Color de la Unidad" value={formData.color} onChange={v => setFormData({...formData, color: v})} placeholder="BLANCO" />
                   </div>
@@ -446,14 +447,18 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
                 {/* Datos Principales */}
                  <div className="mb-8 mt-6 break-inside-avoid">
                      <div className="grid grid-cols-2 gap-x-8 gap-y-4">
-                         <div className="border-b border-slate-200 pb-2">
-                             <div className="text-[9pt] font-black text-slate-400 uppercase">Placas</div>
-                             <div className="text-[16pt] font-black text-slate-900 tracking-widest">{selectedForPrint.plate}</div>
-                         </div>
-                         <div className="border-b border-slate-200 pb-2">
-                             <div className="text-[9pt] font-black text-slate-400 uppercase">Marca/Línea</div>
-                             <div className="text-[11pt] font-bold text-slate-900">{selectedForPrint.brand} {selectedForPrint.line}</div>
-                         </div>
+                          <div className="border-b border-slate-200 pb-2">
+                              <div className="text-[9pt] font-black text-slate-400 uppercase">Placas</div>
+                              <div className="text-[16pt] font-black text-slate-900 tracking-widest">{selectedForPrint.plate}</div>
+                          </div>
+                          <div className="border-b border-slate-200 pb-2">
+                              <div className="text-[9pt] font-black text-slate-400 uppercase">Número Económico</div>
+                              <div className="text-[11pt] font-bold text-slate-900">{selectedForPrint.economicNumber || '---'}</div>
+                          </div>
+                          <div className="border-b border-slate-200 pb-2">
+                              <div className="text-[9pt] font-black text-slate-400 uppercase">Marca/Línea</div>
+                              <div className="text-[11pt] font-bold text-slate-900">{selectedForPrint.brand} {selectedForPrint.line}</div>
+                          </div>
                          <div className="border-b border-slate-200 pb-2">
                              <div className="text-[9pt] font-black text-slate-400 uppercase">Modelo (Año)</div>
                              <div className="text-[11pt] font-bold text-slate-900">{selectedForPrint.year}</div>

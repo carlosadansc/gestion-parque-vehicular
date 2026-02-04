@@ -51,7 +51,7 @@ const CONFIG = {
   sheets: {
     "Vehiculos": [
       "id", "plate", "model", "assignedDriverId", "status", "image", "date_registered",
-      "inventory", "condition", "location", "vin", "odometer", "brand", "year", "type", "line", "color", "cylinders", "fuelType",
+      "economicNumber", "inventory", "condition", "location", "vin", "odometer", "brand", "year", "type", "line", "color", "cylinders", "fuelType",
       "engineStatus", "clutchStatus", "transmissionStatus", "shifterStatus", "steeringStatus", "suspensionStatus", "tempGaugeStatus", "oilGaugeStatus",
       "tiresStatus", "shocksStatus", "brakesStatus", "batteryStatus", "lightsStatus", "hornStatus", "wipersStatus", "speedoStatus",
       "observations", "accessories_notes"

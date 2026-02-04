@@ -37,6 +37,7 @@ export interface Vehicle {
   status: 'active' | 'workshop' | 'inactive';
   image: string;
   // Datos Técnicos (JSON Request)
+  economicNumber?: string;
   inventory?: string;
   condition?: string;
   location?: string;
