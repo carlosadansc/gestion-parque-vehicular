@@ -15,7 +15,7 @@ interface ReportsProps {
   settings?: AppSetting[];
 }
 
-type ReportType = 'financial' | 'efficiency' | 'incidents';
+type ReportType = 'financial' | 'operations' | 'incidents';
 
 const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRecords, incidents, settings = [] }) => {
   // Filtros
@@ -44,7 +44,7 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
   });
 
   // --- FILTRADO DE DATOS ---
-   
+    
   const filteredData = useMemo(() => {
     const start = new Date(dateRange.start).getTime();
     const end = new Date(dateRange.end).getTime() + (24 * 60 * 60 * 1000); // Incluir el día final completo
@@ -93,9 +93,54 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
     
     const totalLiters = filteredData.fuel.reduce((acc, f) => acc + (Number(f.liters) || 0), 0);
     const incidentCount = filteredData.incidents.length;
-
-    return { totalFuelCost, totalMaintenanceCost, totalCost, totalLiters, incidentCount };
+    
+    // KPIs específicos por tipo de reporte
+    const efficiencyLitersPerFill = filteredData.fuel.length > 0 
+      ? (totalLiters / filteredData.fuel.length).toFixed(1) 
+      : '0';
+    
+    return { 
+      totalFuelCost, 
+      totalMaintenanceCost, 
+      totalCost, 
+      totalLiters, 
+      incidentCount,
+      efficiencyLitersPerFill
+    };
   }, [filteredData]);
+
+  // KPIs contextuales según el tipo de reporte
+  const getContextualKpis = () => {
+    switch (activeReport) {
+      case 'financial':
+        return (
+          <>
+            <KPICard title="Gasto Total" value={`${kpis.totalCost.toLocaleString()}`} subtext="Combustible + Mantenimiento" color="blue" />
+            <KPICard title="Combustible" value={`${kpis.totalFuelCost.toLocaleString()}`} subtext={`${kpis.totalLiters.toLocaleString()} Litros consumidos`} color="green" />
+            <KPICard title="Mantenimiento" value={`${kpis.totalMaintenanceCost.toLocaleString()}`} subtext="Servicios Facturados/Cotizados" color="rose" />
+            <KPICard title="Incidencias" value={kpis.incidentCount} subtext="Reportes en periodo" color="blue" />
+          </>
+        );
+      case 'operations':
+        return (
+          <>
+            <KPICard title="Litros Totales" value={`${kpis.totalLiters.toLocaleString()} L`} subtext="Consumo total" color="green" />
+            <KPICard title="Promedio por Carga" value={`${kpis.efficiencyLitersPerFill} L`} subtext="Por carga de combustible" color="blue" />
+            <KPICard title="Gasto Combustible" value={`${kpis.totalFuelCost.toLocaleString()}`} subtext="Período seleccionado" color="rose" />
+            <KPICard title="Incidencias" value={kpis.incidentCount} subtext="Reportes registrados" color="blue" />
+          </>
+        );
+      case 'incidents':
+        return (
+          <>
+            <KPICard title="Total Incidencias" value={kpis.incidentCount} subtext="En el período" color="blue" />
+            <KPICard title="Mecánicas" value={incidentTypeData.find(i => i.name === 'Mecánica')?.value || 0} subtext="Fallas técnicas" color="green" />
+            <KPICard title="Tráfico" value={incidentTypeData.find(i => i.name === 'Tráfico')?.value || 0} subtext="Infracciones" color="amber" />
+            <KPICard title="Gasto Total" value={`${kpis.totalCost.toLocaleString()}`} subtext="Comb. + Mantenimiento" color="rose" />
+          </>
+        );
+    }
+  };
 
   // --- PREPARACIÓN DE GRÁFICAS ---
 
@@ -165,7 +210,7 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
       <p className="text-3xl font-black text-slate-900 mt-2 tracking-tight">{value}</p>
       {subtext && <p className="text-xs font-bold text-slate-500 mt-1">{subtext}</p>}
     </div>
-  );
+   );
 
   // Normalizar la ruta del logo (convertir rutas relativas a absolutas)
   const rawLogo = settingsMap['APP_LOGO'] || '/images/logo-dif.png';
@@ -593,7 +638,7 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
          {/* TABS */}
          <div className="flex gap-2 mb-6 no-print overflow-x-auto">
              <button onClick={() => setActiveReport('financial')} className={`px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${activeReport === 'financial' ? 'bg-[#135bec] text-white shadow-lg shadow-blue-500/30' : 'bg-white text-slate-500 hover:bg-slate-50'}`}>Financiero</button>
-             <button onClick={() => setActiveReport('efficiency')} className={`px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${activeReport === 'efficiency' ? 'bg-[#135bec] text-white shadow-lg shadow-blue-500/30' : 'bg-white text-slate-500 hover:bg-slate-50'}`}>Operativo</button>
+             <button onClick={() => setActiveReport('operations')} className={`px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${activeReport === 'operations' ? 'bg-[#135bec] text-white shadow-lg shadow-blue-500/30' : 'bg-white text-slate-500 hover:bg-slate-50'}`}>Operativo</button>
              <button onClick={() => setActiveReport('incidents')} className={`px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${activeReport === 'incidents' ? 'bg-[#135bec] text-white shadow-lg shadow-blue-500/30' : 'bg-white text-slate-500 hover:bg-slate-50'}`}>Incidencias</button>
          </div>
 
@@ -608,305 +653,305 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
            {/* GRAPHS SECTION */}
            <div className="grid grid-cols-2 gap-6 mb-6 break-inside-avoid charts-grid">
               
-              {/* GRAPH 1: COSTOS POR VEHICULO */}
-              {activeReport === 'financial' || activeReport === 'efficiency' ? (
-                  <div className="bg-white p-5 border border-slate-200 shadow-sm break-inside-avoid">
-                      <h3 className="text-lg font-black text-slate-900 mb-4 tracking-tight">Top 10 Costos por Vehículo</h3>
-                      <div className="h-[300px] w-full">
-                          <ResponsiveContainer width="100%" height="100%">
-                              <BarChart data={costByVehicleData} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
-                                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
-                                  <XAxis type="number" hide />
-                                  <YAxis dataKey="name" type="category" width={100} tick={{fontSize: 10, fontWeight: 700}} />
-                                  <Tooltip 
-                                      cursor={{fill: '#f8fafc'}}
-                                      contentStyle={{ borderRadius: '4px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
-                                  />
-                                  <Legend wrapperStyle={{fontSize: '10px', fontWeight: 700, textTransform: 'uppercase'}} />
-                                  <Bar dataKey="fuel" name="Combustible" stackId="a" fill="#3b82f6" radius={[0, 0, 0, 0]} barSize={20} />
-                                  <Bar dataKey="maintenance" name="Mantenimiento" stackId="a" fill="#f59e0b" radius={[0, 10, 10, 0]} barSize={20} />
-                              </BarChart>
-                          </ResponsiveContainer>
-                      </div>
-                  </div>
-              ) : null}
-
-              {/* GRAPH 2: TENDENCIA DIARIA */}
-              {activeReport === 'financial' ? (
-                  <div className="bg-white p-5 border border-slate-200 shadow-sm break-inside-avoid">
-                      <h3 className="text-lg font-black text-slate-900 mb-4 tracking-tight">Gasto Diario de Combustible</h3>
-                      <div className="h-[300px] w-full">
-                          <ResponsiveContainer width="100%" height="100%">
-                              <LineChart data={efficiencyData}>
-                                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                                  <XAxis dataKey="date" tick={{fontSize: 10}} />
-                                  <YAxis tick={{fontSize: 10}} />
-                                  <Tooltip contentStyle={{ borderRadius: '4px', border: '1px solid #e2e8f0' }} />
-                                  <Line type="monotone" dataKey="totalCost" stroke="#10b981" strokeWidth={3} dot={false} />
-                              </LineChart>
-                          </ResponsiveContainer>
-                      </div>
-                  </div>
-              ) : null}
-
-             {/* GRAPH 3: INCIDENCIAS */}
-             {activeReport === 'incidents' || activeReport === 'efficiency' ? (
-                 <div className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm break-inside-avoid">
-                     <h3 className="text-lg font-black text-slate-900 mb-6 tracking-tight">Distribución de Incidencias</h3>
-                     <div className="h-[300px] w-full flex">
-                         <ResponsiveContainer width="60%" height="100%">
-                             <PieChart>
-                                 <Pie
-                                     data={incidentTypeData}
-                                     cx="50%"
-                                     cy="50%"
-                                     innerRadius={60}
-                                     outerRadius={80}
-                                     paddingAngle={5}
-                                     dataKey="value"
-                                 >
-                                     {incidentTypeData.map((entry: any, index: number) => (
-                                         <Cell key={`cell-${index}`} fill={entry.color} />
-                                     ))}
-                                 </Pie>
-                                 <Tooltip />
-                             </PieChart>
+             {/* GRAPH 1: COSTOS POR VEHICULO */}
+             {activeReport === 'financial' || activeReport === 'operations' ? (
+                 <div className="bg-white p-5 border border-slate-200 shadow-sm break-inside-avoid">
+                     <h3 className="text-lg font-black text-slate-900 mb-4 tracking-tight">Top 10 Costos por Vehículo</h3>
+                     <div className="h-[300px] w-full">
+                         <ResponsiveContainer width="100%" height="100%">
+                             <BarChart data={costByVehicleData} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
+                                 <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
+                                 <XAxis type="number" hide />
+                                 <YAxis dataKey="name" type="category" width={100} tick={{fontSize: 10, fontWeight: 700}} />
+                                 <Tooltip 
+                                     cursor={{fill: '#f8fafc'}}
+                                     contentStyle={{ borderRadius: '4px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
+                                 />
+                                 <Legend wrapperStyle={{fontSize: '10px', fontWeight: 700, textTransform: 'uppercase'}} />
+                                 <Bar dataKey="fuel" name="Combustible" stackId="a" fill="#3b82f6" radius={[0, 0, 0, 0]} barSize={20} />
+                                 <Bar dataKey="maintenance" name="Mantenimiento" stackId="a" fill="#f59e0b" radius={[0, 10, 10, 0]} barSize={20} />
+                             </BarChart>
                          </ResponsiveContainer>
-                         <div className="flex-1 flex flex-col justify-center gap-2">
-                             {incidentTypeData.map((d: any, i: number) => (
-                                 <div key={i} className="flex items-center gap-2">
-                                     <div className="size-3 rounded-full" style={{backgroundColor: d.color}}></div>
-                                     <span className="text-xs font-bold text-slate-600 uppercase">{d.name}: {d.value}</span>
-                                 </div>
-                             ))}
-                         </div>
                      </div>
                  </div>
              ) : null}
-        </div>
 
-        {/* DETAILED TABLES FOR PRINT */}
-        <div className="space-y-8 print-section">
-            {/* Tabla de Gastos */}
-            <div className="break-inside-avoid">
-                <div className="section-title bg-slate-900 text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">
-                    Desglose Financiero Detallado
-                </div>
-                <table className="w-full text-left border-collapse data-table">
-                    <thead>
-                        <tr className="bg-slate-100 text-slate-600">
-                            <th className="p-3 text-[9px] font-black uppercase border border-slate-200">Vehículo</th>
-                            <th className="p-3 text-[9px] font-black uppercase text-right border border-slate-200">Combustible</th>
-                            <th className="p-3 text-[9px] font-black uppercase text-right border border-slate-200">Mantenimiento</th>
-                            <th className="p-3 text-[9px] font-black uppercase text-right border border-slate-200">Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {costByVehicleData.map((item, idx) => (
-                            <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
-                                <td className="p-3 text-[10px] font-bold border border-slate-200 print-truncate max-w-[150px]">{item.name}</td>
-                                <td className="p-3 text-[10px] text-right font-mono border border-slate-200">${item.fuel.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
-                                <td className="p-3 text-[10px] text-right font-mono border border-slate-200">${item.maintenance.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
-                                <td className="p-3 text-[10px] text-right font-black font-mono border border-slate-200 bg-slate-50">${(item.fuel + item.maintenance).toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
-                            </tr>
-                        ))}
-                        {/* Total Row */}
-                        <tr className="bg-slate-900 text-white font-black">
-                            <td className="p-3 text-[10px] font-black uppercase border border-slate-700">Total General</td>
-                            <td className="p-3 text-[10px] text-right font-mono border border-slate-700">${kpis.totalFuelCost.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
-                            <td className="p-3 text-[10px] text-right font-mono border border-slate-700">${kpis.totalMaintenanceCost.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
-                            <td className="p-3 text-[10px] text-right font-black font-mono border border-slate-700">${kpis.totalCost.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+             {/* GRAPH 2: TENDENCIA DIARIA */}
+             {activeReport === 'financial' || activeReport === 'operations' ? (
+                 <div className="bg-white p-5 border border-slate-200 shadow-sm break-inside-avoid">
+                     <h3 className="text-lg font-black text-slate-900 mb-4 tracking-tight">Gasto Diario de Combustible</h3>
+                     <div className="h-[300px] w-full">
+                         <ResponsiveContainer width="100%" height="100%">
+                             <LineChart data={efficiencyData}>
+                                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                                 <XAxis dataKey="date" tick={{fontSize: 10}} />
+                                 <YAxis tick={{fontSize: 10}} />
+                                 <Tooltip contentStyle={{ borderRadius: '4px', border: '1px solid #e2e8f0' }} />
+                                 <Line type="monotone" dataKey="totalCost" stroke="#10b981" strokeWidth={3} dot={false} />
+                             </LineChart>
+                         </ResponsiveContainer>
+                     </div>
+                 </div>
+             ) : null}
 
-          {/* FOOTER - FORMAL DOCUMENT */}
-        <div className="hidden print:block print-footer mt-12 pt-4 border-t-2 border-slate-200">
-            <div className="flex justify-between items-center text-[8pt] text-slate-400">
-                <div>
-                    <p className="font-bold">Sistema de Gestión de Parque Vehicular</p>
-                    <p>DIF Municipal La Paz B.C.S.</p>
+            {/* GRAPH 3: INCIDENCIAS */}
+            {activeReport === 'incidents' || activeReport === 'operations' ? (
+                <div className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm break-inside-avoid">
+                    <h3 className="text-lg font-black text-slate-900 mb-6 tracking-tight">Distribución de Incidencias</h3>
+                    <div className="h-[300px] w-full flex">
+                        <ResponsiveContainer width="60%" height="100%">
+                            <PieChart>
+                                <Pie
+                                    data={incidentTypeData}
+                                    cx="50%"
+                                    cy="50%"
+                                    innerRadius={60}
+                                    outerRadius={80}
+                                    paddingAngle={5}
+                                    dataKey="value"
+                                >
+                                    {incidentTypeData.map((entry: any, index: number) => (
+                                        <Cell key={`cell-${index}`} fill={entry.color} />
+                                    ))}
+                                </Pie>
+                                <Tooltip />
+                            </PieChart>
+                        </ResponsiveContainer>
+                        <div className="flex-1 flex flex-col justify-center gap-2">
+                            {incidentTypeData.map((d: any, i: number) => (
+                                <div key={i} className="flex items-center gap-2">
+                                    <div className="size-3 rounded-full" style={{backgroundColor: d.color}}></div>
+                                    <span className="text-xs font-bold text-slate-600 uppercase">{d.name}: {d.value}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 </div>
-                <div className="text-center">
-                    <p className="font-black uppercase tracking-[0.2em]">Documento Generado Automáticamente</p>
-                    <p>Este documento es válido sin firma para fines informativos</p>
-                </div>
-                <div className="text-right">
-                    <p className="font-bold">
-                        Página <span className="page-number">1</span> de <span className="page-count">{pageCount}</span>
-                    </p>
-                    <p>{new Date().toLocaleDateString('es-ES', {day: '2-digit', month: 'long', year: 'numeric'})}</p>
-                </div>
-            </div>
-        </div>
-
+            ) : null}
        </div>
 
-       {/* Print Preview Modal - EXACT COPY OF PRINT CONTENT */}
-        {showPrintPreview && (
-          <div className="fixed inset-0 z-[200] bg-white flex flex-col overflow-y-auto">
-             <div className="p-4 bg-slate-900 flex justify-between items-center text-white sticky top-0 z-50 shadow-md no-print">
-             <button onClick={() => setShowPrintPreview(false)} className="bg-white/10 px-4 py-2 rounded-lg font-bold text-xs hover:bg-white/20 transition-all">
-               Cerrar
-             </button>
-             <div className="flex gap-2">
-               <button onClick={() => window.print()} className="bg-primary px-8 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-blue-500/20">
-                 <span className="material-symbols-outlined text-lg">picture_as_pdf</span> Imprimir PDF
-               </button>
-             </div>
-           </div>
-           <div className="flex-1 bg-slate-100 p-10 flex justify-center">
-             <div id="report-printable" className="print-preview-container">
-               {/* PRINT ONLY HEADER - COMPACT */}
-               <div className="flex print-header justify-between items-center mb-4 pb-4 border-b-2 border-slate-900">
-                 <div className="flex items-center gap-6">
-                   <img src="/images/logo-dif.png" alt="Logo" className="w-24 object-contain" />
-                   <div className="flex flex-col">
-                     <span className="text-xl font-black text-slate-900 uppercase leading-none tracking-tight">Reporte de Analisis de Vehiculos</span>
-                     <span className="text-lg font-black text-slate-900 uppercase leading-tight tracking-tight">Sistema DIF Municipal La Paz B.C.S.</span>
-                     <span className="text-[8pt] font-bold uppercase text-slate-400 mt-2 tracking-[0.2em]">Gestión de Parque Vehicular</span>
-                   </div>
-                 </div>
-                 <div className="text-right">
-                   <div className="inline-block bg-slate-900 text-white px-4 py-1.5 font-black text-[10pt] uppercase tracking-widest rounded-sm mb-2">
-                     Reporte Ejecutivo
-                   </div>
-                   <p className="text-[9pt] font-black text-slate-400 uppercase tracking-widest">Periodo del Reporte</p>
-                   <p className="text-lg font-black text-slate-900">
-                     {new Date(dateRange.start).toLocaleDateString('es-ES', {day: '2-digit', month: 'short', year: 'numeric'})} — {new Date(dateRange.end).toLocaleDateString('es-ES', {day: '2-digit', month: 'short', year: 'numeric'})}
-                   </p>
-                   <p className="text-[8pt] text-slate-400 font-bold mt-1">
-                     Generado: {new Date().toLocaleDateString('es-ES', {day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'})}
-                   </p>
-                 </div>
+       {/* DETAILED TABLES FOR PRINT */}
+       <div className="space-y-8 print-section">
+           {/* Tabla de Gastos */}
+           <div className="break-inside-avoid">
+               <div className="section-title bg-slate-900 text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">
+                   Desglose Financiero Detallado
                </div>
-
-               {/* KPI SUMMARY - COMPACT FOR PRINT */}
-               <div className="grid grid-cols-4 gap-3 mb-4 kpi-grid print:kpi-grid">
-                 <div className="bg-white p-2 border-l-4 border-l-blue-500 border border-slate-200 shadow-sm">
-                   <p className="text-[8px] font-black text-slate-400 uppercase tracking-wider">Gasto Total</p>
-                   <p className="text-xl font-black text-slate-900 mt-1 tracking-tight">${kpis.totalCost.toLocaleString()}</p>
-                   <p className="text-[7px] font-bold text-slate-500 mt-0.5">Comb. + Mant.</p>
-                 </div>
-                 <div className="bg-white p-2 border-l-4 border-l-emerald-500 border border-slate-200 shadow-sm">
-                   <p className="text-[8px] font-black text-slate-400 uppercase tracking-wider">Combustible</p>
-                   <p className="text-xl font-black text-slate-900 mt-1 tracking-tight">${kpis.totalFuelCost.toLocaleString()}</p>
-                   <p className="text-[7px] font-bold text-slate-500 mt-0.5">{kpis.totalLiters.toLocaleString()} L</p>
-                 </div>
-                 <div className="bg-white p-2 border-l-4 border-l-rose-500 border border-slate-200 shadow-sm">
-                   <p className="text-[8px] font-black text-slate-400 uppercase tracking-wider">Mantenimiento</p>
-                   <p className="text-xl font-black text-slate-900 mt-1 tracking-tight">${kpis.totalMaintenanceCost.toLocaleString()}</p>
-                   <p className="text-[7px] font-bold text-slate-500 mt-0.5">Facturado</p>
-                 </div>
-                 <div className="bg-white p-2 border-l-4 border-l-blue-500 border border-slate-200 shadow-sm">
-                   <p className="text-[8px] font-black text-slate-400 uppercase tracking-wider">Incidencias</p>
-                   <p className="text-xl font-black text-slate-900 mt-1 tracking-tight">{kpis.incidentCount}</p>
-                   <p className="text-[7px] font-bold text-slate-500 mt-0.5">Reportes</p>
-                 </div>
-               </div>
-
-               {/* GRAPHS SECTION */}
-               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4 break-inside-avoid charts-grid">
-                 {/* GRAPH 1: COSTOS POR VEHICULO */}
-                 <div className="bg-white p-4 border border-slate-200 shadow-sm break-inside-avoid">
-                   <h3 className="text-base font-black text-slate-900 mb-3 tracking-tight">Top 10 Costos por Vehículo</h3>
-                   <div className="h-[220px] w-full">
-                     <ResponsiveContainer width="100%" height="100%">
-                       <BarChart data={costByVehicleData} layout="vertical" margin={{ top: 5, right: 20, left: 30, bottom: 5 }}>
-                         <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
-                         <XAxis type="number" hide />
-                         <YAxis dataKey="name" type="category" width={80} tick={{fontSize: 9, fontWeight: 700}} />
-                         <Tooltip 
-                           cursor={{fill: '#f8fafc'}}
-                           contentStyle={{ borderRadius: '4px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
-                         />
-                         <Legend wrapperStyle={{fontSize: '9px', fontWeight: 700, textTransform: 'uppercase'}} />
-                         <Bar dataKey="fuel" name="Combustible" stackId="a" fill="#3b82f6" radius={[0, 0, 0, 0]} barSize={16} />
-                         <Bar dataKey="maintenance" name="Mantenimiento" stackId="a" fill="#f59e0b" radius={[0, 8, 8, 0]} barSize={16} />
-                       </BarChart>
-                     </ResponsiveContainer>
-                   </div>
-                 </div>
-
-                 {/* GRAPH 2: GASTO DIARIO DE COMBUSTIBLE */}
-                 <div className="bg-white p-4 border border-slate-200 shadow-sm break-inside-avoid">
-                   <h3 className="text-base font-black text-slate-900 mb-3 tracking-tight">Gasto Diario de Combustible</h3>
-                   <div className="h-[220px] w-full">
-                     <ResponsiveContainer width="100%" height="100%">
-                       <LineChart data={efficiencyData}>
-                         <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                         <XAxis dataKey="date" tick={{fontSize: 9}} />
-                         <YAxis tick={{fontSize: 9}} />
-                         <Tooltip contentStyle={{ borderRadius: '4px', border: '1px solid #e2e8f0' }} />
-                         <Line type="monotone" dataKey="totalCost" stroke="#10b981" strokeWidth={2} dot={false} />
-                       </LineChart>
-                     </ResponsiveContainer>
-                   </div>
-                 </div>
-               </div>
-
-               {/* DETAILED FINANCIAL TABLE FOR PRINT - COMPACT */}
-               <div className="space-y-4 print-section">
-                 <div className="break-inside-avoid">
-                   <div className="section-title bg-slate-900 text-white px-3 py-1 text-[8pt] font-black uppercase tracking-widest mb-3 inline-block rounded-sm">
-                     Desglose Financiero Detallado
-                   </div>
-                   <table className="w-full text-left border-collapse data-table">
-                     <thead>
+               <table className="w-full text-left border-collapse data-table">
+                   <thead>
                        <tr className="bg-slate-100 text-slate-600">
-                         <th className="p-2 text-[8px] font-black uppercase border border-slate-200">Vehículo</th>
-                         <th className="p-2 text-[8px] font-black uppercase text-right border border-slate-200">Combustible</th>
-                         <th className="p-2 text-[8px] font-black uppercase text-right border border-slate-200">Mantenimiento</th>
-                         <th className="p-2 text-[8px] font-black uppercase text-right border border-slate-200">Total</th>
+                           <th className="p-3 text-[9px] font-black uppercase border border-slate-200">Vehículo</th>
+                           <th className="p-3 text-[9px] font-black uppercase text-right border border-slate-200">Combustible</th>
+                           <th className="p-3 text-[9px] font-black uppercase text-right border border-slate-200">Mantenimiento</th>
+                           <th className="p-3 text-[9px] font-black uppercase text-right border border-slate-200">Total</th>
                        </tr>
-                     </thead>
-                     <tbody>
+                   </thead>
+                   <tbody>
                        {costByVehicleData.map((item, idx) => (
-                         <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
-                           <td className="p-2 text-[9px] font-bold border border-slate-200 print-truncate max-w-[100px]">{item.name}</td>
-                           <td className="p-2 text-[9px] text-right font-mono border border-slate-200">${item.fuel.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
-                           <td className="p-2 text-[9px] text-right font-mono border border-slate-200">${item.maintenance.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
-                           <td className="p-2 text-[9px] text-right font-black font-mono border border-slate-200 bg-slate-50">${(item.fuel + item.maintenance).toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
-                         </tr>
+                           <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
+                               <td className="p-3 text-[10px] font-bold border border-slate-200 print-truncate max-w-[150px]">{item.name}</td>
+                               <td className="p-3 text-[10px] text-right font-mono border border-slate-200">${item.fuel.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+                               <td className="p-3 text-[10px] text-right font-mono border border-slate-200">${item.maintenance.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+                               <td className="p-3 text-[10px] text-right font-black font-mono border border-slate-200 bg-slate-50">${(item.fuel + item.maintenance).toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+                           </tr>
                        ))}
+                       {/* Total Row */}
                        <tr className="bg-slate-900 text-white font-black">
-                         <td className="p-2 text-[8px] font-black uppercase border border-slate-700">Total General</td>
-                         <td className="p-2 text-[8px] text-right font-mono border border-slate-700">${kpis.totalFuelCost.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
-                         <td className="p-2 text-[8px] text-right font-mono border border-slate-700">${kpis.totalMaintenanceCost.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
-                         <td className="p-2 text-[8px] text-right font-black font-mono border border-slate-700">${kpis.totalCost.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+                           <td className="p-3 text-[10px] font-black uppercase border border-slate-700">Total General</td>
+                           <td className="p-3 text-[10px] text-right font-mono border border-slate-700">${kpis.totalFuelCost.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+                           <td className="p-3 text-[10px] text-right font-mono border border-slate-700">${kpis.totalMaintenanceCost.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+                           <td className="p-3 text-[10px] text-right font-black font-mono border border-slate-700">${kpis.totalCost.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
                        </tr>
-                     </tbody>
-                   </table>
-                 </div>
-               </div>
-
-               {/* FOOTER - FORMAL DOCUMENT */}
-               <div className="hidden print:block print-footer mt-6 pt-3 border-t border-slate-200">
-                 <div className="flex justify-between items-center text-[8pt] text-slate-400">
-                   <div>
-                     <p className="font-bold">Sistema de Gestión de Parque Vehicular</p>
-                     <p>DIF Municipal La Paz B.C.S.</p>
-                   </div>
-                   <div className="text-center">
-                     <p className="font-black uppercase tracking-[0.2em]">Documento Generado Automáticamente</p>
-                     <p>Este documento es válido sin firma para fines informativos</p>
-                   </div>
-                   <div className="text-right">
-                     <p className="font-bold">
-                       Página <span className="page-number">1</span> de <span className="page-count">{pageCount}</span>
-                     </p>
-                     <p>{new Date().toLocaleDateString('es-ES', {day: '2-digit', month: 'long', year: 'numeric'})}</p>
-                   </div>
-                 </div>
-               </div>
-             </div>
+                   </tbody>
+               </table>
            </div>
-         </div>
-       )}
-     </div>
-   );
- };
+       </div>
 
- export default Reports;
+         {/* FOOTER - FORMAL DOCUMENT */}
+       <div className="hidden print:block print-footer mt-12 pt-4 border-t-2 border-slate-200">
+           <div className="flex justify-between items-center text-[8pt] text-slate-400">
+               <div>
+                   <p className="font-bold">Sistema de Gestión de Parque Vehicular</p>
+                   <p>DIF Municipal La Paz B.C.S.</p>
+               </div>
+               <div className="text-center">
+                   <p className="font-black uppercase tracking-[0.2em]">Documento Generado Automáticamente</p>
+                   <p>Este documento es válido sin firma para fines informativos</p>
+               </div>
+               <div className="text-right">
+                   <p className="font-bold">
+                       Página <span className="page-number">1</span> de <span className="page-count">{pageCount}</span>
+                   </p>
+                   <p>{new Date().toLocaleDateString('es-ES', {day: '2-digit', month: 'long', year: 'numeric'})}</p>
+               </div>
+           </div>
+       </div>
+
+      </div>
+
+      {/* Print Preview Modal - EXACT COPY OF PRINT CONTENT */}
+       {showPrintPreview && (
+         <div className="fixed inset-0 z-[200] bg-white flex flex-col overflow-y-auto">
+            <div className="p-4 bg-slate-900 flex justify-between items-center text-white sticky top-0 z-50 shadow-md no-print">
+            <button onClick={() => setShowPrintPreview(false)} className="bg-white/10 px-4 py-2 rounded-lg font-bold text-xs hover:bg-white/20 transition-all">
+              Cerrar
+            </button>
+            <div className="flex gap-2">
+              <button onClick={() => window.print()} className="bg-primary px-8 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-blue-500/20">
+                <span className="material-symbols-outlined text-lg">picture_as_pdf</span> Imprimir PDF
+              </button>
+            </div>
+          </div>
+           <div className="flex-1 bg-slate-100 p-10 flex justify-center">
+             <div id="report-printable-preview" className="print-preview-container">
+              {/* PRINT ONLY HEADER - COMPACT */}
+              <div className="flex print-header justify-between items-center mb-4 pb-4 border-b-2 border-slate-900">
+                <div className="flex items-center gap-6">
+                  <img src="/images/logo-dif.png" alt="Logo" className="w-24 object-contain" />
+                  <div className="flex flex-col">
+                    <span className="text-xl font-black text-slate-900 uppercase leading-none tracking-tight">Reporte de Analisis de Vehiculos</span>
+                    <span className="text-lg font-black text-slate-900 uppercase leading-tight tracking-tight">Sistema DIF Municipal La Paz B.C.S.</span>
+                    <span className="text-[8pt] font-bold uppercase text-slate-400 mt-2 tracking-[0.2em]">Gestión de Parque Vehicular</span>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="inline-block bg-slate-900 text-white px-4 py-1.5 font-black text-[10pt] uppercase tracking-widest rounded-sm mb-2">
+                    Reporte Ejecutivo
+                  </div>
+                  <p className="text-[9pt] font-black text-slate-400 uppercase tracking-widest">Periodo del Reporte</p>
+                  <p className="text-lg font-black text-slate-900">
+                    {new Date(dateRange.start).toLocaleDateString('es-ES', {day: '2-digit', month: 'short', year: 'numeric'})} — {new Date(dateRange.end).toLocaleDateString('es-ES', {day: '2-digit', month: 'short', year: 'numeric'})}
+                  </p>
+                  <p className="text-[8pt] text-slate-400 font-bold mt-1">
+                    Generado: {new Date().toLocaleDateString('es-ES', {day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'})}
+                  </p>
+                </div>
+              </div>
+
+              {/* KPI SUMMARY - COMPACT FOR PRINT */}
+              <div className="grid grid-cols-4 gap-3 mb-4 kpi-grid print:kpi-grid">
+                <div className="bg-white p-2 border-l-4 border-l-blue-500 border border-slate-200 shadow-sm">
+                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-wider">Gasto Total</p>
+                  <p className="text-xl font-black text-slate-900 mt-1 tracking-tight">${kpis.totalCost.toLocaleString()}</p>
+                  <p className="text-[7px] font-bold text-slate-500 mt-0.5">Comb. + Mant.</p>
+                </div>
+                <div className="bg-white p-2 border-l-4 border-l-emerald-500 border border-slate-200 shadow-sm">
+                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-wider">Combustible</p>
+                  <p className="text-xl font-black text-slate-900 mt-1 tracking-tight">${kpis.totalFuelCost.toLocaleString()}</p>
+                  <p className="text-[7px] font-bold text-slate-500 mt-0.5">{kpis.totalLiters.toLocaleString()} L</p>
+                </div>
+                <div className="bg-white p-2 border-l-4 border-l-rose-500 border border-slate-200 shadow-sm">
+                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-wider">Mantenimiento</p>
+                  <p className="text-xl font-black text-slate-900 mt-1 tracking-tight">${kpis.totalMaintenanceCost.toLocaleString()}</p>
+                  <p className="text-[7px] font-bold text-slate-500 mt-0.5">Facturado</p>
+                </div>
+                <div className="bg-white p-2 border-l-4 border-l-blue-500 border border-slate-200 shadow-sm">
+                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-wider">Incidencias</p>
+                  <p className="text-xl font-black text-slate-900 mt-1 tracking-tight">{kpis.incidentCount}</p>
+                  <p className="text-[7px] font-bold text-slate-500 mt-0.5">Reportes</p>
+                </div>
+              </div>
+
+              {/* GRAPHS SECTION */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4 break-inside-avoid charts-grid">
+                {/* GRAPH 1: COSTOS POR VEHICULO */}
+                <div className="bg-white p-4 border border-slate-200 shadow-sm break-inside-avoid">
+                  <h3 className="text-base font-black text-slate-900 mb-3 tracking-tight">Top 10 Costos por Vehículo</h3>
+                  <div className="h-[220px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={costByVehicleData} layout="vertical" margin={{ top: 5, right: 20, left: 30, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
+                        <XAxis type="number" hide />
+                        <YAxis dataKey="name" type="category" width={80} tick={{fontSize: 9, fontWeight: 700}} />
+                        <Tooltip 
+                          cursor={{fill: '#f8fafc'}}
+                          contentStyle={{ borderRadius: '4px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
+                        />
+                        <Legend wrapperStyle={{fontSize: '9px', fontWeight: 700, textTransform: 'uppercase'}} />
+                        <Bar dataKey="fuel" name="Combustible" stackId="a" fill="#3b82f6" radius={[0, 0, 0, 0]} barSize={16} />
+                        <Bar dataKey="maintenance" name="Mantenimiento" stackId="a" fill="#f59e0b" radius={[0, 8, 8, 0]} barSize={16} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* GRAPH 2: GASTO DIARIO DE COMBUSTIBLE */}
+                <div className="bg-white p-4 border border-slate-200 shadow-sm break-inside-avoid">
+                  <h3 className="text-base font-black text-slate-900 mb-3 tracking-tight">Gasto Diario de Combustible</h3>
+                  <div className="h-[220px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={efficiencyData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                        <XAxis dataKey="date" tick={{fontSize: 9}} />
+                        <YAxis tick={{fontSize: 9}} />
+                        <Tooltip contentStyle={{ borderRadius: '4px', border: '1px solid #e2e8f0' }} />
+                        <Line type="monotone" dataKey="totalCost" stroke="#10b981" strokeWidth={2} dot={false} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </div>
+
+              {/* DETAILED FINANCIAL TABLE FOR PRINT - COMPACT */}
+              <div className="space-y-4 print-section">
+                <div className="break-inside-avoid">
+                  <div className="section-title bg-slate-900 text-white px-3 py-1 text-[8pt] font-black uppercase tracking-widest mb-3 inline-block rounded-sm">
+                    Desglose Financiero Detallado
+                  </div>
+                  <table className="w-full text-left border-collapse data-table">
+                    <thead>
+                      <tr className="bg-slate-100 text-slate-600">
+                        <th className="p-2 text-[8px] font-black uppercase border border-slate-200">Vehículo</th>
+                        <th className="p-2 text-[8px] font-black uppercase text-right border border-slate-200">Combustible</th>
+                        <th className="p-2 text-[8px] font-black uppercase text-right border border-slate-200">Mantenimiento</th>
+                        <th className="p-2 text-[8px] font-black uppercase text-right border border-slate-200">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {costByVehicleData.map((item, idx) => (
+                        <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
+                          <td className="p-2 text-[9px] font-bold border border-slate-200 print-truncate max-w-[100px]">{item.name}</td>
+                          <td className="p-2 text-[9px] text-right font-mono border border-slate-200">${item.fuel.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+                          <td className="p-2 text-[9px] text-right font-mono border border-slate-200">${item.maintenance.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+                          <td className="p-2 text-[9px] text-right font-black font-mono border border-slate-200 bg-slate-50">${(item.fuel + item.maintenance).toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+                        </tr>
+                      ))}
+                      <tr className="bg-slate-900 text-white font-black">
+                        <td className="p-2 text-[8px] font-black uppercase border border-slate-700">Total General</td>
+                        <td className="p-2 text-[8px] text-right font-mono border border-slate-700">${kpis.totalFuelCost.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+                        <td className="p-2 text-[8px] text-right font-mono border border-slate-700">${kpis.totalMaintenanceCost.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+                        <td className="p-2 text-[8px] text-right font-black font-mono border border-slate-700">${kpis.totalCost.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* FOOTER - FORMAL DOCUMENT */}
+              <div className="hidden print:block print-footer mt-6 pt-3 border-t border-slate-200">
+                <div className="flex justify-between items-center text-[8pt] text-slate-400">
+                  <div>
+                    <p className="font-bold">Sistema de Gestión de Parque Vehicular</p>
+                    <p>DIF Municipal La Paz B.C.S.</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="font-black uppercase tracking-[0.2em]">Documento Generado Automáticamente</p>
+                    <p>Este documento es válido sin firma para fines informativos</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold">
+                      Página <span className="page-number">1</span> de <span className="page-count">{pageCount}</span>
+                    </p>
+                    <p>{new Date().toLocaleDateString('es-ES', {day: '2-digit', month: 'long', year: 'numeric'})}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Reports;

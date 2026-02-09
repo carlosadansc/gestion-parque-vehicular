@@ -231,6 +231,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
   const appLogo = rawLogo.startsWith('./') ? rawLogo.replace('./', '/') : rawLogo;
   const directorName = settingsMap['INSTITUTION_HEAD_NAME'] || 'Director General';
   const vehicleManager = settingsMap['VEHICLE_MANAGER_NAME'] || 'Encargado del Parque Vehicular';
+  const adminCoordinator = settingsMap['ADMIN_COORDINATOR_NAME'] || 'Coordinador Administrativo';
 
   // --- Render Helpers ---
 
@@ -459,7 +460,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
            #planning-printable .signature-line {
              border-top: 2px solid #1e293b;
              padding-top: 0.5rem;
-             min-width: 200px;
+             min-width: 150px;
            }
           
           /* ========================================
@@ -492,23 +493,23 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
         <div className="flex flex-col sm:flex-row items-center gap-4">
            {/* Selector de Vista */}
            <div className="flex bg-slate-100 p-1 rounded-xl">
-              <button onClick={() => setViewMode('day')} className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === 'day' ? 'bg-white text-primary shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>Día</button>
-              <button onClick={() => setViewMode('week')} className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === 'week' ? 'bg-white text-primary shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>Semana</button>
-              <button onClick={() => setViewMode('month')} className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === 'month' ? 'bg-white text-primary shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>Mes</button>
+               <button onClick={() => setViewMode('day')} className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === 'day' ? 'bg-white text-primary shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>Día</button>
+               <button onClick={() => setViewMode('week')} className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === 'week' ? 'bg-white text-primary shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>Semana</button>
+               <button onClick={() => setViewMode('month')} className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === 'month' ? 'bg-white text-primary shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>Mes</button>
            </div>
 
            {/* Navegación de Fecha */}
            <div className="flex items-center bg-white border border-slate-200 rounded-xl p-1 shadow-sm w-full sm:w-auto justify-between sm:justify-start">
-            <button onClick={() => navigate(-1)} className="size-9 flex items-center justify-center hover:bg-slate-50 text-slate-400 rounded-lg transition-colors">
-              <span className="material-symbols-outlined">chevron_left</span>
-            </button>
-            <div className="px-4 text-[11px] font-black uppercase tracking-widest text-slate-700 min-w-[180px] text-center">
-              {getDateLabel()}
-            </div>
-            <button onClick={() => navigate(1)} className="size-9 flex items-center justify-center hover:bg-slate-50 text-slate-400 rounded-lg transition-colors">
-              <span className="material-symbols-outlined">chevron_right</span>
-            </button>
-          </div>
+             <button onClick={() => navigate(-1)} className="size-9 flex items-center justify-center hover:bg-slate-50 text-slate-400 rounded-lg transition-colors">
+               <span className="material-symbols-outlined">chevron_left</span>
+             </button>
+             <div className="px-4 text-[11px] font-black uppercase tracking-widest text-slate-700 min-w-[180px] text-center">
+               {getDateLabel()}
+             </div>
+             <button onClick={() => navigate(1)} className="size-9 flex items-center justify-center hover:bg-slate-50 text-slate-400 rounded-lg transition-colors">
+               <span className="material-symbols-outlined">chevron_right</span>
+             </button>
+           </div>
         </div>
 
         <div className="flex items-center gap-3">
@@ -668,7 +669,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
                     <div className="flex flex-col">
                       <span className="text-lg font-black text-slate-900 uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
                       <span className="text-lg font-black text-slate-900 uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>
-                      <span className="text-[8pt] font-bold uppercase text-slate-400 mt-2 tracking-[0.2em]">Coordinación de Parque Vehicular</span>
+                      <span className="text-[8pt] font-bold uppercase text-slate-400 mt-2 tracking-[0.2em]">Parque Vehicular</span>
                     </div>
                   </div>
                   <div className="text-right">
@@ -756,28 +757,33 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
                   </table>
                 </div>
 
-                 {/* Signature Section - Fixed Position */}
-                 <div className="signature-section absolute bottom-[1.5cm] left-[1.5cm] right-[1.5cm]">
-                     <div className="grid grid-cols-2 gap-24 text-center">
-                       <div className="signature-line border-t-2 border-slate-900 pt-4">
-                           <p className="text-[9pt] font-black uppercase text-slate-900">{vehicleManager}</p>
-                           <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Encargado del Parque Vehicular</p>
-                           <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Elaboró</p>
-                       </div>
-                       <div className="signature-line border-t-2 border-slate-900 pt-4">
-                           <p className="text-[9pt] font-black uppercase text-slate-900">{directorName}</p>
-                           <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Director General</p>
-                           <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Vo. Bo.</p>
-                       </div>
-                     </div>
-                     <div className="print-footer text-center mt-8 border-t border-slate-200 pt-3">
-                         <div className="flex justify-between items-center text-[7pt] text-slate-400">
-                             <span>Sistema de Gestion de Parque Vehicular</span>
-                             <span className="font-black uppercase tracking-[0.2em]">DIF Municipal La Paz B.C.S.</span>
-                             <span>Documento válido con firmas autógrafas</span>
-                         </div>
-                     </div>
-                 </div>
+                  {/* Signature Section - Three Signatures */}
+                  <div className="signature-section absolute bottom-[1.5cm] left-[1.5cm] right-[1.5cm]">
+                      <div className="grid grid-cols-3 gap-8 text-center">
+                        <div className="signature-line border-t-2 border-slate-900 pt-4">
+                            <p className="text-[9pt] font-black uppercase text-slate-900">{vehicleManager}</p>
+                            <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Encargado del Parque Vehicular</p>
+                            <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Realizó</p>
+                        </div>
+                        <div className="signature-line border-t-2 border-slate-900 pt-4">
+                            <p className="text-[9pt] font-black uppercase text-slate-900">{adminCoordinator}</p>
+                            <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Coordinador Administrativo</p>
+                            <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Vo. Bo.</p>
+                        </div>
+                        <div className="signature-line border-t-2 border-slate-900 pt-4">
+                            <p className="text-[9pt] font-black uppercase text-slate-900">{directorName}</p>
+                            <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Director General</p>
+                            <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Autorizó</p>
+                        </div>
+                      </div>
+                      <div className="print-footer text-center mt-8 border-t border-slate-200 pt-3">
+                          <div className="flex justify-between items-center text-[7pt] text-slate-400">
+                              <span>Sistema de Gestion de Parque Vehicular</span>
+                              <span className="font-black uppercase tracking-[0.2em]">DIF Municipal La Paz B.C.S.</span>
+                              <span>Documento válido con firmas autógrafas</span>
+                          </div>
+                      </div>
+                  </div>
               </div>
            </div>
         </div>

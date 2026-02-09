@@ -836,7 +836,7 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
               {/* Header Institucional */}
               <div className="flex justify-between items-center border-b-2 border-slate-900 pb-3 mb-3">
                 <div className="flex items-center gap-4">
-                  <img src={appLogo} alt="Logo" className="w-16 object-contain" />
+                  <img src="/images/logo-dif.png" alt="Logo" className="w-24 object-contain" />
                   <div className="flex flex-col">
                     <span className="text-[10pt] font-black text-slate-900 uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
                     <span className="text-[10pt] font-black text-slate-900 uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>
@@ -898,14 +898,13 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
               <div className="border border-slate-400 rounded overflow-hidden">
                 <table className="w-full border-collapse" style={{ tableLayout: 'fixed' }}>
                   <thead>
-                    <tr className="bg-slate-800 text-white">
+                    <tr className="bg-[#9e1b32] text-white">
                       <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide border-r border-slate-600 text-center" style={{ width: '6%' }}>Fecha</th>
-                      <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide border-r border-slate-600 text-center" style={{ width: '11%' }}>Destino / Comisión</th>
+                      <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide border-r border-slate-600 text-center" style={{ width: '18%' }}>Destino / Comisión</th>
                       <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide border-r border-slate-600 text-center" style={{ width: '5.5%' }}>Hora Salida</th>
                       <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide border-r border-slate-600 text-center" style={{ width: '5.5%' }}>Hora Llegada</th>
                       <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide border-r border-slate-600 text-center" style={{ width: '7%' }}>Km Inicial</th>
                       <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide border-r border-slate-600 text-center" style={{ width: '7%' }}>Km Final</th>
-                      <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide border-r border-slate-600 text-center" style={{ width: '7%' }}>Km Recorridos</th>
                       <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide border-r border-slate-600 text-center" style={{ width: '7%' }}>Tanque Inicial</th>
                       <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide border-r border-slate-600 text-center" style={{ width: '7%' }}>Tanque Final</th>
                       <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide border-r border-slate-600 text-center" style={{ width: '12%' }}>Nombre del Chofer</th>
@@ -926,7 +925,6 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
                         <td className="py-3 px-1 border-r border-slate-200">&nbsp;</td>
                         <td className="py-3 px-1 border-r border-slate-200">&nbsp;</td>
                         <td className="py-3 px-1 border-r border-slate-200">&nbsp;</td>
-                        <td className="py-3 px-1 border-r border-slate-200">&nbsp;</td>
                         <td className="py-3 px-1">&nbsp;</td>
                       </tr>
                     ))}
@@ -940,12 +938,12 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
                   <p className="font-bold">* Cada registro debe ser llenado por el chofer responsable al momento de salida y llegada.</p>
                   <p className="font-bold">* Los niveles de tanque se registran como fracción (E, 1/4, 1/2, 3/4, F).</p>
                 </div>
-                <div className="text-center min-w-[200px]">
+                {/* <div className="text-center min-w-[200px]">
                   <div className="border-t-2 border-slate-900 pt-2 mt-6">
                     <p className="text-[8pt] font-black uppercase text-slate-900">{managerName}</p>
                     <p className="text-[6pt] font-bold text-slate-400 uppercase tracking-widest">{managerPos}</p>
                   </div>
-                </div>
+                </div> */}
               </div>
 
               {/* Footer institucional */}
