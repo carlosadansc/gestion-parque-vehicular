@@ -177,6 +177,8 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
   const rawLogo = settingsMap['APP_LOGO'] || '/images/logo-dif.png';
   const appLogo = rawLogo.startsWith('./') ? rawLogo.replace('./', '/') : rawLogo;
   const directorName = settingsMap['INSTITUTION_HEAD_NAME'] || 'Director General';
+  const administrativeCoordinatorName = settingsMap['ADMINISTRATIVE_COORDINATOR_NAME'] || 'Coordinador Administrativo';
+  const administrativeCoordinatorPos = settingsMap['ADMINISTRATIVE_COORDINATOR_POS'] || 'Coordinador Administrativo';
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-20">
@@ -743,24 +745,29 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                    </div>
                 </div>
 
-                 {/* Firmas - Formal Signature Section */}
-                 <div className="signature-section">
-                     <div className="grid grid-cols-2 gap-24 text-center">
-                       <div className="signature-line border-t-2 border-slate-900 pt-4">
-                           <p className="text-[9pt] font-black uppercase text-slate-900">Jefe de Recursos Materiales</p>
-                           <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Jefe de Recursos Materiales</p>
-                           <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Revisión</p>
-                       </div>
-                       <div className="signature-line border-t-2 border-slate-900 pt-4">
-                           <p className="text-[9pt] font-black uppercase text-slate-900">{directorName}</p>
-                           <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Director General</p>
-                           <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Vo. Bo.</p>
-                       </div>
-                     </div>
-                          <div className="text-center mt-8 border-t border-slate-200 pt-2">
-                       <p className="text-[7pt] font-black text-slate-300 uppercase tracking-[0.3em]">Sistema de Gestion de Parque Vehicular • DIF Municipal La Paz</p>
-                   </div>
-                 </div>
+                  {/* Firmas - Formal Signature Section */}
+                  <div className="signature-section">
+                      <div className="grid grid-cols-3 gap-12 text-center">
+                         <div className="signature-line border-t-2 border-slate-900 pt-4">
+                             <p className="text-[9pt] font-black uppercase text-slate-900">{administrativeCoordinatorName}</p>
+                             <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">{administrativeCoordinatorPos}</p>
+                             <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Vo. Bo.</p>
+                         </div>
+                        <div className="signature-line border-t-2 border-slate-900 pt-4">
+                            <p className="text-[9pt] font-black uppercase text-slate-900">{directorName}</p>
+                            <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Director General</p>
+                            <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Autorización</p>
+                        </div>
+                        <div className="signature-line border-t-2 border-slate-900 pt-4">
+                            <p className="text-[9pt] font-black uppercase text-slate-900">Nombre y Firma</p>
+                            <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Recibido</p>
+                            <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Sello</p>
+                        </div>
+                      </div>
+                           <div className="text-center mt-8 border-t border-slate-200 pt-2">
+                        <p className="text-[7pt] font-black text-slate-300 uppercase tracking-[0.3em]">Sistema de Gestion de Parque Vehicular • DIF Municipal La Paz</p>
+                    </div>
+                  </div>
               </div>
            </div>
         </div>

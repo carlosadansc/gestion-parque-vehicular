@@ -7,14 +7,16 @@ interface FuelProps {
   vehicles: Vehicle[];
   drivers: Driver[];
   onAddFuel: (entry: Omit<FuelEntry, 'id'>) => Promise<void>;
+  onUpdateFuel: (entry: FuelEntry) => Promise<void>;
   onSync: () => void;
   settings?: AppSetting[];
 }
 
-const Fuel: React.FC<FuelProps> = ({ fuelHistory = [], vehicles = [], drivers = [], onAddFuel, onSync, settings = [] }) => {
+const Fuel: React.FC<FuelProps> = ({ fuelHistory = [], vehicles = [], drivers = [], onAddFuel, onUpdateFuel, onSync, settings = [] }) => {
   const [showModal, setShowModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showPrintPreview, setShowPrintPreview] = useState(false);
+  const [editingEntry, setEditingEntry] = useState<FuelEntry | null>(null);
   
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
@@ -24,6 +26,19 @@ const Fuel: React.FC<FuelProps> = ({ fuelHistory = [], vehicles = [], drivers = 
     cost: '',
     odometer: ''
   });
+
+  const handleEdit = (entry: FuelEntry) => {
+    setEditingEntry(entry);
+    setFormData({
+      date: entry.date.split('T')[0],
+      vehicleId: entry.vehicleId,
+      driverId: entry.driverId,
+      liters: String(entry.liters),
+      cost: String(entry.cost),
+      odometer: String(entry.odometer)
+    });
+    setShowModal(true);
+  };
 
   const settingsMap = useMemo(() => {
     const map: Record<string, string> = {};
@@ -80,14 +95,24 @@ const Fuel: React.FC<FuelProps> = ({ fuelHistory = [], vehicles = [], drivers = 
 
     setIsSaving(true);
     try {
-      await onAddFuel({
+      const entryData = {
         date: formData.date,
         vehicleId: formData.vehicleId,
         driverId: formData.driverId,
         liters: Number(formData.liters),
         cost: Number(formData.cost),
         odometer: Number(formData.odometer) || 0
-      });
+      };
+
+      if (editingEntry) {
+        await onUpdateFuel({
+          ...editingEntry,
+          ...entryData
+        });
+      } else {
+        await onAddFuel(entryData);
+      }
+
       setFormData({ 
         date: new Date().toISOString().split('T')[0],
         vehicleId: '', 
@@ -96,6 +121,7 @@ const Fuel: React.FC<FuelProps> = ({ fuelHistory = [], vehicles = [], drivers = 
         cost: '', 
         odometer: '' 
       });
+      setEditingEntry(null);
       setShowModal(false);
     } catch (err) {
       alert("Error al guardar registro de combustible");
@@ -207,6 +233,7 @@ const Fuel: React.FC<FuelProps> = ({ fuelHistory = [], vehicles = [], drivers = 
                 <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-right">Litros</th>
                 <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-right text-blue-600">Rendimiento</th>
                 <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-right">Costo</th>
+                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-center">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -233,8 +260,16 @@ const Fuel: React.FC<FuelProps> = ({ fuelHistory = [], vehicles = [], drivers = 
                         <span className="text-[10px] text-slate-300 font-bold uppercase italic">Carga Inicial</span>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-right font-black text-slate-900">${(Number(entry.cost) || 0).toFixed(2)}</td>
-                  </tr>
+                     <td className="px-6 py-4 text-right font-black text-slate-900">${(Number(entry.cost) || 0).toFixed(2)}</td>
+                     <td className="px-6 py-4 text-center">
+                        <button 
+                          onClick={() => handleEdit(entry)}
+                          className="size-9 bg-white border border-slate-200 text-slate-400 hover:text-primary hover:border-blue-200 rounded-xl transition-all flex items-center justify-center shadow-sm"
+                        >
+                          <span className="material-symbols-outlined text-lg">edit</span>
+                        </button>
+                     </td>
+                   </tr>
                 );
               })}
             </tbody>
@@ -246,10 +281,10 @@ const Fuel: React.FC<FuelProps> = ({ fuelHistory = [], vehicles = [], drivers = 
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-300 no-print">
           <div className="bg-white rounded-[2.5rem] w-full max-w-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
             <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-              <div>
-                <h3 className="text-xl font-black text-slate-900 tracking-tight">Nueva Carga</h3>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-0.5">Registra el gasto de combustible</p>
-              </div>
+               <div>
+                 <h3 className="text-xl font-black text-slate-900 tracking-tight">{editingEntry ? 'Editar Carga' : 'Nueva Carga'}</h3>
+                 <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-0.5">Registra el gasto de combustible</p>
+               </div>
               <button 
                 onClick={() => !isSaving && setShowModal(false)}
                 disabled={isSaving}
@@ -363,7 +398,7 @@ const Fuel: React.FC<FuelProps> = ({ fuelHistory = [], vehicles = [], drivers = 
                       Guardando...
                     </>
                   ) : (
-                    'Guardar Registro'
+                    editingEntry ? 'Guardar Cambios' : 'Guardar Registro'
                   )}
                 </button>
               </div>
@@ -475,7 +510,7 @@ const Fuel: React.FC<FuelProps> = ({ fuelHistory = [], vehicles = [], drivers = 
                          <div className="signature-line border-t-2 border-slate-900 pt-4">
                              <p className="text-[9pt] font-black uppercase text-slate-900">{directorName}</p>
                              <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Director General</p>
-                             <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Vo. Bo.</p>
+                             <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Enterado</p>
                          </div>
                      </div>
                      <div className="text-center mt-8 border-t border-slate-200 pt-2">

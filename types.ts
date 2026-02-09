@@ -113,10 +113,11 @@ export interface Driver {
   id: string;
   name: string;
   licenseType: string;
+  licenseNumber: string;
   phone: string;
   status: 'available' | 'en-route' | 'on-break';
   assignedVehicleId?: string;
-  image: string;
+  notes?: string;
 }
 
 export interface FuelEntry {

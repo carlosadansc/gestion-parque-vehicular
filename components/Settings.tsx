@@ -44,7 +44,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onUpdateSetting, onUrlCha
 
   const appsScriptCode = `
 /** 
- * API FLOTA PRO v8.0 - PLANEACIÓN ACTUALIZADA (ESTADO)
+ * API FLOTA PRO v8.1 - LICENCIA NUMBER AGREGADA
  */
 
 const CONFIG = {
@@ -61,7 +61,7 @@ const CONFIG = {
       "engineStatus", "clutchStatus", "transmissionStatus", "shifterStatus", "steeringStatus", "suspensionStatus", "tempGaugeStatus", "oilGaugeStatus",
       "tiresStatus", "shocksStatus", "brakesStatus", "batteryStatus", "lightsStatus", "hornStatus", "wipersStatus", "speedoStatus"
     ],
-    "Choferes": ["id", "name", "licenseType", "phone", "status", "assignedVehicleId", "image"],
+    "Choferes": ["id", "name", "licenseType", "licenseNumber", "phone", "status", "assignedVehicleId", "image", "notes"],
     "Combustible": ["id", "date", "vehicleId", "driverId", "liters", "cost", "odometer"],
     "Incidencias": ["id", "date", "type", "title", "description", "vehicleId", "driverId", "status"],
     "Planeacion": ["id", "date", "vehicleId", "driverId", "areaId", "notes", "departureTime", "arrivalTime", "destination", "status"],
@@ -121,10 +121,10 @@ function doPost(e) {
     }
     
     let sheetName = "";
-    if (action === 'fuel') sheetName = "Combustible";
+     if (action === 'fuel' || action === 'update-fuel') sheetName = "Combustible";
     else if (action === 'incident') sheetName = "Incidencias";
     else if (action === 'vehicle' || action === 'update-vehicle') sheetName = "Vehiculos";
-    else if (action === 'inspection') sheetName = "Revisiones";
+     else if (action === 'inspection' || action === 'update-inspection') sheetName = "Revisiones";
     else if (action === 'driver' || action === 'update-driver') sheetName = "Choferes";
     else if (action === 'planning' || action === 'update-planning') sheetName = "Planeacion";
     else if (action === 'area') sheetName = "Areas";
@@ -260,10 +260,20 @@ function getSheetData(ss, name) {
                 <input className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm font-bold outline-none focus:border-primary transition-all" value={localSettings['VEHICLE_MANAGER_POS'] || ''} onChange={e => handleUpdate('VEHICLE_MANAGER_POS', e.target.value)} placeholder="Cargo del encargado de parque vehicular" />
               </div>
               
-              <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Cargo del Jefe de Recursos Materiales</label>
-                <input className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm font-bold outline-none focus:border-primary transition-all" value={localSettings['HEAD_OF_MATERIAL_RESOURCES_POS'] || ''} onChange={e => handleUpdate('HEAD_OF_MATERIAL_RESOURCES_POS', e.target.value)} placeholder="Cargo del jefe de recursos materiales" />
-              </div>
+               <div className="space-y-3">
+                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Cargo del Jefe de Recursos Materiales</label>
+                 <input className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm font-bold outline-none focus:border-primary transition-all" value={localSettings['HEAD_OF_MATERIAL_RESOURCES_POS'] || ''} onChange={e => handleUpdate('HEAD_OF_MATERIAL_RESOURCES_POS', e.target.value)} placeholder="Cargo del jefe de recursos materiales" />
+               </div>
+               
+               <div className="space-y-3">
+                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Coordinador Administrativo</label>
+                 <input className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm font-bold outline-none focus:border-primary transition-all" value={localSettings['ADMINISTRATIVE_COORDINATOR_NAME'] || ''} onChange={e => handleUpdate('ADMINISTRATIVE_COORDINATOR_NAME', e.target.value)} placeholder="Nombre del coordinador administrativo" />
+               </div>
+               
+               <div className="space-y-3">
+                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Cargo del Coordinador Administrativo</label>
+                 <input className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm font-bold outline-none focus:border-primary transition-all" value={localSettings['ADMINISTRATIVE_COORDINATOR_POS'] || ''} onChange={e => handleUpdate('ADMINISTRATIVE_COORDINATOR_POS', e.target.value)} placeholder="Cargo del coordinador administrativo" />
+               </div>
               
               <div className="space-y-6">
                 <div className="space-y-3">
@@ -299,7 +309,7 @@ function getSheetData(ss, name) {
               </div>
               <div className="bg-slate-900 rounded-xl p-6 shadow-inner">
                 <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Apps Script (v8.0 - Planeación Status)</h4>
+                  <h4 className="text-[10pt] font-black text-primary uppercase tracking-[0.2em] mb-4">Apps Script (v8.4 - Editar Combustible)</h4>
                   <button onClick={() => { navigator.clipboard.writeText(appsScriptCode); alert("¡Copiado!"); }} className="bg-slate-800 hover:bg-slate-700 text-white text-[10px] font-black py-1.5 px-3 rounded-lg transition-colors border border-slate-700">COPIAR CÓDIGO</button>
                 </div>
                 <pre className="text-[10px] font-mono text-slate-400 overflow-x-auto max-h-48 custom-scrollbar leading-relaxed">{appsScriptCode}</pre>
@@ -310,19 +320,23 @@ function getSheetData(ss, name) {
 
         <div className="xl:col-span-4 space-y-6">
           <div className="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm sticky top-28">
-            <h3 className="text-lg font-black text-slate-900 mb-6">Seguridad V8.0</h3>
+            <h4 className="text-[10pt] font-black text-primary uppercase tracking-[0.2em] mb-4">Seguridad v8.1</h4>
             <ul className="space-y-6">
               <li className="flex gap-4">
                 <span className="size-6 bg-primary text-white text-[10px] font-black flex items-center justify-center rounded-full shrink-0">1</span>
-                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Actualización BD</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Se agregó campo 'status' a Planeación (Programado/Completado/Cancelado).</p></div>
+                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Campo licenseNumber</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Se agregó campo 'licenseNumber' a Choferes para guardar el número de licencia.</p></div>
               </li>
               <li className="flex gap-4">
                 <span className="size-6 bg-primary text-white text-[10px] font-black flex items-center justify-center rounded-full shrink-0">2</span>
-                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Importante</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Debes actualizar el código en Apps Script para guardar el estado de los viajes.</p></div>
+                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Campo notes</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Se agregó campo 'notes' a Choferes para guardar notas u observaciones sobre el chofer.</p></div>
               </li>
               <li className="flex gap-4">
                 <span className="size-6 bg-primary text-white text-[10px] font-black flex items-center justify-center rounded-full shrink-0">3</span>
-                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Sincronización</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Al guardar el nuevo script, la hoja "Planeacion" añadirá la columna automáticamente.</p></div>
+                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Importante</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Debes actualizar el código en Apps Script para guardar el número de licencia y las notas de los choferes.</p></div>
+              </li>
+              <li className="flex gap-4">
+                <span className="size-6 bg-primary text-white text-[10px] font-black flex items-center justify-center rounded-full shrink-0">4</span>
+                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Sincronización</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Al guardar el nuevo script, la hoja "Choferes" añadirá las columnas automáticamente.</p></div>
               </li>
             </ul>
           </div>

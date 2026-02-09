@@ -6,15 +6,17 @@ interface InspectionsProps {
   inspections: VehicleInspection[];
   vehicles: Vehicle[];
   onAddInspection: (i: Omit<VehicleInspection, 'id'>) => Promise<void>;
+  onUpdateInspection: (i: VehicleInspection) => Promise<void>;
   currentUser: User | null;
   settings?: AppSetting[];
 }
 
-const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddInspection, currentUser, settings = [] }) => {
+const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddInspection, onUpdateInspection, currentUser, settings = [] }) => {
   const [showModal, setShowModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showPrintPreview, setShowPrintPreview] = useState(false);
   const [selectedInspection, setSelectedInspection] = useState<VehicleInspection | null>(null);
+  const [editingInspection, setEditingInspection] = useState<VehicleInspection | null>(null);
 
   const settingsMap = useMemo(() => {
     const map: Record<string, string> = {};
@@ -42,12 +44,23 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
 
     setIsSaving(true);
     try {
-      await onAddInspection({
+      const inspectionData = {
         ...formData,
         date: new Date(formData.date).toISOString(), // Ensure ISO format for storage
         odometer: Number(formData.odometer) || 0
-      });
+      };
+
+      if (editingInspection) {
+        await onUpdateInspection({
+          ...editingInspection,
+          ...inspectionData
+        });
+      } else {
+        await onAddInspection(inspectionData);
+      }
+
       setShowModal(false);
+      setEditingInspection(null);
       setFormData({ ...initialFormState, date: new Date().toISOString().slice(0, 16), inspectorName: currentUser?.name || '' });
     } catch (err) {
       alert("Error al guardar la revisión");
@@ -67,6 +80,17 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
       const d = new Date(isoDate);
       return d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
     } catch { return isoDate; }
+  };
+
+  const handleEdit = (insp: VehicleInspection) => {
+    setEditingInspection(insp);
+    setFormData({
+      ...initialFormState,
+      ...insp,
+      date: new Date(insp.date).toISOString().slice(0, 16), // Convert to datetime-local format
+      odometer: String(insp.odometer),
+    });
+    setShowModal(true);
   };
 
   const handlePrintRequest = (insp: VehicleInspection) => {
@@ -321,14 +345,22 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
                     <td className="px-8 py-5 text-right">
                       <p className="text-[11px] font-black text-slate-500">{(Number(insp.odometer) || 0).toLocaleString()} km</p>
                     </td>
-                    <td className="px-8 py-5 text-center">
-                       <button 
-                         onClick={() => handlePrintRequest(insp)}
-                         className="size-9 bg-white border border-slate-200 text-slate-400 hover:text-primary hover:border-blue-200 rounded-xl transition-all flex items-center justify-center mx-auto shadow-sm"
-                       >
-                         <span className="material-symbols-outlined text-lg">description</span>
-                       </button>
-                    </td>
+                     <td className="px-8 py-5 text-center">
+                        <div className="flex items-center justify-center gap-2">
+                          <button 
+                            onClick={() => handlePrintRequest(insp)}
+                            className="size-9 bg-white border border-slate-200 text-slate-400 hover:text-primary hover:border-blue-200 rounded-xl transition-all flex items-center justify-center shadow-sm"
+                          >
+                            <span className="material-symbols-outlined text-lg">description</span>
+                          </button>
+                          <button 
+                            onClick={() => handleEdit(insp)}
+                            className="size-9 bg-white border border-slate-200 text-slate-400 hover:text-primary hover:border-blue-200 rounded-xl transition-all flex items-center justify-center shadow-sm"
+                          >
+                            <span className="material-symbols-outlined text-lg">edit</span>
+                          </button>
+                        </div>
+                     </td>
                   </tr>
                 );
               })}
@@ -348,11 +380,11 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
       {showModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-300 no-print">
           <div className="bg-white rounded-[2.5rem] w-full max-w-4xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-              <div>
-                <h3 className="text-xl font-black text-slate-900 tracking-tight">Registrar Revisión</h3>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-0.5">Evaluación de condiciones mecánicas</p>
-              </div>
+             <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+               <div>
+                 <h3 className="text-xl font-black text-slate-900 tracking-tight">{editingInspection ? 'Editar Revisión' : 'Registrar Revisión'}</h3>
+                 <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-0.5">Evaluación de condiciones mecánicas</p>
+               </div>
               <button onClick={() => !isSaving && setShowModal(false)} disabled={isSaving} className="size-10 rounded-full hover:bg-white hover:shadow-md transition-all flex items-center justify-center text-slate-400">
                 <span className="material-symbols-outlined">close</span>
               </button>
@@ -412,7 +444,7 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
               <div className="pt-4 flex gap-4">
                 <button type="button" disabled={isSaving} onClick={() => setShowModal(false)} className="flex-1 py-4 text-[11px] font-black uppercase tracking-widest text-slate-500 disabled:opacity-50">Cancelar</button>
                 <button type="submit" disabled={isSaving} className="flex-[2] py-4 bg-[#135bec] text-white text-[11px] font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-blue-500/20 hover:bg-blue-600 transition-all disabled:opacity-80 flex items-center justify-center gap-3">
-                  {isSaving ? <><span className="material-symbols-outlined animate-spin">sync</span> Guardando...</> : 'Registrar Revisión'}
+                  {isSaving ? <><span className="material-symbols-outlined animate-spin">sync</span> Guardando...</> : (editingInspection ? 'Guardar Cambios' : 'Registrar Revisión')}
                 </button>
               </div>
             </form>

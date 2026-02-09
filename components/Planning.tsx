@@ -11,6 +11,7 @@ interface PlanningProps {
   onAddPlanning: (p: Omit<Planning, 'id'>) => Promise<void>;
   onUpdatePlanning: (p: Planning) => Promise<void>;
   onAddArea: (a: Omit<Area, 'id'>) => Promise<void>;
+  onDeleteArea: (id: string) => Promise<void>;
 }
 
 type ViewMode = 'week' | 'day' | 'month';
@@ -43,7 +44,7 @@ const formatTime = (time: string | undefined) => {
   return time;
 };
 
-const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drivers, areas, settings = [], onAddPlanning, onUpdatePlanning, onAddArea }) => {
+const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drivers, areas, settings = [], onAddPlanning, onUpdatePlanning, onAddArea, onDeleteArea }) => {
   const [viewMode, setViewMode] = useState<ViewMode>('week');
   const [showModal, setShowModal] = useState(false);
   const [showAreaModal, setShowAreaModal] = useState(false);
@@ -212,6 +213,15 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
       alert("Error al guardar área");
     } finally {
       setIsSavingArea(false);
+    }
+  };
+
+  const handleDeleteArea = async (id: string) => {
+    if (!confirm('¿Estás seguro de eliminar esta área?')) return;
+    try {
+      await onDeleteArea(id);
+    } catch (err) {
+      alert("Error al eliminar área");
     }
   };
 
@@ -502,6 +512,14 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
         </div>
 
         <div className="flex items-center gap-3">
+          <button 
+            onClick={() => setShowAreaModal(true)}
+            className="hidden md:flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 text-[11px] font-black uppercase tracking-widest rounded-xl hover:bg-slate-50 transition-all shadow-sm"
+          >
+            <span className="material-symbols-outlined text-lg">layers</span>
+            Áreas
+          </button>
+          
           <button 
             onClick={() => setShowPrintPreview(true)}
             className="hidden md:flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 text-[11px] font-black uppercase tracking-widest rounded-xl hover:bg-slate-50 transition-all shadow-sm"
@@ -802,6 +820,13 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
                       <div className="size-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center"><span className="material-symbols-outlined text-lg">location_on</span></div>
                       <span className="text-sm font-black text-slate-800">{a.name}</span>
                     </div>
+                    <button 
+                      onClick={() => handleDeleteArea(a.id)}
+                      className="size-8 rounded-lg hover:bg-rose-100 text-slate-400 hover:text-rose-600 flex items-center justify-center transition-colors"
+                      title="Eliminar área"
+                    >
+                      <span className="material-symbols-outlined text-lg">delete</span>
+                    </button>
                   </div>
                 ))}
               </div>

@@ -27,10 +27,11 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
   const [formData, setFormData] = useState({
     name: '',
     licenseType: 'Tipo A',
+    licenseNumber: '',
     phone: '',
     status: 'available' as 'available' | 'en-route' | 'on-break',
-    image: '',
-    assignedVehicleId: ''
+    assignedVehicleId: '',
+    notes: ''
   });
 
   // Buscamos el vehículo asignado recorriendo la lista de vehículos (Fuente de verdad)
@@ -42,7 +43,8 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
              assignedVehicle?.plate?.toLowerCase().includes(query) ||
              assignedVehicle?.model?.toLowerCase().includes(query) ||
              driver.phone?.includes(query) ||
-             driver.licenseType?.toLowerCase().includes(query);
+             driver.licenseType?.toLowerCase().includes(query) ||
+             driver.licenseNumber?.includes(query);
     });
   }, [drivers, vehicles, searchQuery]);
 
@@ -51,10 +53,11 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
     setFormData({
       name: driver.name,
       licenseType: driver.licenseType,
+      licenseNumber: driver.licenseNumber || '',
       phone: driver.phone,
       status: driver.status,
-      image: driver.image,
-      assignedVehicleId: driver.assignedVehicleId || ''
+      assignedVehicleId: driver.assignedVehicleId || '',
+      notes: driver.notes || ''
     });
     setShowModal(true);
   };
@@ -69,10 +72,11 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
     setFormData({
       name: '',
       licenseType: 'Tipo A',
+      licenseNumber: '',
       phone: '',
       status: 'available',
-      image: '',
-      assignedVehicleId: ''
+      assignedVehicleId: '',
+      notes: ''
     });
     setShowModal(true);
   };
@@ -89,10 +93,7 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
           ...formData
         });
       } else {
-        await onAddDriver({
-          ...formData,
-          image: formData.image || `https://picsum.photos/seed/${formData.name}/200`
-        });
+        await onAddDriver(formData);
       }
 
       setShowModal(false);
@@ -109,9 +110,8 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
   // Normalizar la ruta del logo (convertir rutas relativas a absolutas)
   const rawLogo = settingsMap['APP_LOGO'] || '/images/logo-dif.png';
   const appLogo = rawLogo.startsWith('./') ? rawLogo.replace('./', '/') : rawLogo;
-  const directorName = settingsMap['INSTITUTION_HEAD_NAME'] || 'Director General';
   const managerName = settingsMap['VEHICLE_MANAGER_NAME'] || 'Encargado del Parque Vehicular';
-
+  const managerPosition = settingsMap['VEHICLE_MANAGER_POS'] || 'Encargado del Parque Vehicular';
   const assignedVehicleForPrint = selectedDriver ? (vehicles.find(v => v.assignedDriverId === selectedDriver.id) || vehicles.find(v => v.id === selectedDriver.assignedVehicleId)) : null;
 
   return (
@@ -218,7 +218,7 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
                 
                 <div className="mb-6">
                   <h3 className="text-slate-900 font-black text-lg tracking-tight group-hover:text-[#135bec] transition-colors leading-tight">{driver.name}</h3>
-                  <p className="text-[10px] font-black text-[#135bec]/80 mt-1 uppercase tracking-[0.2em]">{driver.licenseType}</p>
+                  <p className="text-[10px] font-black text-[#135bec]/80 mt-1 uppercase tracking-[0.2em]">{driver.licenseType} {driver.licenseNumber ? `- ${driver.licenseNumber}` : ''}</p>
                 </div>
                 
                 <div className="space-y-3.5 pt-6 border-t border-slate-50">
@@ -290,6 +290,19 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
                   </select>
                 </div>
                 <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Número de Licencia</label>
+                  <input 
+                    disabled={isSaving}
+                    className="w-full bg-slate-50 border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 outline-none transition-all disabled:opacity-60"
+                    placeholder="Ej. 12345678"
+                    value={formData.licenseNumber}
+                    onChange={e => setFormData({...formData, licenseNumber: e.target.value})}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Teléfono de Contacto</label>
                   <input 
                     required
@@ -333,13 +346,13 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">URL de Foto (Opcional)</label>
-                <input 
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Notas u Observaciones (Opcional)</label>
+                <textarea 
                   disabled={isSaving}
-                  className="w-full bg-slate-50 border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 outline-none transition-all disabled:opacity-60"
-                  placeholder="https://..."
-                  value={formData.image}
-                  onChange={e => setFormData({...formData, image: e.target.value})}
+                  className="w-full bg-slate-50 border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 outline-none transition-all disabled:opacity-60 resize-vertical min-h-[100px]"
+                  placeholder="Escriba cualquier nota o observación relevante sobre el chofer..."
+                  value={formData.notes}
+                  onChange={e => setFormData({...formData, notes: e.target.value})}
                 />
               </div>
 
@@ -421,56 +434,72 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
                                 <p className="text-lg font-bold text-slate-800 uppercase">{selectedDriver.licenseType}</p>
                             </div>
                             <div>
+                                <p className="text-[8pt] font-black text-slate-400 uppercase tracking-widest mb-1">Número de Licencia</p>
+                                <p className="text-lg font-bold text-slate-800 uppercase">{selectedDriver.licenseNumber || '---'}</p>
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-6">
+                            <div>
                                 <p className="text-[8pt] font-black text-slate-400 uppercase tracking-widest mb-1">Teléfono</p>
                                 <p className="text-lg font-bold text-slate-800">{selectedDriver.phone}</p>
                             </div>
-                        </div>
-                        <div>
-                            <p className="text-[8pt] font-black text-slate-400 uppercase tracking-widest mb-1">Estado Actual</p>
-                            <span className={`inline-block px-3 py-1 rounded border text-xs font-black uppercase tracking-widest ${
-                                selectedDriver.status === 'available' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                                selectedDriver.status === 'en-route' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                                'bg-amber-50 text-amber-700 border-amber-200'
-                            }`}>
-                                {selectedDriver.status === 'available' ? 'Disponible' : selectedDriver.status === 'en-route' ? 'En Ruta' : 'De Descanso'}
-                            </span>
+                            <div>
+                                <p className="text-[8pt] font-black text-slate-400 uppercase tracking-widest mb-1">Estado Actual</p>
+                                <span className={`inline-block px-3 py-1 rounded border text-xs font-black uppercase tracking-widest ${
+                                    selectedDriver.status === 'available' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                                    selectedDriver.status === 'en-route' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                                    'bg-amber-50 text-amber-700 border-amber-200'
+                                }`}>
+                                    {selectedDriver.status === 'available' ? 'Disponible' : selectedDriver.status === 'en-route' ? 'En Ruta' : 'De Descanso'}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div className="mb-12">
-                   <h4 className="bg-slate-900 text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">Asignación de Unidad</h4>
-                   <div className="border-2 border-slate-100 rounded-xl p-6 bg-slate-50/50">
-                      {assignedVehicleForPrint ? (
-                          <div className="grid grid-cols-2 gap-8">
-                              <div>
-                                  <p className="text-[8pt] font-black text-slate-400 uppercase tracking-widest mb-1">Vehículo</p>
-                                  <p className="text-xl font-black text-slate-900 uppercase">{assignedVehicleForPrint.model}</p>
-                                  <p className="text-[10pt] font-bold text-primary uppercase mt-1">{assignedVehicleForPrint.brand} {assignedVehicleForPrint.line}</p>
-                              </div>
-                              <div className="text-right">
-                                  <p className="text-[8pt] font-black text-slate-400 uppercase tracking-widest mb-1">Placas</p>
-                                  <div className="inline-block border-4 border-slate-800 px-4 py-1 rounded bg-white">
-                                      <p className="text-xl font-black text-slate-900 uppercase tracking-widest">{assignedVehicleForPrint.plate}</p>
-                                  </div>
-                              </div>
-                          </div>
-                      ) : (
-                          <p className="text-center text-slate-400 font-bold uppercase py-4">Sin unidad asignada actualmente</p>
-                      )}
-                   </div>
-                </div>
+                 <div className="mb-12">
+                    <h4 className="bg-slate-900 text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">Asignación de Unidad</h4>
+                    <div className="border-2 border-slate-100 rounded-xl p-6 bg-slate-50/50">
+                       {assignedVehicleForPrint ? (
+                           <div className="grid grid-cols-2 gap-8">
+                               <div>
+                                   <p className="text-[8pt] font-black text-slate-400 uppercase tracking-widest mb-1">Vehículo</p>
+                                   <p className="text-xl font-black text-slate-900 uppercase">{assignedVehicleForPrint.model}</p>
+                                   <p className="text-[10pt] font-bold text-primary uppercase mt-1">{assignedVehicleForPrint.brand} {assignedVehicleForPrint.line}</p>
+                               </div>
+                               <div className="text-right">
+                                   <p className="text-[8pt] font-black text-slate-400 uppercase tracking-widest mb-1">Placas</p>
+                                   <div className="inline-block border-4 border-slate-800 px-4 py-1 rounded bg-white">
+                                       <p className="text-xl font-black text-slate-900 uppercase tracking-widest">{assignedVehicleForPrint.plate}</p>
+                                   </div>
+                               </div>
+                           </div>
+                       ) : (
+                           <p className="text-center text-slate-400 font-bold uppercase py-4">Sin unidad asignada actualmente</p>
+                       )}
+                    </div>
+                 </div>
+
+                 {selectedDriver.notes && (
+                 <div className="mb-12">
+                    <h4 className="bg-slate-900 text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">Notas u Observaciones</h4>
+                    <div className="border-2 border-slate-100 rounded-xl p-6 bg-slate-50/50">
+                        <p className="text-[10pt] font-bold text-slate-700 leading-relaxed">{selectedDriver.notes}</p>
+                    </div>
+                 </div>
+                 )}
 
                 {/* Firmas */}
                 <div className="absolute bottom-[1.5cm] left-[1.5cm] right-[1.5cm]">
                     <div className="grid grid-cols-2 gap-24 text-center">
                     <div className="border-t-2 border-slate-900 pt-4">
                         <p className="text-[9pt] font-black uppercase text-slate-900">{selectedDriver.name}</p>
-                        <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Firma del Operador</p>
+                        <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Firma del Chofer</p>
                     </div>
                     <div className="border-t-2 border-slate-900 pt-4">
                         <p className="text-[9pt] font-black uppercase text-slate-900">{managerName}</p>
-                        <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Autorización</p>
+                        <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">{managerPosition}</p>
+                        <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">VAlidó</p>
                     </div>
                     </div>
                     <div className="text-center mt-8 border-t border-slate-200 pt-2">

@@ -47,10 +47,10 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
   const filteredVehicles = useMemo(() => {
     return vehicles.filter(v => {
       const driver = drivers.find(d => d.id === v.assignedDriverId);
-      const matchesSearch = v.plate?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                           v.model?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           v.brand?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           driver?.name?.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch = (typeof v.plate === 'string' && v.plate.toLowerCase().includes(searchQuery.toLowerCase())) || 
+                           (typeof v.model === 'string' && v.model.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                           (typeof v.brand === 'string' && v.brand.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                           (typeof driver?.name === 'string' && driver.name.toLowerCase().includes(searchQuery.toLowerCase()));
       const matchesStatus = statusFilter === 'todos' || v.status === statusFilter;
       return matchesSearch && matchesStatus;
     });
@@ -137,10 +137,10 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
   // Obtener la ruta del logo con base correcta
   const rawLogo = settingsMap['APP_LOGO'] || '/images/logo-dif.png';
   const appLogo = rawLogo.startsWith('./') ? rawLogo.replace('./', '/') : rawLogo;
-  const directorName = settingsMap['INSTITUTION_HEAD_NAME']; 
-  const headOfMaterialsName = settingsMap['HEAD_OF_MATERIAL_RESOURCES'];
-  const headOfMaterialsPosition = settingsMap['HEAD_OF_MATERIAL_RESOURCES_POS'] || 'Jefe de Recursos Materiales';
-  const directorPosition = settingsMap['INSTITUTION_HEAD_POS'] || 'Director General';
+  const directorName = settingsMap['ADMINISTRATIVE_COORDINATOR_NAME']; 
+  const headOfMaterialsName = settingsMap['VEHICLE_MANAGER_NAME'];
+  const headOfMaterialsPosition = settingsMap['VEHICLE_MANAGER_POS'] || 'Encargado de Parque Vehicular';
+  const directorPosition = settingsMap['ADMINISTRATIVE_COORDINATOR_POS'] || 'Coordinador Administrativo';
 
   return (
     <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500 pb-20">
@@ -247,7 +247,7 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
                   <tr key={vehicle.id} className="hover:bg-slate-50 transition-colors group">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-4">
-                         <img src={vehicle.image} className="size-10 rounded-lg object-cover" />
+                         {/* <img src={vehicle.image} className="size-10 rounded-lg object-cover" /> */}
                          <div>
                             <p className="font-black text-slate-900 tracking-tight">{vehicle.model}</p>
                             <p className="text-[10px] text-primary font-bold uppercase">{vehicle.brand} {vehicle.line}</p>
@@ -448,12 +448,12 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
                  <div className="mb-8 mt-6 break-inside-avoid">
                      <div className="grid grid-cols-2 gap-x-8 gap-y-4">
                           <div className="border-b border-slate-200 pb-2">
-                              <div className="text-[9pt] font-black text-slate-400 uppercase">Placas</div>
-                              <div className="text-[16pt] font-black text-slate-900 tracking-widest">{selectedForPrint.plate}</div>
+                              <div className="text-[9pt] font-black text-slate-400 uppercase">Número Económico</div>
+                              <div className="text-[16pt] font-black text-slate-900 tracking-widest">{selectedForPrint.economicNumber || '---'}</div>
                           </div>
                           <div className="border-b border-slate-200 pb-2">
-                              <div className="text-[9pt] font-black text-slate-400 uppercase">Número Económico</div>
-                              <div className="text-[11pt] font-bold text-slate-900">{selectedForPrint.economicNumber || '---'}</div>
+                              <div className="text-[9pt] font-black text-slate-400 uppercase">Placas</div>
+                              <div className="text-[16pt] font-black text-slate-900 tracking-widest">{selectedForPrint.plate}</div>
                           </div>
                           <div className="border-b border-slate-200 pb-2">
                               <div className="text-[9pt] font-black text-slate-400 uppercase">Marca/Línea</div>
@@ -534,7 +534,7 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
                      <div className="border-t-2 border-slate-900 pt-4">
                          <p className="text-[9pt] font-black uppercase text-slate-900">{headOfMaterialsName || 'Jefe de Recursos Materiales'}</p>
                          <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">{headOfMaterialsPosition}</p>
-                         <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Validación</p>
+                         <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Elaboró</p>
                      </div>
                      <div className="border-t-2 border-slate-900 pt-4">
                          <p className="text-[9pt] font-black uppercase text-slate-900">{directorName || 'Director General'}</p>

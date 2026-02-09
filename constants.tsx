@@ -11,10 +11,10 @@ export const VEHICLES: Vehicle[] = [
 
 export const DRIVERS: Driver[] = [
   // Fixed: Use assignedVehicleId instead of assignedVehicle
-  { id: '1', name: 'Carlos Rodríguez', licenseType: 'Tipo A', phone: '+52 55 1234 5678', status: 'available', assignedVehicleId: '1', image: 'https://picsum.photos/seed/driver1/200' },
-  { id: '2', name: 'Ana Martínez', licenseType: 'Tipo B', phone: '+52 55 8765 4321', status: 'en-route', assignedVehicleId: '2', image: 'https://picsum.photos/seed/driver2/200' },
-  { id: '3', name: 'Luis Guevara', licenseType: 'Tipo C', phone: '+52 55 9988 7766', status: 'on-break', assignedVehicleId: '3', image: 'https://picsum.photos/seed/driver3/200' },
-  { id: '4', name: 'Sofía López', licenseType: 'Tipo A', phone: '+52 55 1122 3344', status: 'en-route', assignedVehicleId: '4', image: 'https://picsum.photos/seed/driver4/200' },
+  { id: '1', name: 'Carlos Rodríguez', licenseType: 'Tipo A', licenseNumber: '12345678', phone: '+52 55 1234 5678', status: 'available', assignedVehicleId: '1' },
+  { id: '2', name: 'Ana Martínez', licenseType: 'Tipo B', licenseNumber: '87654321', phone: '+52 55 8765 4321', status: 'en-route', assignedVehicleId: '2' },
+  { id: '3', name: 'Luis Guevara', licenseType: 'Tipo C', licenseNumber: '11223344', phone: '+52 55 9988 7766', status: 'on-break', assignedVehicleId: '3' },
+  { id: '4', name: 'Sofía López', licenseType: 'Tipo A', licenseNumber: '55667788', phone: '+52 55 1122 3344', status: 'en-route', assignedVehicleId: '4' },
 ];
 
 export const INCIDENTS: Incident[] = [

@@ -87,6 +87,9 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
   const [showPrintPreview, setShowPrintPreview] = useState(false);
   const [selectedLog, setSelectedLog] = useState<TravelLog | null>(null);
   const [editingLog, setEditingLog] = useState<TravelLog | null>(null);
+  const [showBlankBitacoraModal, setShowBlankBitacoraModal] = useState(false);
+  const [blankBitacoraVehicleId, setBlankBitacoraVehicleId] = useState('');
+  const [showBlankBitacoraPrint, setShowBlankBitacoraPrint] = useState(false);
   
   const settingsMap = useMemo(() => {
     const map: Record<string, string> = {};
@@ -212,6 +215,15 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
   const selectedVehicle = selectedLog ? vehicles.find(v => v.id === selectedLog.vehicleId) : null;
   const selectedDriver = selectedLog ? drivers.find(d => d.id === selectedLog.driverId) : null;
   const selectedArea = selectedLog ? areas.find(a => a.id === selectedLog.areaId) : null;
+  const blankBitacoraVehicle = vehicles.find(v => v.id === blankBitacoraVehicleId) || null;
+
+  const handlePrintBlankBitacora = () => {
+    if (!blankBitacoraVehicleId) return;
+    setShowBlankBitacoraModal(false);
+    setShowBlankBitacoraPrint(true);
+  };
+
+  const BLANK_ROWS = 9;
 
   return (
     <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500 pb-20">
@@ -225,15 +237,20 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
              -webkit-print-color-adjust: exact !important;
              print-color-adjust: exact !important;
            }
-           #travel-printable { 
-             position: absolute; 
-             left: 0; 
-             top: 0; 
-             width: 100%; 
-             padding: 0; 
+           #travel-printable, #blank-bitacora-printable {
+             position: absolute;
+             left: 0;
+             top: 0;
+             width: 100%;
+             padding: 0;
              margin: 0;
-             background: white !important; 
+             background: white !important;
              font-family: 'Inter', sans-serif;
+           }
+           #blank-bitacora-printable, #blank-bitacora-printable * {
+             visibility: visible;
+             -webkit-print-color-adjust: exact !important;
+             print-color-adjust: exact !important;
            }
            .no-print { display: none !important; }
            @page { margin: 0.5cm; size: letter; }
@@ -259,13 +276,22 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
           <h2 className="text-2xl font-black text-slate-900 tracking-tight">Bitácora de Viajes</h2>
           <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mt-1">Control operativo y registro de entradas/salidas.</p>
         </div>
-        <button 
-          onClick={() => { resetForm(); setShowModal(true); }}
-          className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white text-[11px] font-black uppercase tracking-widest rounded-xl hover:opacity-90 transition-all shadow-lg shadow-blue-500/20"
-        >
-          <span className="material-symbols-outlined text-xl">add_road</span>
-          Registrar Salida
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => { setBlankBitacoraVehicleId(''); setShowBlankBitacoraModal(true); }}
+            className="flex items-center gap-2 px-5 py-2.5 bg-white border-2 border-slate-200 text-slate-700 text-[11px] font-black uppercase tracking-widest rounded-xl hover:border-primary hover:text-primary transition-all"
+          >
+            <span className="material-symbols-outlined text-xl">print</span>
+            Imprimir Bitácora
+          </button>
+          <button
+            onClick={() => { resetForm(); setShowModal(true); }}
+            className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white text-[11px] font-black uppercase tracking-widest rounded-xl hover:opacity-90 transition-all shadow-lg shadow-blue-500/20"
+          >
+            <span className="material-symbols-outlined text-xl">add_road</span>
+            Registrar Salida
+          </button>
+        </div>
       </div>
 
       <div className="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden flex flex-col no-print">
@@ -714,6 +740,218 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
                        <p className="text-[7pt] font-black text-slate-300 uppercase tracking-[0.3em]">Sistema de Gestion de Parque Vehicular • DIF Municipal La Paz</p>
                    </div>
                </div>
+
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL SELECCIÓN DE VEHÍCULO PARA BITÁCORA EN BLANCO */}
+      {showBlankBitacoraModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-300 no-print">
+          <div className="bg-white rounded-[2.5rem] w-full max-w-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+              <div>
+                <h3 className="text-xl font-black text-slate-900 tracking-tight">Imprimir Bitácora en Blanco</h3>
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Selecciona el vehículo para generar el formato</p>
+              </div>
+              <button onClick={() => setShowBlankBitacoraModal(false)} className="size-10 rounded-full hover:bg-white hover:shadow-md transition-all flex items-center justify-center text-slate-400">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <div className="p-8 space-y-6">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Vehículo</label>
+                <select
+                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none focus:ring-4 focus:ring-blue-500/10"
+                  value={blankBitacoraVehicleId}
+                  onChange={e => setBlankBitacoraVehicleId(e.target.value)}
+                >
+                  <option value="">Seleccionar vehículo...</option>
+                  {vehicles.filter(v => v.status === 'active').map(v => (
+                    <option key={v.id} value={v.id}>{v.plate} — {v.model} {v.brand ? `(${v.brand})` : ''}</option>
+                  ))}
+                </select>
+              </div>
+              {blankBitacoraVehicleId && blankBitacoraVehicle && (
+                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center gap-4">
+                  <div className="size-12 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm">
+                    <span className="material-symbols-outlined">directions_car</span>
+                  </div>
+                  <div>
+                    <p className="font-bold text-slate-900 leading-tight">{blankBitacoraVehicle.model}</p>
+                    <p className="text-xs font-mono text-slate-500">{blankBitacoraVehicle.plate} {blankBitacoraVehicle.economicNumber ? `• No. Eco: ${blankBitacoraVehicle.economicNumber}` : ''}</p>
+                  </div>
+                </div>
+              )}
+              <div className="flex gap-4 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowBlankBitacoraModal(false)}
+                  className="flex-1 py-3.5 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-50 rounded-2xl transition-all"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={handlePrintBlankBitacora}
+                  disabled={!blankBitacoraVehicleId}
+                  className="flex-[2] py-3.5 bg-primary text-white text-[11px] font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-blue-500/20 hover:opacity-90 transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <span className="material-symbols-outlined text-lg">print</span>
+                  Generar Formato
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* VISTA PREVIA BITÁCORA EN BLANCO PARA IMPRIMIR */}
+      {showBlankBitacoraPrint && blankBitacoraVehicle && (
+        <div className="fixed inset-0 z-[200] bg-white flex flex-col overflow-y-auto">
+          <div className="sticky top-0 bg-slate-900 p-4 flex justify-between items-center text-white shadow-lg no-print">
+            <div className="flex items-center gap-4">
+              <button onClick={() => setShowBlankBitacoraPrint(false)} className="size-10 flex items-center justify-center hover:bg-white/10 rounded-full transition-colors">
+                <span className="material-symbols-outlined">arrow_back</span>
+              </button>
+              <div>
+                <p className="text-sm font-black uppercase tracking-widest">Bitácora en Blanco</p>
+                <p className="text-xs text-slate-400">{blankBitacoraVehicle.plate} — {blankBitacoraVehicle.model}</p>
+              </div>
+            </div>
+            <button onClick={() => window.print()} className="bg-primary px-6 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center gap-2 shadow-lg hover:opacity-90 transition-all">
+              <span className="material-symbols-outlined text-sm">print</span> Imprimir
+            </button>
+          </div>
+
+          <style>{`
+            @media print {
+              @page { margin: 0.4cm; size: letter landscape; }
+            }
+          `}</style>
+          <div className="flex-1 bg-slate-100 p-6 flex justify-center overflow-auto">
+            <div id="blank-bitacora-printable" className="bg-white shadow-2xl relative text-slate-900" style={{ width: '27.94cm', minHeight: '21.59cm', padding: '0.8cm 1cm' }}>
+              
+              {/* Header Institucional */}
+              <div className="flex justify-between items-center border-b-2 border-slate-900 pb-3 mb-3">
+                <div className="flex items-center gap-4">
+                  <img src={appLogo} alt="Logo" className="w-16 object-contain" />
+                  <div className="flex flex-col">
+                    <span className="text-[10pt] font-black text-slate-900 uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
+                    <span className="text-[10pt] font-black text-slate-900 uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>
+                    <span className="text-[7pt] font-bold uppercase text-slate-400 mt-1 tracking-[0.2em]">Parque Vehicular • Bitácora de Viajes</span>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="inline-block bg-slate-900 text-white px-3 py-1 font-black text-[8pt] uppercase tracking-widest rounded-sm mb-1">
+                    Bitácora de Viajes
+                  </div>
+                  <p className="text-[8pt] text-slate-400 font-bold">Formato para llenado manual</p>
+                </div>
+              </div>
+
+              {/* Datos del Vehículo y Semana */}
+              <div className="mb-3">
+                {/* Campo Semana - será llenado a mano */}
+                <div className="flex items-center gap-2 mb-2 pb-2 border-b border-slate-300">
+                  <span className="font-black text-slate-500 uppercase whitespace-nowrap text-[8pt]">Semana del:</span>
+                  <span className="font-bold text-slate-900 border-b border-slate-300 flex-1 pb-0.5 text-[9pt]">___ al ___ de ____________ _______</span>
+                </div>
+                <div className="grid grid-cols-6 gap-x-4 gap-y-1 text-[8pt]">
+                  <div className="col-span-2 flex items-center gap-1">
+                    <span className="font-black text-slate-500 uppercase whitespace-nowrap">Vehículo:</span>
+                    <span className="font-bold text-slate-900 border-b border-slate-300 flex-1 pb-0.5">{blankBitacoraVehicle.model || '---'}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="font-black text-slate-500 uppercase whitespace-nowrap">Marca:</span>
+                    <span className="font-bold text-slate-900 border-b border-slate-300 flex-1 pb-0.5">{blankBitacoraVehicle.brand || '---'}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="font-black text-slate-500 uppercase whitespace-nowrap">Año:</span>
+                    <span className="font-bold text-slate-900 border-b border-slate-300 flex-1 pb-0.5">{blankBitacoraVehicle.year || '---'}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="font-black text-slate-500 uppercase whitespace-nowrap">Placas:</span>
+                    <span className="font-bold text-slate-900 border-b border-slate-300 flex-1 pb-0.5 tracking-wider">{blankBitacoraVehicle.plate || '---'}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="font-black text-slate-500 uppercase whitespace-nowrap">No. Eco:</span>
+                    <span className="font-bold text-slate-900 border-b border-slate-300 flex-1 pb-0.5">{blankBitacoraVehicle.economicNumber || '---'}</span>
+                  </div>
+                  <div className="col-span-2 flex items-center gap-1">
+                    <span className="font-black text-slate-500 uppercase whitespace-nowrap">Color:</span>
+                    <span className="font-bold text-slate-900 border-b border-slate-300 flex-1 pb-0.5">{blankBitacoraVehicle.color || '---'}</span>
+                  </div>
+                  <div className="col-span-2 flex items-center gap-1">
+                    <span className="font-black text-slate-500 uppercase whitespace-nowrap">Tipo Combustible:</span>
+                    <span className="font-bold text-slate-900 border-b border-slate-300 flex-1 pb-0.5">{blankBitacoraVehicle.fuelType || '---'}</span>
+                  </div>
+                  <div className="col-span-2 flex items-center gap-1">
+                    <span className="font-black text-slate-500 uppercase whitespace-nowrap">No. Inventario:</span>
+                    <span className="font-bold text-slate-900 border-b border-slate-300 flex-1 pb-0.5">{blankBitacoraVehicle.inventory || '---'}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Tabla de Registros en Blanco */}
+              <div className="border border-slate-400 rounded overflow-hidden">
+                <table className="w-full border-collapse" style={{ tableLayout: 'fixed' }}>
+                  <thead>
+                    <tr className="bg-slate-800 text-white">
+                      <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide border-r border-slate-600 text-center" style={{ width: '6%' }}>Fecha</th>
+                      <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide border-r border-slate-600 text-center" style={{ width: '11%' }}>Destino / Comisión</th>
+                      <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide border-r border-slate-600 text-center" style={{ width: '5.5%' }}>Hora Salida</th>
+                      <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide border-r border-slate-600 text-center" style={{ width: '5.5%' }}>Hora Llegada</th>
+                      <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide border-r border-slate-600 text-center" style={{ width: '7%' }}>Km Inicial</th>
+                      <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide border-r border-slate-600 text-center" style={{ width: '7%' }}>Km Final</th>
+                      <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide border-r border-slate-600 text-center" style={{ width: '7%' }}>Km Recorridos</th>
+                      <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide border-r border-slate-600 text-center" style={{ width: '7%' }}>Tanque Inicial</th>
+                      <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide border-r border-slate-600 text-center" style={{ width: '7%' }}>Tanque Final</th>
+                      <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide border-r border-slate-600 text-center" style={{ width: '12%' }}>Nombre del Chofer</th>
+                      <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide border-r border-slate-600 text-center" style={{ width: '8%' }}>Firma Salida</th>
+                      <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide text-center" style={{ width: '8%' }}>Firma Entrada</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Array.from({ length: BLANK_ROWS }).map((_, i) => (
+                      <tr key={i} className={`${i % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'} border-t border-slate-300`}>
+                        <td className="py-3 px-1 border-r border-slate-200 text-center text-[7pt] text-slate-300">____/____/____</td>
+                        <td className="py-3 px-1 border-r border-slate-200">&nbsp;</td>
+                        <td className="py-3 px-1 border-r border-slate-200 text-center text-[7pt] text-slate-300">__:__ __</td>
+                        <td className="py-3 px-1 border-r border-slate-200 text-center text-[7pt] text-slate-300">__:__ __</td>
+                        <td className="py-3 px-1 border-r border-slate-200">&nbsp;</td>
+                        <td className="py-3 px-1 border-r border-slate-200">&nbsp;</td>
+                        <td className="py-3 px-1 border-r border-slate-200">&nbsp;</td>
+                        <td className="py-3 px-1 border-r border-slate-200">&nbsp;</td>
+                        <td className="py-3 px-1 border-r border-slate-200">&nbsp;</td>
+                        <td className="py-3 px-1 border-r border-slate-200">&nbsp;</td>
+                        <td className="py-3 px-1 border-r border-slate-200">&nbsp;</td>
+                        <td className="py-3 px-1">&nbsp;</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Footer con firmas de validación */}
+              <div className="mt-4 flex justify-between items-end">
+                <div className="text-[7pt] text-slate-400">
+                  <p className="font-bold">* Cada registro debe ser llenado por el chofer responsable al momento de salida y llegada.</p>
+                  <p className="font-bold">* Los niveles de tanque se registran como fracción (E, 1/4, 1/2, 3/4, F).</p>
+                </div>
+                <div className="text-center min-w-[200px]">
+                  <div className="border-t-2 border-slate-900 pt-2 mt-6">
+                    <p className="text-[8pt] font-black uppercase text-slate-900">{managerName}</p>
+                    <p className="text-[6pt] font-bold text-slate-400 uppercase tracking-widest">{managerPos}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer institucional */}
+              <div className="text-center mt-3 border-t border-slate-200 pt-1">
+                <p className="text-[6pt] font-black text-slate-300 uppercase tracking-[0.3em]">Sistema de Gestión de Parque Vehicular • DIF Municipal La Paz</p>
+              </div>
 
             </div>
           </div>

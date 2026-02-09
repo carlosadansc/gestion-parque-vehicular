@@ -17,6 +17,7 @@ import Inspections from './components/Inspections';
 import Users from './components/Users';
 import Reports from './components/Reports';
 import { googleSheets } from './services/googleSheets';
+import { verifyPassword } from './utils/password';
 
 const DEFAULT_SETTINGS: AppSetting[] = [
   { key: 'APP_NAME', value: 'DIF La Paz Flota' },
@@ -44,15 +45,9 @@ const DEFAULT_MAINTENANCE_TYPES: MaintenanceType[] = [
 ];
 
 const App: React.FC = () => {
-  // Temporarily bypass login for testing
-  const [currentUser, setCurrentUser] = useState<User | null>({ 
-    id: 'USR-1',
-    name: 'Super Administrador', 
-    username: 'admin', 
-    role: 'admin', 
-    status: 'active',
-    lastLogin: new Date().toISOString()
-  });
+  // Start with no user - show login screen
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [loginUsername, setLoginUsername] = useState('');
   const [loginPass, setLoginPass] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -90,10 +85,16 @@ const App: React.FC = () => {
   }, [settingsMap]);
 
   useEffect(() => {
-    const savedUrl = googleSheets.getServiceUrl();
     const savedUser = localStorage.getItem('fleet_pro_user');
-    if (savedUser) setCurrentUser(JSON.parse(savedUser));
-    if (savedUrl) handleSync();
+    if (savedUser) {
+      try {
+        const user = JSON.parse(savedUser);
+        setCurrentUser(user);
+      } catch (e) {
+        localStorage.removeItem('fleet_pro_user');
+      }
+    }
+    setIsLoading(false);
   }, []);
 
   const handleSync = async () => {
@@ -124,22 +125,45 @@ const App: React.FC = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError('');
+    
+    if (!loginUsername.trim() || !loginPass.trim()) {
+      setLoginError('Por favor ingrese usuario y contraseña.');
+      return;
+    }
+    
     setIsSyncing(true);
     try {
       const timestamp = new Date().toISOString();
       
-      if (loginUsername.toLowerCase() === 'admin' && loginPass === 'Macaco123') {
-        const adminUser: User = { 
-          id: 'USR-1',
-          name: 'Super Administrador', 
-          username: 'admin', 
-          role: 'admin', 
-          status: 'active',
-          lastLogin: timestamp
-        };
-        setCurrentUser(adminUser);
-        localStorage.setItem('fleet_pro_user', JSON.stringify(adminUser));
-        // await googleSheets.pushData('update-user', { id: adminUser.id, lastLogin: timestamp });
+      // Check against appUsers if available, otherwise use default admin
+      let authenticatedUser: User | null = null;
+      
+      if (appUsers.length > 0) {
+        // Validate against registered users (case-insensitive username)
+        const foundUser = appUsers.find(u => 
+          u.username.toLowerCase() === loginUsername.toLowerCase().trim()
+        );
+        
+        if (foundUser && await verifyPassword(loginPass, foundUser.password || '') && foundUser.status === 'active') {
+          authenticatedUser = { ...foundUser, lastLogin: timestamp };
+        }
+      } else {
+        // Default admin login for initial setup
+        if (loginUsername.toLowerCase() === 'admin' && loginPass === 'Macaco123') {
+          authenticatedUser = { 
+            id: 'USR-1',
+            name: 'Super Administrador', 
+            username: 'admin', 
+            role: 'admin', 
+            status: 'active',
+            lastLogin: timestamp
+          };
+        }
+      }
+      
+      if (authenticatedUser) {
+        setCurrentUser(authenticatedUser);
+        localStorage.setItem('fleet_pro_user', JSON.stringify(authenticatedUser));
         setIsSyncing(false);
         return;
       }
@@ -235,7 +259,9 @@ const App: React.FC = () => {
     const formatted = { 
       ...newDriver, 
       name: newDriver.name.toUpperCase(), 
-      licenseType: newDriver.licenseType.toUpperCase() 
+      licenseType: newDriver.licenseType.toUpperCase(),
+      licenseNumber: newDriver.licenseNumber || '',
+      notes: newDriver.notes || ''
     };
     const driverWithId = { ...formatted, id: `D-${Date.now()}` };
     
@@ -258,7 +284,9 @@ const App: React.FC = () => {
     const formatted = { 
       ...updatedDriver, 
       name: updatedDriver.name.toUpperCase(), 
-      licenseType: updatedDriver.licenseType.toUpperCase() 
+      licenseType: updatedDriver.licenseType.toUpperCase(),
+      licenseNumber: updatedDriver.licenseNumber || '',
+      notes: updatedDriver.notes || ''
     };
 
     // Obtenemos estado anterior
@@ -307,6 +335,11 @@ const App: React.FC = () => {
     };
     setFuelEntries([fuelWithId, ...fuelEntries]);
     await googleSheets.pushData('fuel', fuelWithId);
+  };
+
+  const handleUpdateFuel = async (updatedFuel: FuelEntry) => {
+    setFuelEntries(fuelEntries.map(f => f.id === updatedFuel.id ? updatedFuel : f));
+    await googleSheets.pushData('update-fuel', updatedFuel);
   };
 
   const handleAddIncident = async (newIncident: Omit<Incident, 'id'>) => {
@@ -360,6 +393,11 @@ const App: React.FC = () => {
     const aWithId = { ...formatted, id: `A-${Date.now()}` };
     setAreas([aWithId, ...areas]);
     await googleSheets.pushData('area', aWithId);
+  };
+
+  const handleDeleteArea = async (id: string) => {
+    setAreas(areas.filter(a => a.id !== id));
+    await googleSheets.pushData('delete-area', { id });
   };
 
   const handleAddTravelLog = async (newLog: Omit<TravelLog, 'id'>) => {
@@ -441,23 +479,36 @@ const App: React.FC = () => {
     await googleSheets.pushData('inspection' as any, inspectionWithId); 
   };
 
+  const handleUpdateInspection = async (updatedInspection: VehicleInspection) => {
+    setInspections(inspections.map(i => i.id === updatedInspection.id ? updatedInspection : i));
+    await googleSheets.pushData('update-inspection' as any, updatedInspection); 
+  };
+
   const renderContent = () => {
     switch (currentView) {
       case View.DASHBOARD: return <Dashboard vehicles={vehicles} drivers={drivers} fuelEntries={fuelEntries} incidents={incidents} />;
       case View.VEHICLES: return <Vehicles vehicles={vehicles} drivers={drivers} searchQuery={searchQuery} settings={appSettings} onAddVehicle={handleAddVehicle} onUpdateVehicle={handleUpdateVehicle} />;
-      case View.DRIVERS: return <Drivers drivers={drivers} vehicles={vehicles} searchQuery={searchQuery} onAddDriver={handleAddDriver} onUpdateDriver={handleUpdateDriver} />;
-       case View.FUEL: return <Fuel fuelHistory={fuelEntries} vehicles={vehicles} drivers={drivers} onAddFuel={handleAddFuel} onSync={handleSync} settings={appSettings} />;
+       case View.DRIVERS: return <Drivers drivers={drivers} vehicles={vehicles} searchQuery={searchQuery} onAddDriver={handleAddDriver} onUpdateDriver={handleUpdateDriver} settings={appSettings} />;
+       case View.FUEL: return <Fuel fuelHistory={fuelEntries} vehicles={vehicles} drivers={drivers} onAddFuel={handleAddFuel} onUpdateFuel={handleUpdateFuel} onSync={handleSync} settings={appSettings} />;
       case View.INCIDENTS: return <Incidents incidents={incidents} searchQuery={searchQuery} onAddIncident={handleAddIncident} onUpdateIncident={handleUpdateIncident} vehicles={vehicles} drivers={drivers} settings={appSettings} />;
       case View.MAINTENANCE: return <Maintenance records={maintenanceRecords} vehicles={vehicles} maintenanceTypes={maintenanceTypes} settings={appSettings} onAddRecord={handleAddMaintenance} onUpdateRecord={handleUpdateMaintenance} onAddMaintenanceType={handleAddMaintenanceType} onSync={handleSync} />;
       case View.TRAVEL_LOGS: return <TravelLogs travelLogs={travelLogs} vehicles={vehicles} drivers={drivers} areas={areas} settings={appSettings} onAddTravelLog={handleAddTravelLog} onUpdateTravelLog={handleUpdateTravelLog} onSync={handleSync} />;
-      case View.PLANNING: return <PlanningComponent plannings={plannings} vehicles={vehicles} drivers={drivers} areas={areas} onAddPlanning={handleAddPlanning} onUpdatePlanning={handleUpdatePlanning} onAddArea={handleAddArea} settings={appSettings} />;
-      case View.INSPECTIONS: return <Inspections inspections={inspections} vehicles={vehicles} onAddInspection={handleAddInspection} currentUser={currentUser} settings={appSettings} />;
+      case View.PLANNING: return <PlanningComponent plannings={plannings} vehicles={vehicles} drivers={drivers} areas={areas} onAddPlanning={handleAddPlanning} onUpdatePlanning={handleUpdatePlanning} onAddArea={handleAddArea} onDeleteArea={handleDeleteArea} settings={appSettings} />;
+       case View.INSPECTIONS: return <Inspections inspections={inspections} vehicles={vehicles} onAddInspection={handleAddInspection} onUpdateInspection={handleUpdateInspection} currentUser={currentUser} settings={appSettings} />;
       case View.REPORTS: return <Reports vehicles={vehicles} fuelEntries={fuelEntries} maintenanceRecords={maintenanceRecords} incidents={incidents} settings={appSettings} />;
       case View.USERS: return <Users users={appUsers} onAddUser={handleAddUser} onUpdateUser={handleUpdateUser} currentUser={currentUser} />;
       case View.SETTINGS: return <Settings settings={appSettings} onUpdateSetting={handleUpdateSetting} onUrlChange={handleSync} />;
       default: return <Dashboard vehicles={vehicles} drivers={drivers} fuelEntries={fuelEntries} incidents={incidents} />;
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   if (!currentUser) {
     return (

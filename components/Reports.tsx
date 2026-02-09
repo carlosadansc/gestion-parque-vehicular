@@ -521,12 +521,11 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
         `}</style>
 
        {/* HEADER & CONTROLS */}
+        <div className="">
+          <h2 className="text-2xl font-black text-slate-900 tracking-tight break-words">Reportes Dinámicos</h2>
+          <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mt-1 break-words">Análisis de vehiculos.</p>
+        </div>
        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 no-print">
-         <div className="">
-           <h2 className="text-2xl font-black text-slate-900 tracking-tight break-words">Reportes Dinámicos</h2>
-           <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mt-1 break-words">Análisis de flota.</p>
-         </div>
-         
          <div className="flex flex-col sm:flex-row gap-4 bg-white p-2 rounded-2xl border border-slate-200 shadow-sm">
            <div className="flex items-center gap-2 px-2">
              <span className="text-[10px] font-black text-slate-400 uppercase">Desde</span>
@@ -558,9 +557,9 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
          </div>
 
          <div className="flex gap-2">
-           <button onClick={() => setShowPrintPreview(true)} className="bg-blue-600 text-white px-6 py-3 rounded-xl font-black text-[11px] uppercase tracking-widest shadow-lg hover:bg-blue-700 transition-all flex items-center gap-2">
-             <span className="material-symbols-outlined text-lg">preview</span>
-             Vista Previa
+           <button onClick={() => setShowPrintPreview(true)} className="bg-blue-600 text-white px-3 py-3 rounded-xl font-black text-[11px] uppercase tracking-widest shadow-lg hover:bg-blue-700 transition-all flex items-center gap-2">
+             <span className="material-symbols-outlined text-lg">print</span>
+             Generar reporte
            </button>
          </div>
        </div>
@@ -572,9 +571,9 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
              <div className="flex items-center gap-6">
                <img src="/images/logo-dif.png" alt="Logo" className="w-24 object-contain" />
                <div className="flex flex-col">
-                 <span className="text-xl font-black text-slate-900 uppercase leading-none tracking-tight">Reporte Ejecutivo de Flota</span>
+                 <span className="text-xl font-black text-slate-900 uppercase leading-none tracking-tight">Reporte de Analisis de Vehiculos</span>
                  <span className="text-lg font-black text-slate-900 uppercase leading-tight tracking-tight">Sistema DIF Municipal La Paz B.C.S.</span>
-                 <span className="text-[8pt] font-bold uppercase text-slate-400 mt-2 tracking-[0.2em]">Coordinación de Parque Vehicular</span>
+                 <span className="text-[8pt] font-bold uppercase text-slate-400 mt-2 tracking-[0.2em]">Gestión de Parque Vehicular</span>
                </div>
              </div>
              <div className="text-right">
@@ -727,7 +726,7 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
         <div className="hidden print:block print-footer mt-12 pt-4 border-t-2 border-slate-200">
             <div className="flex justify-between items-center text-[8pt] text-slate-400">
                 <div>
-                    <p className="font-bold">Sistema de Control Flota Pro</p>
+                    <p className="font-bold">Sistema de Gestión de Parque Vehicular</p>
                     <p>DIF Municipal La Paz B.C.S.</p>
                 </div>
                 <div className="text-center">
@@ -765,9 +764,9 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
                  <div className="flex items-center gap-6">
                    <img src="/images/logo-dif.png" alt="Logo" className="w-24 object-contain" />
                    <div className="flex flex-col">
-                     <span className="text-xl font-black text-slate-900 uppercase leading-none tracking-tight">Reporte Ejecutivo de Flota</span>
+                     <span className="text-xl font-black text-slate-900 uppercase leading-none tracking-tight">Reporte de Analisis de Vehiculos</span>
                      <span className="text-lg font-black text-slate-900 uppercase leading-tight tracking-tight">Sistema DIF Municipal La Paz B.C.S.</span>
-                     <span className="text-[8pt] font-bold uppercase text-slate-400 mt-2 tracking-[0.2em]">Coordinación de Parque Vehicular</span>
+                     <span className="text-[8pt] font-bold uppercase text-slate-400 mt-2 tracking-[0.2em]">Gestión de Parque Vehicular</span>
                    </div>
                  </div>
                  <div className="text-right">
@@ -887,7 +886,7 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
                <div className="hidden print:block print-footer mt-6 pt-3 border-t border-slate-200">
                  <div className="flex justify-between items-center text-[8pt] text-slate-400">
                    <div>
-                     <p className="font-bold">Sistema de Control Flota Pro</p>
+                     <p className="font-bold">Sistema de Gestión de Parque Vehicular</p>
                      <p>DIF Municipal La Paz B.C.S.</p>
                    </div>
                    <div className="text-center">
