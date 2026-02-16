@@ -1,5 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { Planning, Vehicle, Driver, Area, AppSetting } from '../types';
 
 interface PlanningProps {
@@ -278,7 +279,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
         )}
 
         <p className={`text-[11px] font-black leading-tight mb-1 ${status === 'cancelled' ? 'text-slate-500 line-through' : 'text-slate-900'}`}>{driver?.name || p.driverId}</p>
-        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight flex items-center gap-1.5"><span className="material-symbols-outlined text-xs">local_shipping</span>{vehicle?.plate || p.vehicleId}</p>
+        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight flex items-center gap-1.5"><span className="material-symbols-outlined text-xs">local_shipping</span>{vehicle?.model || p.vehicleId}</p>
         
         {!minimal && p.destination && (
           <div className="mt-2 pt-2 border-t border-slate-200/50">
@@ -302,32 +303,70 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
           /* Page Setup - Letter Landscape */
           @page {
             size: letter landscape;
-            margin: 1.5cm 1.5cm 2cm 1.5cm;
+            margin: 1.0cm;
           }
           
-          /* Hide everything except printable area */
-          body * {
-            visibility: hidden;
+          /* CRITICAL: RESTORE PAGINATION FLOW */
+          html, body {
+            overflow: visible !important;
+            height: auto !important;
+            width: auto !important;
+            margin: 0 !important;
+            padding: 0 !important;
           }
+
+          /* Robust Hiding Strategy */
+          body > *:not(#print-portal) { display: none !important; }
           
-          #planning-printable, #planning-printable * {
-            visibility: visible;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-            color-adjust: exact !important;
+          /* Show and flatten the print path */
+          #print-portal {
+            display: block !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            z-index: 9999 !important;
           }
-          
+
+          /* The modal container needs to be static */
+          #planning-print-modal {
+            display: block !important;
+            position: static !important;
+            overflow: visible !important;
+            height: auto !important;
+            width: 100% !important;
+            max-width: none !important;
+            margin: 0 !important;
+            background: white !important;
+            inset: auto !important;
+          }
+
+          /* Hide non-printable sticky header inside modal */
+          #planning-print-modal > .sticky,
+          .no-print {
+            display: none !important;
+          }
+
+          /* The printable content itself */
           #planning-printable {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            padding: 0;
-            margin: 0;
+            display: block !important;
+            position: static !important; /* NO ABSOLUTE */
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
             background: white !important;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             font-size: 10pt;
             line-height: 1.4;
+            overflow: visible !important;
+            visibility: visible !important;
+          }
+
+          #planning-printable * {
+            visibility: visible !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
           }
           
           .no-print { display: none !important; }
@@ -651,16 +690,16 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
       {/* --- MODALES --- */}
 
       {/* MODAL IMPRESIÓN SEMANAL */}
-      {showPrintPreview && (
-        <div className="fixed inset-0 z-[200] bg-white flex flex-col overflow-y-auto">
+      {showPrintPreview && document.getElementById('print-portal') && createPortal(
+        <div id="planning-print-modal" className="fixed inset-0 z-[200] bg-white flex flex-col overflow-y-auto">
            <div className="sticky top-0 bg-slate-900 p-4 flex justify-between items-center text-white shadow-lg no-print">
              <button onClick={() => setShowPrintPreview(false)} className="bg-white/10 px-4 py-2 rounded-lg font-bold text-xs hover:bg-white/20 transition-all">Cerrar</button>
              <button onClick={() => window.print()} className="bg-primary px-8 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-blue-500/20">
                <span className="material-symbols-outlined text-lg">picture_as_pdf</span> Imprimir Planeación Semanal
              </button>
            </div>
-           <div className="flex-1 bg-slate-100 p-10 flex justify-center">
-              <div id="planning-printable" className="bg-white w-[27.94cm] min-h-[21.59cm] p-[1.5cm] shadow-2xl relative text-slate-900">
+           <div className="flex-1 bg-slate-100 p-10 flex justify-center print:bg-white print:p-0 print:block">
+              <div id="planning-printable" className="bg-white w-[27.94cm] min-h-[21.59cm] p-[1.5cm] shadow-2xl relative text-slate-900 print:shadow-none print:w-full print:p-0 print:m-0 break-after-auto">
                 
                 {/* Header Institucional - Formal Design */}
                 <div className="print-header flex justify-between items-center mb-8 border-b-4 border-slate-900 pb-6">
@@ -686,7 +725,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
                 </div>
 
                 {/* Tabla de Planeación - Formal Table */}
-                <div className="mb-8 break-inside-avoid">
+                <div className="mb-8">
                   <table className="w-full border-collapse border border-slate-300">
                     <thead className="bg-slate-100">
                       <tr>
@@ -731,8 +770,8 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
                                     <div className="text-[7pt] uppercase text-slate-500">{driver?.name || '---'}</div>
                                   </td>
                                   <td className="px-3 py-2 text-[8pt]">
-                                    <div className="font-bold text-slate-800 uppercase overflow-wrap" style={{maxWidth: '200px', wordWrap: 'break-word'}}>{plan.destination || '---'}</div>
-                                    {plan.notes && <div className="text-[7pt] italic text-slate-500 print-truncate" style={{maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{plan.notes}</div>}
+                                    <div className="font-bold text-slate-800 uppercase overflow-wrap" style={{maxWidth: '300px', wordWrap: 'break-word'}}>{plan.destination}</div>
+                                    {plan.notes && <div className="text-[7pt] italic text-slate-500">{plan.notes}</div>}
                                   </td>
                                   <td className={`px-3 py-2 text-[7pt] font-black text-center uppercase ${statusClass}`}>
                                     {statusLabel}
@@ -758,8 +797,8 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
                 </div>
 
                   {/* Signature Section - Three Signatures */}
-                  <div className="signature-section absolute bottom-[1.5cm] left-[1.5cm] right-[1.5cm]">
-                      <div className="grid grid-cols-3 gap-8 text-center">
+                  {/* <div className="signature-section absolute bottom-[1.5cm] left-[1.5cm] right-[1.5cm]"> */}
+                      {/* <div className="grid grid-cols-3 gap-8 text-center">
                         <div className="signature-line border-t-2 border-slate-900 pt-4">
                             <p className="text-[9pt] font-black uppercase text-slate-900">{vehicleManager}</p>
                             <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Encargado del Parque Vehicular</p>
@@ -775,19 +814,18 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
                             <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Director General</p>
                             <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Autorizó</p>
                         </div>
-                      </div>
-                      <div className="print-footer text-center mt-8 border-t border-slate-200 pt-3">
+                      </div> */}
+                      {/* <div className="print-footer text-center mt-8 border-t border-slate-200 pt-3">
                           <div className="flex justify-between items-center text-[7pt] text-slate-400">
                               <span>Sistema de Gestion de Parque Vehicular</span>
                               <span className="font-black uppercase tracking-[0.2em]">DIF Municipal La Paz B.C.S.</span>
-                              <span>Documento válido con firmas autógrafas</span>
                           </div>
-                      </div>
-                  </div>
+                      </div> */}
+                  {/* </div> */}
               </div>
            </div>
         </div>
-      )}
+      , document.getElementById('print-portal')!)}
 
       {showAreaModal && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-300">

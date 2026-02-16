@@ -900,7 +900,8 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
                   <thead>
                     <tr className="bg-[#9e1b32] text-white">
                       <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide border-r border-slate-600 text-center" style={{ width: '6%' }}>Fecha</th>
-                      <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide border-r border-slate-600 text-center" style={{ width: '18%' }}>Destino / Comisión</th>
+                      <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide border-r border-slate-600 text-center" style={{ width: '13%' }}>Destino / Comisión</th>
+                      <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide border-r border-slate-600 text-center" style={{ width: '5%' }}>Personal asignado</th>
                       <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide border-r border-slate-600 text-center" style={{ width: '5.5%' }}>Hora Salida</th>
                       <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide border-r border-slate-600 text-center" style={{ width: '5.5%' }}>Hora Llegada</th>
                       <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide border-r border-slate-600 text-center" style={{ width: '7%' }}>Km Inicial</th>
@@ -916,6 +917,7 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
                     {Array.from({ length: BLANK_ROWS }).map((_, i) => (
                       <tr key={i} className={`${i % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'} border-t border-slate-300`}>
                         <td className="py-3 px-1 border-r border-slate-200 text-center text-[7pt] text-slate-300">____/____/____</td>
+                        <td className="py-3 px-1 border-r border-slate-200">&nbsp;</td>
                         <td className="py-3 px-1 border-r border-slate-200">&nbsp;</td>
                         <td className="py-3 px-1 border-r border-slate-200 text-center text-[7pt] text-slate-300">__:__ __</td>
                         <td className="py-3 px-1 border-r border-slate-200 text-center text-[7pt] text-slate-300">__:__ __</td>

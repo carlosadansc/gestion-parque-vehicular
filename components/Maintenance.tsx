@@ -735,7 +735,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                 {/* Descripción del Servicio - With Overflow Handling */}
                 <div className="space-y-2 mb-12 break-inside-avoid">
                    <div className="section-title bg-slate-900 text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">
-                       Descripción de la Falla / Servicio Solicitado
+                       Descripción / Servicio Solicitado
                    </div>
                    <div className="bg-white p-4 rounded-lg min-h-[120px] max-h-[200px] border border-slate-200 overflow-hidden">
                      <p className="text-[10pt] font-bold text-slate-900 uppercase mb-2 block">{selectedRecord.serviceType}</p>

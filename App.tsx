@@ -95,6 +95,9 @@ const App: React.FC = () => {
       }
     }
     setIsLoading(false);
+    
+    // Auto-sync with Google Sheets on app start
+    handleSync();
   }, []);
 
   const handleSync = async () => {
