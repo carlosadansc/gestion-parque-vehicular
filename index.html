@@ -3,16 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Gestion de Vehiculos ft Sheets</title>
+    <title>Gestión de Parque Vehicular - DIF La Paz</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
     <script>
       tailwind.config = {
         theme: {
@@ -20,6 +14,9 @@
             colors: {
               primary: "var(--primary-color, #135bec)",
               secondary: "var(--secondary-color, #0f172a)",
+            },
+            fontFamily: {
+              sans: ['Inter', 'Plus Jakarta Sans', 'system-ui', 'sans-serif'],
             },
           },
         },
@@ -31,234 +28,107 @@
         --secondary-color: #0f172a;
       }
       body {
-        font-family: "Inter", sans-serif;
+        font-family: 'Inter', 'Plus Jakarta Sans', system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased;
       }
-      .material-symbols-outlined {
-        font-variation-settings:
-          "FILL" 0,
-          "wght" 400,
-          "GRAD" 0,
-          "opsz" 24;
-      }
-      .material-symbols-outlined.filled {
-        font-variation-settings: "FILL" 1;
-      }
-
-      /* Dynamic Colors */
-      .bg-primary {
-        background-color: var(--primary-color) !important;
-      }
-      .text-primary {
-        color: var(--primary-color) !important;
-      }
-      .border-primary {
-        border-color: var(--primary-color) !important;
-      }
-
-      .bg-secondary {
-        background-color: var(--secondary-color) !important;
-      }
-      .text-secondary {
-        color: var(--secondary-color) !important;
-      }
+      .material-symbols-outlined { font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24; }
+      .material-symbols-outlined.filled { font-variation-settings: "FILL" 1; }
+      .bg-primary { background-color: var(--primary-color) !important; }
+      .text-primary { color: var(--primary-color) !important; }
+      .border-primary { border-color: var(--primary-color) !important; }
+      .ring-primary\/10 { --tw-ring-color: rgb(19 91 236 / 0.1) !important; }
+      .bg-secondary { background-color: var(--secondary-color) !important; }
+      .text-secondary { color: var(--secondary-color) !important; }
 
       /* Custom Scrollbar */
-      ::-webkit-scrollbar {
-        width: 6px;
-      }
-      ::-webkit-scrollbar-track {
-        background: transparent;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 10px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #94a3b8;
-      }
+      ::-webkit-scrollbar { width: 6px; height: 6px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+      ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-      /* ========================================
-           SHARED PRINT STYLES - FORMAL DOCUMENTS
-           Standard design for all printable documents
-           ======================================== */
+      /* === COMPONENTES PROFESIONALES === */
+      
+      /* Cards */
+      .card { @apply bg-white rounded-xl border border-slate-200 shadow-sm transition-all duration-200; }
+      .card-hover:hover { @apply border-slate-300 shadow-md; }
+      .card-header { @apply px-5 py-4 border-b border-slate-100 font-semibold text-slate-800; }
+      .card-body { @apply p-5; }
+
+      /* Page Header */
+      .page-header { @apply flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6; }
+      .page-title { @apply text-2xl font-bold text-slate-900 tracking-tight; }
+      .page-subtitle { @apply text-sm text-slate-500 font-medium mt-0.5; }
+
+      /* Buttons */
+      .btn { @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200; }
+      .btn-primary { @apply bg-primary text-white hover:opacity-90 focus:ring-2 focus:ring-primary/30; }
+      .btn-secondary { @apply bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:border-slate-300; }
+      .btn-ghost { @apply text-slate-500 hover:text-slate-700 hover:bg-slate-100; }
+      .btn-icon { @apply p-2 rounded-lg; }
+
+      /* Form Elements */
+      .form-label { @apply block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5; }
+      .form-input { @apply w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 placeholder:text-slate-400 transition-all duration-200; }
+      .form-input:focus { @apply border-primary ring-2 ring-primary/10 outline-none; }
+      .form-select { @apply w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 cursor-pointer transition-all duration-200; }
+      .form-select:focus { @apply border-primary ring-2 ring-primary/10 outline-none; }
+      .form-textarea { @apply w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 placeholder:text-slate-400 transition-all duration-200 resize-y min-h-[100px]; }
+      .form-textarea:focus { @apply border-primary ring-2 ring-primary/10 outline-none; }
+
+      /* Table */
+      .table-container { @apply bg-white rounded-xl border border-slate-200 overflow-hidden; }
+      .table-professional { @apply w-full text-left; }
+      .table-professional thead th { @apply px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider bg-slate-50 border-b border-slate-200; }
+      .table-professional tbody td { @apply px-4 py-3.5 text-sm text-slate-700 border-b border-slate-100; }
+      .table-professional tbody tr { @apply transition-colors duration-150; }
+      .table-professional tbody tr:hover { @apply bg-slate-50/70; }
+      .table-professional tbody tr:last-child td { @apply border-b-0; }
+
+      /* Badges */
+      .badge { @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium; }
+      .badge-success { @apply bg-emerald-100 text-emerald-800; }
+      .badge-warning { @apply bg-amber-100 text-amber-800; }
+      .badge-error { @apply bg-red-100 text-red-800; }
+      .badge-info { @apply bg-blue-100 text-blue-800; }
+      .badge-neutral { @apply bg-slate-100 text-slate-800; }
+
+      /* Filter Pills */
+      .filter-pill { @apply px-3.5 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 border; }
+      .filter-pill-active { @apply bg-primary text-white border-primary; }
+      .filter-pill-inactive { @apply bg-white text-slate-600 border-slate-200 hover:border-slate-300; }
+
+      /* Empty State */
+      .empty-state { @apply flex flex-col items-center justify-center py-16 text-center; }
+      .empty-state-icon { @apply text-slate-300 mb-4; }
+      .empty-state-title { @apply text-sm font-semibold text-slate-600 mb-1; }
+      .empty-state-description { @apply text-xs text-slate-400; }
+
+      /* Animation */
+      .animate-in { animation-duration: 200ms; }
+      *:focus-visible { @apply outline-2 outline-offset-2 outline-primary; }
+
+      /* === PRINT STYLES === */
       @media print {
-        /* Hide non-printable elements */
-        .no-print {
-          display: none !important;
-        }
-
-        /* Base body styles */
-        body {
-          background: white !important;
-          margin: 0 !important;
-          padding: 0 !important;
-          font-family:
-            "Inter",
-            -apple-system,
-            BlinkMacSystemFont,
-            "Segoe UI",
-            sans-serif !important;
-        }
-
-        /* Color preservation */
-        * {
-          -webkit-print-color-adjust: exact !important;
-          print-color-adjust: exact !important;
-          color-adjust: exact !important;
-          box-shadow: none !important;
-          text-shadow: none !important;
-        }
-
-        /* Default page setup */
-        @page {
-          margin: 1.5cm;
-          size: auto;
-        }
-
-        /* ========================================
-               TYPOGRAPHY - FORMAL DOCUMENT STANDARDS
-               ======================================== */
-        h1,
-        h2,
-        h3,
-        h4,
-        h5,
-        h6 {
-          page-break-after: avoid;
-          orphans: 3;
-          widows: 3;
-        }
-
-        p,
-        li {
-          orphans: 3;
-          widows: 3;
-        }
-
-        /* ========================================
-               PAGE BREAK CONTROLS
-               ======================================== */
-        .break-inside-avoid,
-        .print-section {
-          page-break-inside: avoid;
-          break-inside: avoid;
-        }
-
-        .break-before {
-          page-break-before: always;
-          break-before: page;
-        }
-
-        .break-after {
-          page-break-after: always;
-          break-after: page;
-        }
-
-        /* ========================================
-               OVERFLOW HANDLING - CONTENT VALIDATION
-               ======================================== */
-        .overflow-truncate,
-        .print-truncate {
-          max-width: 200px;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-
-        .overflow-wrap,
-        .print-wrap {
-          word-wrap: break-word;
-          overflow-wrap: break-word;
-          hyphens: auto;
-        }
-
-        .text-wrap {
-          white-space: normal;
-          word-wrap: break-word;
-        }
-
-        /* ========================================
-               TABLE STYLING - FORMAL DOCUMENT
-               ======================================== */
-        table {
-          border-collapse: collapse;
-          page-break-inside: auto;
-        }
-
-        thead {
-          display: table-header-group;
-        }
-
-        tfoot {
-          display: table-footer-group;
-        }
-
-        tr {
-          page-break-inside: avoid;
-          page-break-after: auto;
-        }
-
-        /* ========================================
-               FORMAL DOCUMENT ELEMENTS
-               ======================================== */
-        /* Header styling */
-        .print-header {
-          border-bottom: 3px solid #1e293b;
-          padding-bottom: 1rem;
-          margin-bottom: 1.5rem;
-        }
-
-        /* Footer styling */
-        .print-footer {
-          border-top: 1px solid #e2e8f0;
-          padding-top: 0.5rem;
-          font-size: 7pt;
-          color: #94a3b8;
-        }
-
-        /* Signature lines */
-        .signature-line {
-          border-top: 2px solid #1e293b;
-          padding-top: 0.5rem;
-          min-width: 200px;
-        }
-
-        /* Section titles */
-        .section-title {
-          background-color: #1e293b !important;
-          color: white !important;
-          padding: 6px 12px;
-          font-size: 9pt;
-          font-weight: 800;
-          text-transform: uppercase;
-          letter-spacing: 0.1em;
-        }
-
-        /* ========================================
-               SIGNATURE SECTION - FIXED POSITION
-               ======================================== */
-        .signature-section {
-          page-break-inside: avoid;
-        }
-
-        /* ========================================
-               UTILITY CLASSES FOR PRINT
-               ======================================== */
-        .print-only {
-          display: block !important;
-        }
-
-        .screen-only {
-          display: none !important;
-        }
+        .no-print { display: none !important; }
+        body { background: white !important; margin: 0 !important; padding: 0 !important; font-family: 'Inter', system-ui, sans-serif !important; }
+        * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; box-shadow: none !important; }
+        @page { margin: 1.5cm; size: auto; }
+        h1, h2, h3, h4, h5, h6 { page-break-after: avoid; orphans: 3; widows: 3; }
+        p, li { orphans: 3; widows: 3; }
+        .break-inside-avoid, .print-section { page-break-inside: avoid; break-inside: avoid; }
+        table { border-collapse: collapse; page-break-inside: auto; }
+        thead { display: table-header-group; }
+        tfoot { display: table-footer-group; }
+        tr { page-break-inside: avoid; }
+        .print-header { border-bottom: 3px solid #1e293b; padding-bottom: 1rem; margin-bottom: 1.5rem; }
+        .print-footer { border-top: 1px solid #e2e8f0; padding-top: 0.5rem; font-size: 7pt; color: #94a3b8; }
+        .signature-line { border-top: 2px solid #1e293b; padding-top: 0.5rem; min-width: 200px; }
+        .section-title { background-color: #1e293b !important; color: white !important; padding: 6px 12px; font-size: 9pt; font-weight: 800; text-transform: uppercase; }
+        .signature-section { page-break-inside: avoid; }
+        .print-only { display: block !important; }
+        .screen-only { display: none !important; }
       }
-
-      /* Screen-only styles (hidden in print) */
-      @media screen {
-        .print-only {
-          display: none !important;
-        }
-      }
+      @media screen { .print-only { display: none !important; } }
     </style>
     <script type="importmap">
       {
@@ -272,10 +142,9 @@
     </script>
     <link rel="stylesheet" href="/index.css" />
   </head>
-  <body class="bg-[#f8fafc] text-slate-900">
+  <body class="bg-slate-50 text-slate-900">
     <div id="root"></div>
     <div id="print-portal"></div>
     <script type="module" src="index.tsx"></script>
-    <script type="module" src="/index.tsx"></script>
   </body>
 </html>

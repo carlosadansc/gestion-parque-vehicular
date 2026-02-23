@@ -134,81 +134,82 @@ const Dashboard: React.FC<DashboardProps> = ({ vehicles = [], drivers = [], fuel
     <div className="space-y-8 animate-in fade-in duration-700 pb-10">
       
       {/* HEADER DE BIENVENIDA */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tighter">Panel General</h2>
-          <p className="text-slate-500 font-medium mt-1">Resumen ejecutivo del estado de la flota.</p>
+          <h2 className="text-2xl font-bold text-slate-900">Panel General</h2>
+          <p className="text-slate-500 font-medium mt-1">Resumen ejecutivo del estado de la flota vehicular</p>
         </div>
         <div className="flex gap-2">
-           <span className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-[11px] font-black uppercase tracking-widest text-slate-500 shadow-sm">
+           <span className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-500">
              {new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
            </span>
         </div>
       </div>
 
-      {/* KPI CARDS (DISEÑO MÁS VISUAL) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
+      {/* KPI CARDS */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {/* Salud de Flota */}
-        <div className="bg-slate-900 rounded-[2rem] p-6 text-white relative overflow-hidden group shadow-xl shadow-slate-900/20">
-          <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-            <span className="material-symbols-outlined text-8xl">health_and_safety</span>
+        <div className="bg-slate-900 rounded-xl p-5 text-white relative overflow-hidden">
+          <div className="absolute top-3 right-3 opacity-10">
+            <span className="material-symbols-outlined text-6xl">health_and_safety</span>
           </div>
-          <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-2">Salud Mecánica Global</p>
+          <p className="text-slate-400 text-xs font-medium uppercase tracking-wide mb-2">Salud Mecánica</p>
           <div className="flex items-baseline gap-2">
-            <span className="text-5xl font-black tracking-tighter">{fleetHealthScore}%</span>
-            <span className="text-sm font-bold text-green-400 bg-green-400/20 px-2 py-0.5 rounded-lg">Óptimo</span>
+            <span className="text-4xl font-bold tracking-tight">{fleetHealthScore}%</span>
+            <span className="text-xs font-medium text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded">Óptimo</span>
           </div>
-          <div className="w-full bg-slate-700 h-1.5 mt-6 rounded-full overflow-hidden">
-            <div className="bg-green-400 h-full rounded-full transition-all duration-1000" style={{ width: `${fleetHealthScore}%` }}></div>
+          <div className="w-full bg-slate-700 h-1.5 mt-4 rounded-full overflow-hidden">
+            <div className="bg-emerald-400 h-full rounded-full" style={{ width: `${fleetHealthScore}%` }}></div>
           </div>
-          <p className="text-[10px] text-slate-400 mt-3 font-medium">Basado en {vehicles.length * 16} puntos de control</p>
+          <p className="text-[10px] text-slate-500 mt-2">{vehicles.length * 16} puntos de control</p>
         </div>
 
         {/* Disponibilidad */}
-        <div className="bg-white rounded-[2rem] p-6 border border-slate-200 shadow-sm relative overflow-hidden group hover:shadow-lg transition-all">
-          <div className="flex justify-between items-start mb-4">
-             <div className="size-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600">
-               <span className="material-symbols-outlined filled text-2xl">local_shipping</span>
+        <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+          <div className="flex justify-between items-start mb-3">
+             <div className="size-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
+               <span className="material-symbols-outlined filled text-xl">directions_car</span>
              </div>
-             <span className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${availabilityRate > 80 ? 'bg-green-50 text-green-600' : 'bg-amber-50 text-amber-600'}`}>
-                {availabilityRate > 80 ? 'Alta' : 'Media'}
+             <span className={`text-xs font-medium px-2 py-0.5 rounded ${availabilityRate > 80 ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
+               {availabilityRate > 80 ? 'Alta' : 'Media'}
              </span>
           </div>
-          <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">Disponibilidad</p>
-          <p className="text-4xl font-black text-slate-900 tracking-tight mt-1">{availabilityRate}%</p>
-          <p className="text-xs font-bold text-slate-500 mt-1">
-            <span className="text-slate-900">{vehicles.filter(v => v.status === 'active').length}</span> Activos / <span className="text-rose-500">{vehicles.filter(v => v.status === 'workshop').length}</span> Taller
+          <p className="text-slate-500 text-xs font-medium uppercase tracking-wide">Disponibilidad</p>
+          <p className="text-3xl font-bold text-slate-900 mt-1">{availabilityRate}%</p>
+          <p className="text-xs text-slate-500 mt-1">
+            <span className="text-slate-700 font-medium">{vehicles.filter(v => v.status === 'active').length}</span> activos / 
+            <span className="text-rose-600 font-medium"> {vehicles.filter(v => v.status === 'workshop').length}</span> taller
           </p>
         </div>
 
         {/* Costo por KM */}
-        <div className="bg-white rounded-[2rem] p-6 border border-slate-200 shadow-sm relative overflow-hidden group hover:shadow-lg transition-all">
-          <div className="flex justify-between items-start mb-4">
-             <div className="size-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600">
-               <span className="material-symbols-outlined filled text-2xl">payments</span>
+        <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+          <div className="flex justify-between items-start mb-3">
+             <div className="size-10 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
+               <span className="material-symbols-outlined filled text-xl">local_gas_station</span>
              </div>
           </div>
-          <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">Costo Operativo Est.</p>
-          <p className="text-4xl font-black text-slate-900 tracking-tight mt-1">
-            ${fuelEfficiency > 0 ? fuelEfficiency.toFixed(2) : '---'}
-            <span className="text-base text-slate-400 ml-1 font-bold">/ Km</span>
+          <p className="text-slate-500 text-xs font-medium uppercase tracking-wide">Costo/Km</p>
+          <p className="text-3xl font-bold text-slate-900 mt-1">
+            ${fuelEfficiency > 0 ? fuelEfficiency.toFixed(2) : '0.00'}
+            <span className="text-sm text-slate-400 ml-1 font-medium">/km</span>
           </p>
-          <p className="text-xs font-bold text-slate-500 mt-1">Eficiencia de combustible</p>
+          <p className="text-xs text-slate-500 mt-1">Eficiencia de combustible</p>
         </div>
 
         {/* Incidencias Críticas */}
-        <div className="bg-white rounded-[2rem] p-6 border border-slate-200 shadow-sm relative overflow-hidden group hover:shadow-lg transition-all">
-          <div className="flex justify-between items-start mb-4">
-             <div className="size-12 rounded-2xl bg-rose-50 flex items-center justify-center text-rose-500 animate-pulse">
-               <span className="material-symbols-outlined filled text-2xl">warning</span>
+        <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+          <div className="flex justify-between items-start mb-3">
+             <div className="size-10 rounded-lg bg-rose-50 flex items-center justify-center text-rose-500">
+               <span className="material-symbols-outlined filled text-xl">warning</span>
              </div>
              {incidents.filter(i => i.status === 'critical').length > 0 && (
-                <span className="px-2 py-1 rounded-lg bg-rose-100 text-rose-600 text-[10px] font-black uppercase tracking-wider">Acción Req.</span>
+               <span className="text-xs font-medium px-2 py-0.5 rounded bg-rose-100 text-rose-700">Pendiente</span>
              )}
           </div>
-          <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">Alertas Críticas</p>
-          <p className="text-4xl font-black text-slate-900 tracking-tight mt-1">{incidents.filter(i => i.status === 'critical').length}</p>
-          <p className="text-xs font-bold text-slate-500 mt-1">Incidencias pendientes de atención</p>
+          <p className="text-slate-500 text-xs font-medium uppercase tracking-wide">Alertas Críticas</p>
+          <p className="text-3xl font-bold text-slate-900 mt-1">{incidents.filter(i => i.status === 'critical').length}</p>
+          <p className="text-xs text-slate-500 mt-1">Incidencias sin atender</p>
         </div>
       </div>
 

@@ -573,11 +573,11 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#f8fafc]">
+    <div className="flex h-screen overflow-hidden bg-slate-50">
       <Sidebar activeView={currentView} onViewChange={v => { setCurrentView(v); setSearchQuery(''); }} appName={settingsMap['APP_NAME'] || 'Flota Pro'} currentUser={currentUser} onLogout={handleLogout} />
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <Header title={currentView.toUpperCase()} isSyncing={isSyncing} syncStatus={syncStatus} onSync={handleSync} view={currentView} searchQuery={searchQuery} onSearchChange={setSearchQuery} />
-        <div className="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-8 bg-slate-50 custom-scrollbar">
           <div className="max-w-7xl mx-auto w-full">{renderContent()}</div>
         </div>
       </main>

@@ -300,20 +300,20 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 no-print">
         <div>
           <h2 className="text-2xl font-black text-slate-900 tracking-tight">Revisiones Técnicas</h2>
-          <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mt-1">Historial de inspecciones y estado físico de unidades.</p>
+          <p className="text-slate-500 text-sm font-medium mt-1">Historial de inspecciones y estado físico de unidades</p>
         </div>
         <button 
           onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white text-[11px] font-black uppercase tracking-widest rounded-xl hover:opacity-90 transition-all shadow-lg shadow-blue-500/20"
+          className="flex items-center justify-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-black text-sm shadow-lg shadow-blue-500/20 hover:opacity-90 transition-all uppercase tracking-widest"
         >
-          <span className="material-symbols-outlined text-xl">fact_check</span>
+          <span className="material-symbols-outlined">fact_check</span>
           Nueva Revisión
         </button>
       </div>
 
       <div className="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden flex flex-col no-print">
         <div className="px-8 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-          <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Últimas Revisiones</h3>
+          <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Últimas Revisiones</h3>
         </div>
         
         <div className="overflow-x-auto">

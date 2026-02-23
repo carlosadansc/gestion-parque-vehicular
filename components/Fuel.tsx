@@ -186,21 +186,21 @@ const Fuel: React.FC<FuelProps> = ({ fuelHistory = [], vehicles = [], drivers = 
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 no-print">
         <div>
           <h2 className="text-2xl font-black text-slate-900 tracking-tight">Bitácora de Combustible</h2>
-          <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mt-1">Control de gastos y rendimiento por unidad.</p>
+          <p className="text-slate-500 text-sm font-medium mt-1">Control de gastos y rendimiento por unidad</p>
         </div>
         <div className="flex gap-2">
             <button 
                 onClick={() => setShowPrintPreview(true)}
-                className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-600 text-[11px] font-black uppercase tracking-widest rounded-xl hover:bg-slate-50 transition-all shadow-sm"
+                className="flex items-center justify-center gap-2 bg-white border border-slate-200 text-slate-600 px-4 py-2.5 rounded-xl text-xs font-medium hover:bg-slate-50 transition-all"
             >
-                <span className="material-symbols-outlined text-lg">print</span>
+                <span className="material-symbols-outlined">print</span>
                 Vista Previa
             </button>
             <button 
             onClick={() => setShowModal(true)}
-            className="flex items-center gap-2 px-6 py-2.5 bg-[#135bec] text-white text-[11px] font-black uppercase tracking-widest rounded-xl hover:bg-blue-600 transition-all shadow-lg shadow-blue-500/20"
+            className="flex items-center justify-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-black text-sm shadow-lg shadow-blue-500/20 hover:opacity-90 transition-all uppercase tracking-widest"
             >
-            <span className="material-symbols-outlined text-xl">local_gas_station</span>
+            <span className="material-symbols-outlined">local_gas_station</span>
             Agregar Carga
             </button>
         </div>

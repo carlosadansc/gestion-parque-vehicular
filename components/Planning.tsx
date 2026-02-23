@@ -526,15 +526,15 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6">
         <div>
           <h2 className="text-2xl font-black text-slate-900 tracking-tight">Planeación Operativa</h2>
-          <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mt-1">Asignación de recursos y logística.</p>
+          <p className="text-slate-500 text-sm font-medium mt-1">Asignación de recursos y logística</p>
         </div>
         
         <div className="flex flex-col sm:flex-row items-center gap-4">
            {/* Selector de Vista */}
-           <div className="flex bg-slate-100 p-1 rounded-xl">
-               <button onClick={() => setViewMode('day')} className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === 'day' ? 'bg-white text-primary shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>Día</button>
-               <button onClick={() => setViewMode('week')} className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === 'week' ? 'bg-white text-primary shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>Semana</button>
-               <button onClick={() => setViewMode('month')} className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === 'month' ? 'bg-white text-primary shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>Mes</button>
+           <div className="flex bg-slate-100 p-1 rounded-lg">
+               <button onClick={() => setViewMode('day')} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${viewMode === 'day' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Día</button>
+               <button onClick={() => setViewMode('week')} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${viewMode === 'week' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Semana</button>
+               <button onClick={() => setViewMode('month')} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${viewMode === 'month' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Mes</button>
            </div>
 
            {/* Navegación de Fecha */}

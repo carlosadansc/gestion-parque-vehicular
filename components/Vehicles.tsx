@@ -220,48 +220,52 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
         </button>
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/30">
-          <div className="flex items-center gap-2 overflow-x-auto">
+      <div className="card overflow-hidden">
+        <div className="px-5 py-3 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+          <div className="flex items-center gap-2">
             <button onClick={() => setStatusFilter('todos')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${statusFilter === 'todos' ? 'bg-primary text-white' : 'bg-white border border-slate-200 text-slate-500'}`}>Todos</button>
-            <StatusFilterBtn active={statusFilter === 'active'} onClick={() => setStatusFilter('active')} label="Activo" color="bg-green-500" />
-            <StatusFilterBtn active={statusFilter === 'workshop'} onClick={() => setStatusFilter('workshop')} label="Taller" color="bg-amber-500" />
-            <StatusFilterBtn active={statusFilter === 'inactive'} onClick={() => setStatusFilter('inactive')} label="Inactivo" color="bg-slate-400" />
+            <button onClick={() => setStatusFilter('active')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${statusFilter === 'active' ? 'bg-emerald-500 text-white' : 'bg-white border border-slate-200 text-slate-500'}`}>Activo</button>
+            <button onClick={() => setStatusFilter('workshop')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${statusFilter === 'workshop' ? 'bg-amber-500 text-white' : 'bg-white border border-slate-200 text-slate-500'}`}>Taller</button>
+            <button onClick={() => setStatusFilter('inactive')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${statusFilter === 'inactive' ? 'bg-slate-500 text-white' : 'bg-white border border-slate-200 text-slate-500'}`}>Inactivo</button>
           </div>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="bg-slate-50/50 border-b border-slate-200">
-                <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Unidad</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Placa</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Chofer Asignado</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Acciones</th>
+              <tr className="bg-slate-50 border-b border-slate-200">
+                <th className="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Unidad</th>
+                <th className="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Placa</th>
+                <th className="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider text-center">Chofer</th>
+                <th className="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredVehicles.map((vehicle) => {
                 const driver = drivers.find(d => d.id === vehicle.assignedDriverId);
                 return (
-                  <tr key={vehicle.id} className="hover:bg-slate-50 transition-colors group">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-4">
-                         {/* <img src={vehicle.image} className="size-10 rounded-lg object-cover" /> */}
+                  <tr key={vehicle.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-3">
+                         <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center">
+                           <span className="material-symbols-outlined text-slate-400">directions_car</span>
+                         </div>
                          <div>
-                            <p className="font-black text-slate-900 tracking-tight">{vehicle.model}</p>
-                            <p className="text-[10px] text-primary font-bold uppercase">{vehicle.brand} {vehicle.line}</p>
+                            <p className="font-semibold text-slate-900">{vehicle.model}</p>
+                            <p className="text-xs text-primary font-medium">{vehicle.brand} {vehicle.line}</p>
                          </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 font-black text-slate-700">{vehicle.plate}</td>
-                    <td className="px-6 py-4 text-center">
-                       <span className="text-xs font-bold text-slate-600 uppercase overflow-truncate">{driver?.name || '---'}</span>
+                    <td className="px-5 py-4">
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-slate-100 text-xs font-semibold text-slate-700">{vehicle.plate}</span>
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-5 py-4 text-center">
+                       <span className="text-sm font-medium text-slate-600">{driver?.name || '—'}</span>
+                    </td>
+                    <td className="px-5 py-4 text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => handlePrint(vehicle)} className="size-9 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all flex items-center justify-center"><span className="material-symbols-outlined">file_present</span></button>
-                        <button onClick={() => handleEdit(vehicle)} className="size-9 text-slate-400 hover:text-primary hover:bg-blue-50 rounded-xl transition-all flex items-center justify-center"><span className="material-symbols-outlined">edit</span></button>
+                        <button onClick={() => handlePrint(vehicle)} className="btn-icon text-slate-400 hover:text-emerald-600 hover:bg-emerald-50"><span className="material-symbols-outlined">file_present</span></button>
+                        <button onClick={() => handleEdit(vehicle)} className="btn-icon text-slate-400 hover:text-primary hover:bg-blue-50"><span className="material-symbols-outlined">edit</span></button>
                       </div>
                     </td>
                   </tr>

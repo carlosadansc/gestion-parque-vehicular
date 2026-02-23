@@ -218,7 +218,7 @@ function getSheetData(ss, name) {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-black text-slate-900 tracking-tight">Configuración del Sistema</h2>
-          <p className="text-slate-500 font-medium mt-1.5">Ajustes del conector en la nube y seguridad de accesos.</p>
+          <p className="text-slate-500 text-sm font-medium mt-1">Ajustes del conector en la nube y seguridad de accesos</p>
         </div>
       </div>
 

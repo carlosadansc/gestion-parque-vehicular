@@ -356,47 +356,71 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-black text-slate-900 tracking-tight">Gestión de Mantenimiento</h2>
-          <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mt-1">Control de servicios, presupuestos y facturación.</p>
+          <p className="text-slate-500 text-sm font-medium mt-1">Control de servicios, presupuestos y facturación</p>
         </div>
         <button 
           onClick={() => { resetForm(); setShowModal(true); }}
-          className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white text-[11px] font-black uppercase tracking-widest rounded-xl hover:opacity-90 transition-all shadow-lg shadow-blue-500/20"
+          className="flex items-center justify-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-black text-sm shadow-lg shadow-blue-500/20 hover:opacity-90 transition-all uppercase tracking-widest"
         >
-          <span className="material-symbols-outlined text-xl">build</span>
-          Registrar Servicio
+          <span className="material-symbols-outlined">build</span>
+          Nuevo Servicio
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 no-print">
-        <MaintStat label="Gasto Total (Facturado)" value={`$${(stats.totalInvoiced || 0).toLocaleString()}`} icon="payments" color="blue" />
-        <MaintStat label="Presupuesto en Curso" value={`$${(stats.totalQuoted || 0).toLocaleString()}`} icon="request_quote" color="amber" />
-        <MaintStat label="Unidades en Taller" value={(stats.inWorkshop || 0).toString()} icon="car_repair" color="rose" />
-        <MaintStat label="Servicios Finalizados" value={(stats.completed || 0).toString()} icon="task_alt" color="green" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6 no-print">
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="size-9 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600"><span className="material-symbols-outlined text-lg">payments</span></div>
+            <span className="text-xs font-medium text-slate-500">Total Facturado</span>
+          </div>
+          <p className="text-xl font-bold text-slate-900">${(stats.totalInvoiced || 0).toLocaleString()}</p>
+        </div>
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="size-9 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600"><span className="material-symbols-outlined text-lg">request_quote</span></div>
+            <span className="text-xs font-medium text-slate-500">En Curso</span>
+          </div>
+          <p className="text-xl font-bold text-slate-900">${(stats.totalQuoted || 0).toLocaleString()}</p>
+        </div>
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="size-9 rounded-lg bg-rose-50 flex items-center justify-center text-rose-600"><span className="material-symbols-outlined text-lg">car_repair</span></div>
+            <span className="text-xs font-medium text-slate-500">En Taller</span>
+          </div>
+          <p className="text-xl font-bold text-slate-900">{stats.inWorkshop || 0}</p>
+        </div>
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="size-9 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600"><span className="material-symbols-outlined text-lg">task_alt</span></div>
+            <span className="text-xs font-medium text-slate-500">Completados</span>
+          </div>
+          <p className="text-xl font-bold text-slate-900">{stats.completed || 0}</p>
+        </div>
       </div>
 
-      <div className="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden flex flex-col no-print">
-        <div className="px-8 py-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50">
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0">
-            <button onClick={() => setFilterStatus('todos')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filterStatus === 'todos' ? 'bg-primary text-white shadow-md' : 'bg-white border border-slate-200 text-slate-500'}`}>Todos</button>
-            <button onClick={() => setFilterStatus('in-progress')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filterStatus === 'in-progress' ? 'bg-rose-500 text-white shadow-md' : 'bg-white border border-slate-200 text-slate-500'}`}>En Proveedor</button>
-            <button onClick={() => setFilterStatus('scheduled')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filterStatus === 'scheduled' ? 'bg-amber-500 text-white shadow-md' : 'bg-white border border-slate-200 text-slate-500'}`}>Programados</button>
-            <button onClick={() => setFilterStatus('completed')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filterStatus === 'completed' ? 'bg-green-500 text-white shadow-md' : 'bg-white border border-slate-200 text-slate-500'}`}>Completados</button>
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm no-print">
+        <div className="px-5 py-3 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <button onClick={() => setFilterStatus('todos')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filterStatus === 'todos' ? 'bg-primary text-white' : 'bg-white border border-slate-200 text-slate-500'}`}>Todos</button>
+            <button onClick={() => setFilterStatus('in-progress')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filterStatus === 'in-progress' ? 'bg-rose-500 text-white' : 'bg-white border border-slate-200 text-slate-500'}`}>En Taller</button>
+            <button onClick={() => setFilterStatus('scheduled')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filterStatus === 'scheduled' ? 'bg-amber-500 text-white' : 'bg-white border border-slate-200 text-slate-500'}`}>Programados</button>
+            <button onClick={() => setFilterStatus('completed')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filterStatus === 'completed' ? 'bg-primary text-white' : 'bg-white border border-slate-200 text-slate-500'}`}>Completados</button>
           </div>
-          <button onClick={onSync} className="text-[10px] font-black text-primary uppercase tracking-widest flex items-center gap-2 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-all">
-            <span className="material-symbols-outlined text-sm">sync</span> Actualizar
+          <button onClick={onSync} className="btn btn-ghost text-xs">
+            <span className="material-symbols-outlined text-lg">sync</span> Actualizar
           </button>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
+          <table className="table-professional">
             <thead>
-              <tr className="bg-slate-50/50 text-slate-500 border-b border-slate-100">
-                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest">Servicio / Fecha</th>
-                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest">Vehículo / Proveedor</th>
-                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest">Estado</th>
-                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-right">Cotización</th>
-                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-right">Factura</th>
-                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-right">Acciones</th>
+              <tr>
+                <th className="px-5">Servicio</th>
+                <th className="px-5">Vehículo</th>
+                <th className="px-5">Estado</th>
+                <th className="px-5 text-right">Cotización</th>
+                <th className="px-5 text-right">Factura</th>
+                <th className="px-5 text-right"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -550,7 +574,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Descripción del Problema</label>
-                      <textarea rows={2} disabled={isSaving} className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold outline-none resize-none" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
+                      <textarea rows={6} disabled={isSaving} className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold outline-none resize-none" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
                     </div>
                   </div>
 
@@ -737,9 +761,9 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                    <div className="section-title bg-slate-900 text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">
                        Descripción / Servicio Solicitado
                    </div>
-                   <div className="bg-white p-4 rounded-lg min-h-[120px] max-h-[200px] border border-slate-200 overflow-hidden">
+                   <div className="bg-white p-4 rounded-lg border border-slate-200">
                      <p className="text-[10pt] font-bold text-slate-900 uppercase mb-2 block">{selectedRecord.serviceType}</p>
-                     <p className="text-[10pt] text-slate-700 leading-relaxed text-wrap" style={{wordWrap: 'break-word', overflowWrap: 'break-word', maxHeight: '140px', overflow: 'hidden'}}>
+                     <p className="text-[10pt] text-slate-700 leading-relaxed" style={{wordWrap: 'break-word', overflowWrap: 'break-word'}}>
                         {selectedRecord.description || 'Sin descripción detallada.'}
                      </p>
                    </div>

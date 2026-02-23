@@ -274,21 +274,21 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-black text-slate-900 tracking-tight">Bitácora de Viajes</h2>
-          <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mt-1">Control operativo y registro de entradas/salidas.</p>
+          <p className="text-slate-500 text-sm font-medium mt-1">Control operativo y registro de entradas/salidas</p>
         </div>
         <div className="flex items-center gap-3">
           <button
             onClick={() => { setBlankBitacoraVehicleId(''); setShowBlankBitacoraModal(true); }}
-            className="flex items-center gap-2 px-5 py-2.5 bg-white border-2 border-slate-200 text-slate-700 text-[11px] font-black uppercase tracking-widest rounded-xl hover:border-primary hover:text-primary transition-all"
+            className="flex items-center justify-center gap-2 bg-white border border-slate-200 text-slate-600 px-4 py-2.5 rounded-xl text-xs font-medium hover:bg-slate-50 transition-all"
           >
-            <span className="material-symbols-outlined text-xl">print</span>
+            <span className="material-symbols-outlined">print</span>
             Imprimir Bitácora
           </button>
           <button
             onClick={() => { resetForm(); setShowModal(true); }}
-            className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white text-[11px] font-black uppercase tracking-widest rounded-xl hover:opacity-90 transition-all shadow-lg shadow-blue-500/20"
+            className="flex items-center justify-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-black text-sm shadow-lg shadow-blue-500/20 hover:opacity-90 transition-all uppercase tracking-widest"
           >
-            <span className="material-symbols-outlined text-xl">add_road</span>
+            <span className="material-symbols-outlined">add_road</span>
             Registrar Salida
           </button>
         </div>

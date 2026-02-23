@@ -566,10 +566,10 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
         `}</style>
 
        {/* HEADER & CONTROLS */}
-        <div className="">
-          <h2 className="text-2xl font-black text-slate-900 tracking-tight break-words">Reportes Dinámicos</h2>
-          <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mt-1 break-words">Análisis de vehiculos.</p>
-        </div>
+         <div className="">
+           <h2 className="text-2xl font-black text-slate-900 tracking-tight break-words">Reportes Dinámicos</h2>
+           <p className="text-slate-500 text-sm font-medium mt-1 break-words">Análisis de vehículos</p>
+         </div>
        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 no-print">
          <div className="flex flex-col sm:flex-row gap-4 bg-white p-2 rounded-2xl border border-slate-200 shadow-sm">
            <div className="flex items-center gap-2 px-2">

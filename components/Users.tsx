@@ -105,22 +105,22 @@ const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUs
     <div className="space-y-8 animate-in slide-in-from-bottom-6 duration-700">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h2 className="text-3xl font-black text-slate-900 tracking-tighter">Gestión de Usuarios</h2>
-          <p className="text-slate-500 font-medium mt-1">Administración de credenciales y niveles de seguridad del sistema.</p>
+          <h2 className="text-2xl font-black text-slate-900 tracking-tight">Gestión de Usuarios</h2>
+          <p className="text-slate-500 text-sm font-medium mt-1">Administración de credenciales y niveles de seguridad del sistema</p>
         </div>
         <button 
           onClick={handleOpenNew}
-          className="flex items-center gap-3 px-8 py-3.5 bg-primary text-white text-[11px] font-black uppercase tracking-[0.2em] rounded-[1.25rem] shadow-2xl shadow-blue-500/30 hover:scale-[1.02] active:scale-95 transition-all"
+          className="flex items-center justify-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-black text-sm shadow-lg shadow-blue-500/20 hover:opacity-90 transition-all uppercase tracking-widest"
         >
-          <span className="material-symbols-outlined filled">person_add</span>
+          <span className="material-symbols-outlined">person_add</span>
           Nuevo Operador
         </button>
       </div>
 
       <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden">
         <div className="px-10 py-6 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Cuentas activas en Google Sheets</p>
-          <span className="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest">
+          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Cuentas activas en Google Sheets</p>
+          <span className="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-xs font-medium">
             {users.length} Usuarios
           </span>
         </div>

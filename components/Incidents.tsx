@@ -165,13 +165,13 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, searchQuery, onAddInci
       <div className="flex justify-between items-center no-print">
         <div>
           <h1 className="text-2xl font-black text-slate-900 tracking-tight">Tablero de Incidencias</h1>
-          <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mt-1">Monitoreo y gestión de eventos en tiempo real.</p>
+          <p className="text-slate-500 text-sm font-medium mt-1">Monitoreo y gestión de eventos en tiempo real</p>
         </div>
         <button 
           onClick={() => { resetForm(); setShowModal(true); }}
-          className="bg-[#135bec] text-white px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-[0.15em] flex items-center gap-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20 active:scale-95"
+          className="flex items-center justify-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-black text-sm shadow-lg shadow-blue-500/20 hover:opacity-90 transition-all uppercase tracking-widest"
         >
-          <span className="material-symbols-outlined text-lg filled">add_circle</span>
+          <span className="material-symbols-outlined">add_circle</span>
           Reportar Incidencia
         </button>
       </div>
