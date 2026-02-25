@@ -42,9 +42,9 @@ const Settings: React.FC<SettingsProps> = ({ settings, onUpdateSetting, onUrlCha
     onUpdateSetting(key, value);
   };
 
-  const appsScriptCode = `
+const appsScriptCode = `
 /** 
- * API FLOTA PRO v8.1 - LICENCIA NUMBER AGREGADA
+ * API FLOTA PRO v8.5 - Soporte para número consecutivo en mantenimiento
  */
 
 const CONFIG = {
@@ -67,7 +67,7 @@ const CONFIG = {
     "Planeacion": ["id", "date", "vehicleId", "driverId", "areaId", "notes", "departureTime", "arrivalTime", "destination", "status"],
     "Areas": ["id", "name", "description"],
     "BitacorasViaje": ["id", "date", "departureTime", "arrivalTime", "driverId", "vehicleId", "initialOdometer", "finalOdometer", "destination", "areaId", "notes", "initialFuelLevel", "finalFuelLevel"],
-    "Mantenimiento": ["id", "date", "vehicleId", "serviceType", "description", "quoteNumber", "quoteCost", "invoiceNumber", "invoiceAmount", "odometer", "provider", "entryDate", "exitDate", "status", "estimatedDeliveryDate", "internalDocumentNumber", "providerContact"],
+    "Mantenimiento": ["id", "consecutiveNumber", "date", "vehicleId", "serviceType", "description", "quoteNumber", "quoteCost", "invoiceNumber", "invoiceAmount", "odometer", "provider", "entryDate", "exitDate", "status", "estimatedDeliveryDate", "internalDocumentNumber", "providerContact"],
     "TiposMantenimiento": ["id", "name"],
     "Ajustes": ["key", "value"],
     "Usuarios": ["id", "name", "username", "password", "role", "status", "lastLogin"]
@@ -309,7 +309,7 @@ function getSheetData(ss, name) {
               </div>
               <div className="bg-slate-900 rounded-xl p-6 shadow-inner">
                 <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-[10pt] font-black text-primary uppercase tracking-[0.2em] mb-4">Apps Script (v8.4 - Editar Combustible)</h4>
+                  <h4 className="text-[10pt] font-black text-primary uppercase tracking-[0.2em] mb-4">Apps Script (v8.5 - Número Consecutivo Mantenimiento)</h4>
                   <button onClick={() => { navigator.clipboard.writeText(appsScriptCode); alert("¡Copiado!"); }} className="bg-slate-800 hover:bg-slate-700 text-white text-[10px] font-black py-1.5 px-3 rounded-lg transition-colors border border-slate-700">COPIAR CÓDIGO</button>
                 </div>
                 <pre className="text-[10px] font-mono text-slate-400 overflow-x-auto max-h-48 custom-scrollbar leading-relaxed">{appsScriptCode}</pre>

@@ -64,6 +64,12 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [records, filterStatus]);
 
+  const nextConsecutiveNumber = useMemo(() => {
+    if (!records || records.length === 0) return 1;
+    const maxNum = Math.max(...records.map(r => r.consecutiveNumber || 0));
+    return maxNum + 1;
+  }, [records]);
+
   const handleEdit = (record: MaintenanceRecord) => {
     setEditingRecord(record);
     setFormData({
@@ -99,6 +105,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
     setIsSaving(true);
     try {
       const recordData = {
+        consecutiveNumber: editingRecord?.consecutiveNumber || nextConsecutiveNumber,
         date: formData.date,
         vehicleId: formData.vehicleId,
         serviceType: formData.serviceType || 'Mantenimiento General',
@@ -433,7 +440,10 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                   <tr key={record.id} className="hover:bg-slate-50/80 transition-colors group">
                     <td className="px-8 py-5">
                       <p className="font-black text-slate-900 text-[13px] tracking-tight">{serviceLabel}</p>
-                      {record.internalDocumentNumber && <p className="text-[9px] font-black text-indigo-600 uppercase tracking-wider mt-0.5">OFICIO: {record.internalDocumentNumber}</p>}
+                      <div className="flex items-center gap-2 mt-0.5">
+                        {record.consecutiveNumber && <p className="text-[9px] font-black text-blue-600 uppercase tracking-wider">N° {record.consecutiveNumber}</p>}
+                        {record.internalDocumentNumber && <p className="text-[9px] font-black text-indigo-600 uppercase tracking-wider">OFICIO: {record.internalDocumentNumber}</p>}
+                      </div>
                       <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{new Date(record.date).toLocaleDateString()}</p>
                     </td>
                     <td className="px-8 py-5">
@@ -517,9 +527,17 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                 <div className="space-y-6">
                   <div className="bg-slate-50/50 p-6 rounded-3xl border border-slate-100 space-y-4">
                     <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-2">Información de la Unidad</h4>
-                    <div className="space-y-2">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Número de Consecutivo</label>
+                        <div className="w-full bg-blue-50 border border-blue-200 rounded-2xl px-4 py-3 text-sm font-black text-blue-700">
+                          {editingRecord?.consecutiveNumber || nextConsecutiveNumber}
+                        </div>
+                      </div>
+                      <div className="space-y-2">
                         <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Número de Oficio (Control Interno)</label>
                         <input disabled={isSaving} className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold outline-none focus:ring-4 focus:ring-blue-500/10 transition-all uppercase" placeholder="Ej. 135/2023" value={formData.internalDocumentNumber} onChange={e => setFormData({...formData, internalDocumentNumber: e.target.value})} />
+                      </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
@@ -711,6 +729,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                     <div className="inline-block bg-slate-900 text-white px-4 py-1.5 font-black text-[10pt] uppercase tracking-widest rounded-sm mb-2">
                         Autorización de Cotización
                     </div>
+                    <p className="text-xs font-bold text-slate-600">No. <span className="font-black text-blue-600 text-lg ml-1">{(selectedRecord.consecutiveNumber || '---')}</span></p>
                     <p className="text-xs font-bold text-slate-600">FOLIO INTERNO: <span className="font-black text-slate-900 text-lg ml-1">{(selectedRecord.internalDocumentNumber || 'S/N').toUpperCase()}</span></p>
                     <p className="text-[9pt] text-slate-400 font-bold mt-1">Fecha: {new Date(selectedRecord.date).toLocaleDateString('es-ES', {year: 'numeric', month: 'long', day: 'numeric'})}</p>
                     <p className="text-[8pt] text-slate-300 font-bold mt-1">Generado: {new Date().toLocaleDateString('es-ES', {day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'})}</p>

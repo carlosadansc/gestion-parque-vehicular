@@ -153,6 +153,7 @@ export interface MaintenanceType {
 
 export interface MaintenanceRecord {
   id: string;
+  consecutiveNumber?: number; // Número consecutivo automático
   date: string;
   vehicleId: string;
   serviceType: string; // Changed from enum to string to support dynamic types
