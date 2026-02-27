@@ -299,35 +299,35 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
 
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 no-print">
         <div>
-          <h2 className="text-2xl font-black text-slate-900 tracking-tight">Revisiones Técnicas</h2>
-          <p className="text-slate-500 text-sm font-medium mt-1">Historial de inspecciones y estado físico de unidades</p>
+          <h2 className="page-title">Revisiones Técnicas</h2>
+          <p className="page-subtitle">Historial de inspecciones y estado físico de unidades</p>
         </div>
         <button 
           onClick={() => setShowModal(true)}
-          className="flex items-center justify-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-black text-sm shadow-lg shadow-blue-500/20 hover:opacity-90 transition-all uppercase tracking-widest"
+          className="btn btn-primary"
         >
           <span className="material-symbols-outlined">fact_check</span>
           Nueva Revisión
         </button>
       </div>
 
-      <div className="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden flex flex-col no-print">
+      <div className="card flex flex-col no-print">
         <div className="px-8 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
           <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Últimas Revisiones</h3>
         </div>
         
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
+          <table className="table-professional">
             <thead>
-              <tr className="bg-slate-50/50 text-slate-500 border-b border-slate-100">
-                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest">Fecha / Hora</th>
-                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest">Unidad</th>
-                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest">Inspector</th>
-                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-right">Odómetro</th>
-                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-center">Detalle</th>
+              <tr>
+                <th>Fecha / Hora</th>
+                <th>Unidad</th>
+                <th>Inspector</th>
+                <th className="text-right">Odómetro</th>
+                <th className="text-center">Detalle</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody>
               {sortedInspections.map((insp) => {
                 const vehicle = vehicles.find(v => v.id === insp.vehicleId);
                 return (
@@ -486,7 +486,7 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
 
                 {/* Datos Principales - Formal Table */}
                 <div className="mb-8 mt-6 break-inside-avoid">
-                    <div className="section-title bg-slate-900 text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">
+                    <div className="bg-slate-900 text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">
                         Datos del Vehículo
                     </div>
                     <table className="w-full border-collapse">
@@ -517,7 +517,7 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
 
                 {/* Checklist Diagnostico - Formal Grid */}
                 <div className="mb-8 break-inside-avoid">
-                   <div className="section-title bg-slate-900 text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">
+                   <div className="bg-slate-900 text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">
                        Evaluación de Componentes (16 Puntos)
                    </div>
                    <div className="checklist-grid grid grid-cols-4 gap-y-4 gap-x-6 border-2 border-slate-100 p-6 rounded-xl">
@@ -545,7 +545,7 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
 
                  {/* Observations - With Overflow Handling */}
                  <div className="space-y-2 mb-12 break-inside-avoid">
-                    <div className="section-title bg-slate-900 text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">
+                    <div className="bg-slate-900 text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">
                         Observaciones del Inspector
                     </div>
                     <div className="observations-box bg-slate-50 p-6 rounded-lg min-h-[80px] border border-slate-100">

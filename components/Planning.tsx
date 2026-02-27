@@ -523,22 +523,22 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
       `}</style>
       
       {/* HEADER DE CONTROLES */}
-      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6">
-        <div>
-          <h2 className="text-2xl font-black text-slate-900 tracking-tight">Planeación Operativa</h2>
-          <p className="text-slate-500 text-sm font-medium mt-1">Asignación de recursos y logística</p>
+      <div>
+          <h2 className="page-title">Planeación Operativa</h2>
+          <p className="page-subtitle">Asignación de recursos y logística</p>
         </div>
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6">
         
         <div className="flex flex-col sm:flex-row items-center gap-4">
            {/* Selector de Vista */}
            <div className="flex bg-slate-100 p-1 rounded-lg">
-               <button onClick={() => setViewMode('day')} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${viewMode === 'day' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Día</button>
-               <button onClick={() => setViewMode('week')} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${viewMode === 'week' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Semana</button>
-               <button onClick={() => setViewMode('month')} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${viewMode === 'month' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Mes</button>
+<button onClick={() => setViewMode('day')} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${viewMode === 'day' ? 'bg-white text-primary' : 'text-slate-500 hover:text-slate-700'}`}>Día</button>
+                <button onClick={() => setViewMode('week')} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${viewMode === 'week' ? 'bg-white text-primary' : 'text-slate-500 hover:text-slate-700'}`}>Semana</button>
+                <button onClick={() => setViewMode('month')} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${viewMode === 'month' ? 'bg-white text-primary' : 'text-slate-500 hover:text-slate-700'}`}>Mes</button>
            </div>
 
            {/* Navegación de Fecha */}
-           <div className="flex items-center bg-white border border-slate-200 rounded-xl p-1 shadow-sm w-full sm:w-auto justify-between sm:justify-start">
+           <div className="flex items-center bg-white border border-slate-200 rounded-xl p-1 w-full sm:w-auto justify-between sm:justify-start">
              <button onClick={() => navigate(-1)} className="size-9 flex items-center justify-center hover:bg-slate-50 text-slate-400 rounded-lg transition-colors">
                <span className="material-symbols-outlined">chevron_left</span>
              </button>
@@ -554,7 +554,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
         <div className="flex items-center gap-3">
           <button 
             onClick={() => setShowAreaModal(true)}
-            className="hidden md:flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 text-[11px] font-black uppercase tracking-widest rounded-xl hover:bg-slate-50 transition-all shadow-sm"
+            className="btn btn-secondary"
           >
             <span className="material-symbols-outlined text-lg">layers</span>
             Áreas
@@ -562,7 +562,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
           
           <button 
             onClick={() => setShowPrintPreview(true)}
-            className="hidden md:flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 text-[11px] font-black uppercase tracking-widest rounded-xl hover:bg-slate-50 transition-all shadow-sm"
+            className="btn btn-secondary"
           >
             <span className="material-symbols-outlined text-lg">print</span>
             Imprimir Semana
@@ -570,7 +570,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
           
           <button 
             onClick={() => { resetForm(); setShowModal(true); }}
-            className="flex items-center gap-2 px-6 py-2.5 bg-[#135bec] text-white text-[11px] font-black uppercase tracking-widest rounded-xl hover:bg-blue-600 transition-all shadow-lg shadow-blue-500/20"
+            className="btn btn-primary"
           >
             <span className="material-symbols-outlined text-xl">event_available</span>
             <span className="hidden sm:inline">Asignar</span>
@@ -587,7 +587,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
             const dayPlannings = getDayPlannings(day);
             const isToday = day.toDateString() === new Date().toDateString();
             return (
-              <div key={idx} className={`flex flex-col min-h-[400px] bg-white rounded-2xl border transition-all ${isToday ? 'border-[#135bec] shadow-lg shadow-blue-500/5 ring-1 ring-blue-500/10' : 'border-slate-200 shadow-sm'}`}>
+              <div key={idx} className={`flex flex-col min-h-[400px] bg-white rounded-2xl border transition-all ${isToday ? 'border-[#135bec] ring-1 ring-blue-500/10' : 'border-slate-200'}`}>
                 <div className={`p-4 border-b text-center ${isToday ? 'bg-blue-50 border-blue-100' : 'bg-slate-50 border-slate-100'}`}>
                   <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${isToday ? 'text-blue-600' : 'text-slate-400'}`}>{day.toLocaleDateString('es-ES', { weekday: 'long' })}</p>
                   <p className={`text-xl font-black mt-0.5 ${isToday ? 'text-blue-700' : 'text-slate-800'}`}>{day.getDate()}</p>
@@ -608,7 +608,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
 
       {/* --- VISTA DÍA (AGENDA) --- */}
       {viewMode === 'day' && (
-        <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden min-h-[500px] no-print">
+        <div className="card overflow-hidden min-h-[500px] no-print">
           <div className="p-8 border-b border-slate-100 bg-slate-50/50 flex justify-between items-end">
              <div>
                 <h3 className="text-3xl font-black text-slate-900 capitalize tracking-tighter">{currentDate.toLocaleDateString('es-ES', { weekday: 'long' })}</h3>
@@ -638,7 +638,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
 
       {/* --- VISTA MES (CALENDARIO) --- */}
       {viewMode === 'month' && (
-        <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden no-print">
+        <div className="card overflow-hidden no-print">
           <div className="grid grid-cols-7 border-b border-slate-100 bg-slate-50/50">
             {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map(day => (
               <div key={day} className="py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">
@@ -660,7 +660,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
                     onClick={() => handleDayClickInCalendar(date)}
                     className={`min-h-[100px] p-2 border-r border-b border-slate-100 relative group cursor-pointer transition-all hover:bg-blue-50/30 ${isSelected ? 'bg-blue-50/50' : ''}`}
                  >
-                    <div className={`size-7 flex items-center justify-center rounded-lg text-xs font-black mb-2 ${isToday ? 'bg-[#135bec] text-white shadow-md' : 'text-slate-700'}`}>
+                    <div className={`size-7 flex items-center justify-center rounded-lg text-xs font-black mb-2 ${isToday ? 'bg-[#135bec] text-white' : 'text-slate-700'}`}>
                       {date.getDate()}
                     </div>
                     
@@ -835,8 +835,8 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
                 <h3 className="text-xl font-black text-slate-900 tracking-tight">Catálogo de Áreas</h3>
                 <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-0.5">Zonas y sectores de operación</p>
               </div>
-              <button onClick={() => !isSavingArea && setShowAreaModal(false)} disabled={isSavingArea} className="size-10 rounded-full hover:bg-white hover:shadow-md transition-all flex items-center justify-center text-slate-400">
-                <span className="material-symbols-outlined">close</span>
+              <button onClick={() => !isSavingArea && setShowAreaModal(false)} disabled={isSavingArea} className="size-10 rounded-full hover:bg-white hover:shadow-md transition-all flex items-center justify-center text-slate-400" aria-label="Cerrar">
+                <span className="material-symbols-outlined" aria-hidden="true">close</span>
               </button>
             </div>
             <div className="p-8 space-y-6">
@@ -887,8 +887,8 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
                 <h3 className="text-xl font-black text-slate-900 tracking-tight">{editingPlanning ? 'Editar Asignación' : 'Nueva Asignación'}</h3>
                 <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-0.5">{editingPlanning ? `Editando registro ${editingPlanning.id}` : 'Planifica rutas y recursos'}</p>
               </div>
-              <button onClick={() => !isSaving && setShowModal(false)} disabled={isSaving} className="size-10 rounded-full hover:bg-white hover:shadow-md transition-all flex items-center justify-center text-slate-400">
-                <span className="material-symbols-outlined">close</span>
+              <button onClick={() => !isSaving && setShowModal(false)} disabled={isSaving} className="size-10 rounded-full hover:bg-white hover:shadow-md transition-all flex items-center justify-center text-slate-400" aria-label="Cerrar">
+                <span className="material-symbols-outlined" aria-hidden="true">close</span>
               </button>
             </div>
             <form onSubmit={handleSubmit} className="p-8 space-y-6 overflow-y-auto max-h-[80vh] custom-scrollbar">

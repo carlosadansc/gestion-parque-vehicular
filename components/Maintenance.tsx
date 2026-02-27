@@ -362,12 +362,12 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
 
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-black text-slate-900 tracking-tight">Gestión de Mantenimiento</h2>
-          <p className="text-slate-500 text-sm font-medium mt-1">Control de servicios, presupuestos y facturación</p>
+          <h2 className="page-title">Gestión de Mantenimiento</h2>
+          <p className="page-subtitle">Control de servicios y facturación</p>
         </div>
         <button 
           onClick={() => { resetForm(); setShowModal(true); }}
-          className="flex items-center justify-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-black text-sm shadow-lg shadow-blue-500/20 hover:opacity-90 transition-all uppercase tracking-widest"
+          className="btn btn-primary"
         >
           <span className="material-symbols-outlined">build</span>
           Nuevo Servicio
@@ -375,28 +375,28 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6 no-print">
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+        <div className="card p-4">
           <div className="flex items-center gap-3 mb-2">
-            <div className="size-9 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600"><span className="material-symbols-outlined text-lg">payments</span></div>
+            <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600"><span className="material-symbols-outlined text-lg">payments</span></div>
             <span className="text-xs font-medium text-slate-500">Total Facturado</span>
           </div>
-          <p className="text-xl font-bold text-slate-900">${(stats.totalInvoiced || 0).toLocaleString()}</p>
+          <p className="text-xl font-semibold text-slate-900">${(stats.totalInvoiced || 0).toLocaleString()}</p>
         </div>
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+        <div className="card p-4">
           <div className="flex items-center gap-3 mb-2">
-            <div className="size-9 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600"><span className="material-symbols-outlined text-lg">request_quote</span></div>
+            <div className="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600"><span className="material-symbols-outlined text-lg">request_quote</span></div>
             <span className="text-xs font-medium text-slate-500">En Curso</span>
           </div>
-          <p className="text-xl font-bold text-slate-900">${(stats.totalQuoted || 0).toLocaleString()}</p>
+          <p className="text-xl font-semibold text-slate-900">${(stats.totalQuoted || 0).toLocaleString()}</p>
         </div>
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+        <div className="card p-4">
           <div className="flex items-center gap-3 mb-2">
-            <div className="size-9 rounded-lg bg-rose-50 flex items-center justify-center text-rose-600"><span className="material-symbols-outlined text-lg">car_repair</span></div>
+            <div className="w-9 h-9 rounded-lg bg-rose-50 flex items-center justify-center text-rose-600"><span className="material-symbols-outlined text-lg">car_repair</span></div>
             <span className="text-xs font-medium text-slate-500">En Taller</span>
           </div>
-          <p className="text-xl font-bold text-slate-900">{stats.inWorkshop || 0}</p>
+          <p className="text-xl font-semibold text-slate-900">{stats.inWorkshop || 0}</p>
         </div>
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+        <div className="card p-4">
           <div className="flex items-center gap-3 mb-2">
             <div className="size-9 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600"><span className="material-symbols-outlined text-lg">task_alt</span></div>
             <span className="text-xs font-medium text-slate-500">Completados</span>
@@ -405,13 +405,13 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm no-print">
-        <div className="px-5 py-3 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+      <div className="card no-print">
+        <div className="px-4 py-3 border-b border-slate-200 bg-slate-50 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <button onClick={() => setFilterStatus('todos')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filterStatus === 'todos' ? 'bg-primary text-white' : 'bg-white border border-slate-200 text-slate-500'}`}>Todos</button>
-            <button onClick={() => setFilterStatus('in-progress')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filterStatus === 'in-progress' ? 'bg-rose-500 text-white' : 'bg-white border border-slate-200 text-slate-500'}`}>En Taller</button>
-            <button onClick={() => setFilterStatus('scheduled')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filterStatus === 'scheduled' ? 'bg-amber-500 text-white' : 'bg-white border border-slate-200 text-slate-500'}`}>Programados</button>
-            <button onClick={() => setFilterStatus('completed')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filterStatus === 'completed' ? 'bg-primary text-white' : 'bg-white border border-slate-200 text-slate-500'}`}>Completados</button>
+            <button onClick={() => setFilterStatus('todos')} className={`filter-pill ${filterStatus === 'todos' ? 'filter-pill-active' : 'filter-pill-inactive'}`}>Todos</button>
+            <button onClick={() => setFilterStatus('in-progress')} className={`filter-pill ${filterStatus === 'in-progress' ? 'filter-pill-warning' : 'filter-pill-inactive'}`}>En Taller</button>
+            <button onClick={() => setFilterStatus('scheduled')} className={`filter-pill ${filterStatus === 'scheduled' ? 'filter-pill-info' : 'filter-pill-inactive'}`}>Programados</button>
+            <button onClick={() => setFilterStatus('completed')} className={`filter-pill ${filterStatus === 'completed' ? 'filter-pill-success' : 'filter-pill-inactive'}`}>Completados</button>
           </div>
           <button onClick={onSync} className="btn btn-ghost text-xs">
             <span className="material-symbols-outlined text-lg">sync</span> Actualizar
@@ -482,11 +482,11 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                     </td>
                     <td className="px-8 py-5 text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => handlePrintRequest(record)} className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all" title="Imprimir Orden">
-                            <span className="material-symbols-outlined text-xl">file_present</span>
+                        <button onClick={() => handlePrintRequest(record)} className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all" aria-label="Imprimir Orden">
+                            <span className="material-symbols-outlined text-xl" aria-hidden="true">file_present</span>
                         </button>
-                        <button onClick={() => handleEdit(record)} className="p-2 text-slate-400 hover:text-primary hover:bg-blue-50 rounded-xl transition-all" title="Editar">
-                            <span className="material-symbols-outlined text-xl">edit</span>
+                        <button onClick={() => handleEdit(record)} className="p-2 text-slate-400 hover:text-primary hover:bg-blue-50 rounded-xl transition-all" aria-label="Editar">
+                            <span className="material-symbols-outlined text-xl" aria-hidden="true">edit</span>
                         </button>
                       </div>
                     </td>
@@ -516,8 +516,8 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                 </h3>
                 <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-0.5">Control de ingresos y facturación de taller</p>
               </div>
-              <button onClick={() => !isSaving && setShowModal(false)} disabled={isSaving} className="size-10 rounded-full hover:bg-white hover:shadow-md transition-all flex items-center justify-center text-slate-400">
-                <span className="material-symbols-outlined">close</span>
+              <button onClick={() => !isSaving && setShowModal(false)} disabled={isSaving} className="size-10 rounded-full hover:bg-white hover:shadow-md transition-all flex items-center justify-center text-slate-400" aria-label="Cerrar">
+                <span className="material-symbols-outlined" aria-hidden="true">close</span>
               </button>
             </div>
             
@@ -738,7 +738,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
 
                 {/* Datos del Vehículo - Formal Table */}
                 <div className="mb-8 mt-6 break-inside-avoid">
-                    <div className="section-title bg-slate-900 text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">
+                    <div className="bg-slate-900 text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">
                         Datos de Identificación del Vehículo
                     </div>
                     <table className="w-full border-collapse">
@@ -777,7 +777,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
 
                 {/* Descripción del Servicio - With Overflow Handling */}
                 <div className="space-y-2 mb-12 break-inside-avoid">
-                   <div className="section-title bg-slate-900 text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">
+                   <div className="bg-slate-900 text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">
                        Descripción / Servicio Solicitado
                    </div>
                    <div className="bg-white p-4 rounded-lg border border-slate-200">

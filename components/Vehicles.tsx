@@ -47,10 +47,10 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
   const filteredVehicles = useMemo(() => {
     return vehicles.filter(v => {
       const driver = drivers.find(d => d.id === v.assignedDriverId);
-      const matchesSearch = (typeof v.plate === 'string' && v.plate.toLowerCase().includes(searchQuery.toLowerCase())) || 
-                           (typeof v.model === 'string' && v.model.toLowerCase().includes(searchQuery.toLowerCase())) ||
-                           (typeof v.brand === 'string' && v.brand.toLowerCase().includes(searchQuery.toLowerCase())) ||
-                           (typeof driver?.name === 'string' && driver.name.toLowerCase().includes(searchQuery.toLowerCase()));
+      const matchesSearch = String(v.plate || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
+                           String(v.model || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           String(v.brand || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           String(driver?.name || '').toLowerCase().includes(searchQuery.toLowerCase());
       const matchesStatus = statusFilter === 'todos' || v.status === statusFilter;
       return matchesSearch && matchesStatus;
     });
@@ -208,64 +208,64 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
 
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-black text-slate-900 tracking-tight">Inventario de Vehículos</h2>
-          <p className="text-slate-500 text-sm font-medium mt-1">Gestión técnica y administrativa de unidades.</p>
+          <h2 className="page-title">Inventario de Vehículos</h2>
+          <p className="page-subtitle">Gestión técnica y administrativa de unidades.</p>
         </div>
         <button 
           onClick={handleOpenNew}
-          className="flex items-center justify-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-black text-sm shadow-lg shadow-blue-500/20 hover:opacity-90 transition-all uppercase tracking-widest"
+          className="btn btn-primary"
         >
           <span className="material-symbols-outlined">add</span>
           Nueva Unidad
         </button>
       </div>
 
-      <div className="card overflow-hidden">
-        <div className="px-5 py-3 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+      <div className="card">
+        <div className="px-4 py-3 border-b border-slate-200 bg-slate-50 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <button onClick={() => setStatusFilter('todos')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${statusFilter === 'todos' ? 'bg-primary text-white' : 'bg-white border border-slate-200 text-slate-500'}`}>Todos</button>
-            <button onClick={() => setStatusFilter('active')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${statusFilter === 'active' ? 'bg-emerald-500 text-white' : 'bg-white border border-slate-200 text-slate-500'}`}>Activo</button>
-            <button onClick={() => setStatusFilter('workshop')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${statusFilter === 'workshop' ? 'bg-amber-500 text-white' : 'bg-white border border-slate-200 text-slate-500'}`}>Taller</button>
-            <button onClick={() => setStatusFilter('inactive')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${statusFilter === 'inactive' ? 'bg-slate-500 text-white' : 'bg-white border border-slate-200 text-slate-500'}`}>Inactivo</button>
+            <button onClick={() => setStatusFilter('todos')} className={`filter-pill ${statusFilter === 'todos' ? 'filter-pill-active' : 'filter-pill-inactive'}`}>Todos</button>
+            <button onClick={() => setStatusFilter('active')} className={`filter-pill ${statusFilter === 'active' ? 'filter-pill-success' : 'filter-pill-inactive'}`}>Activo</button>
+            <button onClick={() => setStatusFilter('workshop')} className={`filter-pill ${statusFilter === 'workshop' ? 'filter-pill-warning' : 'filter-pill-inactive'}`}>Taller</button>
+            <button onClick={() => setStatusFilter('inactive')} className={`filter-pill ${statusFilter === 'inactive' ? 'filter-pill-error' : 'filter-pill-inactive'}`}>Inactivo</button>
           </div>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
+          <table className="table-professional">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-200">
-                <th className="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Unidad</th>
-                <th className="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Placa</th>
-                <th className="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider text-center">Chofer</th>
-                <th className="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Acciones</th>
+              <tr>
+                <th>Unidad</th>
+                <th>Placa</th>
+                <th className="text-center">Chofer</th>
+                <th className="text-right">Acciones</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody>
               {filteredVehicles.map((vehicle) => {
                 const driver = drivers.find(d => d.id === vehicle.assignedDriverId);
                 return (
-                  <tr key={vehicle.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-5 py-4">
+                  <tr key={vehicle.id}>
+                    <td>
                       <div className="flex items-center gap-3">
-                         <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center">
-                           <span className="material-symbols-outlined text-slate-400">directions_car</span>
+                         <div className="w-9 h-9 rounded-md bg-slate-100 flex items-center justify-center">
+                           <span className="material-symbols-outlined text-slate-500">directions_car</span>
                          </div>
                          <div>
-                            <p className="font-semibold text-slate-900">{vehicle.model}</p>
-                            <p className="text-xs text-primary font-medium">{vehicle.brand} {vehicle.line}</p>
+                            <p className="font-medium text-slate-900">{vehicle.model}</p>
+                            <p className="text-xs text-primary">{vehicle.brand} {vehicle.line}</p>
                          </div>
                       </div>
                     </td>
-                    <td className="px-5 py-4">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-slate-100 text-xs font-semibold text-slate-700">{vehicle.plate}</span>
+                    <td>
+                      <span className="inline-flex items-center px-2 py-1 rounded-md bg-slate-100 text-xs font-medium text-slate-700">{vehicle.plate}</span>
                     </td>
-                    <td className="px-5 py-4 text-center">
-                       <span className="text-sm font-medium text-slate-600">{driver?.name || '—'}</span>
+                    <td className="text-center">
+                       <span className="text-sm text-slate-600">{driver?.name || '—'}</span>
                     </td>
-                    <td className="px-5 py-4 text-right">
+                    <td className="text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => handlePrint(vehicle)} className="btn-icon text-slate-400 hover:text-emerald-600 hover:bg-emerald-50"><span className="material-symbols-outlined">file_present</span></button>
-                        <button onClick={() => handleEdit(vehicle)} className="btn-icon text-slate-400 hover:text-primary hover:bg-blue-50"><span className="material-symbols-outlined">edit</span></button>
+                        <button onClick={() => handlePrint(vehicle)} className="btn-icon" aria-label="Imprimir"><span className="material-symbols-outlined" aria-hidden="true">file_present</span></button>
+                        <button onClick={() => handleEdit(vehicle)} className="btn-icon" aria-label="Editar"><span className="material-symbols-outlined" aria-hidden="true">edit</span></button>
                       </div>
                     </td>
                   </tr>
@@ -284,7 +284,7 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
                 <h3 className="text-2xl font-black text-slate-900 tracking-tight">{editingVehicle ? 'Ficha de Unidad' : 'Nueva Unidad'}</h3>
                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1">Control Patrimonial y Técnico V.7.5</p>
               </div>
-              <button onClick={() => !isSaving && setShowModal(false)} className="size-12 rounded-full hover:bg-white hover:shadow-md transition-all flex items-center justify-center text-slate-400"><span className="material-symbols-outlined text-2xl">close</span></button>
+              <button onClick={() => !isSaving && setShowModal(false)} className="size-12 rounded-full hover:bg-white hover:shadow-md transition-all flex items-center justify-center text-slate-400" aria-label="Cerrar"><span className="material-symbols-outlined text-2xl" aria-hidden="true">close</span></button>
             </div>
 
             <div className="flex border-b border-slate-100 bg-white px-10 overflow-x-auto">

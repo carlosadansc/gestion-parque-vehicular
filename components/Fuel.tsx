@@ -185,20 +185,20 @@ const Fuel: React.FC<FuelProps> = ({ fuelHistory = [], vehicles = [], drivers = 
 
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 no-print">
         <div>
-          <h2 className="text-2xl font-black text-slate-900 tracking-tight">Bitácora de Combustible</h2>
-          <p className="text-slate-500 text-sm font-medium mt-1">Control de gastos y rendimiento por unidad</p>
+          <h2 className="page-title">Bitácora de Combustible</h2>
+          <p className="page-subtitle">Control de gastos y rendimiento por unidad</p>
         </div>
         <div className="flex gap-2">
             <button 
                 onClick={() => setShowPrintPreview(true)}
-                className="flex items-center justify-center gap-2 bg-white border border-slate-200 text-slate-600 px-4 py-2.5 rounded-xl text-xs font-medium hover:bg-slate-50 transition-all"
+                className="btn btn-secondary"
             >
                 <span className="material-symbols-outlined">print</span>
                 Vista Previa
             </button>
             <button 
             onClick={() => setShowModal(true)}
-            className="flex items-center justify-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-black text-sm shadow-lg shadow-blue-500/20 hover:opacity-90 transition-all uppercase tracking-widest"
+            className="btn btn-primary"
             >
             <span className="material-symbols-outlined">local_gas_station</span>
             Agregar Carga
@@ -212,64 +212,65 @@ const Fuel: React.FC<FuelProps> = ({ fuelHistory = [], vehicles = [], drivers = 
         <FuelStat label="Litros Totales" value={(totalLiters || 0).toLocaleString()} unit="L" icon="water_drop" desc={`${(fuelHistory?.length || 0)} cargas registradas`} />
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-full no-print">
-        <div className="px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50">
+      <div className="card flex flex-col h-full no-print">
+        <div className="px-4 py-3 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50">
           <div>
-            <h3 className="text-lg font-black text-slate-900 tracking-tight">Historial de Consumo</h3>
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-0.5">Listado completo de cargas realizadas</p>
+            <h3 className="section-title">Historial de Consumo</h3>
+            <p className="label mt-0.5">Listado completo de cargas</p>
           </div>
-          <button onClick={onSync} className="text-[10px] font-black text-[#135bec] uppercase tracking-widest flex items-center gap-2 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-all">
+          <button onClick={onSync} className="btn btn-ghost text-xs">
             <span className="material-symbols-outlined text-sm">sync</span> Sincronizar
           </button>
         </div>
         
         <div className="overflow-x-auto flex-1">
-          <table className="w-full text-left text-sm">
+          <table className="table-professional">
             <thead>
-              <tr className="bg-slate-50/50 text-slate-500 border-b border-slate-100">
-                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Fecha</th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Vehículo</th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-right">Odómetro</th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-right">Litros</th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-right text-blue-600">Rendimiento</th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-right">Costo</th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-center">Acciones</th>
+              <tr>
+                <th>Fecha</th>
+                <th>Vehículo</th>
+                <th className="text-right">Odómetro</th>
+                <th className="text-right">Litros</th>
+                <th className="text-right">Rendimiento</th>
+                <th className="text-right">Costo</th>
+                <th className="text-center">Acciones</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody>
               {processedHistory.map((entry) => {
                 const vehicle = vehicles.find(v => v.id === entry.vehicleId);
                 const driver = drivers.find(d => d.id === entry.driverId);
                 return (
-                  <tr key={entry.id} className="hover:bg-slate-50 transition-colors group">
-                    <td className="px-6 py-4 text-slate-700 font-bold text-[13px]">
+                  <tr key={entry.id}>
+                    <td className="font-medium">
                       {entry.date ? new Date(entry.date).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }) : '---'}
                     </td>
-                    <td className="px-6 py-4">
-                      <p className="font-black text-slate-900 text-sm tracking-tight">{vehicle?.plate || entry.vehicleId || 'S/P'}</p>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase">{driver?.name || entry.driverId || '---'}</p>
+                    <td>
+                      <p className="font-medium text-slate-900">{vehicle?.plate || entry.vehicleId || 'S/P'}</p>
+                      <p className="text-xs text-slate-400">{driver?.name || entry.driverId || '---'}</p>
                     </td>
-                    <td className="px-6 py-4 text-right font-medium text-slate-400 text-[12px]">{(Number(entry.odometer) || 0).toLocaleString()} km</td>
-                    <td className="px-6 py-4 text-right font-bold text-slate-700">{entry.liters || 0} L</td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="text-right text-slate-500">{(Number(entry.odometer) || 0).toLocaleString()} km</td>
+                    <td className="text-right font-medium">{entry.liters || 0} L</td>
+                    <td className="text-right">
                       {entry.performance ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg font-black text-[11px] border border-blue-100">
+                        <span className="badge badge-info">
                           {entry.performance.toFixed(2)} KM/L
                         </span>
                       ) : (
-                        <span className="text-[10px] text-slate-300 font-bold uppercase italic">Carga Inicial</span>
+                        <span className="text-xs text-slate-400 italic">Carga Inicial</span>
                       )}
                     </td>
-                     <td className="px-6 py-4 text-right font-black text-slate-900">${(Number(entry.cost) || 0).toFixed(2)}</td>
-                     <td className="px-6 py-4 text-center">
+                     <td className="text-right font-medium">${(Number(entry.cost) || 0).toFixed(2)}</td>
+                     <td className="text-center">
                         <button 
                           onClick={() => handleEdit(entry)}
-                          className="size-9 bg-white border border-slate-200 text-slate-400 hover:text-primary hover:border-blue-200 rounded-xl transition-all flex items-center justify-center shadow-sm"
+                          className="btn-icon"
+                          aria-label="Editar"
                         >
                           <span className="material-symbols-outlined text-lg">edit</span>
                         </button>
                      </td>
-                   </tr>
+                  </tr>
                 );
               })}
             </tbody>
@@ -289,8 +290,9 @@ const Fuel: React.FC<FuelProps> = ({ fuelHistory = [], vehicles = [], drivers = 
                 onClick={() => !isSaving && setShowModal(false)}
                 disabled={isSaving}
                 className="size-10 rounded-full hover:bg-white hover:shadow-md transition-all flex items-center justify-center text-slate-400"
+                aria-label="Cerrar"
               >
-                <span className="material-symbols-outlined">close</span>
+                <span className="material-symbols-outlined" aria-hidden="true">close</span>
               </button>
             </div>
             
@@ -526,7 +528,7 @@ const Fuel: React.FC<FuelProps> = ({ fuelHistory = [], vehicles = [], drivers = 
 };
 
 const FuelStat: React.FC<{ label: string, value: string, unit?: string, icon: string, trend?: string, isNegativeTrend?: boolean, desc?: string }> = ({ label, value, unit, icon, trend, isNegativeTrend, desc }) => (
-  <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 group hover:border-blue-500/30 transition-all">
+  <div className="bg-white p-6 rounded-2xl border border-slate-200 group hover:border-blue-500/30 transition-all">
     <div className="flex items-center justify-between mb-4">
       <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">{label}</p>
       <div className="bg-blue-50 text-blue-600 p-2 rounded-xl group-hover:scale-110 transition-transform">

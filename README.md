@@ -138,9 +138,9 @@ gestion-de-parque-vehicular-ft-google-sheets/
 ├── constants.tsx              # Constantes y datos predefinidos
 ├── index.html                  # Template HTML
 ├── index.tsx                   # Punto de entrada
-├── metadata.json               # Metadatos del proyecto
 ├── package.json                # Dependencias
 ├── tsconfig.json              # Configuración TypeScript
+├── types.ts                    # Tipos e interfaces TypeScript
 └── vite.config.ts             # Configuración Vite
 ```
 
@@ -252,8 +252,8 @@ El código de Apps Script se encuentra en la sección **Configuración** de la a
 ### Pasos:
 1. Ir a [Google Apps Script](https://script.google.com/)
 2. Crear nuevo proyecto
-3. Pegar el código completoar el
-4. Guard proyecto
+3. Pegar el código completo
+4. Guardar el proyecto
 5. Deploy > New deployment
 6. Seleccionar tipo: **Web app**
 7. Ejecutar como: **Me**

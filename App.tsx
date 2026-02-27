@@ -515,38 +515,32 @@ const App: React.FC = () => {
 
   if (!currentUser) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-6 relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
-          <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary rounded-full blur-[150px]"></div>
-          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-400 rounded-full blur-[120px]"></div>
-        </div>
-        <div className="w-full max-w-md bg-white rounded-[2.5rem] shadow-2xl p-10 z-10 animate-in zoom-in-95 duration-500">
-          <div className="flex flex-col items-center mb-10 text-center">
-            <div className="bg-primary size-16 rounded-[1.5rem] flex items-center justify-center text-white shadow-xl shadow-blue-500/20 mb-6">
-              <span className="material-symbols-outlined text-4xl filled">directions_car</span>
-            </div>
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight">{settingsMap['APP_NAME'] || 'Flota Pro'}</h1>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mt-2">DIF LA PAZ - CONTROL VEHICULAR</p>
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+        <div className="w-full max-w-sm bg-white rounded-xl border border-slate-200 p-8">
+          <div className="flex flex-col items-center mb-8">
+            <img alt="DIF" className="w-14 h-14 object-contain mb-4" src="/images/logo-dif.png" />
+            <h1 className="text-xl font-semibold text-slate-900">{settingsMap['APP_NAME'] || 'Flota Pro'}</h1>
+            <p className="text-xs text-slate-500 mt-1">DIF La Paz - Control Vehicular</p>
           </div>
-          <form onSubmit={handleLogin} className="space-y-6">
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Nombre de Usuario</label>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-slate-600">Usuario</label>
               <input 
                 type="text" 
                 required 
-                className={`w-full bg-slate-50 border rounded-2xl px-6 py-4 font-bold text-sm outline-none transition-all ${loginError ? 'border-rose-300 ring-4 ring-rose-50' : 'border-slate-200 focus:ring-4 focus:ring-primary/10'}`}
+                className="w-full px-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
                 placeholder="admin" 
                 value={loginUsername} 
                 onChange={e => { setLoginUsername(e.target.value); setLoginError(''); }} 
               />
             </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Contraseña</label>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-slate-600">Contraseña</label>
               <div className="relative">
                 <input 
                   type={showPassword ? "text" : "password"} 
                   required 
-                  className={`w-full bg-slate-50 border rounded-2xl px-6 py-4 pr-12 font-bold text-sm outline-none transition-all ${loginError ? 'border-rose-300 ring-4 ring-rose-50' : 'border-slate-200 focus:ring-4 focus:ring-primary/10'}`}
+                  className="w-full px-4 py-2.5 pr-10 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
                   placeholder="••••••••" 
                   value={loginPass} 
                   onChange={e => { setLoginPass(e.target.value); setLoginError(''); }} 
@@ -554,17 +548,17 @@ const App: React.FC = () => {
                 <button 
                   type="button" 
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
                 >
-                  <span className="material-symbols-outlined text-xl">
+                  <span className="material-symbols-outlined text-lg">
                     {showPassword ? 'visibility_off' : 'visibility'}
                   </span>
                 </button>
               </div>
             </div>
-            {loginError && <p className="text-rose-500 text-[11px] font-black text-center uppercase tracking-widest bg-rose-50 p-3 rounded-xl border border-rose-100 animate-in slide-in-from-top-2">{loginError}</p>}
-            <button type="submit" disabled={isSyncing} className="w-full bg-primary text-white py-4 rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-blue-500/30 hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50">
-              {isSyncing ? 'Iniciando...' : 'Acceder al Sistema'}
+            {loginError && <p className="text-red-500 text-xs text-center py-2">{loginError}</p>}
+            <button type="submit" disabled={isSyncing} className="w-full bg-primary text-white py-2.5 rounded-lg font-medium text-sm hover:opacity-90 transition-opacity">
+              {isSyncing ? 'Iniciando...' : 'Iniciar Sesión'}
             </button>
           </form>
         </div>
@@ -577,8 +571,8 @@ const App: React.FC = () => {
       <Sidebar activeView={currentView} onViewChange={v => { setCurrentView(v); setSearchQuery(''); }} appName={settingsMap['APP_NAME'] || 'Flota Pro'} currentUser={currentUser} onLogout={handleLogout} />
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <Header title={currentView.toUpperCase()} isSyncing={isSyncing} syncStatus={syncStatus} onSync={handleSync} view={currentView} searchQuery={searchQuery} onSearchChange={setSearchQuery} />
-        <div className="flex-1 overflow-y-auto p-8 bg-slate-50 custom-scrollbar">
-          <div className="max-w-7xl mx-auto w-full">{renderContent()}</div>
+        <div className="flex-1 overflow-y-auto p-6">
+          <div className="max-w-7xl mx-auto">{renderContent()}</div>
         </div>
       </main>
     </div>

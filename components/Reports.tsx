@@ -205,7 +205,7 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
   // --- COMPONENTES UI ---
 
    const KPICard = ({ title, value, subtext, color }: any) => (
-    <div className={`bg-white p-4 border-l-4 ${color === 'blue' ? 'border-l-blue-500' : color === 'green' ? 'border-l-emerald-500' : 'border-l-rose-500'} border-y border-r border-slate-200 shadow-sm`}>
+     <div className={`bg-white p-4 border-l-4 ${color === 'blue' ? 'border-l-blue-500' : color === 'green' ? 'border-l-emerald-500' : 'border-l-rose-500'} border-y border-r border-slate-200`}>
       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{title}</p>
       <p className="text-3xl font-black text-slate-900 mt-2 tracking-tight">{value}</p>
       {subtext && <p className="text-xs font-bold text-slate-500 mt-1">{subtext}</p>}
@@ -565,13 +565,13 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
           }
         `}</style>
 
-       {/* HEADER & CONTROLS */}
-         <div className="">
-           <h2 className="text-2xl font-black text-slate-900 tracking-tight break-words">Reportes Dinámicos</h2>
-           <p className="text-slate-500 text-sm font-medium mt-1 break-words">Análisis de vehículos</p>
-         </div>
-       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 no-print">
-         <div className="flex flex-col sm:flex-row gap-4 bg-white p-2 rounded-2xl border border-slate-200 shadow-sm">
+        {/* HEADER & CONTROLS */}
+          <div className="">
+            <h2 className="page-title break-words">Reportes Dinámicos</h2>
+            <p className="page-subtitle break-words">Análisis de vehículos</p>
+          </div>
+         <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 no-print">
+          <div className="flex flex-col sm:flex-row gap-4 bg-white p-2 rounded-2xl border border-slate-200">
            <div className="flex items-center gap-2 px-2">
              <span className="text-[10px] font-black text-slate-400 uppercase">Desde</span>
              <input 
@@ -602,8 +602,8 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
          </div>
 
          <div className="flex gap-2">
-           <button onClick={() => setShowPrintPreview(true)} className="bg-blue-600 text-white px-3 py-3 rounded-xl font-black text-[11px] uppercase tracking-widest shadow-lg hover:bg-blue-700 transition-all flex items-center gap-2">
-             <span className="material-symbols-outlined text-lg">print</span>
+           <button onClick={() => setShowPrintPreview(true)} className="btn btn-primary">
+             <span className="material-symbols-outlined">print</span>
              Generar reporte
            </button>
          </div>
@@ -637,9 +637,9 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
 
          {/* TABS */}
          <div className="flex gap-2 mb-6 no-print overflow-x-auto">
-             <button onClick={() => setActiveReport('financial')} className={`px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${activeReport === 'financial' ? 'bg-[#135bec] text-white shadow-lg shadow-blue-500/30' : 'bg-white text-slate-500 hover:bg-slate-50'}`}>Financiero</button>
-             <button onClick={() => setActiveReport('operations')} className={`px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${activeReport === 'operations' ? 'bg-[#135bec] text-white shadow-lg shadow-blue-500/30' : 'bg-white text-slate-500 hover:bg-slate-50'}`}>Operativo</button>
-             <button onClick={() => setActiveReport('incidents')} className={`px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${activeReport === 'incidents' ? 'bg-[#135bec] text-white shadow-lg shadow-blue-500/30' : 'bg-white text-slate-500 hover:bg-slate-50'}`}>Incidencias</button>
+<button onClick={() => setActiveReport('financial')} className={`px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${activeReport === 'financial' ? 'bg-[#135bec] text-white' : 'bg-white text-slate-500 hover:bg-slate-50'}`}>Financiero</button>
+              <button onClick={() => setActiveReport('operations')} className={`px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${activeReport === 'operations' ? 'bg-[#135bec] text-white' : 'bg-white text-slate-500 hover:bg-slate-50'}`}>Operativo</button>
+              <button onClick={() => setActiveReport('incidents')} className={`px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${activeReport === 'incidents' ? 'bg-[#135bec] text-white' : 'bg-white text-slate-500 hover:bg-slate-50'}`}>Incidencias</button>
          </div>
 
           {/* KPI SUMMARY */}
@@ -655,8 +655,8 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
               
              {/* GRAPH 1: COSTOS POR VEHICULO */}
              {activeReport === 'financial' || activeReport === 'operations' ? (
-                 <div className="bg-white p-5 border border-slate-200 shadow-sm break-inside-avoid">
-                     <h3 className="text-lg font-black text-slate-900 mb-4 tracking-tight">Top 10 Costos por Vehículo</h3>
+<div className="bg-white p-5 border border-slate-200 break-inside-avoid">
+                      <h3 className="text-lg font-black text-slate-900 mb-4 tracking-tight">Top 10 Costos por Vehículo</h3>
                      <div className="h-[300px] w-full">
                          <ResponsiveContainer width="100%" height="100%">
                              <BarChart data={costByVehicleData} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
@@ -678,8 +678,8 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
 
              {/* GRAPH 2: TENDENCIA DIARIA */}
              {activeReport === 'financial' || activeReport === 'operations' ? (
-                 <div className="bg-white p-5 border border-slate-200 shadow-sm break-inside-avoid">
-                     <h3 className="text-lg font-black text-slate-900 mb-4 tracking-tight">Gasto Diario de Combustible</h3>
+<div className="bg-white p-5 border border-slate-200 break-inside-avoid">
+                      <h3 className="text-lg font-black text-slate-900 mb-4 tracking-tight">Gasto Diario de Combustible</h3>
                      <div className="h-[300px] w-full">
                          <ResponsiveContainer width="100%" height="100%">
                              <LineChart data={efficiencyData}>
@@ -696,7 +696,7 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
 
             {/* GRAPH 3: INCIDENCIAS */}
             {activeReport === 'incidents' || activeReport === 'operations' ? (
-                <div className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm break-inside-avoid">
+                <div className="bg-white p-6 rounded-[2rem] border border-slate-200 break-inside-avoid">
                     <h3 className="text-lg font-black text-slate-900 mb-6 tracking-tight">Distribución de Incidencias</h3>
                     <div className="h-[300px] w-full flex">
                         <ResponsiveContainer width="60%" height="100%">
@@ -734,7 +734,7 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
        <div className="space-y-8 print-section">
            {/* Tabla de Gastos */}
            <div className="break-inside-avoid">
-               <div className="section-title bg-slate-900 text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">
+               <div className="text-white bg-slate-900  px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">
                    Desglose Financiero Detallado
                </div>
                <table className="w-full text-left border-collapse data-table">
@@ -895,7 +895,7 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
               {/* DETAILED FINANCIAL TABLE FOR PRINT - COMPACT */}
               <div className="space-y-4 print-section">
                 <div className="break-inside-avoid">
-                  <div className="section-title bg-slate-900 text-white px-3 py-1 text-[8pt] font-black uppercase tracking-widest mb-3 inline-block rounded-sm">
+                  <div className="bg-slate-900 text-white px-3 py-1 text-[8pt] font-black uppercase tracking-widest mb-3 inline-block rounded-sm">
                     Desglose Financiero Detallado
                   </div>
                   <table className="w-full text-left border-collapse data-table">

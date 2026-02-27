@@ -165,7 +165,7 @@ const Dashboard: React.FC<DashboardProps> = ({ vehicles = [], drivers = [], fuel
         </div>
 
         {/* Disponibilidad */}
-        <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+        <div className="bg-white rounded-xl p-5 border border-slate-200">
           <div className="flex justify-between items-start mb-3">
              <div className="size-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
                <span className="material-symbols-outlined filled text-xl">directions_car</span>
@@ -183,7 +183,7 @@ const Dashboard: React.FC<DashboardProps> = ({ vehicles = [], drivers = [], fuel
         </div>
 
         {/* Costo por KM */}
-        <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+        <div className="bg-white rounded-xl p-5 border border-slate-200">
           <div className="flex justify-between items-start mb-3">
              <div className="size-10 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
                <span className="material-symbols-outlined filled text-xl">local_gas_station</span>
@@ -198,7 +198,7 @@ const Dashboard: React.FC<DashboardProps> = ({ vehicles = [], drivers = [], fuel
         </div>
 
         {/* Incidencias Críticas */}
-        <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+        <div className="bg-white rounded-xl p-5 border border-slate-200">
           <div className="flex justify-between items-start mb-3">
              <div className="size-10 rounded-lg bg-rose-50 flex items-center justify-center text-rose-500">
                <span className="material-symbols-outlined filled text-xl">warning</span>
@@ -217,7 +217,7 @@ const Dashboard: React.FC<DashboardProps> = ({ vehicles = [], drivers = [], fuel
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         {/* Gráfico Financiero */}
-        <div className="lg:col-span-2 bg-white p-8 md:p-10 rounded-[2.5rem] border border-slate-200 shadow-sm">
+        <div className="lg:col-span-2 bg-white p-8 md:p-10 rounded-[2.5rem] border border-slate-200">
           <div className="flex justify-between items-center mb-8">
             <div>
               <h3 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">Tendencia de Gastos</h3>
@@ -252,7 +252,7 @@ const Dashboard: React.FC<DashboardProps> = ({ vehicles = [], drivers = [], fuel
         </div>
 
         {/* Gráfico de Incidencias */}
-        <div className="bg-white p-8 md:p-10 rounded-[2.5rem] border border-slate-200 shadow-sm flex flex-col">
+        <div className="bg-white p-8 md:p-10 rounded-[2.5rem] border border-slate-200 flex flex-col">
           <div className="mb-6">
             <h3 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">Incidencias</h3>
             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Distribución por Tipo</p>
@@ -303,7 +303,7 @@ const Dashboard: React.FC<DashboardProps> = ({ vehicles = [], drivers = [], fuel
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
         {/* Top Gastos */}
-        <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden">
+        <div className="card overflow-hidden">
            <div className="p-8 md:p-10 border-b border-slate-100 bg-slate-50/50">
               <h3 className="text-lg md:text-xl font-black text-slate-900 tracking-tight">Mayores Consumidores</h3>
               <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Vehículos con mayor gasto acumulado</p>
@@ -329,7 +329,7 @@ const Dashboard: React.FC<DashboardProps> = ({ vehicles = [], drivers = [], fuel
         </div>
 
         {/* Actividad Reciente (Refinada) */}
-        <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden">
+        <div className="card overflow-hidden">
            <div className="p-8 md:p-10 border-b border-slate-100 bg-slate-50/50">
               <h3 className="text-lg md:text-xl font-black text-slate-900 tracking-tight">Bitácora Reciente</h3>
               <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Últimos movimientos registrados</p>

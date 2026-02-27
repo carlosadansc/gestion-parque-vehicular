@@ -273,20 +273,20 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
 
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-black text-slate-900 tracking-tight">Bitácora de Viajes</h2>
-          <p className="text-slate-500 text-sm font-medium mt-1">Control operativo y registro de entradas/salidas</p>
+          <h2 className="page-title">Bitácora de Viajes</h2>
+          <p className="page-subtitle">Control operativo y registro de entradas/salidas</p>
         </div>
         <div className="flex items-center gap-3">
           <button
             onClick={() => { setBlankBitacoraVehicleId(''); setShowBlankBitacoraModal(true); }}
-            className="flex items-center justify-center gap-2 bg-white border border-slate-200 text-slate-600 px-4 py-2.5 rounded-xl text-xs font-medium hover:bg-slate-50 transition-all"
+            className="btn btn-secondary"
           >
             <span className="material-symbols-outlined">print</span>
             Imprimir Bitácora
           </button>
           <button
             onClick={() => { resetForm(); setShowModal(true); }}
-            className="flex items-center justify-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-black text-sm shadow-lg shadow-blue-500/20 hover:opacity-90 transition-all uppercase tracking-widest"
+            className="btn btn-primary"
           >
             <span className="material-symbols-outlined">add_road</span>
             Registrar Salida
@@ -294,7 +294,7 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
         </div>
       </div>
 
-      <div className="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden flex flex-col no-print">
+      <div className="card flex flex-col no-print">
         <div className="px-8 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
           <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Movimientos Recientes</h3>
           <button onClick={onSync} className="text-[10px] font-black text-primary uppercase tracking-widest flex items-center gap-2 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-all">
@@ -303,17 +303,17 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
         </div>
         
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
+          <table className="table-professional">
             <thead>
-              <tr className="bg-slate-50/50 text-slate-500 border-b border-slate-100">
-                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest">Fecha / Horarios</th>
-                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest">Unidad / Chofer</th>
-                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest">Destino / Ruta</th>
-                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-right">Odómetro</th>
-                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-center">Gestión</th>
+              <tr>
+                <th>Fecha / Horario</th>
+                <th>Unidad / Chofer</th>
+                <th>Destino</th>
+                <th className="text-right">Odómetro</th>
+                <th className="text-center">Gestión</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody>
               {sortedLogs.map((log) => {
                 const vehicle = vehicles.find(v => v.id === log.vehicleId);
                 const driver = drivers.find(d => d.id === log.driverId);

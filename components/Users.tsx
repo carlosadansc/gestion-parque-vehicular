@@ -110,14 +110,14 @@ const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUs
         </div>
         <button 
           onClick={handleOpenNew}
-          className="flex items-center justify-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-black text-sm shadow-lg shadow-blue-500/20 hover:opacity-90 transition-all uppercase tracking-widest"
+          className="btn btn-primary"
         >
           <span className="material-symbols-outlined">person_add</span>
           Nuevo Operador
         </button>
       </div>
 
-      <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden">
+      <div className="card overflow-hidden">
         <div className="px-10 py-6 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Cuentas activas en Google Sheets</p>
           <span className="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-xs font-medium">
@@ -126,14 +126,14 @@ const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUs
         </div>
         
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
+          <table className="table-professional">
             <thead>
-              <tr className="bg-slate-50/30 text-slate-500 border-b border-slate-100">
-                <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest">Personal</th>
-                <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest">ID de Acceso</th>
-                <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest">Rol</th>
-                <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest">Último Acceso</th>
-                <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest text-right">Gestión</th>
+              <tr>
+                <th>Personal</th>
+                <th>ID de Acceso</th>
+                <th>Rol</th>
+                <th>Último Acceso</th>
+                <th className="text-right">Gestión</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -195,8 +195,8 @@ const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUs
                 <h3 className="text-2xl font-black text-slate-900 tracking-tighter">{editingUser ? 'Actualizar Cuenta' : 'Registrar Nuevo Acceso'}</h3>
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Configuración de credenciales de seguridad</p>
               </div>
-              <button onClick={() => !isSaving && setShowModal(false)} className="size-12 rounded-full hover:bg-white hover:shadow-md transition-all flex items-center justify-center text-slate-400">
-                <span className="material-symbols-outlined text-2xl">close</span>
+              <button onClick={() => !isSaving && setShowModal(false)} className="size-12 rounded-full hover:bg-white hover:shadow-md transition-all flex items-center justify-center text-slate-400" aria-label="Cerrar">
+                <span className="material-symbols-outlined text-2xl" aria-hidden="true">close</span>
               </button>
             </div>
             

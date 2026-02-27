@@ -275,23 +275,12 @@ function getSheetData(ss, name) {
                  <input className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm font-bold outline-none focus:border-primary transition-all" value={localSettings['ADMINISTRATIVE_COORDINATOR_POS'] || ''} onChange={e => handleUpdate('ADMINISTRATIVE_COORDINATOR_POS', e.target.value)} placeholder="Cargo del coordinador administrativo" />
                </div>
               
-              <div className="space-y-6">
-                <div className="space-y-3">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Color Principal (Botones/Acentos)</label>
-                  <div className="flex gap-4 items-center">
-                    <input type="color" className="size-12 rounded-xl cursor-pointer border-none bg-transparent" value={localSettings['PRIMARY_COLOR'] || '#135bec'} onChange={e => handleUpdate('PRIMARY_COLOR', e.target.value)} />
-                    <input className="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm font-mono font-bold outline-none" value={localSettings['PRIMARY_COLOR'] || '#135bec'} onChange={e => handleUpdate('PRIMARY_COLOR', e.target.value)} />
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Color del Menú (Fondo Lateral)</label>
-                  <div className="flex gap-4 items-center">
-                    <input type="color" className="size-12 rounded-xl cursor-pointer border-none bg-transparent" value={localSettings['SECONDARY_COLOR'] || '#0f172a'} onChange={e => handleUpdate('SECONDARY_COLOR', e.target.value)} />
-                    <input className="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm font-mono font-bold outline-none" value={localSettings['SECONDARY_COLOR'] || '#0f172a'} onChange={e => handleUpdate('SECONDARY_COLOR', e.target.value)} />
-                  </div>
-                </div>
-              </div>
+               <div className="space-y-6">
+                 <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
+                   <p className="text-sm font-semibold text-blue-800">Colores Institucionales</p>
+                   <p className="text-xs text-blue-600 mt-1">Los colores están configurados institucionalmente: Primary <span className="font-mono">#135bec</span> y Secondary <span className="font-mono">#0f172a</span></p>
+                 </div>
+               </div>
             </div>
           </section>
 

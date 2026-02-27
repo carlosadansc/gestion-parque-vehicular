@@ -39,10 +39,10 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, searchQuery, onAddInci
     return incidents.filter((incident) => {
       const vehicle = vehicles.find(v => v.id === incident.vehicleId);
       const driver = drivers.find(d => d.id === incident.driverId);
-      return incident.title.toLowerCase().includes(query) ||
-             incident.description.toLowerCase().includes(query) ||
-             vehicle?.plate?.toLowerCase().includes(query) ||
-             driver?.name?.toLowerCase().includes(query);
+      return String(incident.title || '').toLowerCase().includes(query) ||
+             String(incident.description || '').toLowerCase().includes(query) ||
+             String(vehicle?.plate || '').toLowerCase().includes(query) ||
+             String(driver?.name || '').toLowerCase().includes(query);
     });
   }, [incidents, vehicles, drivers, searchQuery]);
 
@@ -164,12 +164,12 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, searchQuery, onAddInci
 
       <div className="flex justify-between items-center no-print">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Tablero de Incidencias</h1>
-          <p className="text-slate-500 text-sm font-medium mt-1">Monitoreo y gestión de eventos en tiempo real</p>
+          <h1 className="page-title">Tablero de Incidencias</h1>
+          <p className="page-subtitle">Monitoreo y gestión de eventos</p>
         </div>
         <button 
           onClick={() => { resetForm(); setShowModal(true); }}
-          className="flex items-center justify-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-black text-sm shadow-lg shadow-blue-500/20 hover:opacity-90 transition-all uppercase tracking-widest"
+          className="btn btn-primary"
         >
           <span className="material-symbols-outlined">add_circle</span>
           Reportar Incidencia
@@ -191,7 +191,7 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, searchQuery, onAddInci
           const typeLabel = typeMap[incident.type] || incident.type;
           
           return (
-            <div key={incident.id} className={`bg-white rounded-[2rem] border overflow-hidden shadow-sm hover:shadow-xl transition-all ${incident.status === 'critical' ? 'border-2 border-blue-500' : 'border-slate-200'}`}>
+            <div key={incident.id} className={`bg-white rounded-[2rem] border overflow-hidden transition-all ${incident.status === 'critical' ? 'border-2 border-blue-500' : 'border-slate-200'}`}>
               <div className="p-6">
                 <div className="flex justify-between mb-5">
                   <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-[0.2em] border ${
@@ -254,8 +254,9 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, searchQuery, onAddInci
                 onClick={() => !isSaving && setShowModal(false)}
                 disabled={isSaving}
                 className="size-10 rounded-full hover:bg-white hover:shadow-md transition-all flex items-center justify-center text-slate-400"
+                aria-label="Cerrar"
               >
-                <span className="material-symbols-outlined">close</span>
+                <span className="material-symbols-outlined" aria-hidden="true">close</span>
               </button>
             </div>
             
@@ -481,7 +482,7 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, searchQuery, onAddInci
 const SummaryCard: React.FC<{ label: string, value: string, trend?: string, icon?: string, color: string }> = ({ label, value, trend, icon, color }) => {
   const borderColors: any = { green: 'border-l-green-500', blue: 'border-l-blue-500', amber: 'border-l-amber-500', rose: 'border-l-rose-500', purple: 'border-l-purple-500' };
   return (
-    <div className={`bg-white p-6 rounded-2xl border border-slate-200 border-l-4 ${borderColors[color]} shadow-sm`}>
+    <div className={`bg-white p-6 rounded-2xl border border-slate-200 border-l-4 ${borderColors[color]}`}>
       <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.15em]">{label}</p>
       <div className="flex items-center justify-between mt-2.5">
         <span className="text-3xl font-black tracking-tighter text-slate-900">{value}</span>

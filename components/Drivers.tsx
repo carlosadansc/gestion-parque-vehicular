@@ -40,12 +40,12 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
     const query = searchQuery.toLowerCase();
     return drivers.filter((driver) => {
       const assignedVehicle = vehicles.find(v => v.assignedDriverId === driver.id) || vehicles.find(v => v.id === driver.assignedVehicleId);
-      const matchesSearch = driver.name?.toLowerCase().includes(query) ||
-             assignedVehicle?.plate?.toLowerCase().includes(query) ||
-             assignedVehicle?.model?.toLowerCase().includes(query) ||
-             driver.phone?.includes(query) ||
-             driver.licenseType?.toLowerCase().includes(query) ||
-             driver.licenseNumber?.includes(query);
+      const matchesSearch = String(driver.name || '').toLowerCase().includes(query) ||
+              String(assignedVehicle?.plate || '').toLowerCase().includes(query) ||
+              String(assignedVehicle?.model || '').toLowerCase().includes(query) ||
+              String(driver.phone || '').includes(query) ||
+              String(driver.licenseType || '').toLowerCase().includes(query) ||
+              String(driver.licenseNumber || '').includes(query);
       const matchesStatus = statusFilter === 'todos' || driver.status === statusFilter;
       return matchesSearch && matchesStatus;
     });
@@ -151,68 +151,66 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
 
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-black text-slate-900 tracking-tight">Directorio de Choferes</h2>
-          <p className="text-slate-500 text-sm font-medium mt-1">Gestión administrativa del personal operativo</p>
+          <h2 className="page-title">Directorio de Choferes</h2>
+          <p className="page-subtitle">Gestión del personal operativo</p>
         </div>
         <button 
           onClick={handleOpenNew}
-          className="flex items-center justify-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-black text-sm shadow-lg shadow-blue-500/20 hover:opacity-90 transition-all uppercase tracking-widest"
+          className="btn btn-primary"
         >
           <span className="material-symbols-outlined">person_add</span>
           Nuevo Chofer
         </button>
       </div>
 
-      <div className="card overflow-hidden">
-        <div className="px-5 py-3 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+      <div className="card">
+        <div className="px-4 py-3 border-b border-slate-200 bg-slate-50 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <button onClick={() => setStatusFilter('todos')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${statusFilter === 'todos' ? 'bg-primary text-white' : 'bg-white border border-slate-200 text-slate-500'}`}>Todos</button>
-            <button onClick={() => setStatusFilter('available')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${statusFilter === 'available' ? 'bg-emerald-500 text-white' : 'bg-white border border-slate-200 text-slate-500'}`}>Disponible</button>
-            <button onClick={() => setStatusFilter('en-route')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${statusFilter === 'en-route' ? 'bg-blue-500 text-white' : 'bg-white border border-slate-200 text-slate-500'}`}>En Ruta</button>
-            <button onClick={() => setStatusFilter('off')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${statusFilter === 'off' ? 'bg-amber-500 text-white' : 'bg-white border border-slate-200 text-slate-500'}`}>Descanso</button>
+            <button onClick={() => setStatusFilter('todos')} className={`filter-pill ${statusFilter === 'todos' ? 'filter-pill-active' : 'filter-pill-inactive'}`}>Todos</button>
+            <button onClick={() => setStatusFilter('available')} className={`filter-pill ${statusFilter === 'available' ? 'filter-pill-success' : 'filter-pill-inactive'}`}>Disponible</button>
+            <button onClick={() => setStatusFilter('en-route')} className={`filter-pill ${statusFilter === 'en-route' ? 'filter-pill-info' : 'filter-pill-inactive'}`}>En Ruta</button>
+            <button onClick={() => setStatusFilter('off')} className={`filter-pill ${statusFilter === 'off' ? 'filter-pill-warning' : 'filter-pill-inactive'}`}>Descanso</button>
           </div>
-          <span className="text-xs font-medium text-slate-500">{filteredDrivers.length} registros</span>
+          <span className="text-xs text-slate-500">{filteredDrivers.length} registros</span>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
+          <table className="table-professional">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-200">
-                <th className="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Chofer</th>
-                <th className="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Licencia</th>
-                <th className="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Contacto</th>
-                <th className="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Vehículo Asignado</th>
-                <th className="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Estado</th>
-                <th className="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Acciones</th>
+              <tr>
+                <th>Chofer</th>
+                <th>Licencia</th>
+                <th>Contacto</th>
+                <th>Vehículo</th>
+                <th>Estado</th>
+                <th className="text-right">Acciones</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody>
               {filteredDrivers.map((driver) => {
                 const assignedVehicle = vehicles.find(v => v.assignedDriverId === driver.id) || vehicles.find(v => v.id === driver.assignedVehicleId);
                 return (
-                  <tr key={driver.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-5 py-4">
+                  <tr key={driver.id}>
+                    <td>
                       <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold text-sm ${
+                        <div className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-medium ${
                           driver.status === 'available' ? 'bg-emerald-500' :
                           driver.status === 'en-route' ? 'bg-blue-500' :
                           'bg-amber-500'
                         }`}>
                           {driver.name.charAt(0).toUpperCase()}
                         </div>
-                        <div>
-                          <p className="font-semibold text-slate-900">{driver.name}</p>
-                        </div>
+                        <p className="font-medium text-slate-900">{driver.name}</p>
                       </div>
                     </td>
-                    <td className="px-5 py-4">
+                    <td>
                       <span className="text-sm text-slate-600">{driver.licenseType}</span>
                       <p className="text-xs text-slate-400">{driver.licenseNumber}</p>
                     </td>
-                    <td className="px-5 py-4">
+                    <td>
                       <span className="text-sm text-slate-600">{driver.phone}</span>
                     </td>
-                    <td className="px-5 py-4">
+                    <td>
                       {assignedVehicle ? (
                         <div>
                           <p className="text-sm font-medium text-slate-700">{assignedVehicle.model}</p>
@@ -233,11 +231,11 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
                     </td>
                     <td className="px-5 py-4 text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => handlePrintRequest(driver)} className="btn-icon text-slate-400 hover:text-emerald-600 hover:bg-emerald-50" title="Imprimir">
-                          <span className="material-symbols-outlined">file_present</span>
+                        <button onClick={() => handlePrintRequest(driver)} className="btn-icon text-slate-400 hover:text-emerald-600 hover:bg-emerald-50" aria-label="Imprimir">
+                          <span className="material-symbols-outlined" aria-hidden="true">file_present</span>
                         </button>
-                        <button onClick={() => handleEdit(driver)} className="btn-icon text-slate-400 hover:text-primary hover:bg-blue-50" title="Editar">
-                          <span className="material-symbols-outlined">edit</span>
+                        <button onClick={() => handleEdit(driver)} className="btn-icon text-slate-400 hover:text-primary hover:bg-blue-50" aria-label="Editar">
+                          <span className="material-symbols-outlined" aria-hidden="true">edit</span>
                         </button>
                       </div>
                     </td>
@@ -266,8 +264,9 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
                 onClick={() => !isSaving && setShowModal(false)}
                 disabled={isSaving}
                 className="size-10 rounded-full hover:bg-white hover:shadow-md transition-all flex items-center justify-center text-slate-400 disabled:opacity-50"
+                aria-label="Cerrar"
               >
-                <span className="material-symbols-outlined">close</span>
+                <span className="material-symbols-outlined" aria-hidden="true">close</span>
               </button>
             </div>
             
