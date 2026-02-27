@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { View, Vehicle, Driver, FuelEntry, Incident, Planning, Area, TravelLog, MaintenanceRecord, AppSetting, User, VehicleInspection, MaintenanceType } from './types';
+import { View, Vehicle, Driver, FuelEntry, Incident, Planning, Area, TravelLog, MaintenanceRecord, AppSetting, User, VehicleInspection, MaintenanceType, Supplier } from './types';
 import { VEHICLES as initialVehicles, DRIVERS as initialDrivers, INCIDENTS as initialIncidents, FUEL_HISTORY as initialFuel } from './constants';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
@@ -67,6 +67,7 @@ const App: React.FC = () => {
   const [travelLogs, setTravelLogs] = useState<TravelLog[]>([]);
   const [maintenanceRecords, setMaintenanceRecords] = useState<MaintenanceRecord[]>([]);
   const [maintenanceTypes, setMaintenanceTypes] = useState<MaintenanceType[]>(DEFAULT_MAINTENANCE_TYPES);
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [inspections, setInspections] = useState<VehicleInspection[]>([]);
   const [appSettings, setAppSettings] = useState<AppSetting[]>(DEFAULT_SETTINGS);
   const [appUsers, setAppUsers] = useState<User[]>([]);
@@ -117,6 +118,7 @@ const App: React.FC = () => {
         if (data.travelLogs) setTravelLogs(data.travelLogs);
         if (data.maintenanceRecords) setMaintenanceRecords(data.maintenanceRecords);
         if (data.maintenanceTypes && data.maintenanceTypes.length > 0) setMaintenanceTypes(data.maintenanceTypes);
+        if (data.suppliers && data.suppliers.length > 0) setSuppliers(data.suppliers);
         if (data.settings && data.settings.length > 0) setAppSettings(data.settings);
         if (data.users) setAppUsers(data.users);
         if (data.inspections) setInspections(data.inspections);
@@ -455,6 +457,12 @@ const App: React.FC = () => {
     await googleSheets.pushData('maintenance-type', newType);
   };
 
+  const handleAddSupplier = async (supplier: Omit<Supplier, 'id'>) => {
+    const newSupplier = { ...supplier, id: `SUP-${Date.now()}` };
+    setSuppliers([...suppliers, newSupplier]);
+    await googleSheets.pushData('supplier', newSupplier);
+  };
+
   const handleAddUser = async (newUser: Omit<User, 'id'>) => {
     const formatted = { 
       ...newUser, 
@@ -494,7 +502,7 @@ const App: React.FC = () => {
        case View.DRIVERS: return <Drivers drivers={drivers} vehicles={vehicles} searchQuery={searchQuery} onAddDriver={handleAddDriver} onUpdateDriver={handleUpdateDriver} settings={appSettings} />;
        case View.FUEL: return <Fuel fuelHistory={fuelEntries} vehicles={vehicles} drivers={drivers} onAddFuel={handleAddFuel} onUpdateFuel={handleUpdateFuel} onSync={handleSync} settings={appSettings} />;
       case View.INCIDENTS: return <Incidents incidents={incidents} searchQuery={searchQuery} onAddIncident={handleAddIncident} onUpdateIncident={handleUpdateIncident} vehicles={vehicles} drivers={drivers} settings={appSettings} />;
-      case View.MAINTENANCE: return <Maintenance records={maintenanceRecords} vehicles={vehicles} maintenanceTypes={maintenanceTypes} settings={appSettings} onAddRecord={handleAddMaintenance} onUpdateRecord={handleUpdateMaintenance} onAddMaintenanceType={handleAddMaintenanceType} onSync={handleSync} />;
+      case View.MAINTENANCE: return <Maintenance records={maintenanceRecords} vehicles={vehicles} maintenanceTypes={maintenanceTypes} suppliers={suppliers} settings={appSettings} onAddRecord={handleAddMaintenance} onUpdateRecord={handleUpdateMaintenance} onAddMaintenanceType={handleAddMaintenanceType} onAddSupplier={handleAddSupplier} onSync={handleSync} />;
       case View.TRAVEL_LOGS: return <TravelLogs travelLogs={travelLogs} vehicles={vehicles} drivers={drivers} areas={areas} settings={appSettings} onAddTravelLog={handleAddTravelLog} onUpdateTravelLog={handleUpdateTravelLog} onSync={handleSync} />;
       case View.PLANNING: return <PlanningComponent plannings={plannings} vehicles={vehicles} drivers={drivers} areas={areas} onAddPlanning={handleAddPlanning} onUpdatePlanning={handleUpdatePlanning} onAddArea={handleAddArea} onDeleteArea={handleDeleteArea} settings={appSettings} />;
        case View.INSPECTIONS: return <Inspections inspections={inspections} vehicles={vehicles} onAddInspection={handleAddInspection} onUpdateInspection={handleUpdateInspection} currentUser={currentUser} settings={appSettings} />;

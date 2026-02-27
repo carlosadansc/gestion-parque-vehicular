@@ -379,46 +379,50 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
 
       {showModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-300 no-print">
-          <div className="bg-white rounded-[2.5rem] w-full max-w-4xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-             <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-               <div>
-                 <h3 className="text-xl font-black text-slate-900 tracking-tight">{editingInspection ? 'Editar Revisión' : 'Registrar Revisión'}</h3>
-                 <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-0.5">Evaluación de condiciones mecánicas</p>
+          <div className="bg-white rounded-xl w-full max-w-4xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-300">
+             <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+               <div className="flex items-center gap-3">
+                 <div className="size-10 bg-amber-100 rounded-lg flex items-center justify-center">
+                   <span className="material-symbols-outlined text-amber-600" aria-hidden="true">health_and_safety</span>
+                 </div>
+                 <div>
+                   <h3 className="text-lg font-black text-slate-900">{editingInspection ? 'Editar Revisión' : 'Registrar Revisión'}</h3>
+                 </div>
                </div>
-              <button onClick={() => !isSaving && setShowModal(false)} disabled={isSaving} className="size-10 rounded-full hover:bg-white hover:shadow-md transition-all flex items-center justify-center text-slate-400">
-                <span className="material-symbols-outlined">close</span>
-              </button>
-            </div>
+               <button onClick={() => !isSaving && setShowModal(false)} disabled={isSaving} className="size-9 rounded-md hover:bg-white transition-all flex items-center justify-center text-slate-400 disabled:opacity-50" aria-label="Cerrar modal">
+                 <span className="material-symbols-outlined" aria-hidden="true">close</span>
+               </button>
+             </div>
             
-            <form onSubmit={handleSubmit} className="p-8 space-y-8 overflow-y-auto max-h-[80vh] custom-scrollbar">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <form onSubmit={handleSubmit} className="p-6 space-y-6 overflow-y-auto max-h-[80vh] custom-scrollbar">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Fecha y Hora</label>
-                  <input required disabled={isSaving} type="datetime-local" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} />
+                  <input required disabled={isSaving} type="datetime-local" className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Inspector</label>
-                  <input required disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none uppercase" placeholder="Nombre completo" value={formData.inspectorName} onChange={e => setFormData({...formData, inspectorName: e.target.value})} />
+                  <input required disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all uppercase" placeholder="Nombre completo" value={formData.inspectorName} onChange={e => setFormData({...formData, inspectorName: e.target.value})} />
                 </div>
                 <div className="space-y-2">
                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Vehículo</label>
-                   <select required disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none" value={formData.vehicleId} onChange={e => setFormData({...formData, vehicleId: e.target.value})}>
-                    <option value="">Seleccionar...</option>
-                    {vehicles.map(v => (<option key={v.id} value={v.id}>{v.plate} - {v.model}</option>))}
-                   </select>
+                   <select required disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all" value={formData.vehicleId} onChange={e => setFormData({...formData, vehicleId: e.target.value})}>
+                   <option value="">Seleccionar...</option>
+                   {vehicles.map(v => (<option key={v.id} value={v.id}>{v.plate} - {v.model}</option>))}
+                  </select>
                 </div>
               </div>
               
               <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Odómetro Actual (Km)</label>
-                  <input type="number" required disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none" placeholder="0" value={formData.odometer} onChange={e => setFormData({...formData, odometer: e.target.value})} />
+                  <input type="number" required disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all" placeholder="0" value={formData.odometer} onChange={e => setFormData({...formData, odometer: e.target.value})} />
               </div>
 
               <div className="space-y-4 pt-4 border-t border-slate-100">
-                <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Puntos de Revisión (16 Puntos)</h4>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <h4 className="text-xs font-black text-primary uppercase tracking-wider">Puntos de Revisión (16 Puntos)</h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <ConditionSelect label="1. Motor" value={formData.engineStatus} onChange={v => setFormData({...formData, engineStatus: v})} disabled={isSaving} />
-                  <ConditionSelect label="2. Transmisión" value={formData.transmissionStatus} onChange={v => setFormData({...formData, transmissionStatus: v})} disabled={isSaving} />
+                  <ConditionSelect label="2. transmisión" value={formData.transmissionStatus} onChange={v => setFormData({...formData, transmissionStatus: v})} disabled={isSaving} />
                   <ConditionSelect label="3. Clutch" value={formData.clutchStatus} onChange={v => setFormData({...formData, clutchStatus: v})} disabled={isSaving} />
                   <ConditionSelect label="4. Frenos" value={formData.brakesStatus} onChange={v => setFormData({...formData, brakesStatus: v})} disabled={isSaving} />
                   <ConditionSelect label="5. Dirección" value={formData.steeringStatus} onChange={v => setFormData({...formData, steeringStatus: v})} disabled={isSaving} />
@@ -429,7 +433,7 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
                   <ConditionSelect label="10. Luces" value={formData.lightsStatus} onChange={v => setFormData({...formData, lightsStatus: v})} disabled={isSaving} />
                   <ConditionSelect label="11. Limpiadores" value={formData.wipersStatus} onChange={v => setFormData({...formData, wipersStatus: v})} disabled={isSaving} />
                   <ConditionSelect label="12. Claxon" value={formData.hornStatus} onChange={v => setFormData({...formData, hornStatus: v})} disabled={isSaving} />
-                  <ConditionSelect label="13. Palanca Vel." value={formData.shifterStatus} onChange={v => setFormData({...formData, shifterStatus: v})} disabled={isSaving} />
+                  <ConditionSelect label="13. Palanca Vel." value={formData.shifterStatus} onChange={v => setFormData({...formData,shifterStatus: v})} disabled={isSaving} />
                   <ConditionSelect label="14. Velocímetro" value={formData.speedoStatus} onChange={v => setFormData({...formData, speedoStatus: v})} disabled={isSaving} />
                   <ConditionSelect label="15. Medidor Temp." value={formData.tempGaugeStatus} onChange={v => setFormData({...formData, tempGaugeStatus: v})} disabled={isSaving} />
                   <ConditionSelect label="16. Medidor Aceite" value={formData.oilGaugeStatus} onChange={v => setFormData({...formData, oilGaugeStatus: v})} disabled={isSaving} />
@@ -438,12 +442,12 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
 
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Observaciones Generales</label>
-                <textarea rows={3} disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none resize-none" placeholder="Detalles adicionales..." value={formData.observations} onChange={e => setFormData({...formData, observations: e.target.value})} />
+                <textarea rows={3} disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all resize-none" placeholder="Detalles adicionales..." value={formData.observations} onChange={e => setFormData({...formData, observations: e.target.value})} />
               </div>
 
-              <div className="pt-4 flex gap-4">
-                <button type="button" disabled={isSaving} onClick={() => setShowModal(false)} className="flex-1 py-4 text-[11px] font-black uppercase tracking-widest text-slate-500 disabled:opacity-50">Cancelar</button>
-                <button type="submit" disabled={isSaving} className="flex-[2] py-4 bg-[#135bec] text-white text-[11px] font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-blue-500/20 hover:bg-blue-600 transition-all disabled:opacity-80 flex items-center justify-center gap-3">
+              <div className="pt-4 flex gap-3">
+                <button type="button" disabled={isSaving} onClick={() => setShowModal(false)} className="flex-1 py-3 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-100 rounded-md transition-all disabled:opacity-50">Cancelar</button>
+                <button type="submit" disabled={isSaving} className="flex-[2] py-3 bg-primary text-white text-[11px] font-black uppercase tracking-widest rounded-md hover:opacity-90 transition-all disabled:opacity-80 flex items-center justify-center gap-2">
                   {isSaving ? <><span className="material-symbols-outlined animate-spin">sync</span> Guardando...</> : (editingInspection ? 'Guardar Cambios' : 'Registrar Revisión')}
                 </button>
               </div>

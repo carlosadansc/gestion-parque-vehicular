@@ -278,23 +278,27 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
 
       {showModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-300">
-          <div className="bg-white rounded-[2.5rem] w-full max-w-4xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]">
-            <div className="px-10 py-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-              <div>
-                <h3 className="text-2xl font-black text-slate-900 tracking-tight">{editingVehicle ? 'Ficha de Unidad' : 'Nueva Unidad'}</h3>
-                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1">Control Patrimonial y Técnico V.7.5</p>
+          <div className="bg-white rounded-xl w-full max-w-4xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]">
+            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <div className="flex items-center gap-3">
+                <div className="size-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <span className="material-symbols-outlined text-blue-600" aria-hidden="true">directions_car</span>
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-slate-900">{editingVehicle ? 'Ficha de Unidad' : 'Nueva Unidad'}</h3>
+                </div>
               </div>
-              <button onClick={() => !isSaving && setShowModal(false)} className="size-12 rounded-full hover:bg-white hover:shadow-md transition-all flex items-center justify-center text-slate-400" aria-label="Cerrar"><span className="material-symbols-outlined text-2xl" aria-hidden="true">close</span></button>
+              <button onClick={() => !isSaving && setShowModal(false)} className="size-9 rounded-md hover:bg-white transition-all flex items-center justify-center text-slate-400" aria-label="Cerrar modal"><span className="material-symbols-outlined text-xl" aria-hidden="true">close</span></button>
             </div>
 
-            <div className="flex border-b border-slate-100 bg-white px-10 overflow-x-auto">
+            <div className="flex border-b border-slate-100 bg-white px-6 overflow-x-auto">
               <TabBtn active={activeTab === 'general'} onClick={() => setActiveTab('general')} label="Generales" icon="info" />
               <TabBtn active={activeTab === 'technical'} onClick={() => setActiveTab('technical')} label="Técnicos" icon="settings_suggest" />
               <TabBtn active={activeTab === 'condition'} onClick={() => setActiveTab('condition')} label="Estado Mecánico (16 Puntos)" icon="health_and_safety" />
               <TabBtn active={activeTab === 'accessories'} onClick={() => setActiveTab('accessories')} label="Accesorios / Notas" icon="construction" />
             </div>
             
-            <form onSubmit={handleSubmit} className="p-10 space-y-8 overflow-y-auto flex-1 custom-scrollbar">
+            <form onSubmit={handleSubmit} className="p-6 space-y-6 overflow-y-auto flex-1 custom-scrollbar">
               {activeTab === 'general' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in slide-in-from-left-4">
                   <div className="space-y-4">
@@ -361,7 +365,7 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
                     <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Listado de Accesorios</label>
                     <div className="flex gap-3">
                       <input 
-                        className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold outline-none focus:ring-4 focus:ring-primary/10 transition-all uppercase"
+                        className="flex-1 bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all uppercase"
                         placeholder="Escribe el nombre de un accesorio y presiona Enter..."
                         value={newAccessory}
                         onChange={(e) => setNewAccessory(e.target.value)}
@@ -370,31 +374,31 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
                       <button 
                         type="button"
                         onClick={addAccessory}
-                        className="bg-primary text-white size-14 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20 hover:opacity-90 transition-all"
+                        className="bg-primary text-white size-12 rounded-md flex items-center justify-center hover:opacity-90 transition-all"
                       >
-                        <span className="material-symbols-outlined text-2xl font-black">add</span>
+                        <span className="material-symbols-outlined text-xl font-black">add</span>
                       </button>
                     </div>
 
-                    <div className="flex flex-wrap gap-3 mt-6">
+                    <div className="flex flex-wrap gap-2 mt-4">
                       {accessoriesList.map((acc, index) => (
-                        <div key={index} className="flex items-center gap-3 bg-blue-50/50 border border-primary/20 rounded-2xl px-5 py-3.5 group hover:bg-white hover:shadow-md transition-all">
-                          <div className="size-6 bg-primary text-white rounded-lg flex items-center justify-center shadow-sm">
-                            <span className="material-symbols-outlined text-[14px] font-black">check</span>
+                        <div key={index} className="flex items-center gap-2 bg-blue-50 border border-primary/20 rounded-md px-3 py-2 group hover:bg-white transition-all">
+                          <div className="size-5 bg-primary text-white rounded flex items-center justify-center">
+                            <span className="material-symbols-outlined text-xs">check</span>
                           </div>
-                          <span className="text-[10px] font-black uppercase tracking-widest text-slate-700">{acc}</span>
+                          <span className="text-xs font-bold uppercase tracking-widest text-slate-700">{acc}</span>
                           <button 
                             type="button"
                             onClick={() => removeAccessory(index)}
-                            className="size-6 rounded-full hover:bg-rose-100 text-slate-300 hover:text-rose-500 flex items-center justify-center transition-all"
+                            className="size-5 rounded hover:bg-rose-100 text-slate-300 hover:text-rose-500 flex items-center justify-center transition-all"
                           >
-                            <span className="material-symbols-outlined text-[16px]">close</span>
+                            <span className="material-symbols-outlined text-xs">close</span>
                           </button>
                         </div>
                       ))}
                       {accessoriesList.length === 0 && (
-                        <div className="w-full py-10 border-2 border-dashed border-slate-100 rounded-[2rem] flex flex-col items-center justify-center opacity-40">
-                          <span className="material-symbols-outlined text-4xl mb-2">construction</span>
+                        <div className="w-full py-8 border-2 border-dashed border-slate-100 rounded-md flex flex-col items-center justify-center opacity-40">
+                          <span className="material-symbols-outlined text-3xl mb-1">construction</span>
                           <p className="text-[10px] font-black uppercase tracking-widest">Sin accesorios registrados</p>
                         </div>
                       )}
@@ -403,14 +407,14 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
 
                   <div className="space-y-4 pt-8 border-t border-slate-100">
                     <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Observaciones de Carrocería</label>
-                    <textarea rows={4} className="w-full bg-slate-50 border border-slate-200 rounded-[2.5rem] px-8 py-6 text-sm font-bold outline-none resize-none focus:ring-4 focus:ring-primary/10 transition-all" placeholder="Detalles de golpes, rayones, seguros, observaciones adicionales..." value={formData.observations} onChange={e => setFormData({...formData, observations: e.target.value})} />
+                    <textarea rows={4} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none resize-none focus:bg-white focus:border-primary transition-all" placeholder="Detalles de golpe, rayones, seguros, observaciones adicionales..." value={formData.observations} onChange={e => setFormData({...formData, observations: e.target.value})} />
                   </div>
                 </div>
               )}
 
-              <div className="pt-10 flex gap-4">
-                <button type="button" onClick={() => setShowModal(false)} className="flex-1 py-5 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-50 rounded-2xl transition-all">Cancelar</button>
-                <button type="submit" disabled={isSaving} className="flex-[2] py-5 bg-primary text-white text-[11px] font-black uppercase tracking-widest rounded-2xl shadow-2xl shadow-blue-500/20 hover:opacity-95 active:scale-[0.98] transition-all flex items-center justify-center gap-3">
+              <div className="pt-6 flex gap-3">
+                <button type="button" onClick={() => setShowModal(false)} className="flex-1 py-3 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-100 rounded-md transition-all">Cancelar</button>
+                <button type="submit" disabled={isSaving} className="flex-[2] py-3 bg-primary text-white text-[11px] font-black uppercase tracking-widest rounded-md hover:opacity-90 transition-all flex items-center justify-center gap-2">
                   {isSaving ? 'Guardando...' : (editingVehicle ? 'Guardar Cambios' : 'Registrar Vehículo')}
                 </button>
               </div>
@@ -576,14 +580,14 @@ const TabBtn = ({ active, onClick, label, icon }: any) => (
 const InputField = ({ label, value, onChange, type = 'text', placeholder = '' }: any) => (
   <div className="space-y-2">
     <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">{label}</label>
-    <input type={type} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none focus:ring-4 focus:ring-primary/10 transition-all" />
+    <input type={type} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all" />
   </div>
 );
 
 const SelectField = ({ label, value, onChange, options }: any) => (
   <div className="space-y-2">
     <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">{label}</label>
-    <select value={value} onChange={(e) => onChange(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none focus:ring-4 focus:ring-primary/10 transition-all">
+    <select value={value} onChange={(e) => onChange(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all">
       {options.map((opt: any) => <option key={opt.v} value={opt.v}>{opt.l}</option>)}
     </select>
   </div>

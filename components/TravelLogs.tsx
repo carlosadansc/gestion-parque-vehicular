@@ -390,105 +390,107 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
       {/* --- MODAL DETALLE DEL VIAJE --- */}
       {showDetailModal && viewingLog && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center bg-slate-900/70 backdrop-blur-sm p-4 animate-in fade-in duration-300 no-print">
-          <div className="bg-white rounded-[2.5rem] w-full max-w-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col">
-            <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-              <div>
-                <h3 className="text-xl font-black text-slate-900 tracking-tight">Detalle de Recorrido</h3>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-0.5">
-                  Fecha: {new Date(viewingLog.date).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-                </p>
+          <div className="bg-white rounded-xl w-full max-w-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col">
+            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <div className="flex items-center gap-3">
+                <div className="size-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <span className="material-symbols-outlined text-blue-600" aria-hidden="true">route</span>
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-slate-900">Detalle de Recorrido</h3>
+                </div>
               </div>
-              <button onClick={() => setShowDetailModal(false)} className="size-10 rounded-full hover:bg-white hover:shadow-md transition-all flex items-center justify-center text-slate-400">
-                <span className="material-symbols-outlined">close</span>
+              <button onClick={() => setShowDetailModal(false)} className="size-9 rounded-md hover:bg-white transition-all flex items-center justify-center text-slate-400" aria-label="Cerrar">
+                <span className="material-symbols-outlined" aria-hidden="true">close</span>
               </button>
             </div>
-            <div className="p-8 overflow-y-auto max-h-[80vh] custom-scrollbar">
+            <div className="p-6 overflow-y-auto max-h-[80vh] custom-scrollbar">
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center gap-4">
-                  <div className="size-12 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                <div className="bg-slate-50 p-4 rounded-md border border-slate-100 flex items-center gap-3">
+                  <div className="size-10 rounded-lg bg-white flex items-center justify-center text-primary">
                     <span className="material-symbols-outlined">directions_car</span>
                   </div>
                   <div>
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Vehículo</p>
                     <p className="font-bold text-slate-900 leading-tight">{vehicles.find(v => v.id === viewingLog.vehicleId)?.model || 'Desconocido'}</p>
-                    <p className="text-xs font-mono text-slate-500 mt-0.5">{vehicles.find(v => v.id === viewingLog.vehicleId)?.plate || viewingLog.vehicleId}</p>
+                    <p className="text-xs font-mono text-slate-500">{vehicles.find(v => v.id === viewingLog.vehicleId)?.plate || viewingLog.vehicleId}</p>
                   </div>
                 </div>
-                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center gap-4">
-                  <div className="size-12 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm">
+                <div className="bg-slate-50 p-4 rounded-md border border-slate-100 flex items-center gap-3">
+                  <div className="size-10 rounded-lg bg-white flex items-center justify-center text-primary">
                     <span className="material-symbols-outlined">person</span>
                   </div>
                   <div>
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Chofer</p>
                     <p className="font-bold text-slate-900 leading-tight">{drivers.find(d => d.id === viewingLog.driverId)?.name || 'Desconocido'}</p>
-                    <p className="text-xs text-slate-500 mt-0.5 uppercase">{areas.find(a => a.id === viewingLog.areaId)?.name || 'Área General'}</p>
+                    <p className="text-xs text-slate-500 uppercase">{areas.find(a => a.id === viewingLog.areaId)?.name || 'Área General'}</p>
                   </div>
                 </div>
               </div>
 
               {/* Timeline Section */}
-              <div className="relative pl-4 border-l-2 border-slate-100 space-y-8 my-8">
+              <div className="relative pl-4 border-l-2 border-slate-100 space-y-6 my-6">
                  {/* Salida */}
                  <div className="relative">
-                    <div className="absolute -left-[21px] top-1 size-3 bg-green-500 rounded-full ring-4 ring-white"></div>
-                    <div>
-                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Salida</p>
-                       <p className="text-xl font-black text-slate-900">{formatTime(viewingLog.departureTime)}</p>
-                       <p className="text-xs font-bold text-slate-500">Odómetro: {(Number(viewingLog.initialOdometer) || 0).toLocaleString()} km</p>
-                    </div>
-                 </div>
+                   <div className="absolute -left-[21px] top-1 size-3 bg-green-500 rounded-full ring-4 ring-white"></div>
+                   <div>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Salida</p>
+                      <p className="text-xl font-black text-slate-900">{formatTime(viewingLog.departureTime)}</p>
+                      <p className="text-xs font-bold text-slate-500">Odómetro: {(Number(viewingLog.initialOdometer) || 0).toLocaleString()} km</p>
+                   </div>
+                </div>
 
-                 {/* Destino */}
-                 <div className="relative">
-                    <div className="absolute -left-[21px] top-1 size-3 bg-blue-500 rounded-full ring-4 ring-white"></div>
-                    <div>
-                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Destino / Ruta</p>
-                       <p className="text-lg font-bold text-slate-800 uppercase">{viewingLog.destination}</p>
-                       <p className="text-xs text-slate-500 font-medium italic mt-1">{viewingLog.notes || 'Sin notas adicionales'}</p>
-                    </div>
-                 </div>
+                {/* Destino */}
+                <div className="relative">
+                   <div className="absolute -left-[21px] top-1 size-3 bg-blue-500 rounded-full ring-4 ring-white"></div>
+                   <div>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Destino / Ruta</p>
+                      <p className="text-lg font-bold text-slate-800 uppercase">{viewingLog.destination}</p>
+                      <p className="text-xs text-slate-500 font-medium italic mt-1">{viewingLog.notes || 'Sin notas adicionales'}</p>
+                   </div>
+                </div>
 
-                 {/* Llegada */}
-                 <div className="relative">
-                    <div className={`absolute -left-[21px] top-1 size-3 rounded-full ring-4 ring-white ${viewingLog.arrivalTime ? 'bg-slate-900' : 'bg-slate-200'}`}></div>
-                    <div>
-                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Llegada</p>
-                       {viewingLog.arrivalTime ? (
-                         <>
-                           <p className="text-xl font-black text-slate-900">{formatTime(viewingLog.arrivalTime)}</p>
-                           <p className="text-xs font-bold text-slate-500">Odómetro: {(Number(viewingLog.finalOdometer) || 0).toLocaleString()} km</p>
-                         </>
-                       ) : (
-                         <span className="inline-block bg-amber-100 text-amber-700 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest mt-1">En Ruta</span>
-                       )}
-                    </div>
-                 </div>
+                {/* Llegada */}
+                <div className="relative">
+                   <div className={`absolute -left-[21px] top-1 size-3 rounded-full ring-4 ring-white ${viewingLog.arrivalTime ? 'bg-slate-900' : 'bg-slate-200'}`}></div>
+                   <div>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Llegada</p>
+                      {viewingLog.arrivalTime ? (
+                        <>
+                          <p className="text-xl font-black text-slate-900">{formatTime(viewingLog.arrivalTime)}</p>
+                          <p className="text-xs font-bold text-slate-500">Odómetro: {(Number(viewingLog.finalOdometer) || 0).toLocaleString()} km</p>
+                        </>
+                      ) : (
+                        <span className="inline-block bg-amber-100 text-amber-700 px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-widest mt-1">En Ruta</span>
+                      )}
+                   </div>
+                </div>
               </div>
 
               {/* Stats Cards */}
-              <div className="grid grid-cols-2 gap-4 mb-8">
-                 <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 text-center">
+              <div className="grid grid-cols-2 gap-3 mb-6">
+                 <div className="bg-slate-50 p-4 rounded-md border border-slate-100 text-center">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Recorrido Total</p>
-                    <p className="text-2xl font-black text-primary">
+                    <p className="text-xl font-black text-primary">
                       {viewingLog.finalOdometer ? (Number(viewingLog.finalOdometer) - Number(viewingLog.initialOdometer)).toLocaleString() : '---'} <span className="text-sm text-slate-400 font-bold">km</span>
                     </p>
                  </div>
-                 <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 text-center">
+                 <div className="bg-slate-50 p-4 rounded-md border border-slate-100 text-center">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Tiempo Total</p>
-                    <p className="text-2xl font-black text-slate-900">
+                    <p className="text-xl font-black text-slate-900">
                       {calculateDuration(viewingLog.departureTime, viewingLog.arrivalTime || '') || '---'}
                     </p>
                  </div>
               </div>
 
               {/* Fuel Info */}
-              <div className="bg-blue-50/50 p-6 rounded-2xl border border-blue-100">
+              <div className="bg-blue-50 p-4 rounded-md border border-blue-100">
                  <div className="flex justify-between items-end mb-2">
-                    <p className="text-[10px] font-black text-blue-600 uppercase tracking-[0.2em]">Consumo de Combustible</p>
+                    <p className="text-[10px] font-black text-blue-600 uppercase tracking-wider">Consumo de Combustible</p>
                     <p className="text-xs font-bold text-slate-500">{viewingLog.finalFuelLevel !== undefined ? `${(viewingLog.initialFuelLevel || 100) - viewingLog.finalFuelLevel}% Consumido` : 'Pendiente'}</p>
                  </div>
-                 <div className="h-3 bg-slate-200 rounded-full overflow-hidden flex">
+                 <div className="h-2 bg-slate-200 rounded-full overflow-hidden flex">
                     <div className="h-full bg-slate-300" style={{ width: `${100 - (viewingLog.initialFuelLevel || 100)}%` }}></div>
                     <div className="h-full bg-green-500" style={{ width: `${(viewingLog.initialFuelLevel || 100) - (viewingLog.finalFuelLevel || 0)}%` }}></div>
                     <div className="h-full bg-primary" style={{ width: `${viewingLog.finalFuelLevel || 0}%` }}></div>
@@ -500,8 +502,8 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
               </div>
 
             </div>
-            <div className="p-6 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
-               <button onClick={() => { setShowDetailModal(false); }} className="px-6 py-3 bg-primary text-white font-black text-[11px] uppercase tracking-widest rounded-xl hover:bg-blue-600 transition-all shadow-lg shadow-blue-500/20">Aceptar</button>
+            <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-end">
+               <button onClick={() => { setShowDetailModal(false); }} className="px-6 py-3 bg-primary text-white font-black text-xs uppercase tracking-widest rounded-md hover:opacity-90 transition-all">Aceptar</button>
             </div>
           </div>
         </div>

@@ -1,25 +1,30 @@
 
 import React, { useState, useMemo } from 'react';
-import { MaintenanceRecord, Vehicle, AppSetting, MaintenanceType } from '../types';
+import { MaintenanceRecord, Vehicle, AppSetting, MaintenanceType, Supplier } from '../types';
 
 interface MaintenanceProps {
   records: MaintenanceRecord[];
   vehicles: Vehicle[];
   maintenanceTypes?: MaintenanceType[];
+  suppliers?: Supplier[];
   settings?: AppSetting[];
   onAddRecord: (record: Omit<MaintenanceRecord, 'id'>) => Promise<void>;
   onUpdateRecord: (record: MaintenanceRecord) => Promise<void>;
   onAddMaintenanceType?: (name: string) => Promise<void>;
+  onAddSupplier?: (supplier: Omit<Supplier, 'id'>) => Promise<void>;
   onSync: () => void;
 }
 
-const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], maintenanceTypes = [], settings = [], onAddRecord, onUpdateRecord, onAddMaintenanceType, onSync }) => {
+const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], maintenanceTypes = [], suppliers = [], settings = [], onAddRecord, onUpdateRecord, onAddMaintenanceType, onAddSupplier, onSync }) => {
   const [showModal, setShowModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [editingRecord, setEditingRecord] = useState<MaintenanceRecord | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('todos');
   const [isAddingType, setIsAddingType] = useState(false);
   const [newTypeName, setNewTypeName] = useState('');
+  const [isAddingSupplier, setIsAddingSupplier] = useState(false);
+  const [newSupplierName, setNewSupplierName] = useState('');
+  const [newSupplierContact, setNewSupplierContact] = useState('');
   
   // Print States
   const [showPrintPreview, setShowPrintPreview] = useState(false);
@@ -147,6 +152,22 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
         setIsAddingType(false);
     } catch (e) {
         alert("Error al agregar tipo");
+    }
+  };
+
+  const handleCreateSupplier = async () => {
+    if (!newSupplierName.trim() || !onAddSupplier) return;
+    try {
+        await onAddSupplier({ 
+          name: newSupplierName.toUpperCase(), 
+          contact: newSupplierContact || undefined 
+        });
+        setFormData({ ...formData, provider: newSupplierName.toUpperCase() }); // Auto select
+        setNewSupplierName('');
+        setNewSupplierContact('');
+        setIsAddingSupplier(false);
+    } catch (e) {
+        alert("Error al agregar proveedor");
     }
   };
 
@@ -482,10 +503,10 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                     </td>
                     <td className="px-8 py-5 text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => handlePrintRequest(record)} className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all" aria-label="Imprimir Orden">
+                        <button onClick={() => handlePrintRequest(record)} className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-all" aria-label="Imprimir Orden">
                             <span className="material-symbols-outlined text-xl" aria-hidden="true">file_present</span>
                         </button>
-                        <button onClick={() => handleEdit(record)} className="p-2 text-slate-400 hover:text-primary hover:bg-blue-50 rounded-xl transition-all" aria-label="Editar">
+                        <button onClick={() => handleEdit(record)} className="p-2 text-slate-400 hover:text-primary hover:bg-blue-50 rounded-md transition-all" aria-label="Editar">
                             <span className="material-symbols-outlined text-xl" aria-hidden="true">edit</span>
                         </button>
                       </div>
@@ -508,7 +529,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
 
       {showModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-300 no-print">
-          <div className="bg-white rounded-[2.5rem] w-full max-w-4xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+          <div className="bg-white rounded-2xl w-full max-w-4xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-300">
             <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
               <div>
                 <h3 className="text-xl font-black text-slate-900 tracking-tight">
@@ -516,7 +537,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                 </h3>
                 <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-0.5">Control de ingresos y facturación de taller</p>
               </div>
-              <button onClick={() => !isSaving && setShowModal(false)} disabled={isSaving} className="size-10 rounded-full hover:bg-white hover:shadow-md transition-all flex items-center justify-center text-slate-400" aria-label="Cerrar">
+              <button onClick={() => !isSaving && setShowModal(false)} disabled={isSaving} className="size-10 rounded-lg hover:bg-white transition-all flex items-center justify-center text-slate-400" aria-label="Cerrar modal">
                 <span className="material-symbols-outlined" aria-hidden="true">close</span>
               </button>
             </div>
@@ -525,57 +546,64 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* SECCIÓN BÁSICA */}
                 <div className="space-y-6">
-                  <div className="bg-slate-50/50 p-6 rounded-3xl border border-slate-100 space-y-4">
-                    <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-2">Información de la Unidad</h4>
+                  {/* Header de sección */}
+                  <div className="flex items-center gap-3 pb-2">
+                    <div className="size-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <span className="material-symbols-outlined text-blue-600 text-lg" aria-hidden="true">directions_car</span>
+                    </div>
+                    <h4 className="text-sm font-black text-slate-900 uppercase tracking-wider">Datos del Servicio</h4>
+                  </div>
+                  
+                  <div className="bg-white p-6 rounded-2xl border border-slate-200 space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Número de Consecutivo</label>
-                        <div className="w-full bg-blue-50 border border-blue-200 rounded-2xl px-4 py-3 text-sm font-black text-blue-700">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Consecutivo</label>
+                        <div className="w-full bg-blue-50 border border-blue-200 rounded-md px-4 py-3 text-sm font-black text-blue-700">
                           {editingRecord?.consecutiveNumber || nextConsecutiveNumber}
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Número de Oficio (Control Interno)</label>
-                        <input disabled={isSaving} className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold outline-none focus:ring-4 focus:ring-blue-500/10 transition-all uppercase" placeholder="Ej. 135/2023" value={formData.internalDocumentNumber} onChange={e => setFormData({...formData, internalDocumentNumber: e.target.value})} />
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">N° de Oficio</label>
+                        <input disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all uppercase" placeholder="Ej. 135/2023" value={formData.internalDocumentNumber} onChange={e => setFormData({...formData, internalDocumentNumber: e.target.value})} />
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Vehículo</label>
-                        <select required disabled={isSaving} className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold outline-none focus:ring-4 focus:ring-blue-500/10 transition-all" value={formData.vehicleId} onChange={e => setFormData({...formData, vehicleId: e.target.value})}>
+                        <select required disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all" value={formData.vehicleId} onChange={e => setFormData({...formData, vehicleId: e.target.value})}>
                           <option value="">Seleccionar...</option>
                           {vehicles.map(v => (<option key={v.id} value={v.id}>{v.plate} - {v.model}</option>))}
                         </select>
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Kilometraje (Km)</label>
-                        <input type="number" required disabled={isSaving} className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold outline-none" value={formData.odometer} onChange={e => setFormData({...formData, odometer: e.target.value})} />
+                        <input type="number" required disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all" value={formData.odometer} onChange={e => setFormData({...formData, odometer: e.target.value})} />
                       </div>
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Tipo de Servicio</label>
-                      <div className="flex gap-2">
-                        <select required disabled={isSaving} className="flex-1 bg-white border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold outline-none" value={formData.serviceType} onChange={e => setFormData({...formData, serviceType: e.target.value})}>
-                            <option value="">Seleccionar tipo...</option>
-                            {maintenanceTypes.map(t => (
-                                <option key={t.id} value={t.name}>{t.name}</option>
-                            ))}
-                        </select>
-                        <button 
-                            type="button" 
-                            disabled={isSaving}
-                            onClick={() => setIsAddingType(!isAddingType)}
-                            className="bg-[#135bec] text-white size-12 rounded-2xl flex items-center justify-center shadow-lg hover:opacity-90 transition-all"
-                            title="Agregar nuevo tipo"
-                        >
-                            <span className="material-symbols-outlined text-xl">{isAddingType ? 'close' : 'add'}</span>
-                        </button>
-                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Tipo de Servicio</label>
+                        <div className="flex gap-2 items-start">
+                          <select required disabled={isSaving} className="flex-1 max-w-[calc(100%-3rem)] bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all truncate" value={formData.serviceType} onChange={e => setFormData({...formData, serviceType: e.target.value})}>
+                              <option value="">Seleccionar tipo...</option>
+                              {maintenanceTypes.map(t => (
+                                  <option key={t.id} value={t.name}>{t.name}</option>
+                              ))}
+                          </select>
+                          <button 
+                              type="button" 
+                              disabled={isSaving}
+                              onClick={() => setIsAddingType(!isAddingType)}
+                              className="bg-primary text-white size-12 rounded-md flex items-center justify-center hover:opacity-90 transition-all shrink-0"
+                              title="Agregar nuevo tipo"
+                          >
+                              <span className="material-symbols-outlined text-xl">{isAddingType ? 'close' : 'add'}</span>
+                          </button>
+                        </div>
                       
                       {isAddingType && (
                         <div className="animate-in slide-in-from-top-2 pt-2 flex gap-2">
                             <input 
-                                className="flex-1 bg-white border border-slate-200 rounded-2xl px-4 py-2 text-sm font-bold outline-none uppercase" 
+                                className="flex-1 bg-slate-50 border border-slate-200 rounded-md px-4 py-2 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all uppercase" 
                                 placeholder="NOMBRE DEL NUEVO TIPO"
                                 value={newTypeName}
                                 onChange={e => setNewTypeName(e.target.value)}
@@ -583,7 +611,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                             <button 
                                 type="button" 
                                 onClick={handleCreateType}
-                                className="bg-green-500 text-white px-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-green-600 transition-all"
+                                className="bg-green-500 text-white px-4 rounded-md font-black text-[10px] uppercase tracking-widest hover:bg-green-600 transition-all"
                             >
                                 Guardar
                             </button>
@@ -592,24 +620,87 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Descripción del Problema</label>
-                      <textarea rows={6} disabled={isSaving} className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold outline-none resize-none" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
+                      <textarea rows={4} disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none resize-none focus:bg-white focus:border-primary transition-all" placeholder="Describe el problema o servicio requerido..." value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
                     </div>
                   </div>
 
-                  <div className="bg-slate-50/50 p-6 rounded-3xl border border-slate-100 space-y-4">
-                    <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-2">Control de Taller</h4>
+                  {/* Header de sección */}
+                  <div className="flex items-center gap-3 pb-2 pt-4">
+                    <div className="size-8 bg-amber-100 rounded-lg flex items-center justify-center">
+                      <span className="material-symbols-outlined text-amber-600 text-lg" aria-hidden="true">build</span>
+                    </div>
+                    <h4 className="text-sm font-black text-slate-900 uppercase tracking-wider">Control de Taller</h4>
+                  </div>
+
+                  <div className="bg-white p-6 rounded-2xl border border-slate-200 space-y-4">
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Nombre Comercial (Taller)</label>
-                      <input required disabled={isSaving} className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold outline-none" placeholder="Ej. Taller Mecánico Especializado" value={formData.provider} onChange={e => setFormData({...formData, provider: e.target.value})} />
+                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Proveedor / Taller</label>
+                      <div className="flex gap-2">
+                        <select 
+                          required 
+                          disabled={isSaving} 
+                          className="flex-1 max-w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all truncate" 
+                          value={formData.provider} 
+                          onChange={e => {
+                            const selectedSupplier = suppliers.find(s => s.name === e.target.value);
+                            setFormData({
+                              ...formData, 
+                              provider: e.target.value,
+                              providerContact: selectedSupplier?.contact || ''
+                            });
+                          }}
+                        >
+                          <option value="">Seleccionar proveedor...</option>
+                          {suppliers.map(s => (
+                            <option key={s.id} value={s.name}>{s.name}</option>
+                          ))}
+                        </select>
+                        <button 
+                          type="button" 
+                          disabled={isSaving}
+                          onClick={() => setIsAddingSupplier(!isAddingSupplier)}
+                          className="bg-primary text-white size-12 rounded-md flex items-center justify-center hover:opacity-90 transition-all shrink-0"
+                          title="Agregar nuevo proveedor"
+                        >
+                          <span className="material-symbols-outlined text-xl">{isAddingSupplier ? 'close' : 'add'}</span>
+                        </button>
+                      </div>
+                      
+                      {isAddingSupplier && (
+                        <div className="animate-in slide-in-from-top-2 pt-2 space-y-2 p-3 bg-slate-50 rounded-md border border-slate-200">
+                          <input 
+                            className="w-full bg-white border border-slate-200 rounded-md px-4 py-2 text-sm font-bold outline-none focus:border-primary transition-all uppercase" 
+                            placeholder="NOMBRE DEL PROVEEDOR"
+                            value={newSupplierName}
+                            onChange={e => setNewSupplierName(e.target.value)}
+                          />
+                          <input 
+                            className="w-full bg-white border border-slate-200 rounded-md px-4 py-2 text-sm font-bold outline-none focus:border-primary transition-all" 
+                            placeholder="Nombre del encargado"
+                            value={newSupplierContact}
+                            onChange={e => setNewSupplierContact(e.target.value)}
+                          />
+                          <button 
+                            type="button" 
+                            onClick={handleCreateSupplier}
+                            className="w-full bg-green-500 text-white px-4 py-2 rounded-md font-black text-[10px] uppercase tracking-widest hover:bg-green-600 transition-all"
+                          >
+                            Guardar Proveedor
+                          </button>
+                        </div>
+                      )}
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Nombre del Encargado (Contacto)</label>
-                      <input disabled={isSaving} className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold outline-none" placeholder="Ej. Juan Pérez" value={formData.providerContact} onChange={e => setFormData({...formData, providerContact: e.target.value})} />
+                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">
+                        Encargado 
+                        {formData.provider && formData.providerContact && <span className="ml-1 text-green-600">(auto-completado)</span>}
+                      </label>
+                      <input disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all" placeholder="Nombre del contacto" value={formData.providerContact} onChange={e => setFormData({...formData, providerContact: e.target.value})} />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Estado de la Orden</label>
-                        <select required disabled={isSaving} className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold outline-none" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value as any})}>
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Estado</label>
+                        <select required disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value as any})}>
                           <option value="scheduled">Programado</option>
                           <option value="in-progress">En Proveedor</option>
                           <option value="completed">Completado</option>
@@ -618,75 +709,94 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Fecha de Ingreso</label>
-                        <input type="datetime-local" required disabled={isSaving} className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold outline-none" value={formData.entryDate} onChange={e => setFormData({...formData, entryDate: e.target.value})} />
+                        <input type="datetime-local" required disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all" value={formData.entryDate} onChange={e => setFormData({...formData, entryDate: e.target.value})} />
                       </div>
                     </div>
                     <div className="space-y-2">
                         <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Fecha de Entrega Estimada</label>
-                        <input type="date" disabled={isSaving} className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold outline-none" value={formData.estimatedDeliveryDate} onChange={e => setFormData({...formData, estimatedDeliveryDate: e.target.value})} />
+                        <input type="date" disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all" value={formData.estimatedDeliveryDate} onChange={e => setFormData({...formData, estimatedDeliveryDate: e.target.value})} />
                     </div>
                   </div>
                 </div>
 
                 {/* SECCIÓN FINANCIERA */}
                 <div className="space-y-6">
-                  <div className="bg-blue-50/30 p-6 rounded-3xl border border-blue-100 space-y-4">
-                    <h4 className="text-[10px] font-black text-blue-600 uppercase tracking-[0.2em] mb-2">Presupuesto (Cotización)</h4>
+                  {/* Header de sección */}
+                  <div className="flex items-center gap-3 pb-2">
+                    <div className="size-8 bg-green-100 rounded-lg flex items-center justify-center">
+                      <span className="material-symbols-outlined text-green-600 text-lg" aria-hidden="true">request_quote</span>
+                    </div>
+                    <h4 className="text-sm font-black text-slate-900 uppercase tracking-wider">Control Financiero</h4>
+                  </div>
+
+                  <div className="bg-white p-6 rounded-2xl border border-slate-200 space-y-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Presupuesto (Cotización)</span>
+                    </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">N° de Cotización</label>
-                        <input disabled={isSaving} className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold outline-none" value={formData.quoteNumber} onChange={e => setFormData({...formData, quoteNumber: e.target.value})} />
+                        <input disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all" value={formData.quoteNumber} onChange={e => setFormData({...formData, quoteNumber: e.target.value})} />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Monto Cotizado ($)</label>
-                        <input type="number" required disabled={isSaving} className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3 text-sm font-black outline-none" value={formData.quoteCost} onChange={e => setFormData({...formData, quoteCost: e.target.value})} />
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Monto ($)</label>
+                        <input type="number" required disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-black outline-none focus:bg-white focus:border-primary transition-all" value={formData.quoteCost} onChange={e => setFormData({...formData, quoteCost: e.target.value})} />
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-green-50/30 p-6 rounded-3xl border border-green-100 space-y-4">
+                  <div className="bg-white p-6 rounded-2xl border border-slate-200 space-y-4">
                     <div className="flex items-center justify-between mb-2">
-                      <h4 className="text-[10px] font-black text-green-700 uppercase tracking-[0.2em]">Facturación (Liquidación)</h4>
+                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Facturación (Liquidación)</span>
                       <span className="bg-green-100 text-green-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">Obligatorio al completar</span>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">N° de Factura</label>
-                        <input disabled={isSaving} className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold outline-none" value={formData.invoiceNumber} onChange={e => setFormData({...formData, invoiceNumber: e.target.value})} />
+                        <input disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all" value={formData.invoiceNumber} onChange={e => setFormData({...formData, invoiceNumber: e.target.value})} />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Monto Facturado ($)</label>
-                        <input type="number" disabled={isSaving} className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3 text-sm font-black outline-none" value={formData.invoiceAmount} onChange={e => setFormData({...formData, invoiceAmount: e.target.value})} />
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Monto ($)</label>
+                        <input type="number" disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-black outline-none focus:bg-white focus:border-primary transition-all" value={formData.invoiceAmount} onChange={e => setFormData({...formData, invoiceAmount: e.target.value})} />
                       </div>
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Fecha de Salida Real</label>
-                      <input type="date" disabled={isSaving} className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold outline-none" value={formData.exitDate} onChange={e => setFormData({...formData, exitDate: e.target.value})} />
+                      <input type="date" disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all" value={formData.exitDate} onChange={e => setFormData({...formData, exitDate: e.target.value})} />
                     </div>
                   </div>
 
-                  <div className="p-4 bg-slate-900 rounded-3xl text-white">
-                    <div className="flex justify-between items-center px-4">
-                      <p className="text-[10px] font-black uppercase tracking-widest opacity-60">Variación Presupuestaria</p>
-                      <p className={`text-xl font-black ${(Number(formData.quoteCost) - Number(formData.invoiceAmount || 0)) < 0 ? 'text-rose-400' : 'text-green-400'}`}>
-                        ${(Number(formData.quoteCost) - Number(formData.invoiceAmount || 0)).toLocaleString()}
-                      </p>
+                  {/* Resumen financiero */}
+                  <div className="p-6 bg-slate-800 rounded-2xl text-white">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p className="text-[10px] font-black uppercase tracking-widest opacity-60">Variación Presupuestaria</p>
+                        <p className={`text-2xl font-black mt-1 ${(Number(formData.quoteCost) - Number(formData.invoiceAmount || 0)) < 0 ? 'text-rose-400' : 'text-green-400'}`}>
+                          ${Math.abs(Number(formData.quoteCost) - Number(formData.invoiceAmount || 0)).toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[10px] font-black uppercase tracking-widest opacity-60">Estado</p>
+                        <p className={`text-sm font-black mt-1 ${(Number(formData.quoteCost) - Number(formData.invoiceAmount || 0)) < 0 ? 'text-rose-400' : 'text-green-400'}`}>
+                          {(Number(formData.quoteCost) - Number(formData.invoiceAmount || 0)) < 0 ? 'EXCEDENTE' : 'DENTRO PRESUPUESTO'}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="pt-10 flex gap-4">
+              <div className="pt-8 flex gap-4">
                 <button 
                   type="button" disabled={isSaving}
                   onClick={() => setShowModal(false)}
-                  className="flex-1 py-4 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-50 rounded-2xl transition-all disabled:opacity-50"
+                  className="flex-1 py-4 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-100 rounded-md transition-all disabled:opacity-50"
                 >
                   Cancelar
                 </button>
                 <button 
                   type="submit" disabled={isSaving}
-                  className="flex-[2] py-4 bg-primary text-white text-[11px] font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-blue-500/20 hover:opacity-90 transition-all disabled:opacity-80 flex items-center justify-center gap-3"
+                  className="flex-[2] py-4 bg-primary text-white text-[11px] font-black uppercase tracking-widest rounded-md hover:opacity-90 transition-all disabled:opacity-80 flex items-center justify-center gap-3"
                 >
                   {isSaving ? (
                     <>
@@ -708,7 +818,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
         <div className="fixed inset-0 z-[200] bg-white flex flex-col overflow-y-auto">
            <div className="sticky top-0 bg-slate-900 p-4 flex justify-between items-center text-white shadow-lg no-print">
              <button onClick={() => setShowPrintPreview(false)} className="bg-white/10 px-4 py-2 rounded-lg font-bold text-xs hover:bg-white/20 transition-all">Cerrar</button>
-             <button onClick={() => window.print()} className="bg-primary px-8 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-blue-500/20">
+             <button onClick={() => window.print()} className="bg-primary px-8 py-2.5 rounded-md font-black text-[11px] uppercase tracking-widest flex items-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-blue-500/20">
                <span className="material-symbols-outlined text-lg">picture_as_pdf</span> Imprimir Formato PDF
              </button>
            </div>

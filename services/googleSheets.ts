@@ -12,6 +12,7 @@ export interface SyncData {
   users?: any[];
   inspections?: any[];
   maintenanceTypes?: any[];
+  suppliers?: any[];
 }
 
 class GoogleSheetsService {
@@ -58,7 +59,7 @@ class GoogleSheetsService {
     }
   }
 
-  async pushData(type: 'fuel' | 'update-fuel' | 'incident' | 'update-incident' | 'vehicle' | 'driver' | 'planning' | 'update-planning' | 'area' | 'delete-area' | 'travel-log' | 'update-travel-log' | 'update-vehicle' | 'update-driver' | 'maintenance' | 'update-maintenance' | 'user' | 'update-user' | 'update-setting' | 'inspection' | 'update-inspection' | 'maintenance-type', payload: any): Promise<boolean> {
+  async pushData(type: 'fuel' | 'update-fuel' | 'incident' | 'update-incident' | 'vehicle' | 'driver' | 'planning' | 'update-planning' | 'area' | 'delete-area' | 'travel-log' | 'update-travel-log' | 'update-vehicle' | 'update-driver' | 'maintenance' | 'update-maintenance' | 'user' | 'update-user' | 'update-setting' | 'inspection' | 'update-inspection' | 'maintenance-type' | 'supplier' | 'update-supplier', payload: any): Promise<boolean> {
     if (!this.serviceUrl || !this.isValidScriptUrl()) {
       return false;
     }

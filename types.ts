@@ -151,6 +151,16 @@ export interface MaintenanceType {
   name: string;
 }
 
+export interface Supplier {
+  id: string;
+  name: string;
+  contact?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  notes?: string;
+}
+
 export interface MaintenanceRecord {
   id: string;
   consecutiveNumber?: number; // Número consecutivo automático

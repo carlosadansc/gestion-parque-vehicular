@@ -44,7 +44,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onUpdateSetting, onUrlCha
 
 const appsScriptCode = `
 /** 
- * API FLOTA PRO v8.5 - Soporte para número consecutivo en mantenimiento
+ * API FLOTA PRO v8.6 - Soporte para catálogo de Proveedores
  */
 
 const CONFIG = {
@@ -69,6 +69,7 @@ const CONFIG = {
     "BitacorasViaje": ["id", "date", "departureTime", "arrivalTime", "driverId", "vehicleId", "initialOdometer", "finalOdometer", "destination", "areaId", "notes", "initialFuelLevel", "finalFuelLevel"],
     "Mantenimiento": ["id", "consecutiveNumber", "date", "vehicleId", "serviceType", "description", "quoteNumber", "quoteCost", "invoiceNumber", "invoiceAmount", "odometer", "provider", "entryDate", "exitDate", "status", "estimatedDeliveryDate", "internalDocumentNumber", "providerContact"],
     "TiposMantenimiento": ["id", "name"],
+    "Proveedores": ["id", "name", "contact", "phone", "email", "address", "notes"],
     "Ajustes": ["key", "value"],
     "Usuarios": ["id", "name", "username", "password", "role", "status", "lastLogin"]
   }
@@ -100,6 +101,7 @@ function doGet(e) {
     travelLogs: data.bitacorasviaje,
     maintenanceRecords: data.mantenimiento,
     maintenanceTypes: data.tiposmantenimiento,
+    suppliers: data.proveedores,
     settings: data.ajustes,
     users: data.usuarios
   };
@@ -131,6 +133,7 @@ function doPost(e) {
     else if (action === 'travel-log' || action === 'update-travel-log') sheetName = "BitacorasViaje";
     else if (action === 'maintenance' || action === 'update-maintenance') sheetName = "Mantenimiento";
     else if (action === 'maintenance-type') sheetName = "TiposMantenimiento";
+    else if (action === 'supplier' || action === 'update-supplier') sheetName = "Proveedores";
     else if (action === 'user' || action === 'update-user') {
       sheetName = "Usuarios";
       if (d.password) d.password = Utilities.base64Encode(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, d.password));
@@ -298,7 +301,7 @@ function getSheetData(ss, name) {
               </div>
               <div className="bg-slate-900 rounded-xl p-6 shadow-inner">
                 <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-[10pt] font-black text-primary uppercase tracking-[0.2em] mb-4">Apps Script (v8.5 - Número Consecutivo Mantenimiento)</h4>
+                  <h4 className="text-[10pt] font-black text-primary uppercase tracking-[0.2em] mb-4">Apps Script (v8.6 - Catálogo de Proveedores)</h4>
                   <button onClick={() => { navigator.clipboard.writeText(appsScriptCode); alert("¡Copiado!"); }} className="bg-slate-800 hover:bg-slate-700 text-white text-[10px] font-black py-1.5 px-3 rounded-lg transition-colors border border-slate-700">COPIAR CÓDIGO</button>
                 </div>
                 <pre className="text-[10px] font-mono text-slate-400 overflow-x-auto max-h-48 custom-scrollbar leading-relaxed">{appsScriptCode}</pre>
@@ -309,23 +312,19 @@ function getSheetData(ss, name) {
 
         <div className="xl:col-span-4 space-y-6">
           <div className="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm sticky top-28">
-            <h4 className="text-[10pt] font-black text-primary uppercase tracking-[0.2em] mb-4">Seguridad v8.1</h4>
+            <h4 className="text-[10pt] font-black text-primary uppercase tracking-[0.2em] mb-4">Novedades v8.6</h4>
             <ul className="space-y-6">
               <li className="flex gap-4">
                 <span className="size-6 bg-primary text-white text-[10px] font-black flex items-center justify-center rounded-full shrink-0">1</span>
-                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Campo licenseNumber</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Se agregó campo 'licenseNumber' a Choferes para guardar el número de licencia.</p></div>
+                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Catálogo de Proveedores</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Nueva hoja "Proveedores" para gestionar talleres y proveedores de servicio.</p></div>
               </li>
               <li className="flex gap-4">
                 <span className="size-6 bg-primary text-white text-[10px] font-black flex items-center justify-center rounded-full shrink-0">2</span>
-                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Campo notes</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Se agregó campo 'notes' a Choferes para guardar notas u observaciones sobre el chofer.</p></div>
+                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Selección en Mantenimiento</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">En el modal de mantenimiento ahora puedes seleccionar proveedores del catálogo.</p></div>
               </li>
               <li className="flex gap-4">
                 <span className="size-6 bg-primary text-white text-[10px] font-black flex items-center justify-center rounded-full shrink-0">3</span>
-                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Importante</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Debes actualizar el código en Apps Script para guardar el número de licencia y las notas de los choferes.</p></div>
-              </li>
-              <li className="flex gap-4">
-                <span className="size-6 bg-primary text-white text-[10px] font-black flex items-center justify-center rounded-full shrink-0">4</span>
-                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Sincronización</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Al guardar el nuevo script, la hoja "Choferes" añadirá las columnas automáticamente.</p></div>
+                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Importante</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Debes actualizar el código en Apps Script para habilitar el catálogo de proveedores.</p></div>
               </li>
             </ul>
           </div>

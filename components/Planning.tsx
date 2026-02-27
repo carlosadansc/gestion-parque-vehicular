@@ -829,29 +829,33 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
 
       {showAreaModal && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-300">
-          <div className="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-              <div>
-                <h3 className="text-xl font-black text-slate-900 tracking-tight">Catálogo de Áreas</h3>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-0.5">Zonas y sectores de operación</p>
+          <div className="bg-white rounded-xl w-full max-w-lg border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <div className="flex items-center gap-3">
+                <div className="size-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <span className="material-symbols-outlined text-purple-600" aria-hidden="true">layers</span>
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-slate-900">Catálogo de Áreas</h3>
+                </div>
               </div>
-              <button onClick={() => !isSavingArea && setShowAreaModal(false)} disabled={isSavingArea} className="size-10 rounded-full hover:bg-white hover:shadow-md transition-all flex items-center justify-center text-slate-400" aria-label="Cerrar">
+              <button onClick={() => !isSavingArea && setShowAreaModal(false)} disabled={isSavingArea} className="size-9 rounded-md hover:bg-white transition-all flex items-center justify-center text-slate-400 disabled:opacity-50" aria-label="Cerrar modal">
                 <span className="material-symbols-outlined" aria-hidden="true">close</span>
               </button>
             </div>
-            <div className="p-8 space-y-6">
-              <form onSubmit={handleAreaSubmit} className="space-y-4 pb-6 border-b border-slate-100">
+            <div className="p-6 space-y-5">
+              <form onSubmit={handleAreaSubmit} className="space-y-3 pb-5 border-b border-slate-100">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Nombre de la Nueva Área</label>
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Nueva Área</label>
                   <div className="flex gap-2">
                     <input 
                       required disabled={isSavingArea}
-                      className="flex-1 bg-slate-50 border-slate-200 rounded-2xl px-5 py-3 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 outline-none transition-all disabled:opacity-50"
+                      className="flex-1 bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all disabled:opacity-50"
                       placeholder="Ej. Sector Sur"
                       value={areaFormData.name}
                       onChange={e => setAreaFormData({...areaFormData, name: e.target.value})}
                     />
-                    <button type="submit" disabled={isSavingArea} className="bg-[#135bec] text-white px-5 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:bg-blue-600 transition-all disabled:opacity-80 flex items-center gap-2">
+                    <button type="submit" disabled={isSavingArea} className="bg-primary text-white px-4 rounded-md font-black text-xs uppercase tracking-widest hover:opacity-90 transition-all disabled:opacity-80 flex items-center gap-2">
                       {isSavingArea ? <span className="material-symbols-outlined animate-spin text-sm">sync</span> : 'Añadir'}
                     </button>
                   </div>
@@ -859,17 +863,17 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
               </form>
               <div className="max-h-60 overflow-y-auto custom-scrollbar space-y-2">
                 {areas.map(a => (
-                  <div key={a.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                  <div key={a.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-md border border-slate-100">
                     <div className="flex items-center gap-3">
-                      <div className="size-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center"><span className="material-symbols-outlined text-lg">location_on</span></div>
-                      <span className="text-sm font-black text-slate-800">{a.name}</span>
+                      <div className="size-8 rounded-md bg-blue-100 text-blue-600 flex items-center justify-center"><span className="material-symbols-outlined text-base">location_on</span></div>
+                      <span className="text-sm font-bold text-slate-800">{a.name}</span>
                     </div>
                     <button 
                       onClick={() => handleDeleteArea(a.id)}
-                      className="size-8 rounded-lg hover:bg-rose-100 text-slate-400 hover:text-rose-600 flex items-center justify-center transition-colors"
+                      className="size-8 rounded-md hover:bg-rose-100 text-slate-400 hover:text-rose-600 flex items-center justify-center transition-colors"
                       title="Eliminar área"
                     >
-                      <span className="material-symbols-outlined text-lg">delete</span>
+                      <span className="material-symbols-outlined text-base">delete</span>
                     </button>
                   </div>
                 ))}
@@ -881,53 +885,57 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
 
       {showModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-300">
-          <div className="bg-white rounded-[2.5rem] w-full max-w-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-              <div>
-                <h3 className="text-xl font-black text-slate-900 tracking-tight">{editingPlanning ? 'Editar Asignación' : 'Nueva Asignación'}</h3>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-0.5">{editingPlanning ? `Editando registro ${editingPlanning.id}` : 'Planifica rutas y recursos'}</p>
+          <div className="bg-white rounded-xl w-full max-w-xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <div className="flex items-center gap-3">
+                <div className="size-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                  <span className="material-symbols-outlined text-indigo-600" aria-hidden="true">event_available</span>
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-slate-900">{editingPlanning ? 'Editar Asignación' : 'Nueva Asignación'}</h3>
+                </div>
               </div>
-              <button onClick={() => !isSaving && setShowModal(false)} disabled={isSaving} className="size-10 rounded-full hover:bg-white hover:shadow-md transition-all flex items-center justify-center text-slate-400" aria-label="Cerrar">
+              <button onClick={() => !isSaving && setShowModal(false)} disabled={isSaving} className="size-9 rounded-md hover:bg-white transition-all flex items-center justify-center text-slate-400 disabled:opacity-50" aria-label="Cerrar modal">
                 <span className="material-symbols-outlined" aria-hidden="true">close</span>
               </button>
             </div>
-            <form onSubmit={handleSubmit} className="p-8 space-y-6 overflow-y-auto max-h-[80vh] custom-scrollbar">
-              <div className="grid grid-cols-2 gap-6">
+            <form onSubmit={handleSubmit} className="p-6 space-y-5 overflow-y-auto max-h-[80vh] custom-scrollbar">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Fecha</label>
-                  <input required disabled={isSaving} type="date" className="w-full bg-slate-50 border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none disabled:opacity-50" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} />
+                  <input required disabled={isSaving} type="date" className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all disabled:opacity-50" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Área / Zona</label>
-                  <select required disabled={isSaving} className="w-full bg-slate-50 border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none disabled:opacity-50" value={formData.areaId} onChange={e => setFormData({...formData, areaId: e.target.value})}>
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Área / zona</label>
+                  <select required disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all disabled:opacity-50" value={formData.areaId} onChange={e => setFormData({...formData, areaId: e.target.value})}>
                     <option value="">Seleccionar área...</option>
                     {areas.map(a => (<option key={a.id} value={a.id}>{a.name}</option>))}
                   </select>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Hora Salida</label>
-                  <input type="time" disabled={isSaving} className="w-full bg-slate-50 border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none disabled:opacity-50" value={formData.departureTime} onChange={e => setFormData({...formData, departureTime: e.target.value})} />
+                  <input type="time" disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all disabled:opacity-50" value={formData.departureTime} onChange={e => setFormData({...formData, departureTime: e.target.value})} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Hora Llegada (Estimada)</label>
-                  <input type="time" disabled={isSaving} className="w-full bg-slate-50 border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none disabled:opacity-50" value={formData.arrivalTime} onChange={e => setFormData({...formData, arrivalTime: e.target.value})} />
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Hora Llegada</label>
+                  <input type="time" disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all disabled:opacity-50" value={formData.arrivalTime} onChange={e => setFormData({...formData, arrivalTime: e.target.value})} />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Vehículo</label>
-                  <select required disabled={isSaving} className="w-full bg-slate-50 border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none disabled:opacity-50" value={formData.vehicleId} onChange={e => setFormData({...formData, vehicleId: e.target.value})}>
+                  <select required disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all disabled:opacity-50" value={formData.vehicleId} onChange={e => setFormData({...formData, vehicleId: e.target.value})}>
                     <option value="">Seleccionar...</option>
                     {vehicles.map(v => (<option key={v.id} value={v.id}>{v.plate} - {v.model}</option>))}
                   </select>
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Chofer</label>
-                  <select required disabled={isSaving} className="w-full bg-slate-50 border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none disabled:opacity-50" value={formData.driverId} onChange={e => setFormData({...formData, driverId: e.target.value})}>
+                  <select required disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all disabled:opacity-50" value={formData.driverId} onChange={e => setFormData({...formData, driverId: e.target.value})}>
                     <option value="">Seleccionar...</option>
                     {drivers.map(d => ( <option key={d.id} value={d.id}>{d.name}</option> ))}
                   </select>
@@ -936,19 +944,19 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
 
               <div className="space-y-2">
                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Destino / Lugar</label>
-                 <input disabled={isSaving} className="w-full bg-slate-50 border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none disabled:opacity-50 uppercase" placeholder="Ej. CENTRO DE SALUD..." value={formData.destination} onChange={e => setFormData({...formData, destination: e.target.value})} />
+                 <input disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all disabled:opacity-50 uppercase" placeholder="Ej. CENTRO DE SALUD..." value={formData.destination} onChange={e => setFormData({...formData, destination: e.target.value})} />
               </div>
 
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Notas (Opcional)</label>
-                <input disabled={isSaving} className="w-full bg-slate-50 border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none disabled:opacity-50" placeholder="Observaciones..." value={formData.notes} onChange={e => setFormData({...formData, notes: e.target.value})} />
+                <input disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all disabled:opacity-50" placeholder="Observaciones..." value={formData.notes} onChange={e => setFormData({...formData, notes: e.target.value})} />
               </div>
 
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Estado del Viaje</label>
                 <select 
                     disabled={isSaving}
-                    className="w-full bg-slate-50 border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none disabled:opacity-50"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all disabled:opacity-50"
                     value={formData.status}
                     onChange={e => setFormData({...formData, status: e.target.value as any})}
                 >
@@ -958,9 +966,9 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
                 </select>
               </div>
               
-              <div className="pt-4 flex gap-4">
-                <button type="button" disabled={isSaving} onClick={() => setShowModal(false)} className="flex-1 py-4 text-[11px] font-black uppercase tracking-widest text-slate-500 disabled:opacity-50">Cancelar</button>
-                <button type="submit" disabled={isSaving} className="flex-[2] py-4 bg-[#135bec] text-white text-[11px] font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-blue-500/20 hover:bg-blue-600 transition-all disabled:opacity-80 flex items-center justify-center gap-3">
+              <div className="pt-4 flex gap-3">
+                <button type="button" disabled={isSaving} onClick={() => setShowModal(false)} className="flex-1 py-3 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-100 rounded-md transition-all disabled:opacity-50">Cancelar</button>
+                <button type="submit" disabled={isSaving} className="flex-[2] py-3 bg-primary text-white text-[11px] font-black uppercase tracking-widest rounded-md hover:opacity-90 transition-all disabled:opacity-80 flex items-center justify-center gap-2">
                   {isSaving ? <><span className="material-symbols-outlined animate-spin">sync</span> Guardando...</> : (editingPlanning ? 'Actualizar Asignación' : 'Confirmar Planeación')}
                 </button>
               </div>

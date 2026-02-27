@@ -244,29 +244,33 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, searchQuery, onAddInci
 
       {showModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-300 no-print">
-          <div className="bg-white rounded-[2.5rem] w-full max-w-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-              <div>
-                <h3 className="text-xl font-black text-slate-900 tracking-tight">{editingIncident ? 'Editar Incidencia' : 'Reportar Incidencia'}</h3>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-0.5">Registro de eventos y fallas</p>
+          <div className="bg-white rounded-xl w-full max-w-xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <div className="flex items-center gap-3">
+                <div className="size-10 bg-rose-100 rounded-lg flex items-center justify-center">
+                  <span className="material-symbols-outlined text-rose-600" aria-hidden="true">warning</span>
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-slate-900">{editingIncident ? 'Editar Incidencia' : 'Reportar Incidencia'}</h3>
+                </div>
               </div>
               <button 
                 onClick={() => !isSaving && setShowModal(false)}
                 disabled={isSaving}
-                className="size-10 rounded-full hover:bg-white hover:shadow-md transition-all flex items-center justify-center text-slate-400"
-                aria-label="Cerrar"
+                className="size-9 rounded-md hover:bg-white transition-all flex items-center justify-center text-slate-400 disabled:opacity-50"
+                aria-label="Cerrar modal"
               >
                 <span className="material-symbols-outlined" aria-hidden="true">close</span>
               </button>
             </div>
             
-            <form onSubmit={handleSubmit} className="p-8 space-y-6">
-              <div className="grid grid-cols-2 gap-6">
+            <form onSubmit={handleSubmit} className="p-6 space-y-5">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Tipo de Incidencia</label>
                   <select 
                     disabled={isSaving}
-                    className="w-full bg-slate-50 border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 outline-none transition-all disabled:opacity-50"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all disabled:opacity-50"
                     value={formData.type}
                     onChange={e => setFormData({...formData, type: e.target.value as any})}
                   >
@@ -280,7 +284,7 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, searchQuery, onAddInci
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Prioridad / Estado</label>
                   <select 
                     disabled={isSaving}
-                    className="w-full bg-slate-50 border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 outline-none transition-all disabled:opacity-50"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all disabled:opacity-50"
                     value={formData.status}
                     onChange={e => setFormData({...formData, status: e.target.value as any})}
                   >
@@ -297,7 +301,7 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, searchQuery, onAddInci
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Título corto</label>
                 <input 
                   required disabled={isSaving}
-                  className="w-full bg-slate-50 border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 outline-none transition-all disabled:opacity-50"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all disabled:opacity-50"
                   placeholder="Ej. Falla en frenos, Choque leve..."
                   value={formData.title}
                   onChange={e => setFormData({...formData, title: e.target.value})}
@@ -308,19 +312,19 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, searchQuery, onAddInci
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Descripción detallada</label>
                 <textarea 
                   rows={3} disabled={isSaving}
-                  className="w-full bg-slate-50 border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 outline-none transition-all resize-none disabled:opacity-50"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all resize-none disabled:opacity-50"
                   placeholder="Explica qué sucedió..."
                   value={formData.description}
                   onChange={e => setFormData({...formData, description: e.target.value})}
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Vehículo (Placa)</label>
                   <select 
                     required disabled={isSaving}
-                    className="w-full bg-slate-50 border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 outline-none transition-all disabled:opacity-50"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all disabled:opacity-50"
                     value={formData.vehicleId}
                     onChange={e => setFormData({...formData, vehicleId: e.target.value})}
                   >
@@ -334,7 +338,7 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, searchQuery, onAddInci
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Conductor</label>
                   <select 
                     required disabled={isSaving}
-                    className="w-full bg-slate-50 border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 outline-none transition-all disabled:opacity-50"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all disabled:opacity-50"
                     value={formData.driverId}
                     onChange={e => setFormData({...formData, driverId: e.target.value})}
                   >
@@ -346,17 +350,17 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, searchQuery, onAddInci
                 </div>
               </div>
 
-              <div className="pt-4 flex gap-4">
+              <div className="pt-4 flex gap-3">
                 <button 
                   type="button" disabled={isSaving}
                   onClick={() => setShowModal(false)}
-                  className="flex-1 py-4 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-50 rounded-2xl transition-all disabled:opacity-50"
+                  className="flex-1 py-3 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-100 rounded-md transition-all disabled:opacity-50"
                 >
                   Cancelar
                 </button>
                 <button 
                   type="submit" disabled={isSaving}
-                  className="flex-[2] py-4 bg-[#135bec] text-white text-[11px] font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-blue-500/20 hover:bg-blue-600 transition-all disabled:opacity-80 flex items-center justify-center gap-3"
+                  className="flex-[2] py-3 bg-primary text-white text-[11px] font-black uppercase tracking-widest rounded-md hover:opacity-90 transition-all disabled:opacity-80 flex items-center justify-center gap-2"
                 >
                   {isSaving ? (
                     <>

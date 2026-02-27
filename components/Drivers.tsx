@@ -250,45 +250,47 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
       {/* MODAL PARA AGREGAR/EDITAR CHOFER */}
       {showModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-300 no-print">
-          <div className="bg-white rounded-[2.5rem] w-full max-w-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-              <div>
-                <h3 className="text-xl font-black text-slate-900 tracking-tight">
-                  {editingDriver ? 'Editar Perfil' : 'Nuevo Chofer'}
-                </h3>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-0.5">
-                  Gestión de datos personales y operativos del conductor.
-                </p>
+          <div className="bg-white rounded-xl w-full max-w-xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <div className="flex items-center gap-3">
+                <div className="size-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                  <span className="material-symbols-outlined text-primary" aria-hidden="true">badge</span>
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-slate-900">
+                    {editingDriver ? 'Editar Chofer' : 'Nuevo Chofer'}
+                  </h3>
+                </div>
               </div>
               <button 
                 onClick={() => !isSaving && setShowModal(false)}
                 disabled={isSaving}
-                className="size-10 rounded-full hover:bg-white hover:shadow-md transition-all flex items-center justify-center text-slate-400 disabled:opacity-50"
-                aria-label="Cerrar"
+                className="size-9 rounded-md hover:bg-white transition-all flex items-center justify-center text-slate-400 disabled:opacity-50"
+                aria-label="Cerrar modal"
               >
                 <span className="material-symbols-outlined" aria-hidden="true">close</span>
               </button>
             </div>
             
-            <form onSubmit={handleSubmit} className="p-8 space-y-6">
+            <form onSubmit={handleSubmit} className="p-6 space-y-5">
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Nombre Completo</label>
                 <input 
                   required
                   disabled={isSaving}
-                  className="w-full bg-slate-50 border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 outline-none transition-all disabled:opacity-60"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all disabled:opacity-60"
                   placeholder="Ej. Juan Pérez"
                   value={formData.name}
                   onChange={e => setFormData({...formData, name: e.target.value})}
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Tipo de Licencia</label>
                   <select 
                     disabled={isSaving}
-                    className="w-full bg-slate-50 border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 outline-none transition-all disabled:opacity-60"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all disabled:opacity-60"
                     value={formData.licenseType}
                     onChange={e => setFormData({...formData, licenseType: e.target.value})}
                   >
@@ -302,7 +304,7 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Número de Licencia</label>
                   <input 
                     disabled={isSaving}
-                    className="w-full bg-slate-50 border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 outline-none transition-all disabled:opacity-60"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all disabled:opacity-60"
                     placeholder="Ej. 12345678"
                     value={formData.licenseNumber}
                     onChange={e => setFormData({...formData, licenseNumber: e.target.value})}
@@ -310,26 +312,24 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Teléfono de Contacto</label>
-                  <input 
-                    required
-                    disabled={isSaving}
-                    className="w-full bg-slate-50 border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 outline-none transition-all disabled:opacity-60"
-                    placeholder="+52 00 0000 0000"
-                    value={formData.phone}
-                    onChange={e => setFormData({...formData, phone: e.target.value})}
-                  />
-                </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Teléfono de Contacto</label>
+                <input 
+                  required
+                  disabled={isSaving}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all disabled:opacity-60"
+                  placeholder="+52 00 0000 0000"
+                  value={formData.phone}
+                  onChange={e => setFormData({...formData, phone: e.target.value})}
+                />
               </div>
 
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Estado Operativo</label>
                   <select 
                     disabled={isSaving}
-                    className="w-full bg-slate-50 border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 outline-none transition-all disabled:opacity-60"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all disabled:opacity-60"
                     value={formData.status}
                     onChange={e => setFormData({...formData, status: e.target.value as any})}
                   >
@@ -342,7 +342,7 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Vehículo Asignado</label>
                   <select 
                     disabled={isSaving}
-                    className="w-full bg-slate-50 border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 outline-none transition-all disabled:opacity-60"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all disabled:opacity-60"
                     value={formData.assignedVehicleId}
                     onChange={e => setFormData({...formData, assignedVehicleId: e.target.value})}
                   >
@@ -358,34 +358,34 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Notas u Observaciones (Opcional)</label>
                 <textarea 
                   disabled={isSaving}
-                  className="w-full bg-slate-50 border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 outline-none transition-all disabled:opacity-60 resize-vertical min-h-[100px]"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all disabled:opacity-60 resize-none min-h-[80px]"
                   placeholder="Escriba cualquier nota o observación relevante sobre el chofer..."
                   value={formData.notes}
                   onChange={e => setFormData({...formData, notes: e.target.value})}
                 />
               </div>
 
-              <div className="pt-4 flex gap-4">
+              <div className="pt-4 flex gap-3">
                 <button 
                   type="button"
                   disabled={isSaving}
                   onClick={() => setShowModal(false)}
-                  className="flex-1 py-4 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-50 rounded-2xl transition-all disabled:opacity-40"
+                  className="flex-1 py-3 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-100 rounded-md transition-all disabled:opacity-40"
                 >
                   Cancelar
                 </button>
                 <button 
                   type="submit"
                   disabled={isSaving}
-                  className="flex-[2] py-4 bg-[#135bec] text-white text-[11px] font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-blue-500/20 hover:bg-blue-600 transition-all disabled:opacity-80 flex items-center justify-center gap-3"
+                  className="flex-[2] py-3 bg-primary text-white text-[11px] font-black uppercase tracking-widest rounded-md hover:opacity-90 transition-all disabled:opacity-80 flex items-center justify-center gap-2"
                 >
                   {isSaving ? (
                     <>
-                      <span className="material-symbols-outlined animate-spin text-xl">sync</span>
+                      <span className="material-symbols-outlined animate-spin text-lg">sync</span>
                       Guardando...
                     </>
                   ) : (
-                    editingDriver ? 'Actualizar Perfil' : 'Registrar Chofer'
+                    editingDriver ? 'Actualizar Chofer' : 'Registrar Chofer'
                   )}
                 </button>
               </div>
