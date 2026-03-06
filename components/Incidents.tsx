@@ -18,6 +18,7 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, searchQuery, onAddInci
   const [showPrintPreview, setShowPrintPreview] = useState(false);
   const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
   const [editingIncident, setEditingIncident] = useState<Incident | null>(null);
+  const [formError, setFormError] = useState('');
 
   const settingsMap = useMemo(() => {
     const map: Record<string, string> = {};
@@ -47,11 +48,13 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, searchQuery, onAddInci
   }, [incidents, vehicles, drivers, searchQuery]);
 
   const resetForm = () => {
+    setFormError('');
     setEditingIncident(null);
     setFormData({ type: 'mechanical', title: '', description: '', vehicleId: '', driverId: '', status: 'pending' });
   };
 
   const handleEdit = (incident: Incident) => {
+    setFormError('');
     setEditingIncident(incident);
     setFormData({
         type: incident.type,
@@ -66,6 +69,7 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, searchQuery, onAddInci
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError('');
     if (!formData.title || !formData.vehicleId || !formData.driverId) return;
 
     setIsSaving(true);
@@ -84,7 +88,8 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, searchQuery, onAddInci
       resetForm();
       setShowModal(false);
     } catch (err) {
-      alert("Error al guardar incidencia");
+      const message = err instanceof Error ? err.message : "Error al guardar incidencia";
+      setFormError(message);
     } finally {
       setIsSaving(false);
     }
@@ -264,7 +269,7 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, searchQuery, onAddInci
               </button>
             </div>
             
-            <form onSubmit={handleSubmit} className="p-6 space-y-5">
+            <form onSubmit={handleSubmit} autoComplete="off" className="p-6 space-y-5">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Tipo de Incidencia</label>
@@ -349,6 +354,12 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, searchQuery, onAddInci
                   </select>
                 </div>
               </div>
+
+              {formError && (
+                <p className="text-xs font-bold text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">
+                  {formError}
+                </p>
+              )}
 
               <div className="pt-4 flex gap-3">
                 <button 

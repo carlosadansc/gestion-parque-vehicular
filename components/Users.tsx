@@ -12,6 +12,7 @@ interface UsersProps {
 const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUser }) => {
   const [showModal, setShowModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [formError, setFormError] = useState('');
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -43,18 +44,20 @@ const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUs
   };
 
   const handleEdit = (user: User) => {
+    setFormError('');
     setEditingUser(user);
     setFormData({
-      name: user.name,
-      username: user.username,
+      name: String(user.name ?? ''),
+      username: String(user.username ?? ''),
       password: '', 
-      role: user.role,
-      status: user.status
+      role: (String(user.role ?? 'operator').trim() as User['role']),
+      status: (String(user.status ?? 'active').trim() as User['status'])
     });
     setShowModal(true);
   };
 
   const handleOpenNew = () => {
+    setFormError('');
     setEditingUser(null);
     setFormData({ name: '', username: '', password: '', role: 'operator', status: 'active' });
     setShowModal(true);
@@ -62,9 +65,10 @@ const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUs
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError('');
     if (!formData.name || !formData.username) return;
     if (!editingUser && !formData.password) {
-      alert("La contraseña es obligatoria para nuevos registros.");
+      setFormError("La contraseña es obligatoria para nuevos registros.");
       return;
     }
 
@@ -82,11 +86,13 @@ const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUs
       } else {
         await onAddUser(formData);
       }
+      setFormError('');
       setShowModal(false);
       setEditingUser(null);
     } catch (err) {
       console.error("Error saving user:", err);
-      alert("Error al procesar el usuario en la base de datos.");
+      const message = err instanceof Error ? err.message : "Error al procesar el usuario en la base de datos.";
+      setFormError(message);
     } finally {
       setIsSaving(false);
     }
@@ -195,12 +201,12 @@ const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUs
                 <h3 className="text-2xl font-black text-slate-900 tracking-tighter">{editingUser ? 'Actualizar Cuenta' : 'Registrar Nuevo Acceso'}</h3>
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Configuración de credenciales de seguridad</p>
               </div>
-              <button onClick={() => !isSaving && setShowModal(false)} className="size-12 rounded-full hover:bg-white hover:shadow-md transition-all flex items-center justify-center text-slate-400" aria-label="Cerrar">
+              <button onClick={() => { if (!isSaving) { setFormError(''); setShowModal(false); } }} className="size-12 rounded-full hover:bg-white hover:shadow-md transition-all flex items-center justify-center text-slate-400" aria-label="Cerrar">
                 <span className="material-symbols-outlined text-2xl" aria-hidden="true">close</span>
               </button>
             </div>
             
-            <form onSubmit={handleSubmit} className="p-12 space-y-8">
+            <form onSubmit={handleSubmit} autoComplete="off" className="p-12 space-y-8">
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Nombre Completo (Personal)</label>
                 <input 
@@ -228,6 +234,7 @@ const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUs
                   <input 
                     type="password"
                     disabled={isSaving} 
+                    autoComplete="new-password"
                     className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-bold text-sm outline-none focus:ring-4 focus:ring-primary/10 transition-all" 
                     placeholder={editingUser ? "Omitir para no cambiar" : "••••••••"}
                     value={formData.password} 
@@ -264,10 +271,16 @@ const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUs
                 </div>
               </div>
 
+              {formError && (
+                <p className="text-xs font-bold text-rose-600 bg-rose-50 border border-rose-100 rounded-2xl px-4 py-3">
+                  {formError}
+                </p>
+              )}
+
               <div className="pt-4 flex gap-4">
                 <button 
                   type="button" disabled={isSaving} 
-                  onClick={() => setShowModal(false)} 
+                  onClick={() => { setFormError(''); setShowModal(false); }} 
                   className="flex-1 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-all"
                 >
                   Cancelar

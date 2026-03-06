@@ -15,6 +15,7 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
   const [statusFilter, setStatusFilter] = useState<string>('todos');
   const [showModal, setShowModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [formError, setFormError] = useState('');
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
   const [activeTab, setActiveTab] = useState<'general' | 'technical' | 'condition' | 'accessories'>('general');
   const [showPrintPreview, setShowPrintPreview] = useState(false);
@@ -57,11 +58,17 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
   }, [vehicles, drivers, searchQuery, statusFilter]);
 
   const handleEdit = (vehicle: Vehicle) => {
+    setFormError('');
     setEditingVehicle(vehicle);
     // Use casting to any for complex merged objects to avoid strict property overlap errors with widened types
     setFormData({
       ...initialFormState,
       ...vehicle,
+      plate: String(vehicle.plate ?? ''),
+      model: String(vehicle.model ?? ''),
+      assignedDriverId: String(vehicle.assignedDriverId ?? '').trim(),
+      status: (String(vehicle.status ?? 'active').trim() as Vehicle['status']),
+      image: String(vehicle.image ?? ''),
       year: (vehicle.year || new Date().getFullYear()).toString(),
       odometer: (vehicle.odometer || 0).toString(),
       cylinders: (vehicle.cylinders || 4).toString(),
@@ -78,6 +85,7 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
   };
 
   const handleOpenNew = () => {
+    setFormError('');
     setEditingVehicle(null);
     setFormData(initialFormState);
     setAccessoriesList([]);
@@ -100,6 +108,7 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError('');
     if (!formData.plate || !formData.model) return;
     
     setIsSaving(true);
@@ -121,9 +130,11 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
       } else {
         await onAddVehicle(payload);
       }
+      setFormError('');
       setShowModal(false);
     } catch (err) {
-      alert("Error al guardar el vehículo");
+      const message = err instanceof Error ? err.message : "Error al guardar el vehiculo";
+      setFormError(message);
     } finally {
       setIsSaving(false);
     }
@@ -288,7 +299,7 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
                   <h3 className="text-lg font-black text-slate-900">{editingVehicle ? 'Ficha de Unidad' : 'Nueva Unidad'}</h3>
                 </div>
               </div>
-              <button onClick={() => !isSaving && setShowModal(false)} className="size-9 rounded-md hover:bg-white transition-all flex items-center justify-center text-slate-400" aria-label="Cerrar modal"><span className="material-symbols-outlined text-xl" aria-hidden="true">close</span></button>
+              <button onClick={() => { if (!isSaving) { setFormError(''); setShowModal(false); } }} className="size-9 rounded-md hover:bg-white transition-all flex items-center justify-center text-slate-400" aria-label="Cerrar modal"><span className="material-symbols-outlined text-xl" aria-hidden="true">close</span></button>
             </div>
 
             <div className="flex border-b border-slate-100 bg-white px-6 overflow-x-auto">
@@ -298,7 +309,7 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
               <TabBtn active={activeTab === 'accessories'} onClick={() => setActiveTab('accessories')} label="Accesorios / Notas" icon="construction" />
             </div>
             
-            <form onSubmit={handleSubmit} className="p-6 space-y-6 overflow-y-auto flex-1 custom-scrollbar">
+            <form onSubmit={handleSubmit} autoComplete="off" className="p-6 space-y-6 overflow-y-auto flex-1 custom-scrollbar">
               {activeTab === 'general' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in slide-in-from-left-4">
                   <div className="space-y-4">
@@ -412,8 +423,14 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
                 </div>
               )}
 
+              {formError && (
+                <p className="text-xs font-bold text-rose-600 bg-rose-50 border border-rose-100 rounded-md px-4 py-3">
+                  {formError}
+                </p>
+              )}
+
               <div className="pt-6 flex gap-3">
-                <button type="button" onClick={() => setShowModal(false)} className="flex-1 py-3 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-100 rounded-md transition-all">Cancelar</button>
+                <button type="button" onClick={() => { setFormError(''); setShowModal(false); }} className="flex-1 py-3 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-100 rounded-md transition-all">Cancelar</button>
                 <button type="submit" disabled={isSaving} className="flex-[2] py-3 bg-primary text-white text-[11px] font-black uppercase tracking-widest rounded-md hover:opacity-90 transition-all flex items-center justify-center gap-2">
                   {isSaving ? 'Guardando...' : (editingVehicle ? 'Guardar Cambios' : 'Registrar Vehículo')}
                 </button>

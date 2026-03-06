@@ -12,11 +12,23 @@ interface FuelProps {
   settings?: AppSetting[];
 }
 
+const toDateInputValue = (value: unknown, fallback = ''): string => {
+  if (!value) return fallback;
+  const raw = String(value).trim();
+  if (!raw) return fallback;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+  if (/^\d{4}-\d{2}-\d{2}T/.test(raw)) return raw.slice(0, 10);
+  const parsed = new Date(raw);
+  if (Number.isNaN(parsed.getTime())) return fallback;
+  return parsed.toISOString().slice(0, 10);
+};
+
 const Fuel: React.FC<FuelProps> = ({ fuelHistory = [], vehicles = [], drivers = [], onAddFuel, onUpdateFuel, onSync, settings = [] }) => {
   const [showModal, setShowModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showPrintPreview, setShowPrintPreview] = useState(false);
   const [editingEntry, setEditingEntry] = useState<FuelEntry | null>(null);
+  const [formError, setFormError] = useState('');
   
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
@@ -28,14 +40,15 @@ const Fuel: React.FC<FuelProps> = ({ fuelHistory = [], vehicles = [], drivers = 
   });
 
   const handleEdit = (entry: FuelEntry) => {
+    setFormError('');
     setEditingEntry(entry);
     setFormData({
-      date: entry.date.split('T')[0],
-      vehicleId: entry.vehicleId,
-      driverId: entry.driverId,
-      liters: String(entry.liters),
-      cost: String(entry.cost),
-      odometer: String(entry.odometer)
+      date: toDateInputValue(entry.date, new Date().toISOString().split('T')[0]),
+      vehicleId: String(entry.vehicleId ?? '').trim(),
+      driverId: String(entry.driverId ?? '').trim(),
+      liters: entry.liters !== undefined && entry.liters !== null ? String(entry.liters) : '',
+      cost: entry.cost !== undefined && entry.cost !== null ? String(entry.cost) : '',
+      odometer: entry.odometer !== undefined && entry.odometer !== null ? String(entry.odometer) : ''
     });
     setShowModal(true);
   };
@@ -91,6 +104,7 @@ const Fuel: React.FC<FuelProps> = ({ fuelHistory = [], vehicles = [], drivers = 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError('');
     if (!formData.vehicleId || !formData.liters || !formData.cost || !formData.driverId) return;
 
     setIsSaving(true);
@@ -123,8 +137,10 @@ const Fuel: React.FC<FuelProps> = ({ fuelHistory = [], vehicles = [], drivers = 
       });
       setEditingEntry(null);
       setShowModal(false);
+      setFormError('');
     } catch (err) {
-      alert("Error al guardar registro de combustible");
+      const message = err instanceof Error ? err.message : "Error al guardar registro de combustible";
+      setFormError(message);
     } finally {
       setIsSaving(false);
     }
@@ -300,7 +316,7 @@ const Fuel: React.FC<FuelProps> = ({ fuelHistory = [], vehicles = [], drivers = 
               </button>
             </div>
             
-            <form onSubmit={handleSubmit} className="p-6 space-y-5">
+            <form onSubmit={handleSubmit} autoComplete="off" className="p-6 space-y-5">
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Fecha de la Carga</label>
                 <input 
@@ -385,6 +401,12 @@ const Fuel: React.FC<FuelProps> = ({ fuelHistory = [], vehicles = [], drivers = 
                   onChange={e => setFormData({...formData, odometer: e.target.value})}
                 />
               </div>
+
+              {formError && (
+                <p className="text-xs font-bold text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">
+                  {formError}
+                </p>
+              )}
 
               <div className="pt-4 flex gap-3">
                 <button 

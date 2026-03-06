@@ -11,12 +11,25 @@ interface InspectionsProps {
   settings?: AppSetting[];
 }
 
+const toDateTimeLocalValue = (value: unknown, fallback = ''): string => {
+  if (!value) return fallback;
+  const raw = String(value).trim();
+  if (!raw) return fallback;
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(raw)) return raw;
+  if (/^\d{4}-\d{2}-\d{2}T/.test(raw)) return raw.slice(0, 16);
+  const parsed = new Date(raw);
+  if (Number.isNaN(parsed.getTime())) return fallback;
+  const localDate = new Date(parsed.getTime() - (parsed.getTimezoneOffset() * 60000));
+  return localDate.toISOString().slice(0, 16);
+};
+
 const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddInspection, onUpdateInspection, currentUser, settings = [] }) => {
   const [showModal, setShowModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showPrintPreview, setShowPrintPreview] = useState(false);
   const [selectedInspection, setSelectedInspection] = useState<VehicleInspection | null>(null);
   const [editingInspection, setEditingInspection] = useState<VehicleInspection | null>(null);
+  const [formError, setFormError] = useState('');
 
   const settingsMap = useMemo(() => {
     const map: Record<string, string> = {};
@@ -40,6 +53,7 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError('');
     if (!formData.vehicleId || !formData.inspectorName) return;
 
     setIsSaving(true);
@@ -62,8 +76,10 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
       setShowModal(false);
       setEditingInspection(null);
       setFormData({ ...initialFormState, date: new Date().toISOString().slice(0, 16), inspectorName: currentUser?.name || '' });
+      setFormError('');
     } catch (err) {
-      alert("Error al guardar la revisión");
+      const message = err instanceof Error ? err.message : "Error al guardar la revision";
+      setFormError(message);
     } finally {
       setIsSaving(false);
     }
@@ -83,12 +99,15 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
   };
 
   const handleEdit = (insp: VehicleInspection) => {
+    setFormError('');
     setEditingInspection(insp);
     setFormData({
       ...initialFormState,
       ...insp,
-      date: new Date(insp.date).toISOString().slice(0, 16), // Convert to datetime-local format
-      odometer: String(insp.odometer),
+      date: toDateTimeLocalValue(insp.date, new Date().toISOString().slice(0, 16)),
+      vehicleId: String(insp.vehicleId ?? '').trim(),
+      inspectorName: String(insp.inspectorName ?? ''),
+      odometer: insp.odometer !== undefined && insp.odometer !== null ? String(insp.odometer) : '',
     });
     setShowModal(true);
   };
@@ -394,7 +413,7 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
                </button>
              </div>
             
-            <form onSubmit={handleSubmit} className="p-6 space-y-6 overflow-y-auto max-h-[80vh] custom-scrollbar">
+            <form onSubmit={handleSubmit} autoComplete="off" className="p-6 space-y-6 overflow-y-auto max-h-[80vh] custom-scrollbar">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Fecha y Hora</label>
@@ -444,6 +463,12 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Observaciones Generales</label>
                 <textarea rows={3} disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all resize-none" placeholder="Detalles adicionales..." value={formData.observations} onChange={e => setFormData({...formData, observations: e.target.value})} />
               </div>
+
+              {formError && (
+                <p className="text-xs font-bold text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">
+                  {formError}
+                </p>
+              )}
 
               <div className="pt-4 flex gap-3">
                 <button type="button" disabled={isSaving} onClick={() => setShowModal(false)} className="flex-1 py-3 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-100 rounded-md transition-all disabled:opacity-50">Cancelar</button>

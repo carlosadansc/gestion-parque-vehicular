@@ -15,6 +15,29 @@ interface MaintenanceProps {
   onSync: () => void;
 }
 
+const toDateInputValue = (value: unknown, fallback = ''): string => {
+  if (!value) return fallback;
+  const raw = String(value).trim();
+  if (!raw) return fallback;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+  if (/^\d{4}-\d{2}-\d{2}T/.test(raw)) return raw.slice(0, 10);
+  const parsed = new Date(raw);
+  if (Number.isNaN(parsed.getTime())) return fallback;
+  return parsed.toISOString().slice(0, 10);
+};
+
+const toDateTimeLocalValue = (value: unknown, fallback = ''): string => {
+  if (!value) return fallback;
+  const raw = String(value).trim();
+  if (!raw) return fallback;
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(raw)) return raw;
+  if (/^\d{4}-\d{2}-\d{2}T/.test(raw)) return raw.slice(0, 16);
+  const parsed = new Date(raw);
+  if (Number.isNaN(parsed.getTime())) return fallback;
+  const localDate = new Date(parsed.getTime() - (parsed.getTimezoneOffset() * 60000));
+  return localDate.toISOString().slice(0, 16);
+};
+
 const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], maintenanceTypes = [], suppliers = [], settings = [], onAddRecord, onUpdateRecord, onAddMaintenanceType, onAddSupplier, onSync }) => {
   const [showModal, setShowModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -29,6 +52,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
   // Print States
   const [showPrintPreview, setShowPrintPreview] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<MaintenanceRecord | null>(null);
+  const [formError, setFormError] = useState('');
 
   const settingsMap = useMemo(() => {
     const map: Record<string, string> = {};
@@ -76,23 +100,24 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
   }, [records]);
 
   const handleEdit = (record: MaintenanceRecord) => {
+    setFormError('');
     setEditingRecord(record);
     setFormData({
-      date: record.date ? record.date.split('T')[0] : new Date().toISOString().split('T')[0],
-      vehicleId: record.vehicleId || '',
-      serviceType: record.serviceType || '',
-      description: record.description || '',
-      quoteNumber: record.quoteNumber || '',
-      quoteCost: (record.quoteCost || 0).toString(),
-      invoiceNumber: record.invoiceNumber || '',
-      invoiceAmount: (record.invoiceAmount || 0).toString(),
-      odometer: (record.odometer || 0).toString(),
-      provider: record.provider || '',
-      providerContact: record.providerContact || '',
-      entryDate: record.entryDate || new Date().toISOString().slice(0, 16),
-      exitDate: record.exitDate || '',
-      estimatedDeliveryDate: record.estimatedDeliveryDate || '',
-      internalDocumentNumber: record.internalDocumentNumber || '',
+      date: toDateInputValue(record.date, new Date().toISOString().split('T')[0]),
+      vehicleId: String(record.vehicleId ?? '').trim(),
+      serviceType: String(record.serviceType ?? ''),
+      description: String(record.description ?? ''),
+      quoteNumber: String(record.quoteNumber ?? ''),
+      quoteCost: record.quoteCost !== undefined && record.quoteCost !== null ? String(record.quoteCost) : '',
+      invoiceNumber: String(record.invoiceNumber ?? ''),
+      invoiceAmount: record.invoiceAmount !== undefined && record.invoiceAmount !== null ? String(record.invoiceAmount) : '',
+      odometer: record.odometer !== undefined && record.odometer !== null ? String(record.odometer) : '',
+      provider: String(record.provider ?? '').trim(),
+      providerContact: String(record.providerContact ?? ''),
+      entryDate: toDateTimeLocalValue(record.entryDate, new Date().toISOString().slice(0, 16)),
+      exitDate: toDateInputValue(record.exitDate),
+      estimatedDeliveryDate: toDateInputValue(record.estimatedDeliveryDate),
+      internalDocumentNumber: String(record.internalDocumentNumber ?? ''),
       status: record.status || 'scheduled'
     });
     setShowModal(true);
@@ -105,6 +130,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError('');
     if (!formData.vehicleId || !formData.provider) return;
 
     setIsSaving(true);
@@ -136,8 +162,10 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
       }
       setShowModal(false);
       resetForm();
+      setFormError('');
     } catch (err) {
-      alert("Error al guardar mantenimiento");
+      const message = err instanceof Error ? err.message : "Error al guardar mantenimiento";
+      setFormError(message);
     } finally {
       setIsSaving(false);
     }
@@ -151,7 +179,8 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
         setNewTypeName('');
         setIsAddingType(false);
     } catch (e) {
-        alert("Error al agregar tipo");
+        const message = e instanceof Error ? e.message : "Error al agregar tipo";
+        setFormError(message);
     }
   };
 
@@ -167,11 +196,13 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
         setNewSupplierContact('');
         setIsAddingSupplier(false);
     } catch (e) {
-        alert("Error al agregar proveedor");
+        const message = e instanceof Error ? e.message : "Error al agregar proveedor";
+        setFormError(message);
     }
   };
 
   const resetForm = () => {
+    setFormError('');
     setEditingRecord(null);
     setFormData({ 
       date: new Date().toISOString().split('T')[0], 
@@ -542,7 +573,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
               </button>
             </div>
             
-            <form onSubmit={handleSubmit} className="p-8 overflow-y-auto max-h-[80vh] custom-scrollbar">
+            <form onSubmit={handleSubmit} autoComplete="off" className="p-8 overflow-y-auto max-h-[80vh] custom-scrollbar">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* SECCIÓN BÁSICA */}
                 <div className="space-y-6">
@@ -785,6 +816,12 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                   </div>
                 </div>
               </div>
+
+              {formError && (
+                <p className="text-xs font-bold text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2 mt-6">
+                  {formError}
+                </p>
+              )}
 
               <div className="pt-8 flex gap-4">
                 <button 

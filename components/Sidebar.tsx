@@ -30,7 +30,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange, appName, cu
     >
       <div className="p-4 flex-1 flex flex-col min-h-0 h-full">
         <div className="flex items-center gap-3 mb-6">
-          <img alt="DIF" className="w-10 h-10 object-contain" src="../images/logo-dif.png" />
+          <img alt="DIF" className="w-10 h-10 object-contain" src="/images/logo-dif.png" />
           <div className="flex flex-col min-w-0">
             <h1 className="text-white text-sm font-medium truncate">{appName}</h1>
             <p className="text-slate-500 text-xs">Gestión Vehicular</p>

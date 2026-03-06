@@ -308,6 +308,23 @@ body {
   border-bottom: 0; 
 }
 
+.table-sticky-header thead th {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: var(--color-surface-subtle);
+}
+
+.table-density-compact thead th {
+  padding: 0.625rem 1rem;
+  font-size: 0.6875rem;
+}
+
+.table-density-compact tbody td {
+  padding: 0.625rem 1rem;
+  font-size: 0.8125rem;
+}
+
 /* Badges minimal */
 .badge { 
   display: inline-flex; 

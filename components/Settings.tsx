@@ -12,6 +12,8 @@ interface SettingsProps {
 const Settings: React.FC<SettingsProps> = ({ settings, onUpdateSetting, onUrlChange }) => {
   const [serviceUrl, setServiceUrl] = useState(googleSheets.getServiceUrl());
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [urlError, setUrlError] = useState('');
+  const [copyStatus, setCopyStatus] = useState<'idle' | 'copied' | 'error'>('idle');
   const [localSettings, setLocalSettings] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -22,12 +24,13 @@ const Settings: React.FC<SettingsProps> = ({ settings, onUpdateSetting, onUrlCha
 
   const handleSaveUrl = () => {
     if (!serviceUrl.includes('script.google.com/macros/s/') || !serviceUrl.includes('/exec')) {
+      setUrlError('La URL debe terminar en /exec.');
       setSaveStatus('error');
-      alert("Error: La URL debe terminar en /exec.");
       setTimeout(() => setSaveStatus('idle'), 3000);
       return;
     }
 
+    setUrlError('');
     setSaveStatus('saving');
     googleSheets.setServiceUrl(serviceUrl);
     setTimeout(() => {
@@ -124,25 +127,43 @@ function doPost(e) {
     
     let sheetName = "";
      if (action === 'fuel' || action === 'update-fuel') sheetName = "Combustible";
-    else if (action === 'incident') sheetName = "Incidencias";
+    else if (action === 'incident' || action === 'update-incident') sheetName = "Incidencias";
     else if (action === 'vehicle' || action === 'update-vehicle') sheetName = "Vehiculos";
      else if (action === 'inspection' || action === 'update-inspection') sheetName = "Revisiones";
     else if (action === 'driver' || action === 'update-driver') sheetName = "Choferes";
     else if (action === 'planning' || action === 'update-planning') sheetName = "Planeacion";
-    else if (action === 'area') sheetName = "Areas";
+    else if (action === 'area' || action === 'delete-area') sheetName = "Areas";
     else if (action === 'travel-log' || action === 'update-travel-log') sheetName = "BitacorasViaje";
     else if (action === 'maintenance' || action === 'update-maintenance') sheetName = "Mantenimiento";
-    else if (action === 'maintenance-type') sheetName = "TiposMantenimiento";
+    else if (action === 'maintenance-type' || action === 'update-maintenance-type') sheetName = "TiposMantenimiento";
     else if (action === 'supplier' || action === 'update-supplier') sheetName = "Proveedores";
     else if (action === 'user' || action === 'update-user') {
       sheetName = "Usuarios";
       if (d.password) d.password = Utilities.base64Encode(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, d.password));
     }
     
+    if (!sheetName) {
+      throw new Error("Accion no soportada: " + action);
+    }
+    if (!d || typeof d !== 'object') {
+      throw new Error("Carga de datos invalida.");
+    }
+
     const sheet = getOrCreateSheet(ss, sheetName);
     const headersInSheet = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+
+    const requiresUniqueName = action === 'maintenance-type' ||
+      action === 'update-maintenance-type' ||
+      action === 'supplier' ||
+      action === 'update-supplier';
+    if (requiresUniqueName && hasDuplicateName(sheet, headersInSheet, d.name, action.startsWith('update-') ? d.id : "")) {
+      throw new Error("Ya existe un registro con ese nombre.");
+    }
     
-    if (action.startsWith('update-')) {
+    if (action === 'delete-area') {
+      if (!d.id) throw new Error("El id es obligatorio para eliminar un area.");
+      deleteRowById(sheet, d.id, headersInSheet);
+    } else if (action.startsWith('update-')) {
       updateRowDynamic(sheet, d.id, d, headersInSheet);
     } else {
       appendRowDynamic(sheet, d, headersInSheet);
@@ -175,6 +196,49 @@ function updateRowDynamic(sheet, id, dataObj, headers) {
       });
       return true;
     }
+  }
+  return false;
+}
+
+function deleteRowById(sheet, id, headers) {
+  const idColIndex = headers.indexOf("id");
+  if (idColIndex === -1) return false;
+  const data = sheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][idColIndex]) === String(id)) {
+      sheet.deleteRow(i + 1);
+      return true;
+    }
+  }
+  return false;
+}
+
+function normalizeForCompare(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toUpperCase();
+}
+
+function hasDuplicateName(sheet, headers, candidateName, excludeId) {
+  const nameColIndex = headers.indexOf("name");
+  if (nameColIndex === -1) return false;
+
+  const normalizedCandidate = normalizeForCompare(candidateName);
+  if (!normalizedCandidate) return false;
+
+  const idColIndex = headers.indexOf("id");
+  const data = sheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    const existingName = normalizeForCompare(data[i][nameColIndex]);
+    if (existingName !== normalizedCandidate) continue;
+
+    if (excludeId && idColIndex !== -1 && String(data[i][idColIndex]) === String(excludeId)) {
+      continue;
+    }
+    return true;
   }
   return false;
 }
@@ -295,14 +359,26 @@ function getSheetData(ss, name) {
               <div className="space-y-3">
                 <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-1">URL /exec</label>
                 <div className={`flex rounded-xl border transition-all ${saveStatus === 'error' ? 'border-rose-500 ring-4 ring-rose-50' : 'border-slate-200 focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/10'}`}>
-                  <input className="flex-1 text-slate-900 text-sm font-bold p-4 bg-transparent outline-none" placeholder="https://script.google.com/macros/s/.../exec" value={serviceUrl} onChange={(e) => setServiceUrl(e.target.value)} />
+                  <input className="flex-1 text-slate-900 text-sm font-bold p-4 bg-transparent outline-none" placeholder="https://script.google.com/macros/s/.../exec" value={serviceUrl} onChange={(e) => { setServiceUrl(e.target.value); if (urlError) setUrlError(''); }} />
                   <button onClick={handleSaveUrl} disabled={saveStatus === 'saving'} className="bg-primary text-white px-6 font-black text-[10px] uppercase tracking-widest hover:opacity-90 transition-all">{saveStatus === 'saving' ? 'Guardando...' : 'Actualizar'}</button>
                 </div>
+                {urlError && (
+                  <p className="text-xs font-bold text-rose-600">{urlError}</p>
+                )}
               </div>
               <div className="bg-slate-900 rounded-xl p-6 shadow-inner">
                 <div className="flex items-center justify-between mb-4">
                   <h4 className="text-[10pt] font-black text-primary uppercase tracking-[0.2em] mb-4">Apps Script (v8.6 - Catálogo de Proveedores)</h4>
-                  <button onClick={() => { navigator.clipboard.writeText(appsScriptCode); alert("¡Copiado!"); }} className="bg-slate-800 hover:bg-slate-700 text-white text-[10px] font-black py-1.5 px-3 rounded-lg transition-colors border border-slate-700">COPIAR CÓDIGO</button>
+                  <button onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(appsScriptCode);
+                      setCopyStatus('copied');
+                    } catch (error) {
+                      setCopyStatus('error');
+                    } finally {
+                      setTimeout(() => setCopyStatus('idle'), 2000);
+                    }
+                  }} className="bg-slate-800 hover:bg-slate-700 text-white text-[10px] font-black py-1.5 px-3 rounded-lg transition-colors border border-slate-700">{copyStatus === 'copied' ? 'COPIADO' : copyStatus === 'error' ? 'ERROR AL COPIAR' : 'COPIAR CÓDIGO'}</button>
                 </div>
                 <pre className="text-[10px] font-mono text-slate-400 overflow-x-auto max-h-48 custom-scrollbar leading-relaxed">{appsScriptCode}</pre>
               </div>

@@ -41,6 +41,34 @@ const formatTime = (time: string | undefined) => {
 };
 
 // Helper robusto para calcular duración
+const toDateInputValue = (value: unknown, fallback = ''): string => {
+  if (!value) return fallback;
+  const raw = String(value).trim();
+  if (!raw) return fallback;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+  if (/^\d{4}-\d{2}-\d{2}T/.test(raw)) return raw.slice(0, 10);
+  const parsed = new Date(raw);
+  if (Number.isNaN(parsed.getTime())) return fallback;
+  return parsed.toISOString().slice(0, 10);
+};
+
+const toTimeInputValue = (value: unknown): string => {
+  if (!value) return '';
+  const raw = String(value).trim();
+  if (!raw) return '';
+  if (/^\d{2}:\d{2}$/.test(raw)) return raw;
+  if (/^\d{2}:\d{2}:\d{2}$/.test(raw)) return raw.slice(0, 5);
+  if (raw.includes('T')) {
+    const parsed = new Date(raw);
+    if (!Number.isNaN(parsed.getTime())) {
+      const hh = String(parsed.getHours()).padStart(2, '0');
+      const mm = String(parsed.getMinutes()).padStart(2, '0');
+      return `${hh}:${mm}`;
+    }
+  }
+  return '';
+};
+
 const calculateDuration = (start: string, end: string) => {
   if (!start || !end) return null;
 
@@ -84,6 +112,7 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [viewingLog, setViewingLog] = useState<TravelLog | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [formError, setFormError] = useState('');
   const [showPrintPreview, setShowPrintPreview] = useState(false);
   const [selectedLog, setSelectedLog] = useState<TravelLog | null>(null);
   const [editingLog, setEditingLog] = useState<TravelLog | null>(null);
@@ -122,6 +151,7 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError('');
     if (!formData.vehicleId || !formData.driverId || !formData.date || !formData.departureTime) return;
 
     setIsSaving(true);
@@ -149,30 +179,33 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
       } else {
         await onAddTravelLog(payload);
       }
+      setFormError('');
       setShowModal(false);
       resetForm();
     } catch (err) {
-      alert("Error al guardar bitácora de viaje");
+      const message = err instanceof Error ? err.message : "Error al guardar bitacora de viaje";
+      setFormError(message);
     } finally {
       setIsSaving(false);
     }
   };
 
   const handleEdit = (log: TravelLog) => {
+    setFormError('');
     setEditingLog(log);
     setFormData({
-      date: log.date ? (typeof log.date === 'string' ? log.date.split('T')[0] : new Date(log.date).toISOString().split('T')[0]) : new Date().toISOString().split('T')[0],
-      departureTime: log.departureTime || '',
-      arrivalTime: log.arrivalTime || '',
-      driverId: log.driverId || '',
-      vehicleId: log.vehicleId || '',
+      date: toDateInputValue(log.date, new Date().toISOString().split('T')[0]),
+      departureTime: toTimeInputValue(log.departureTime),
+      arrivalTime: toTimeInputValue(log.arrivalTime),
+      driverId: String(log.driverId ?? '').trim(),
+      vehicleId: String(log.vehicleId ?? '').trim(),
       initialOdometer: (log.initialOdometer || 0).toString(),
       finalOdometer: log.finalOdometer ? log.finalOdometer.toString() : '',
-      destination: log.destination || '',
-      areaId: log.areaId || '',
-      notes: log.notes || '',
-      initialFuelLevel: log.initialFuelLevel !== undefined ? log.initialFuelLevel : 100,
-      finalFuelLevel: log.finalFuelLevel !== undefined ? log.finalFuelLevel : 100
+      destination: String(log.destination ?? ''),
+      areaId: String(log.areaId ?? '').trim(),
+      notes: String(log.notes ?? ''),
+      initialFuelLevel: Number.isFinite(Number(log.initialFuelLevel)) ? Number(log.initialFuelLevel) : 100,
+      finalFuelLevel: Number.isFinite(Number(log.finalFuelLevel)) ? Number(log.finalFuelLevel) : 100
     });
     setShowModal(true);
   };
@@ -183,6 +216,7 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
   };
 
   const resetForm = () => {
+    setFormError('');
     setEditingLog(null);
     setFormData({ 
       date: new Date().toISOString().split('T')[0], 
@@ -518,12 +552,12 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
                 <h3 className="text-2xl font-black text-slate-900 tracking-tight">{editingLog ? (editingLog.arrivalTime ? 'Editar Bitácora' : 'Registrar Llegada') : 'Nueva Salida'}</h3>
                 <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Control de movimientos de la unidad</p>
               </div>
-              <button onClick={() => !isSaving && setShowModal(false)} disabled={isSaving} className="size-12 rounded-full hover:bg-white hover:shadow-md transition-all flex items-center justify-center text-slate-400">
+              <button onClick={() => { if (!isSaving) { setFormError(''); setShowModal(false); } }} disabled={isSaving} className="size-12 rounded-full hover:bg-white hover:shadow-md transition-all flex items-center justify-center text-slate-400">
                 <span className="material-symbols-outlined text-2xl">close</span>
               </button>
             </div>
             
-            <form onSubmit={handleSubmit} className="p-10 space-y-8 overflow-y-auto max-h-[70vh] custom-scrollbar">
+            <form onSubmit={handleSubmit} autoComplete="off" className="p-10 space-y-8 overflow-y-auto max-h-[70vh] custom-scrollbar">
               {/* Formulario (igual que antes) */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-2">
@@ -598,8 +632,14 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
                 </div>
               </div>
 
+              {formError && (
+                <p className="text-xs font-bold text-rose-600 bg-rose-50 border border-rose-100 rounded-2xl px-4 py-3">
+                  {formError}
+                </p>
+              )}
+
               <div className="pt-6 flex gap-4">
-                <button type="button" disabled={isSaving} onClick={() => setShowModal(false)} className="flex-1 py-4 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-50 rounded-2xl transition-all">Cancelar</button>
+                <button type="button" disabled={isSaving} onClick={() => { setFormError(''); setShowModal(false); }} className="flex-1 py-4 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-50 rounded-2xl transition-all">Cancelar</button>
                 <button type="submit" disabled={isSaving} className="flex-[2] py-4 bg-primary text-white text-[11px] font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-blue-500/20 hover:opacity-90 transition-all flex items-center justify-center gap-3">
                   {isSaving ? <><span className="material-symbols-outlined animate-spin">sync</span> Procesando...</> : (editingLog ? (editingLog.arrivalTime ? 'Guardar Cambios' : 'Registrar Llegada') : 'Confirmar Salida')}
                 </button>

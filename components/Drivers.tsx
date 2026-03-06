@@ -18,6 +18,8 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
   const [showPrintPreview, setShowPrintPreview] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState<Driver | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('todos');
+  const [formError, setFormError] = useState('');
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
 
   const settingsMap = useMemo(() => {
     const map: Record<string, string> = {};
@@ -34,6 +36,30 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
     assignedVehicleId: '',
     notes: ''
   });
+
+  const fieldErrors = useMemo(() => {
+    const phoneDigits = (formData.phone || '').replace(/\D/g, '');
+    return {
+      name: !formData.name.trim() ? 'El nombre es obligatorio.' : formData.name.trim().length < 3 ? 'Captura al menos 3 caracteres.' : '',
+      phone: !formData.phone.trim() ? 'El telefono es obligatorio.' : phoneDigits.length < 7 ? 'Captura un telefono valido.' : '',
+      licenseNumber: formData.licenseNumber.trim() && formData.licenseNumber.trim().length < 4 ? 'El numero de licencia es demasiado corto.' : '',
+    };
+  }, [formData]);
+
+  const isFormValid = !Object.values(fieldErrors).some(Boolean);
+
+  const markTouched = (field: string) => {
+    setTouched(prev => ({ ...prev, [field]: true }));
+  };
+
+  const getFieldClass = (field: keyof typeof fieldErrors) => {
+    const hasError = Boolean(touched[field] && fieldErrors[field]);
+    return `w-full bg-slate-50 border rounded-md px-4 py-3 text-sm font-bold outline-none transition-all disabled:opacity-60 ${
+      hasError
+        ? 'border-rose-300 bg-rose-50 focus:bg-white focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10'
+        : 'border-slate-200 focus:bg-white focus:border-primary'
+    }`;
+  };
 
   // Buscamos el vehículo asignado recorriendo la lista de vehículos (Fuente de verdad)
   const filteredDrivers = useMemo(() => {
@@ -52,15 +78,17 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
   }, [drivers, vehicles, searchQuery, statusFilter]);
 
   const handleEdit = (driver: Driver) => {
+    setFormError('');
+    setTouched({});
     setEditingDriver(driver);
     setFormData({
-      name: driver.name,
-      licenseType: driver.licenseType,
-      licenseNumber: driver.licenseNumber || '',
-      phone: driver.phone,
-      status: driver.status,
-      assignedVehicleId: driver.assignedVehicleId || '',
-      notes: driver.notes || ''
+      name: String(driver.name ?? ''),
+      licenseType: String(driver.licenseType ?? 'Tipo A'),
+      licenseNumber: String(driver.licenseNumber ?? ''),
+      phone: String(driver.phone ?? ''),
+      status: (String(driver.status ?? 'available').trim() as 'available' | 'en-route' | 'on-break'),
+      assignedVehicleId: String(driver.assignedVehicleId ?? '').trim(),
+      notes: String(driver.notes ?? '')
     });
     setShowModal(true);
   };
@@ -71,6 +99,8 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
   };
 
   const handleOpenNew = () => {
+    setFormError('');
+    setTouched({});
     setEditingDriver(null);
     setFormData({
       name: '',
@@ -86,7 +116,13 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.phone) return;
+    setFormError('');
+    setTouched({ name: true, phone: true, licenseNumber: true });
+    if (!isFormValid) {
+      const firstError = Object.values(fieldErrors).find(Boolean) || 'Revisa los campos marcados.';
+      setFormError(firstError);
+      return;
+    }
 
     setIsSaving(true);
     try {
@@ -101,9 +137,12 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
 
       setShowModal(false);
       setEditingDriver(null);
+      setFormError('');
+      setTouched({});
     } catch (error) {
       console.error("Error saving driver:", error);
-      alert("Hubo un error al guardar el chofer.");
+      const message = error instanceof Error ? error.message : "Hubo un error al guardar el chofer.";
+      setFormError(message);
     } finally {
       setIsSaving(false);
     }
@@ -169,13 +208,15 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
             <button onClick={() => setStatusFilter('todos')} className={`filter-pill ${statusFilter === 'todos' ? 'filter-pill-active' : 'filter-pill-inactive'}`}>Todos</button>
             <button onClick={() => setStatusFilter('available')} className={`filter-pill ${statusFilter === 'available' ? 'filter-pill-success' : 'filter-pill-inactive'}`}>Disponible</button>
             <button onClick={() => setStatusFilter('en-route')} className={`filter-pill ${statusFilter === 'en-route' ? 'filter-pill-info' : 'filter-pill-inactive'}`}>En Ruta</button>
-            <button onClick={() => setStatusFilter('off')} className={`filter-pill ${statusFilter === 'off' ? 'filter-pill-warning' : 'filter-pill-inactive'}`}>Descanso</button>
+            <button onClick={() => setStatusFilter('on-break')} className={`filter-pill ${statusFilter === 'on-break' ? 'filter-pill-warning' : 'filter-pill-inactive'}`}>Descanso</button>
           </div>
-          <span className="text-xs text-slate-500">{filteredDrivers.length} registros</span>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-slate-500">{filteredDrivers.length} registros</span>
+          </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="table-professional">
+        <div className="overflow-auto max-h-[62vh] custom-scrollbar">
+          <table className="table-professional table-sticky-header">
             <thead>
               <tr>
                 <th>Chofer</th>
@@ -263,7 +304,7 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
                 </div>
               </div>
               <button 
-                onClick={() => !isSaving && setShowModal(false)}
+                onClick={() => { if (!isSaving) { setTouched({}); setFormError(''); setShowModal(false); } }}
                 disabled={isSaving}
                 className="size-9 rounded-md hover:bg-white transition-all flex items-center justify-center text-slate-400 disabled:opacity-50"
                 aria-label="Cerrar modal"
@@ -272,17 +313,19 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
               </button>
             </div>
             
-            <form onSubmit={handleSubmit} className="p-6 space-y-5">
+            <form onSubmit={handleSubmit} autoComplete="off" className="p-6 space-y-5">
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Nombre Completo</label>
                 <input 
                   required
                   disabled={isSaving}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all disabled:opacity-60"
+                  className={getFieldClass('name')}
                   placeholder="Ej. Juan Pérez"
                   value={formData.name}
                   onChange={e => setFormData({...formData, name: e.target.value})}
+                  onBlur={() => markTouched('name')}
                 />
+                {touched.name && fieldErrors.name && <p className="text-[11px] font-bold text-rose-600">{fieldErrors.name}</p>}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -304,11 +347,13 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Número de Licencia</label>
                   <input 
                     disabled={isSaving}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all disabled:opacity-60"
+                    className={getFieldClass('licenseNumber')}
                     placeholder="Ej. 12345678"
                     value={formData.licenseNumber}
                     onChange={e => setFormData({...formData, licenseNumber: e.target.value})}
+                    onBlur={() => markTouched('licenseNumber')}
                   />
+                  {touched.licenseNumber && fieldErrors.licenseNumber && <p className="text-[11px] font-bold text-rose-600">{fieldErrors.licenseNumber}</p>}
                 </div>
               </div>
 
@@ -317,11 +362,13 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
                 <input 
                   required
                   disabled={isSaving}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all disabled:opacity-60"
+                  className={getFieldClass('phone')}
                   placeholder="+52 00 0000 0000"
                   value={formData.phone}
                   onChange={e => setFormData({...formData, phone: e.target.value})}
+                  onBlur={() => markTouched('phone')}
                 />
+                {touched.phone && fieldErrors.phone && <p className="text-[11px] font-bold text-rose-600">{fieldErrors.phone}</p>}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -365,11 +412,17 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
                 />
               </div>
 
+              {formError && (
+                <p className="text-xs font-bold text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">
+                  {formError}
+                </p>
+              )}
+
               <div className="pt-4 flex gap-3">
                 <button 
                   type="button"
                   disabled={isSaving}
-                  onClick={() => setShowModal(false)}
+                  onClick={() => { setTouched({}); setFormError(''); setShowModal(false); }}
                   className="flex-1 py-3 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-100 rounded-md transition-all disabled:opacity-40"
                 >
                   Cancelar
@@ -382,7 +435,7 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
                   {isSaving ? (
                     <>
                       <span className="material-symbols-outlined animate-spin text-lg">sync</span>
-                      Guardando...
+                      {editingDriver ? 'Actualizando chofer...' : 'Registrando chofer...'}
                     </>
                   ) : (
                     editingDriver ? 'Actualizar Chofer' : 'Registrar Chofer'
