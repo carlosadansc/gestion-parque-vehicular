@@ -134,10 +134,10 @@ const Dashboard: React.FC<DashboardProps> = ({ vehicles = [], drivers = [], fuel
     <div className="space-y-8 animate-in fade-in duration-700 pb-10">
       
       {/* HEADER DE BIENVENIDA */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+      <div className="page-header mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900">Panel General</h2>
-          <p className="text-slate-500 font-medium mt-1">Resumen ejecutivo del estado de la flota vehicular</p>
+          <h2 className="page-title">Panel General</h2>
+          <p className="page-subtitle">Resumen ejecutivo del estado de la flota vehicular</p>
         </div>
         <div className="flex gap-2">
            <span className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-500">
@@ -151,7 +151,7 @@ const Dashboard: React.FC<DashboardProps> = ({ vehicles = [], drivers = [], fuel
         {/* Salud de Flota */}
         <div className="bg-slate-900 rounded-xl p-5 text-white relative overflow-hidden">
           <div className="absolute top-3 right-3 opacity-10">
-            <span className="material-symbols-outlined text-6xl">health_and_safety</span>
+            <span className="material-symbols-outlined ui-icon text-6xl">health_and_safety</span>
           </div>
           <p className="text-slate-400 text-xs font-medium uppercase tracking-wide mb-2">Salud Mecánica</p>
           <div className="flex items-baseline gap-2">
@@ -168,7 +168,7 @@ const Dashboard: React.FC<DashboardProps> = ({ vehicles = [], drivers = [], fuel
         <div className="bg-white rounded-xl p-5 border border-slate-200">
           <div className="flex justify-between items-start mb-3">
              <div className="size-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
-               <span className="material-symbols-outlined filled text-xl">directions_car</span>
+               <span className="material-symbols-outlined filled ui-icon text-xl">directions_car</span>
              </div>
              <span className={`text-xs font-medium px-2 py-0.5 rounded ${availabilityRate > 80 ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
                {availabilityRate > 80 ? 'Alta' : 'Media'}
@@ -186,7 +186,7 @@ const Dashboard: React.FC<DashboardProps> = ({ vehicles = [], drivers = [], fuel
         <div className="bg-white rounded-xl p-5 border border-slate-200">
           <div className="flex justify-between items-start mb-3">
              <div className="size-10 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
-               <span className="material-symbols-outlined filled text-xl">local_gas_station</span>
+               <span className="material-symbols-outlined filled ui-icon text-xl">local_gas_station</span>
              </div>
           </div>
           <p className="text-slate-500 text-xs font-medium uppercase tracking-wide">Costo/Km</p>
@@ -201,7 +201,7 @@ const Dashboard: React.FC<DashboardProps> = ({ vehicles = [], drivers = [], fuel
         <div className="bg-white rounded-xl p-5 border border-slate-200">
           <div className="flex justify-between items-start mb-3">
              <div className="size-10 rounded-lg bg-rose-50 flex items-center justify-center text-rose-500">
-               <span className="material-symbols-outlined filled text-xl">warning</span>
+               <span className="material-symbols-outlined filled ui-icon text-xl">warning</span>
              </div>
              {incidents.filter(i => i.status === 'critical').length > 0 && (
                <span className="text-xs font-medium px-2 py-0.5 rounded bg-rose-100 text-rose-700">Pendiente</span>
@@ -341,9 +341,9 @@ const Dashboard: React.FC<DashboardProps> = ({ vehicles = [], drivers = [], fuel
                 ...fuelEntries.slice(0, 3).map(f => ({...f, metaType: 'fuel'}))
               ].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 5).map((item: any, idx) => (
                  <div key={`${item.metaType}-${item.id}`} className="flex gap-4 p-4 hover:bg-slate-50 rounded-2xl transition-colors">
-                    <div className={`size-10 rounded-full flex items-center justify-center shrink-0 ${item.metaType === 'incident' ? 'bg-rose-50 text-rose-500' : 'bg-blue-50 text-blue-500'}`}>
-                       <span className="material-symbols-outlined text-lg">{item.metaType === 'incident' ? 'warning' : 'local_gas_station'}</span>
-                    </div>
+                     <div className={`size-10 rounded-full flex items-center justify-center shrink-0 ${item.metaType === 'incident' ? 'bg-rose-50 text-rose-500' : 'bg-blue-50 text-blue-500'}`}>
+                       <span className="material-symbols-outlined ui-icon text-lg">{item.metaType === 'incident' ? 'warning' : 'local_gas_station'}</span>
+                     </div>
                     <div className="flex-1">
                        <div className="flex justify-between">
                           <p className="text-xs font-black text-slate-900 uppercase tracking-wide">

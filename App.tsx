@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { View, Vehicle, Driver, FuelEntry, Incident, Planning, Area, TravelLog, MaintenanceRecord, AppSetting, User, VehicleInspection, MaintenanceType, Supplier } from './types';
+import { View, Vehicle, Driver, FuelEntry, FuelAcquisition, Incident, Planning, Area, TravelLog, MaintenanceRecord, AppSetting, User, VehicleInspection, MaintenanceType, Supplier } from './types';
 import { VEHICLES as initialVehicles, DRIVERS as initialDrivers, INCIDENTS as initialIncidents, FUEL_HISTORY as initialFuel } from './constants';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
@@ -122,6 +122,20 @@ const validateFuelPayload = (entry: Omit<FuelEntry, 'id'> | FuelEntry, vehicleLi
   ensure(isFiniteNumber(entry.odometer) && Number(entry.odometer) >= 0, 'El odometro debe ser un numero valido.');
 };
 
+const validateFuelAcquisitionPayload = (entry: Omit<FuelAcquisition, 'id'> | FuelAcquisition) => {
+  ensure(isValidDateValue(entry.date), 'La fecha de adquisicion no es valida.');
+  ensure(isValidDateValue(entry.validFrom), 'La fecha inicial de vigencia no es valida.');
+  ensure(isValidDateValue(entry.validTo), 'La fecha final de vigencia no es valida.');
+  ensure(new Date(entry.validFrom).getTime() <= new Date(entry.validTo).getTime(), 'La fecha final no puede ser menor a la inicial.');
+  ensure(hasText(entry.description), 'La descripcion de la adquisicion es obligatoria.');
+  ensure(hasText(entry.area), 'El area destino es obligatoria.');
+  ensure(hasText(entry.supplier), 'El proveedor es obligatorio.');
+  ensure(isFiniteNumber(entry.amount) && Number(entry.amount) > 0, 'El monto debe ser mayor a 0.');
+  if (hasValue(entry.consecutiveNumber)) {
+    ensure(Number.isInteger(Number(entry.consecutiveNumber)) && Number(entry.consecutiveNumber) > 0, 'El consecutivo debe ser un entero positivo.');
+  }
+};
+
 const validateIncidentPayload = (incident: Omit<Incident, 'id'> | Incident, vehicleList: Vehicle[], driverList: Driver[]) => {
   ensure(INCIDENT_TYPE_SET.has(incident.type), 'El tipo de incidencia no es valido.');
   ensure(INCIDENT_STATUS_SET.has(incident.status), 'El estado de la incidencia no es valido.');
@@ -176,15 +190,15 @@ const validateTravelLogPayload = (log: Omit<TravelLog, 'id'> | TravelLog, vehicl
 
 const validateMaintenancePayload = (record: Omit<MaintenanceRecord, 'id'> | MaintenanceRecord, vehicleList: Vehicle[]) => {
   ensure(isValidDateValue(record.date), 'La fecha del mantenimiento no es valida.');
+  ensure(hasText(record.provider), 'El proveedor es obligatorio.');
+  ensure(hasText(record.description), 'La descripcion del mantenimiento es obligatoria.');
+  ensure(isFiniteNumber(record.quoteCost) && Number(record.quoteCost) >= 0, 'El costo cotizado debe ser un numero valido.');
+  ensure(MAINTENANCE_STATUS_SET.has(record.status), 'El estado del mantenimiento no es valido.');
   ensure(isValidDateValue(record.entryDate), 'La fecha/hora de ingreso no es valida.');
   if (hasText(record.exitDate)) ensure(isValidDateValue(record.exitDate), 'La fecha/hora de salida no es valida.');
   if (hasText(record.estimatedDeliveryDate)) ensure(isValidDateValue(record.estimatedDeliveryDate), 'La fecha estimada de entrega no es valida.');
   ensure(hasText(record.vehicleId) && vehicleList.some(v => v.id === record.vehicleId), 'Debes seleccionar un vehiculo valido.');
-  ensure(hasText(record.provider), 'El proveedor es obligatorio.');
-  ensure(hasText(record.description), 'La descripcion del mantenimiento es obligatoria.');
-  ensure(isFiniteNumber(record.quoteCost) && Number(record.quoteCost) >= 0, 'El costo cotizado debe ser un numero valido.');
   ensure(isFiniteNumber(record.odometer) && Number(record.odometer) >= 0, 'El odometro debe ser un numero valido.');
-  ensure(MAINTENANCE_STATUS_SET.has(record.status), 'El estado del mantenimiento no es valido.');
 
   if (hasValue(record.invoiceAmount)) {
     ensure(isFiniteNumber(record.invoiceAmount), 'El monto de factura debe ser un numero valido.');
@@ -253,6 +267,7 @@ const App: React.FC = () => {
   const [drivers, setDrivers] = useState<Driver[]>(initialDrivers);
   const [incidents, setIncidents] = useState<Incident[]>(initialIncidents);
   const [fuelEntries, setFuelEntries] = useState<FuelEntry[]>(initialFuel);
+  const [fuelAcquisitions, setFuelAcquisitions] = useState<FuelAcquisition[]>([]);
   const [plannings, setPlannings] = useState<Planning[]>([]);
   const [areas, setAreas] = useState<Area[]>([]);
   const [travelLogs, setTravelLogs] = useState<TravelLog[]>([]);
@@ -333,6 +348,7 @@ const App: React.FC = () => {
         if (data.vehicles) setVehicles(data.vehicles);
         if (data.drivers) setDrivers(data.drivers);
         if (data.fuelEntries) setFuelEntries(data.fuelEntries);
+        if (data.fuelAcquisitions) setFuelAcquisitions(data.fuelAcquisitions);
         if (data.incidents) setIncidents(data.incidents);
         if (data.plannings) setPlannings(data.plannings);
         if (data.areas) setAreas(data.areas);
@@ -653,6 +669,47 @@ const App: React.FC = () => {
     await persistOrThrow('update-fuel', updatedFuel, 'actualizar');
     } catch (error) {
       setFuelEntries(previousFuelEntries);
+      throw error;
+    }
+  };
+
+  const handleAddFuelAcquisition = async (newAcquisition: Omit<FuelAcquisition, 'id'>) => {
+    const previousFuelAcquisitions = fuelAcquisitions;
+    try {
+    const formatted = {
+      ...newAcquisition,
+      description: (newAcquisition.description || '').toUpperCase(),
+      area: (newAcquisition.area || '').toUpperCase(),
+      supplier: (newAcquisition.supplier || '').toUpperCase(),
+      internalFolio: newAcquisition.internalFolio?.toUpperCase()
+    };
+    validateFuelAcquisitionPayload(formatted);
+    const acquisitionWithId = { ...formatted, id: `FA-${Date.now()}` };
+    setFuelAcquisitions([acquisitionWithId, ...fuelAcquisitions]);
+    await persistOrThrow('fuel-acquisition', acquisitionWithId, 'guardar');
+    } catch (error) {
+      setFuelAcquisitions(previousFuelAcquisitions);
+      throw error;
+    }
+  };
+
+  const handleUpdateFuelAcquisition = async (updatedAcquisition: FuelAcquisition) => {
+    const previousFuelAcquisitions = fuelAcquisitions;
+    try {
+    const formatted = {
+      ...updatedAcquisition,
+      description: (updatedAcquisition.description || '').toUpperCase(),
+      area: (updatedAcquisition.area || '').toUpperCase(),
+      supplier: (updatedAcquisition.supplier || '').toUpperCase(),
+      internalFolio: updatedAcquisition.internalFolio?.toUpperCase()
+    };
+    ensure(hasText(formatted.id), 'No se pudo identificar la adquisicion de combustible.');
+    ensure(fuelAcquisitions.some(f => f.id === formatted.id), 'La adquisicion que intentas actualizar no existe.');
+    validateFuelAcquisitionPayload(formatted);
+    setFuelAcquisitions(fuelAcquisitions.map(f => f.id === formatted.id ? formatted : f));
+    await persistOrThrow('update-fuel-acquisition', formatted, 'actualizar');
+    } catch (error) {
+      setFuelAcquisitions(previousFuelAcquisitions);
       throw error;
     }
   };
@@ -984,8 +1041,11 @@ const App: React.FC = () => {
         return (
           <Fuel
             fuelHistory={fuelEntries}
+            fuelAcquisitions={fuelAcquisitions}
             vehicles={vehicles}
             drivers={drivers}
+            areas={areas}
+            suppliers={suppliers}
             settings={appSettings}
             onAddFuel={async (payload) => executeWithToast(
               () => handleAddFuel(payload),
@@ -996,6 +1056,16 @@ const App: React.FC = () => {
               () => handleUpdateFuel(payload),
               'Registro de combustible actualizado.',
               'No se pudo actualizar el registro de combustible.'
+            )}
+            onAddFuelAcquisition={async (payload) => executeWithToast(
+              () => handleAddFuelAcquisition(payload),
+              'Adquisicion de combustible registrada.',
+              'No se pudo registrar la adquisicion de combustible.'
+            )}
+            onUpdateFuelAcquisition={async (payload) => executeWithToast(
+              () => handleUpdateFuelAcquisition(payload),
+              'Adquisicion de combustible actualizada.',
+              'No se pudo actualizar la adquisicion de combustible.'
             )}
             onSync={handleSyncWithToast}
           />
@@ -1025,6 +1095,7 @@ const App: React.FC = () => {
           <Maintenance
             records={maintenanceRecords}
             vehicles={vehicles}
+            searchQuery={searchQuery}
             maintenanceTypes={maintenanceTypes}
             suppliers={suppliers}
             settings={appSettings}

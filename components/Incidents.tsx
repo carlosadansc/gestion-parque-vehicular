@@ -176,7 +176,7 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, searchQuery, onAddInci
           onClick={() => { resetForm(); setShowModal(true); }}
           className="btn btn-primary"
         >
-          <span className="material-symbols-outlined">add_circle</span>
+          <span className="material-symbols-outlined ui-icon">add_circle</span>
           Reportar Incidencia
         </button>
       </div>
@@ -216,17 +216,17 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, searchQuery, onAddInci
                   <div className="flex items-center gap-1 ml-2">
                     <button 
                         onClick={() => handleEdit(incident)}
-                        className="size-9 bg-slate-50 text-slate-400 hover:text-primary hover:bg-blue-50 rounded-xl transition-all flex items-center justify-center shrink-0"
+                        className="btn-icon btn-icon-primary shrink-0"
                         title="Editar Incidencia"
                     >
-                        <span className="material-symbols-outlined text-lg">edit</span>
+                        <span className="material-symbols-outlined ui-icon">edit</span>
                     </button>
                     <button 
                         onClick={() => handlePrintRequest(incident)}
-                        className="size-9 bg-slate-50 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all flex items-center justify-center shrink-0"
+                        className="btn-icon btn-icon-success shrink-0"
                         title="Imprimir Reporte"
                     >
-                        <span className="material-symbols-outlined text-lg">description</span>
+                        <span className="material-symbols-outlined ui-icon">description</span>
                     </button>
                   </div>
                 </div>
@@ -397,7 +397,7 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, searchQuery, onAddInci
                 <h3 className="font-black text-sm uppercase tracking-widest">Vista Previa</h3>
              </div>
              <button onClick={() => window.print()} className="bg-primary px-8 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-blue-500/20">
-               <span className="material-symbols-outlined text-lg">picture_as_pdf</span> Imprimir Reporte PDF
+               <span className="material-symbols-outlined ui-icon">picture_as_pdf</span> Imprimir Reporte PDF
              </button>
           </div>
           

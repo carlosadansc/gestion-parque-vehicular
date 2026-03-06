@@ -27,7 +27,7 @@ const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUs
     return (
       <div className="flex flex-col items-center justify-center py-40 text-center animate-in fade-in zoom-in duration-700">
         <div className="size-28 bg-rose-50 rounded-[3rem] flex items-center justify-center text-rose-500 shadow-xl shadow-rose-500/10 mb-8 border border-rose-100">
-          <span className="material-symbols-outlined text-6xl filled">admin_panel_settings</span>
+          <span className="material-symbols-outlined ui-icon text-6xl filled">admin_panel_settings</span>
         </div>
         <h2 className="text-3xl font-black text-slate-900 tracking-tight mb-3">Módulo Restringido</h2>
         <p className="text-slate-400 font-bold uppercase text-[10px] tracking-[0.3em] max-w-xs leading-relaxed">
@@ -109,30 +109,30 @@ const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUs
 
   return (
     <div className="space-y-8 animate-in slide-in-from-bottom-6 duration-700">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="page-header">
         <div>
-          <h2 className="text-2xl font-black text-slate-900 tracking-tight">Gestión de Usuarios</h2>
-          <p className="text-slate-500 text-sm font-medium mt-1">Administración de credenciales y niveles de seguridad del sistema</p>
+          <h2 className="page-title">Gestión de Usuarios</h2>
+          <p className="page-subtitle">Administración de credenciales y niveles de seguridad del sistema</p>
         </div>
         <button 
           onClick={handleOpenNew}
           className="btn btn-primary"
         >
-          <span className="material-symbols-outlined">person_add</span>
+          <span className="material-symbols-outlined ui-icon">person_add</span>
           Nuevo Operador
         </button>
       </div>
 
       <div className="card overflow-hidden">
-        <div className="px-10 py-6 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
-          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Cuentas activas en Google Sheets</p>
-          <span className="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-xs font-medium">
+        <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between gap-2">
+          <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Cuentas activas en Google Sheets</p>
+          <span className="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-[11px] font-medium">
             {users.length} Usuarios
           </span>
         </div>
         
         <div className="overflow-x-auto">
-          <table className="table-professional">
+          <table className="table-professional table-density-compact">
             <thead>
               <tr>
                 <th>Personal</th>
@@ -145,7 +145,7 @@ const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUs
             <tbody className="divide-y divide-slate-100">
               {users.map((user) => (
                 <tr key={user.id} className="hover:bg-slate-50/80 transition-all group">
-                  <td className="px-10 py-6">
+                  <td>
                     <div className="flex items-center gap-4">
                       <div className="size-12 rounded-2xl bg-slate-100 flex items-center justify-center font-black text-slate-400 group-hover:bg-primary group-hover:text-white transition-all shadow-sm">
                         {user.name[0].toUpperCase()}
@@ -161,10 +161,10 @@ const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUs
                       </div>
                     </div>
                   </td>
-                  <td className="px-10 py-6">
+                  <td>
                     <code className="text-[11px] font-black text-primary bg-blue-50 px-2 py-1 rounded-lg">@{user.username}</code>
                   </td>
-                  <td className="px-10 py-6">
+                  <td>
                     <span className={`inline-flex px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest border ${
                       user.role === 'admin' ? 'bg-indigo-50 text-indigo-700 border-indigo-100' :
                       user.role === 'operator' ? 'bg-blue-50 text-blue-700 border-blue-100' :
@@ -173,17 +173,17 @@ const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUs
                       {getRoleLabel(user.role)}
                     </span>
                   </td>
-                  <td className="px-10 py-6">
+                  <td>
                     <p className="text-xs font-bold text-slate-400">
                       {user.lastLogin ? new Date(user.lastLogin).toLocaleString('es-ES') : 'Nunca ha ingresado'}
                     </p>
                   </td>
-                  <td className="px-10 py-6 text-right">
+                  <td className="text-right">
                     <button 
                       onClick={() => handleEdit(user)}
-                      className="size-10 text-slate-300 hover:text-primary hover:bg-white hover:shadow-md rounded-xl transition-all flex items-center justify-center ml-auto"
+                      className="btn-icon btn-icon-primary ml-auto"
                     >
-                      <span className="material-symbols-outlined text-xl">edit_square</span>
+                      <span className="material-symbols-outlined ui-icon">edit_square</span>
                     </button>
                   </td>
                 </tr>
@@ -202,7 +202,7 @@ const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUs
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Configuración de credenciales de seguridad</p>
               </div>
               <button onClick={() => { if (!isSaving) { setFormError(''); setShowModal(false); } }} className="size-12 rounded-full hover:bg-white hover:shadow-md transition-all flex items-center justify-center text-slate-400" aria-label="Cerrar">
-                <span className="material-symbols-outlined text-2xl" aria-hidden="true">close</span>
+                <span className="material-symbols-outlined ui-icon text-2xl" aria-hidden="true">close</span>
               </button>
             </div>
             
@@ -291,7 +291,7 @@ const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUs
                 >
                   {isSaving ? (
                     <>
-                      <span className="material-symbols-outlined animate-spin">sync</span>
+                      <span className="material-symbols-outlined ui-icon animate-spin">sync</span>
                       Sincronizando...
                     </>
                   ) : (

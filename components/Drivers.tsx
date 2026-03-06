@@ -197,14 +197,14 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
           onClick={handleOpenNew}
           className="btn btn-primary"
         >
-          <span className="material-symbols-outlined">person_add</span>
+          <span className="material-symbols-outlined ui-icon">person_add</span>
           Nuevo Chofer
         </button>
       </div>
 
       <div className="card">
-        <div className="px-4 py-3 border-b border-slate-200 bg-slate-50 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
+        <div className="px-4 py-3 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <button onClick={() => setStatusFilter('todos')} className={`filter-pill ${statusFilter === 'todos' ? 'filter-pill-active' : 'filter-pill-inactive'}`}>Todos</button>
             <button onClick={() => setStatusFilter('available')} className={`filter-pill ${statusFilter === 'available' ? 'filter-pill-success' : 'filter-pill-inactive'}`}>Disponible</button>
             <button onClick={() => setStatusFilter('en-route')} className={`filter-pill ${statusFilter === 'en-route' ? 'filter-pill-info' : 'filter-pill-inactive'}`}>En Ruta</button>
@@ -216,7 +216,7 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
         </div>
 
         <div className="overflow-auto max-h-[62vh] custom-scrollbar">
-          <table className="table-professional table-sticky-header">
+          <table className="table-professional table-sticky-header table-density-compact">
             <thead>
               <tr>
                 <th>Chofer</th>
@@ -271,12 +271,12 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
                       </span>
                     </td>
                     <td className="px-5 py-4 text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => handlePrintRequest(driver)} className="btn-icon text-slate-400 hover:text-emerald-600 hover:bg-emerald-50" aria-label="Imprimir">
-                          <span className="material-symbols-outlined" aria-hidden="true">file_present</span>
+                      <div className="table-actions">
+                        <button onClick={() => handlePrintRequest(driver)} className="btn-icon btn-icon-success" aria-label="Imprimir">
+                          <span className="material-symbols-outlined ui-icon" aria-hidden="true">file_present</span>
                         </button>
-                        <button onClick={() => handleEdit(driver)} className="btn-icon text-slate-400 hover:text-primary hover:bg-blue-50" aria-label="Editar">
-                          <span className="material-symbols-outlined" aria-hidden="true">edit</span>
+                        <button onClick={() => handleEdit(driver)} className="btn-icon btn-icon-primary" aria-label="Editar">
+                          <span className="material-symbols-outlined ui-icon" aria-hidden="true">edit</span>
                         </button>
                       </div>
                     </td>
@@ -295,7 +295,7 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
             <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
               <div className="flex items-center gap-3">
                 <div className="size-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                  <span className="material-symbols-outlined text-primary" aria-hidden="true">badge</span>
+                  <span className="material-symbols-outlined ui-icon text-primary" aria-hidden="true">badge</span>
                 </div>
                 <div>
                   <h3 className="text-lg font-black text-slate-900">
@@ -309,7 +309,7 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
                 className="size-9 rounded-md hover:bg-white transition-all flex items-center justify-center text-slate-400 disabled:opacity-50"
                 aria-label="Cerrar modal"
               >
-                <span className="material-symbols-outlined" aria-hidden="true">close</span>
+                <span className="material-symbols-outlined ui-icon" aria-hidden="true">close</span>
               </button>
             </div>
             
@@ -434,7 +434,7 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
                 >
                   {isSaving ? (
                     <>
-                      <span className="material-symbols-outlined animate-spin text-lg">sync</span>
+                      <span className="material-symbols-outlined ui-icon animate-spin text-lg">sync</span>
                       {editingDriver ? 'Actualizando chofer...' : 'Registrando chofer...'}
                     </>
                   ) : (
@@ -456,7 +456,7 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
                 <h3 className="font-black uppercase tracking-widest text-sm">Vista Previa</h3>
               </div>
               <button onClick={() => window.print()} className="bg-primary px-8 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-blue-500/20">
-                <span className="material-symbols-outlined text-lg">picture_as_pdf</span> Imprimir Ficha PDF
+                <span className="material-symbols-outlined ui-icon text-lg">picture_as_pdf</span> Imprimir Ficha PDF
               </button>
             </div>
             <div className="flex-1 bg-slate-100 p-10 flex justify-center">

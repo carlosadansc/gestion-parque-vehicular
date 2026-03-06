@@ -47,7 +47,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onUpdateSetting, onUrlCha
 
 const appsScriptCode = `
 /** 
- * API FLOTA PRO v8.6 - Soporte para catálogo de Proveedores
+ * API FLOTA PRO v8.7 - Combustible con hoja de adquisiciones
  */
 
 const CONFIG = {
@@ -66,6 +66,7 @@ const CONFIG = {
     ],
     "Choferes": ["id", "name", "licenseType", "licenseNumber", "phone", "status", "assignedVehicleId", "image", "notes"],
     "Combustible": ["id", "date", "vehicleId", "driverId", "liters", "cost", "odometer"],
+    "CombustibleAdquisiciones": ["id", "consecutiveNumber", "internalFolio", "date", "isQr", "validFrom", "validTo", "description", "amount", "area", "supplier"],
     "Incidencias": ["id", "date", "type", "title", "description", "vehicleId", "driverId", "status"],
     "Planeacion": ["id", "date", "vehicleId", "driverId", "areaId", "notes", "departureTime", "arrivalTime", "destination", "status"],
     "Areas": ["id", "name", "description"],
@@ -98,6 +99,7 @@ function doGet(e) {
     inspections: data.revisiones,
     drivers: data.choferes,
     fuelEntries: data.combustible,
+    fuelAcquisitions: data.combustibleadquisiciones,
     incidents: data.incidencias,
     plannings: data.planeacion,
     areas: data.areas,
@@ -127,6 +129,7 @@ function doPost(e) {
     
     let sheetName = "";
      if (action === 'fuel' || action === 'update-fuel') sheetName = "Combustible";
+    else if (action === 'fuel-acquisition' || action === 'update-fuel-acquisition') sheetName = "CombustibleAdquisiciones";
     else if (action === 'incident' || action === 'update-incident') sheetName = "Incidencias";
     else if (action === 'vehicle' || action === 'update-vehicle') sheetName = "Vehiculos";
      else if (action === 'inspection' || action === 'update-inspection') sheetName = "Revisiones";
@@ -368,7 +371,7 @@ function getSheetData(ss, name) {
               </div>
               <div className="bg-slate-900 rounded-xl p-6 shadow-inner">
                 <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-[10pt] font-black text-primary uppercase tracking-[0.2em] mb-4">Apps Script (v8.6 - Catálogo de Proveedores)</h4>
+                  <h4 className="text-[10pt] font-black text-primary uppercase tracking-[0.2em] mb-4">Apps Script (v8.7 - Combustible y Adquisiciones)</h4>
                   <button onClick={async () => {
                     try {
                       await navigator.clipboard.writeText(appsScriptCode);
@@ -388,19 +391,19 @@ function getSheetData(ss, name) {
 
         <div className="xl:col-span-4 space-y-6">
           <div className="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm sticky top-28">
-            <h4 className="text-[10pt] font-black text-primary uppercase tracking-[0.2em] mb-4">Novedades v8.6</h4>
+            <h4 className="text-[10pt] font-black text-primary uppercase tracking-[0.2em] mb-4">Novedades v8.7</h4>
             <ul className="space-y-6">
               <li className="flex gap-4">
                 <span className="size-6 bg-primary text-white text-[10px] font-black flex items-center justify-center rounded-full shrink-0">1</span>
-                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Catálogo de Proveedores</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Nueva hoja "Proveedores" para gestionar talleres y proveedores de servicio.</p></div>
+                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Adquisiciones de Combustible</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Nueva hoja "CombustibleAdquisiciones" para vales y compras por codigo QR.</p></div>
               </li>
               <li className="flex gap-4">
                 <span className="size-6 bg-primary text-white text-[10px] font-black flex items-center justify-center rounded-full shrink-0">2</span>
-                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Selección en Mantenimiento</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">En el modal de mantenimiento ahora puedes seleccionar proveedores del catálogo.</p></div>
+                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Nuevo Tab en Combustible</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">El modulo de combustible ahora incluye un tab para registrar adquisiciones.</p></div>
               </li>
               <li className="flex gap-4">
                 <span className="size-6 bg-primary text-white text-[10px] font-black flex items-center justify-center rounded-full shrink-0">3</span>
-                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Importante</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Debes actualizar el código en Apps Script para habilitar el catálogo de proveedores.</p></div>
+                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Importante</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Debes actualizar el codigo en Apps Script para crear la hoja nueva y sincronizar adquisiciones.</p></div>
               </li>
             </ul>
           </div>

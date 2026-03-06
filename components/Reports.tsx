@@ -213,8 +213,16 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
    );
 
   // Normalizar la ruta del logo (convertir rutas relativas a absolutas)
-  const rawLogo = settingsMap['APP_LOGO'] || '/images/logo-dif.png';
-  const appLogo = rawLogo.startsWith('./') ? rawLogo.replace('./', '/') : rawLogo;
+  const defaultLogo = '/images/logo-dif.png';
+  const rawLogo = String(settingsMap['APP_LOGO'] || defaultLogo).trim();
+  const appLogo = (() => {
+    if (!rawLogo) return defaultLogo;
+    if (/^(https?:|data:|blob:)/i.test(rawLogo)) return rawLogo;
+    if (rawLogo.startsWith('./')) return `/${rawLogo.slice(2)}`;
+    if (rawLogo.startsWith('/')) return rawLogo;
+    if (/^[a-zA-Z]:\\/.test(rawLogo) || rawLogo.startsWith('\\\\')) return defaultLogo;
+    return `/${rawLogo.replace(/^\/+/, '')}`;
+  })();
   const containerClass = "space-y-8 animate-in fade-in duration-500 pb-20";
   const contentClass = "w-full";
 
@@ -603,18 +611,28 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
 
          <div className="flex gap-2">
            <button onClick={() => setShowPrintPreview(true)} className="btn btn-primary">
-             <span className="material-symbols-outlined">print</span>
-             Generar reporte
-           </button>
-         </div>
-       </div>
+             <span className="material-symbols-outlined ui-icon">print</span>
+              Generar reporte
+            </button>
+          </div>
+        </div>
 
        {/* REPORT CONTENT */}
        <div ref={targetRef} id="report-printable" className={contentClass}>
          {/* PRINT ONLY HEADER */}
          <div className="hidden print:flex print-header justify-between items-center mb-8 border-b-4 border-slate-900 pb-6">
              <div className="flex items-center gap-6">
-               <img src="/images/logo-dif.png" alt="Logo" className="w-24 object-contain" />
+                <img
+                  src={appLogo}
+                  alt="Logo"
+                  className="w-24 object-contain"
+                  onError={(e) => {
+                    const img = e.currentTarget;
+                    if (img.dataset.fallbackApplied === '1') return;
+                    img.dataset.fallbackApplied = '1';
+                    img.src = defaultLogo;
+                  }}
+                />
                <div className="flex flex-col">
                  <span className="text-xl font-black text-slate-900 uppercase leading-none tracking-tight">Reporte de Analisis de Vehiculos</span>
                  <span className="text-lg font-black text-slate-900 uppercase leading-tight tracking-tight">Sistema DIF Municipal La Paz B.C.S.</span>
@@ -636,11 +654,11 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
          </div>
 
          {/* TABS */}
-         <div className="flex gap-2 mb-6 no-print overflow-x-auto">
-<button onClick={() => setActiveReport('financial')} className={`px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${activeReport === 'financial' ? 'bg-[#135bec] text-white' : 'bg-white text-slate-500 hover:bg-slate-50'}`}>Financiero</button>
-              <button onClick={() => setActiveReport('operations')} className={`px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${activeReport === 'operations' ? 'bg-[#135bec] text-white' : 'bg-white text-slate-500 hover:bg-slate-50'}`}>Operativo</button>
-              <button onClick={() => setActiveReport('incidents')} className={`px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${activeReport === 'incidents' ? 'bg-[#135bec] text-white' : 'bg-white text-slate-500 hover:bg-slate-50'}`}>Incidencias</button>
-         </div>
+          <div className="flex gap-2 mb-6 no-print overflow-x-auto">
+            <button onClick={() => setActiveReport('financial')} className={`filter-pill ${activeReport === 'financial' ? 'filter-pill-active' : 'filter-pill-inactive'}`}>Financiero</button>
+            <button onClick={() => setActiveReport('operations')} className={`filter-pill ${activeReport === 'operations' ? 'filter-pill-active' : 'filter-pill-inactive'}`}>Operativo</button>
+            <button onClick={() => setActiveReport('incidents')} className={`filter-pill ${activeReport === 'incidents' ? 'filter-pill-active' : 'filter-pill-inactive'}`}>Incidencias</button>
+          </div>
 
           {/* KPI SUMMARY */}
          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 kpi-grid">
@@ -798,7 +816,7 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
             </button>
             <div className="flex gap-2">
               <button onClick={() => window.print()} className="bg-primary px-8 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-blue-500/20">
-                <span className="material-symbols-outlined text-lg">picture_as_pdf</span> Imprimir PDF
+                <span className="material-symbols-outlined ui-icon">picture_as_pdf</span> Imprimir PDF
               </button>
             </div>
           </div>
@@ -807,7 +825,17 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
               {/* PRINT ONLY HEADER - COMPACT */}
               <div className="flex print-header justify-between items-center mb-4 pb-4 border-b-2 border-slate-900">
                 <div className="flex items-center gap-6">
-                  <img src="/images/logo-dif.png" alt="Logo" className="w-24 object-contain" />
+                  <img
+                    src={appLogo}
+                    alt="Logo"
+                    className="w-24 object-contain"
+                    onError={(e) => {
+                      const img = e.currentTarget;
+                      if (img.dataset.fallbackApplied === '1') return;
+                      img.dataset.fallbackApplied = '1';
+                      img.src = defaultLogo;
+                    }}
+                  />
                   <div className="flex flex-col">
                     <span className="text-xl font-black text-slate-900 uppercase leading-none tracking-tight">Reporte de Analisis de Vehiculos</span>
                     <span className="text-lg font-black text-slate-900 uppercase leading-tight tracking-tight">Sistema DIF Municipal La Paz B.C.S.</span>

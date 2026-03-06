@@ -381,8 +381,8 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
 
     const statusIcon = {
       scheduled: null,
-      completed: <span className="material-symbols-outlined text-sm text-green-600 font-bold" title="Completado">check_circle</span>,
-      cancelled: <span className="material-symbols-outlined text-sm text-rose-600 font-bold" title="Cancelado">cancel</span>
+      completed: <span className="material-symbols-outlined ui-icon text-sm text-green-600 font-bold" title="Completado">check_circle</span>,
+      cancelled: <span className="material-symbols-outlined ui-icon text-sm text-rose-600 font-bold" title="Cancelado">cancel</span>
     };
     const cardPadding = 'p-3 rounded-xl';
     const cardTitleClass = 'text-[11px] font-black leading-tight mb-1';
@@ -399,13 +399,13 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
             onClick={(e) => { e.stopPropagation(); handleEdit(p); }}
             className="opacity-0 group-hover:opacity-100 size-6 rounded-lg hover:bg-slate-200/50 text-slate-400 hover:text-primary flex items-center justify-center transition-all"
           >
-            <span className="material-symbols-outlined text-sm">edit</span>
+            <span className="material-symbols-outlined ui-icon text-sm">edit</span>
           </button>
         </div>
         
         {(p.departureTime || p.arrivalTime) && (
           <div className={`mb-2 flex items-center gap-1.5 ${status === 'cancelled' ? 'text-slate-400 line-through' : 'text-slate-500'}`}>
-            <span className="material-symbols-outlined text-[14px]">schedule</span>
+            <span className="material-symbols-outlined ui-icon text-[14px]">schedule</span>
             <span className="text-[10px] font-bold">
               {formatTime(p.departureTime) || '--:--'} - {formatTime(p.arrivalTime) || '--:--'}
             </span>
@@ -413,7 +413,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
         )}
 
         <p className={`${cardTitleClass} ${status === 'cancelled' ? 'text-slate-500 line-through' : 'text-slate-900'}`}>{driver?.name || p.driverId}</p>
-        <p className={cardMetaClass}><span className="material-symbols-outlined text-xs">local_shipping</span>{vehicle?.model || p.vehicleId}</p>
+        <p className={cardMetaClass}><span className="material-symbols-outlined ui-icon text-xs">local_shipping</span>{vehicle?.model || p.vehicleId}</p>
         
         {!minimal && p.destination && (
           <div className="mt-2 pt-2 border-t border-slate-200/50">
@@ -681,13 +681,13 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
            {/* Navegación de Fecha */}
            <div className="flex items-center bg-white border border-slate-200 rounded-xl p-1 w-full lg:w-auto justify-between lg:justify-start">
               <button onClick={() => navigate(-1)} className="size-9 flex items-center justify-center hover:bg-slate-50 text-slate-400 rounded-lg transition-colors">
-                <span className="material-symbols-outlined">chevron_left</span>
+                <span className="material-symbols-outlined ui-icon">chevron_left</span>
               </button>
              <div className="px-4 text-[11px] font-black uppercase tracking-widest text-slate-700 min-w-[180px] text-center">
                {getDateLabel()}
              </div>
              <button onClick={() => navigate(1)} className="size-9 flex items-center justify-center hover:bg-slate-50 text-slate-400 rounded-lg transition-colors">
-               <span className="material-symbols-outlined">chevron_right</span>
+               <span className="material-symbols-outlined ui-icon">chevron_right</span>
              </button>
            </div>
         </div>
@@ -697,7 +697,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
             onClick={() => { setAreaFormError(''); setAreaTouched({}); setShowAreaModal(true); }}
             className="btn btn-secondary shrink-0"
           >
-            <span className="material-symbols-outlined text-lg">layers</span>
+            <span className="material-symbols-outlined ui-icon">layers</span>
             Áreas
           </button>
           
@@ -705,7 +705,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
             onClick={() => setShowPrintPreview(true)}
             className="btn btn-secondary shrink-0"
           >
-            <span className="material-symbols-outlined text-lg">print</span>
+            <span className="material-symbols-outlined ui-icon">print</span>
             <span className="hidden md:inline">Imprimir Semana</span>
           </button>
           
@@ -713,7 +713,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
             onClick={() => { resetForm(); setShowModal(true); }}
             className="btn btn-primary shrink-0"
           >
-            <span className="material-symbols-outlined text-xl">event_available</span>
+            <span className="material-symbols-outlined ui-icon">event_available</span>
             <span className="hidden sm:inline">Asignar</span>
           </button>
         </div>
@@ -737,7 +737,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
                   {dayPlannings.map(p => renderPlanningCard(p, true))}
                   {dayPlannings.length === 0 && (
                     <div className="h-full flex items-center justify-center opacity-20">
-                      <span className="material-symbols-outlined text-3xl">event_busy</span>
+                      <span className="material-symbols-outlined ui-icon text-3xl">event_busy</span>
                     </div>
                   )}
                 </div>
@@ -767,7 +767,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
             {getDayPlannings(currentDate).length === 0 && (
               <div className="flex flex-col items-center justify-center py-20 text-slate-300">
                 <div className="size-20 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-                   <span className="material-symbols-outlined text-4xl">event_note</span>
+                   <span className="material-symbols-outlined ui-icon text-4xl">event_note</span>
                 </div>
                 <p className="text-sm font-black uppercase tracking-widest">No hay actividades programadas para este día</p>
                 <button onClick={() => { setFormData({...formData, date: currentDate.toISOString().split('T')[0]}); setShowModal(true); }} className="mt-4 text-primary text-xs font-bold hover:underline">Programar Actividad</button>
@@ -836,7 +836,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
            <div className="sticky top-0 bg-slate-900 p-4 flex justify-between items-center text-white shadow-lg no-print">
              <button onClick={() => setShowPrintPreview(false)} className="bg-white/10 px-4 py-2 rounded-lg font-bold text-xs hover:bg-white/20 transition-all">Cerrar</button>
              <button onClick={() => window.print()} className="bg-primary px-8 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-blue-500/20">
-               <span className="material-symbols-outlined text-lg">picture_as_pdf</span> Imprimir Planeación Semanal
+               <span className="material-symbols-outlined ui-icon text-lg">picture_as_pdf</span> Imprimir Planeación Semanal
              </button>
            </div>
            <div className="flex-1 bg-slate-100 p-10 flex justify-center print:bg-white print:p-0 print:block">
@@ -974,14 +974,14 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
             <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
               <div className="flex items-center gap-3">
                 <div className="size-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <span className="material-symbols-outlined text-purple-600" aria-hidden="true">layers</span>
+                  <span className="material-symbols-outlined ui-icon text-purple-600" aria-hidden="true">layers</span>
                 </div>
                 <div>
                   <h3 className="text-lg font-black text-slate-900">Catálogo de Áreas</h3>
                 </div>
               </div>
               <button onClick={() => { if (!isSavingArea) { setAreaFormError(''); setAreaTouched({}); setShowAreaModal(false); } }} disabled={isSavingArea} className="size-9 rounded-md hover:bg-white transition-all flex items-center justify-center text-slate-400 disabled:opacity-50" aria-label="Cerrar modal">
-                <span className="material-symbols-outlined" aria-hidden="true">close</span>
+                <span className="material-symbols-outlined ui-icon" aria-hidden="true">close</span>
               </button>
             </div>
             <div className="p-6 space-y-5">
@@ -998,7 +998,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
                       onBlur={() => markAreaTouched('name')}
                     />
                     <button type="submit" disabled={isSavingArea} className="bg-primary text-white px-4 rounded-md font-black text-xs uppercase tracking-widest hover:opacity-90 transition-all disabled:opacity-80 flex items-center gap-2">
-                      {isSavingArea ? <><span className="material-symbols-outlined animate-spin text-sm">sync</span> Guardando...</> : 'Añadir'}
+                      {isSavingArea ? <><span className="material-symbols-outlined ui-icon animate-spin text-sm">sync</span> Guardando...</> : 'Añadir'}
                     </button>
                   </div>
                 </div>
@@ -1015,7 +1015,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
                 {areas.map(a => (
                   <div key={a.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-md border border-slate-100">
                     <div className="flex items-center gap-3">
-                      <div className="size-8 rounded-md bg-blue-100 text-blue-600 flex items-center justify-center"><span className="material-symbols-outlined text-base">location_on</span></div>
+                      <div className="size-8 rounded-md bg-blue-100 text-blue-600 flex items-center justify-center"><span className="material-symbols-outlined ui-icon text-base">location_on</span></div>
                       <span className="text-sm font-bold text-slate-800">{a.name}</span>
                     </div>
                     <button 
@@ -1023,7 +1023,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
                       className="size-8 rounded-md hover:bg-rose-100 text-slate-400 hover:text-rose-600 flex items-center justify-center transition-colors"
                       title="Eliminar área"
                     >
-                      <span className="material-symbols-outlined text-base">delete</span>
+                      <span className="material-symbols-outlined ui-icon text-base">delete</span>
                     </button>
                   </div>
                 ))}
@@ -1039,14 +1039,14 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
             <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
               <div className="flex items-center gap-3">
                 <div className="size-10 bg-indigo-100 rounded-lg flex items-center justify-center">
-                  <span className="material-symbols-outlined text-indigo-600" aria-hidden="true">event_available</span>
+                  <span className="material-symbols-outlined ui-icon text-indigo-600" aria-hidden="true">event_available</span>
                 </div>
                 <div>
                   <h3 className="text-lg font-black text-slate-900">{editingPlanning ? 'Editar Asignación' : 'Nueva Asignación'}</h3>
                 </div>
               </div>
               <button onClick={() => { if (!isSaving) { setFormError(''); setTouched({}); setShowModal(false); } }} disabled={isSaving} className="size-9 rounded-md hover:bg-white transition-all flex items-center justify-center text-slate-400 disabled:opacity-50" aria-label="Cerrar modal">
-                <span className="material-symbols-outlined" aria-hidden="true">close</span>
+                <span className="material-symbols-outlined ui-icon" aria-hidden="true">close</span>
               </button>
             </div>
             <form onSubmit={handleSubmit} autoComplete="off" className="p-6 space-y-5 overflow-y-auto max-h-[80vh] custom-scrollbar">
@@ -1132,7 +1132,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
               <div className="pt-4 flex gap-3">
                 <button type="button" disabled={isSaving} onClick={() => { setFormError(''); setTouched({}); setShowModal(false); }} className="flex-1 py-3 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-100 rounded-md transition-all disabled:opacity-50">Cancelar</button>
                 <button type="submit" disabled={isSaving} className="flex-[2] py-3 bg-primary text-white text-[11px] font-black uppercase tracking-widest rounded-md hover:opacity-90 transition-all disabled:opacity-80 flex items-center justify-center gap-2">
-                  {isSaving ? <><span className="material-symbols-outlined animate-spin">sync</span> {editingPlanning ? 'Actualizando asignacion...' : 'Guardando asignacion...'}</> : (editingPlanning ? 'Actualizar Asignación' : 'Confirmar Planeación')}
+                  {isSaving ? <><span className="material-symbols-outlined ui-icon animate-spin">sync</span> {editingPlanning ? 'Actualizando asignacion...' : 'Guardando asignacion...'}</> : (editingPlanning ? 'Actualizar Asignación' : 'Confirmar Planeación')}
                 </button>
               </div>
             </form>

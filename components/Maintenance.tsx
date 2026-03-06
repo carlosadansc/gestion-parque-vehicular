@@ -421,7 +421,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
           onClick={() => { resetForm(); setShowModal(true); }}
           className="btn btn-primary"
         >
-          <span className="material-symbols-outlined">build</span>
+          <span className="material-symbols-outlined ui-icon">build</span>
           Nuevo Servicio
         </button>
       </div>
@@ -466,12 +466,12 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
             <button onClick={() => setFilterStatus('completed')} className={`filter-pill ${filterStatus === 'completed' ? 'filter-pill-success' : 'filter-pill-inactive'}`}>Completados</button>
           </div>
           <button onClick={onSync} className="btn btn-ghost text-xs">
-            <span className="material-symbols-outlined text-lg">sync</span> Actualizar
+            <span className="material-symbols-outlined ui-icon">sync</span> Actualizar
           </button>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="table-professional">
+          <table className="table-professional table-density-compact">
             <thead>
               <tr>
                 <th className="px-5">Servicio</th>
@@ -533,12 +533,12 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                       )}
                     </td>
                     <td className="px-8 py-5 text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => handlePrintRequest(record)} className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-all" aria-label="Imprimir Orden">
-                            <span className="material-symbols-outlined text-xl" aria-hidden="true">file_present</span>
+                      <div className="table-actions">
+                        <button onClick={() => handlePrintRequest(record)} className="btn-icon btn-icon-success" aria-label="Imprimir Orden">
+                            <span className="material-symbols-outlined ui-icon" aria-hidden="true">file_present</span>
                         </button>
-                        <button onClick={() => handleEdit(record)} className="p-2 text-slate-400 hover:text-primary hover:bg-blue-50 rounded-md transition-all" aria-label="Editar">
-                            <span className="material-symbols-outlined text-xl" aria-hidden="true">edit</span>
+                        <button onClick={() => handleEdit(record)} className="btn-icon btn-icon-primary" aria-label="Editar">
+                            <span className="material-symbols-outlined ui-icon" aria-hidden="true">edit</span>
                         </button>
                       </div>
                     </td>
@@ -613,8 +613,8 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                     </div>
                       <div className="space-y-2">
                         <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Tipo de Servicio</label>
-                        <div className="flex gap-2 items-start">
-                          <select required disabled={isSaving} className="flex-1 max-w-[calc(100%-3rem)] bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all truncate" value={formData.serviceType} onChange={e => setFormData({...formData, serviceType: e.target.value})}>
+                        <div className="flex gap-2 items-start min-w-0">
+                          <select required disabled={isSaving} className="w-full min-w-0 flex-1 bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all truncate" value={formData.serviceType} onChange={e => setFormData({...formData, serviceType: e.target.value})}>
                               <option value="">Seleccionar tipo...</option>
                               {maintenanceTypes.map(t => (
                                   <option key={t.id} value={t.name}>{t.name}</option>
@@ -627,12 +627,12 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                               className="bg-primary text-white size-12 rounded-md flex items-center justify-center hover:opacity-90 transition-all shrink-0"
                               title="Agregar nuevo tipo"
                           >
-                              <span className="material-symbols-outlined text-xl">{isAddingType ? 'close' : 'add'}</span>
+                              <span className="material-symbols-outlined ui-icon text-xl">{isAddingType ? 'close' : 'add'}</span>
                           </button>
                         </div>
                       
                       {isAddingType && (
-                        <div className="animate-in slide-in-from-top-2 pt-2 flex gap-2">
+                        <div className="animate-in slide-in-from-top-2 pt-2 flex flex-col sm:flex-row gap-2">
                             <input 
                                 className="flex-1 bg-slate-50 border border-slate-200 rounded-md px-4 py-2 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all uppercase" 
                                 placeholder="NOMBRE DEL NUEVO TIPO"
@@ -642,7 +642,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                             <button 
                                 type="button" 
                                 onClick={handleCreateType}
-                                className="bg-green-500 text-white px-4 rounded-md font-black text-[10px] uppercase tracking-widest hover:bg-green-600 transition-all"
+                                className="bg-green-500 text-white px-4 py-2 rounded-md font-black text-[10px] uppercase tracking-widest hover:bg-green-600 transition-all"
                             >
                                 Guardar
                             </button>
@@ -666,11 +666,11 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                   <div className="bg-white p-6 rounded-2xl border border-slate-200 space-y-4">
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Proveedor / Taller</label>
-                      <div className="flex gap-2">
+                      <div className="flex flex-col sm:flex-row gap-2 min-w-0">
                         <select 
                           required 
                           disabled={isSaving} 
-                          className="flex-1 max-w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all truncate" 
+                          className="w-full min-w-0 flex-1 bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all truncate" 
                           value={formData.provider} 
                           onChange={e => {
                             const selectedSupplier = suppliers.find(s => s.name === e.target.value);
@@ -690,10 +690,10 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                           type="button" 
                           disabled={isSaving}
                           onClick={() => setIsAddingSupplier(!isAddingSupplier)}
-                          className="bg-primary text-white size-12 rounded-md flex items-center justify-center hover:opacity-90 transition-all shrink-0"
+                          className="bg-primary text-white size-12 rounded-md flex items-center justify-center hover:opacity-90 transition-all shrink-0 self-start sm:self-auto"
                           title="Agregar nuevo proveedor"
                         >
-                          <span className="material-symbols-outlined text-xl">{isAddingSupplier ? 'close' : 'add'}</span>
+                          <span className="material-symbols-outlined ui-icon text-xl">{isAddingSupplier ? 'close' : 'add'}</span>
                         </button>
                       </div>
                       

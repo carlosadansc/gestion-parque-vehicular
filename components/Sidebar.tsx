@@ -24,6 +24,16 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange, appName, cu
     { id: View.INCIDENTS, label: 'Incidencias', icon: 'report_problem' },
   ];
 
+  const navButtonClass = (isActive: boolean, extra = '') =>
+    `group flex items-center gap-3 px-3 py-2.5 rounded-md text-left text-sm transition-colors ${
+      isActive ? 'bg-primary text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'
+    } ${extra}`.trim();
+
+  const navIconClass = (isActive: boolean) =>
+    `material-symbols-outlined ui-icon text-[20px] ${
+      isActive ? 'text-white' : 'text-slate-400 group-hover:text-white'
+    }`;
+
   return (
     <aside 
       className="w-60 flex flex-col shrink-0 z-50 bg-[#0f172a]"
@@ -42,13 +52,9 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange, appName, cu
             <button
               key={item.id}
               onClick={() => onViewChange(item.id)}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-left text-sm transition-colors ${
-                activeView === item.id 
-                  ? 'bg-primary text-white' 
-                  : 'text-slate-400 hover:text-white hover:bg-white/5'
-              }`}
+              className={navButtonClass(activeView === item.id)}
             >
-              <span className="material-symbols-outlined text-xl">{item.icon}</span>
+              <span className={navIconClass(activeView === item.id)}>{item.icon}</span>
               <span className="font-medium">{item.label}</span>
             </button>
           ))}
@@ -58,13 +64,9 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange, appName, cu
               <div className="my-3 border-t border-white/10"></div>
               <button
                 onClick={() => onViewChange(View.USERS)}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-left text-sm transition-colors ${
-                  activeView === View.USERS 
-                    ? 'bg-primary text-white' 
-                    : 'text-slate-400 hover:text-white hover:bg-white/5'
-                }`}
+                className={navButtonClass(activeView === View.USERS)}
               >
-                <span className="material-symbols-outlined text-xl">group</span>
+                <span className={navIconClass(activeView === View.USERS)}>group</span>
                 <span className="font-medium">Usuarios</span>
               </button>
             </>
@@ -72,13 +74,9 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange, appName, cu
 
           <button
             onClick={() => onViewChange(View.SETTINGS)}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-left text-sm transition-colors mt-auto ${
-              activeView === View.SETTINGS 
-                ? 'bg-primary text-white' 
-                : 'text-slate-400 hover:text-white hover:bg-white/5'
-            }`}
+            className={navButtonClass(activeView === View.SETTINGS, 'mt-auto')}
           >
-            <span className="material-symbols-outlined text-xl">settings</span>
+            <span className={navIconClass(activeView === View.SETTINGS)}>settings</span>
             <span className="font-medium">Configuración</span>
           </button>
         </nav>
@@ -94,7 +92,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange, appName, cu
             </div>
           </div>
           <button onClick={onLogout} className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-md text-slate-500 hover:text-white hover:bg-white/5 transition-colors text-sm">
-            <span className="material-symbols-outlined text-lg">logout</span>
+            <span className="material-symbols-outlined ui-icon text-[18px]">logout</span>
             Cerrar Sesión
           </button>
         </div>

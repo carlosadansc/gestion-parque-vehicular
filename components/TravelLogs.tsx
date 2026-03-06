@@ -315,14 +315,14 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
             onClick={() => { setBlankBitacoraVehicleId(''); setShowBlankBitacoraModal(true); }}
             className="btn btn-secondary"
           >
-            <span className="material-symbols-outlined">print</span>
+            <span className="material-symbols-outlined ui-icon">print</span>
             Imprimir Bitácora
           </button>
           <button
             onClick={() => { resetForm(); setShowModal(true); }}
             className="btn btn-primary"
           >
-            <span className="material-symbols-outlined">add_road</span>
+            <span className="material-symbols-outlined ui-icon">add_road</span>
             Registrar Salida
           </button>
         </div>
@@ -331,13 +331,13 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
       <div className="card flex flex-col no-print">
         <div className="px-8 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
           <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Movimientos Recientes</h3>
-          <button onClick={onSync} className="text-[10px] font-black text-primary uppercase tracking-widest flex items-center gap-2 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-all">
-            <span className="material-symbols-outlined text-sm">sync</span> Actualizar Datos
+          <button onClick={onSync} className="btn btn-ghost text-[10px] font-black uppercase tracking-widest">
+            <span className="material-symbols-outlined ui-icon">sync</span> Actualizar Datos
           </button>
         </div>
         
         <div className="overflow-x-auto">
-          <table className="table-professional">
+          <table className="table-professional table-density-compact">
             <thead>
               <tr>
                 <th>Fecha / Horario</th>
@@ -381,27 +381,27 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
                       </p>
                     </td>
                     <td className="px-8 py-5 text-center">
-                      <div className="flex items-center justify-center gap-2">
+                      <div className="table-actions justify-center">
                         <button 
                           onClick={() => handleViewDetail(log)}
-                          className="size-9 rounded-xl bg-slate-100 text-slate-500 hover:bg-slate-200 transition-all flex items-center justify-center"
+                          className="btn-icon"
                           title="Ver Detalle y Resumen"
                         >
-                          <span className="material-symbols-outlined text-xl">visibility</span>
+                          <span className="material-symbols-outlined ui-icon">visibility</span>
                         </button>
                         <button 
                           onClick={() => handleEdit(log)}
-                          className={`size-9 rounded-xl transition-all flex items-center justify-center ${isComplete ? 'text-slate-400 hover:text-primary hover:bg-primary/10' : 'text-white bg-blue-600 shadow-md hover:bg-blue-700'}`}
+                          className={`btn-icon ${isComplete ? 'btn-icon-primary' : 'text-white bg-blue-600 border-blue-600 hover:bg-blue-700 hover:border-blue-700 shadow-md'}`}
                           title={isComplete ? "Editar Registro" : "Completar Llegada"}
                         >
-                          <span className="material-symbols-outlined text-xl">{isComplete ? 'edit' : 'login'}</span>
+                          <span className="material-symbols-outlined ui-icon">{isComplete ? 'edit' : 'login'}</span>
                         </button>
                         <button 
                           onClick={() => handlePrintRequest(log)}
-                          className="size-9 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all flex items-center justify-center"
+                          className="btn-icon btn-icon-success"
                           title="Ficha de Bitácora"
                         >
-                          <span className="material-symbols-outlined text-xl">assignment</span>
+                          <span className="material-symbols-outlined ui-icon">assignment</span>
                         </button>
                       </div>
                     </td>
@@ -411,7 +411,7 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
               {sortedLogs.length === 0 && (
                 <tr>
                   <td colSpan={5} className="px-8 py-20 text-center opacity-30">
-                    <span className="material-symbols-outlined text-4xl block mb-2">route</span>
+                    <span className="material-symbols-outlined ui-icon text-4xl block mb-2">route</span>
                     <p className="text-xs font-black uppercase tracking-widest">No hay viajes registrados en la bitácora</p>
                   </td>
                 </tr>
@@ -428,14 +428,14 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
             <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
               <div className="flex items-center gap-3">
                 <div className="size-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <span className="material-symbols-outlined text-blue-600" aria-hidden="true">route</span>
+                  <span className="material-symbols-outlined ui-icon text-blue-600" aria-hidden="true">route</span>
                 </div>
                 <div>
                   <h3 className="text-lg font-black text-slate-900">Detalle de Recorrido</h3>
                 </div>
               </div>
               <button onClick={() => setShowDetailModal(false)} className="size-9 rounded-md hover:bg-white transition-all flex items-center justify-center text-slate-400" aria-label="Cerrar">
-                <span className="material-symbols-outlined" aria-hidden="true">close</span>
+                <span className="material-symbols-outlined ui-icon" aria-hidden="true">close</span>
               </button>
             </div>
             <div className="p-6 overflow-y-auto max-h-[80vh] custom-scrollbar">
@@ -443,7 +443,7 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                 <div className="bg-slate-50 p-4 rounded-md border border-slate-100 flex items-center gap-3">
                   <div className="size-10 rounded-lg bg-white flex items-center justify-center text-primary">
-                    <span className="material-symbols-outlined">directions_car</span>
+                    <span className="material-symbols-outlined ui-icon">directions_car</span>
                   </div>
                   <div>
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Vehículo</p>
@@ -453,7 +453,7 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
                 </div>
                 <div className="bg-slate-50 p-4 rounded-md border border-slate-100 flex items-center gap-3">
                   <div className="size-10 rounded-lg bg-white flex items-center justify-center text-primary">
-                    <span className="material-symbols-outlined">person</span>
+                    <span className="material-symbols-outlined ui-icon">person</span>
                   </div>
                   <div>
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Chofer</p>
@@ -553,7 +553,7 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
                 <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Control de movimientos de la unidad</p>
               </div>
               <button onClick={() => { if (!isSaving) { setFormError(''); setShowModal(false); } }} disabled={isSaving} className="size-12 rounded-full hover:bg-white hover:shadow-md transition-all flex items-center justify-center text-slate-400">
-                <span className="material-symbols-outlined text-2xl">close</span>
+                <span className="material-symbols-outlined ui-icon text-2xl">close</span>
               </button>
             </div>
             
@@ -641,7 +641,7 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
               <div className="pt-6 flex gap-4">
                 <button type="button" disabled={isSaving} onClick={() => { setFormError(''); setShowModal(false); }} className="flex-1 py-4 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-50 rounded-2xl transition-all">Cancelar</button>
                 <button type="submit" disabled={isSaving} className="flex-[2] py-4 bg-primary text-white text-[11px] font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-blue-500/20 hover:opacity-90 transition-all flex items-center justify-center gap-3">
-                  {isSaving ? <><span className="material-symbols-outlined animate-spin">sync</span> Procesando...</> : (editingLog ? (editingLog.arrivalTime ? 'Guardar Cambios' : 'Registrar Llegada') : 'Confirmar Salida')}
+                  {isSaving ? <><span className="material-symbols-outlined ui-icon animate-spin">sync</span> Procesando...</> : (editingLog ? (editingLog.arrivalTime ? 'Guardar Cambios' : 'Registrar Llegada') : 'Confirmar Salida')}
                 </button>
               </div>
             </form>
@@ -657,7 +657,7 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
                 <button onClick={() => setShowPrintPreview(false)} className="size-10 flex items-center justify-center hover:bg-white/10 rounded-full transition-colors">Cerrar</button>
              </div>
              <button onClick={() => window.print()} className="bg-primary px-6 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center gap-2 shadow-lg hover:opacity-90 transition-all">
-               <span className="material-symbols-outlined text-sm">print</span> Imprimir Ficha
+               <span className="material-symbols-outlined ui-icon">print</span> Imprimir Ficha
              </button>
           </div>
           
@@ -798,7 +798,7 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
                 <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Selecciona el vehículo para generar el formato</p>
               </div>
               <button onClick={() => setShowBlankBitacoraModal(false)} className="size-10 rounded-full hover:bg-white hover:shadow-md transition-all flex items-center justify-center text-slate-400">
-                <span className="material-symbols-outlined">close</span>
+                <span className="material-symbols-outlined ui-icon">close</span>
               </button>
             </div>
             <div className="p-8 space-y-6">
@@ -818,7 +818,7 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
               {blankBitacoraVehicleId && blankBitacoraVehicle && (
                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center gap-4">
                   <div className="size-12 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm">
-                    <span className="material-symbols-outlined">directions_car</span>
+                    <span className="material-symbols-outlined ui-icon">directions_car</span>
                   </div>
                   <div>
                     <p className="font-bold text-slate-900 leading-tight">{blankBitacoraVehicle.model}</p>
@@ -840,7 +840,7 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
                   disabled={!blankBitacoraVehicleId}
                   className="flex-[2] py-3.5 bg-primary text-white text-[11px] font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-blue-500/20 hover:opacity-90 transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  <span className="material-symbols-outlined text-lg">print</span>
+                  <span className="material-symbols-outlined ui-icon">print</span>
                   Generar Formato
                 </button>
               </div>
@@ -855,7 +855,7 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
           <div className="sticky top-0 bg-slate-900 p-4 flex justify-between items-center text-white shadow-lg no-print">
             <div className="flex items-center gap-4">
               <button onClick={() => setShowBlankBitacoraPrint(false)} className="size-10 flex items-center justify-center hover:bg-white/10 rounded-full transition-colors">
-                <span className="material-symbols-outlined">arrow_back</span>
+                <span className="material-symbols-outlined ui-icon">arrow_back</span>
               </button>
               <div>
                 <p className="text-sm font-black uppercase tracking-widest">Bitácora en Blanco</p>
@@ -863,7 +863,7 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
               </div>
             </div>
             <button onClick={() => window.print()} className="bg-primary px-6 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center gap-2 shadow-lg hover:opacity-90 transition-all">
-              <span className="material-symbols-outlined text-sm">print</span> Imprimir
+              <span className="material-symbols-outlined ui-icon">print</span> Imprimir
             </button>
           </div>
 

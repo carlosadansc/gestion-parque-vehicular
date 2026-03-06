@@ -1,4 +1,4 @@
-
+﻿
 export enum View {
   DASHBOARD = 'dashboard',
   VEHICLES = 'vehicles',
@@ -36,7 +36,7 @@ export interface Vehicle {
   assignedDriverId?: string;
   status: 'active' | 'workshop' | 'inactive';
   image: string;
-  // Datos Técnicos (JSON Request)
+  // Datos TÃ©cnicos (JSON Request)
   economicNumber?: string;
   inventory?: string;
   condition?: string;
@@ -50,7 +50,7 @@ export interface Vehicle {
   color?: string;
   cylinders?: number;
   fuelType?: string;
-  // Condiciones Mecánicas (JSON Request)
+  // Condiciones MecÃ¡nicas (JSON Request)
   engineStatus?: string;
   clutchStatus?: string;
   transmissionStatus?: string;
@@ -130,6 +130,20 @@ export interface FuelEntry {
   odometer: number;
 }
 
+export interface FuelAcquisition {
+  id: string;
+  consecutiveNumber?: number;
+  internalFolio?: string;
+  date: string;
+  isQr: boolean;
+  validFrom: string;
+  validTo: string;
+  description: string;
+  amount: number;
+  area: string;
+  supplier: string;
+}
+
 export interface TravelLog {
   id: string;
   date: string;
@@ -163,7 +177,7 @@ export interface Supplier {
 
 export interface MaintenanceRecord {
   id: string;
-  consecutiveNumber?: number; // Número consecutivo automático
+  consecutiveNumber?: number; // NÃºmero consecutivo automÃ¡tico
   date: string;
   vehicleId: string;
   serviceType: string; // Changed from enum to string to support dynamic types
@@ -216,3 +230,4 @@ export interface AppSetting {
   key: string;
   value: string;
 }
+

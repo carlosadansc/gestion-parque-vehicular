@@ -1,13 +1,18 @@
 
 import React, { useState, useMemo } from 'react';
-import { FuelEntry, Vehicle, Driver, AppSetting } from '../types';
+import { FuelEntry, FuelAcquisition, Vehicle, Driver, AppSetting, Area, Supplier } from '../types';
 
 interface FuelProps {
   fuelHistory: FuelEntry[];
+  fuelAcquisitions?: FuelAcquisition[];
   vehicles: Vehicle[];
   drivers: Driver[];
+  areas?: Area[];
+  suppliers?: Supplier[];
   onAddFuel: (entry: Omit<FuelEntry, 'id'>) => Promise<void>;
   onUpdateFuel: (entry: FuelEntry) => Promise<void>;
+  onAddFuelAcquisition?: (entry: Omit<FuelAcquisition, 'id'>) => Promise<void>;
+  onUpdateFuelAcquisition?: (entry: FuelAcquisition) => Promise<void>;
   onSync: () => void;
   settings?: AppSetting[];
 }
@@ -23,12 +28,43 @@ const toDateInputValue = (value: unknown, fallback = ''): string => {
   return parsed.toISOString().slice(0, 10);
 };
 
-const Fuel: React.FC<FuelProps> = ({ fuelHistory = [], vehicles = [], drivers = [], onAddFuel, onUpdateFuel, onSync, settings = [] }) => {
+const Fuel: React.FC<FuelProps> = ({
+  fuelHistory = [],
+  fuelAcquisitions = [],
+  vehicles = [],
+  drivers = [],
+  areas = [],
+  suppliers = [],
+  onAddFuel,
+  onUpdateFuel,
+  onAddFuelAcquisition,
+  onUpdateFuelAcquisition,
+  onSync,
+  settings = []
+}) => {
+  const [activeTab, setActiveTab] = useState<'loads' | 'acquisitions'>('loads');
   const [showModal, setShowModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showPrintPreview, setShowPrintPreview] = useState(false);
+  const [showAcquisitionPrintPreview, setShowAcquisitionPrintPreview] = useState(false);
+  const [selectedAcquisition, setSelectedAcquisition] = useState<FuelAcquisition | null>(null);
   const [editingEntry, setEditingEntry] = useState<FuelEntry | null>(null);
   const [formError, setFormError] = useState('');
+  const [showAcquisitionModal, setShowAcquisitionModal] = useState(false);
+  const [isSavingAcquisition, setIsSavingAcquisition] = useState(false);
+  const [editingAcquisition, setEditingAcquisition] = useState<FuelAcquisition | null>(null);
+  const [acquisitionError, setAcquisitionError] = useState('');
+  const [acquisitionForm, setAcquisitionForm] = useState({
+    date: new Date().toISOString().split('T')[0],
+    internalFolio: '',
+    isQr: false,
+    validFrom: new Date().toISOString().split('T')[0],
+    validTo: new Date().toISOString().split('T')[0],
+    description: '',
+    amount: '',
+    area: '',
+    supplier: ''
+  });
   
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
@@ -58,6 +94,15 @@ const Fuel: React.FC<FuelProps> = ({ fuelHistory = [], vehicles = [], drivers = 
     (settings || []).forEach(s => { map[s.key] = s.value; });
     return map;
   }, [settings]);
+
+  const areaOptions = useMemo(
+    () => [...new Set((areas || []).map(item => String(item.name || '').trim()).filter(Boolean))],
+    [areas]
+  );
+  const supplierOptions = useMemo(
+    () => [...new Set((suppliers || []).map(item => String(item.name || '').trim()).filter(Boolean))],
+    [suppliers]
+  );
 
   const { processedHistory, globalAveragePerformance } = useMemo(() => {
     const entriesByVehicle: Record<string, FuelEntry[]> = {};
@@ -101,6 +146,21 @@ const Fuel: React.FC<FuelProps> = ({ fuelHistory = [], vehicles = [], drivers = 
 
   const totalCost = useMemo(() => fuelHistory.reduce((acc, curr) => acc + (Number(curr.cost) || 0), 0), [fuelHistory]);
   const totalLiters = useMemo(() => fuelHistory.reduce((acc, curr) => acc + (Number(curr.liters) || 0), 0), [fuelHistory]);
+  const acquisitionTotals = useMemo(() => {
+    const totalAmount = fuelAcquisitions.reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
+    const qrCount = fuelAcquisitions.filter(item => item.isQr).length;
+    return {
+      totalAmount,
+      qrCount,
+      vouchersCount: fuelAcquisitions.length - qrCount
+    };
+  }, [fuelAcquisitions]);
+
+  const nextAcquisitionConsecutive = useMemo(() => {
+    if (fuelAcquisitions.length === 0) return 1;
+    const maxNum = Math.max(...fuelAcquisitions.map(item => Number(item.consecutiveNumber) || 0));
+    return maxNum + 1;
+  }, [fuelAcquisitions]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -146,101 +206,246 @@ const Fuel: React.FC<FuelProps> = ({ fuelHistory = [], vehicles = [], drivers = 
     }
   };
 
+  const resetAcquisitionForm = () => {
+    setAcquisitionError('');
+    setEditingAcquisition(null);
+    setAcquisitionForm({
+      date: new Date().toISOString().split('T')[0],
+      internalFolio: '',
+      isQr: false,
+      validFrom: new Date().toISOString().split('T')[0],
+      validTo: new Date().toISOString().split('T')[0],
+      description: '',
+      amount: '',
+      area: '',
+      supplier: ''
+    });
+  };
+
+  const handleEditAcquisition = (entry: FuelAcquisition) => {
+    setAcquisitionError('');
+    setEditingAcquisition(entry);
+    setAcquisitionForm({
+      date: toDateInputValue(entry.date, new Date().toISOString().split('T')[0]),
+      internalFolio: String(entry.internalFolio || ''),
+      isQr: Boolean(entry.isQr),
+      validFrom: toDateInputValue(entry.validFrom, new Date().toISOString().split('T')[0]),
+      validTo: toDateInputValue(entry.validTo, new Date().toISOString().split('T')[0]),
+      description: String(entry.description || ''),
+      amount: Number(entry.amount) ? String(entry.amount) : '',
+      area: String(entry.area || ''),
+      supplier: String(entry.supplier || '')
+    });
+    setShowAcquisitionModal(true);
+  };
+
+  const handleSubmitAcquisition = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!onAddFuelAcquisition || !onUpdateFuelAcquisition) return;
+
+    setAcquisitionError('');
+    if (!acquisitionForm.description.trim() || !acquisitionForm.amount || !acquisitionForm.area.trim() || !acquisitionForm.supplier.trim()) {
+      setAcquisitionError('Debes completar descripcion, monto, area y proveedor.');
+      return;
+    }
+    if (!acquisitionForm.validFrom || !acquisitionForm.validTo) {
+      setAcquisitionError('Debes capturar el rango de vigencia.');
+      return;
+    }
+    if (new Date(acquisitionForm.validFrom).getTime() > new Date(acquisitionForm.validTo).getTime()) {
+      setAcquisitionError('La fecha final no puede ser menor a la inicial.');
+      return;
+    }
+
+    setIsSavingAcquisition(true);
+    try {
+      const payload = {
+        consecutiveNumber: editingAcquisition?.consecutiveNumber || nextAcquisitionConsecutive,
+        internalFolio: acquisitionForm.internalFolio || undefined,
+        date: acquisitionForm.date,
+        isQr: acquisitionForm.isQr,
+        validFrom: acquisitionForm.validFrom,
+        validTo: acquisitionForm.validTo,
+        description: acquisitionForm.description,
+        amount: Number(acquisitionForm.amount),
+        area: acquisitionForm.area,
+        supplier: acquisitionForm.supplier
+      };
+
+      if (editingAcquisition) {
+        await onUpdateFuelAcquisition({ ...payload, id: editingAcquisition.id });
+      } else {
+        await onAddFuelAcquisition(payload);
+      }
+
+      setShowAcquisitionModal(false);
+      resetAcquisitionForm();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error al guardar adquisicion de combustible';
+      setAcquisitionError(message);
+    } finally {
+      setIsSavingAcquisition(false);
+    }
+  };
+
+  const handlePrintAcquisition = (entry: FuelAcquisition) => {
+    setSelectedAcquisition(entry);
+    setShowAcquisitionPrintPreview(true);
+  };
+
   // Variables institucionales para impresión
   // Normalizar la ruta del logo (convertir rutas relativas a absolutas)
-  const rawLogo = settingsMap['APP_LOGO'] || '/images/logo-dif.png';
-  const appLogo = rawLogo.startsWith('./') ? rawLogo.replace('./', '/') : rawLogo;
+  const defaultLogo = '/images/logo-dif.png';
+  const rawLogo = String(settingsMap['APP_LOGO'] || defaultLogo).trim();
+  const appLogo = (() => {
+    if (!rawLogo) return defaultLogo;
+    if (/^(https?:|data:|blob:)/i.test(rawLogo)) return rawLogo;
+    if (rawLogo.startsWith('./')) return `/${rawLogo.slice(2)}`;
+    if (rawLogo.startsWith('/')) return rawLogo;
+    if (/^[a-zA-Z]:\\/.test(rawLogo) || rawLogo.startsWith('\\\\')) return defaultLogo;
+    return `/${rawLogo.replace(/^\/+/, '')}`;
+  })();
   const directorName = settingsMap['INSTITUTION_HEAD_NAME'] || 'Director General';
   const managerName = settingsMap['VEHICLE_MANAGER_NAME'] || 'Encargado del Parque Vehicular';
+  const administrativeCoordinatorName = settingsMap['ADMINISTRATIVE_COORDINATOR_NAME'] || 'Coordinador Administrativo';
+  const administrativeCoordinatorPos = settingsMap['ADMINISTRATIVE_COORDINATOR_POS'] || 'Coordinador Administrativo';
 
   return (
     <div className="space-y-8 animate-in slide-in-from-right-4 duration-500 pb-20">
        <style>{`
          @media print {
-           body * { 
-             visibility: hidden; 
-           }
-           #fuel-printable, #fuel-printable * { 
-             visibility: visible; 
-             -webkit-print-color-adjust: exact !important;
-             print-color-adjust: exact !important;
-           }
-           #fuel-printable { 
-             position: absolute; 
-             left: 0; 
-             top: 0; 
-             width: 100%; 
-             padding: 0; 
+            body * { 
+              visibility: hidden; 
+            }
+            #fuel-printable,
+            #fuel-printable *,
+            #fuel-acquisition-printable,
+            #fuel-acquisition-printable * { 
+              visibility: visible; 
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
+            #fuel-printable,
+            #fuel-acquisition-printable { 
+              position: absolute; 
+              left: 0; 
+              top: 0; 
+              width: 100%; 
+              padding: 0; 
              margin: 0;
              background: white !important; 
              font-family: 'Inter', sans-serif;
            }
-           .no-print { display: none !important; }
-           @page { margin: 0.5cm; size: letter landscape; }
-           /* Ensure tables fit on landscape page */
-           #fuel-printable table {
-             width: 100% !important;
-             font-size: 8pt !important;
-           }
+            .no-print { display: none !important; }
+            @page { margin: 0.5cm; size: letter landscape; }
+            /* Ensure tables fit on landscape page */
+            #fuel-printable table,
+            #fuel-acquisition-printable table {
+              width: 100% !important;
+              font-size: 8pt !important;
+            }
            
             /* ========================================
                SIGNATURE SECTION - FLOWING WITH CONTENT
                ======================================== */
-            #fuel-printable .signature-section {
-              page-break-inside: avoid;
-              margin-top: 2rem;
-            }
-            
-            #fuel-printable .signature-line {
-              border-top: 2px solid #1e293b;
-              padding-top: 0.5rem;
-              min-width: 200px;
-            }
+             #fuel-printable .signature-section,
+             #fuel-acquisition-printable .signature-section {
+               page-break-inside: avoid;
+               margin-top: 2rem;
+             }
+             
+             #fuel-printable .signature-line,
+             #fuel-acquisition-printable .signature-line {
+               border-top: 2px solid #1e293b;
+               padding-top: 0.5rem;
+               min-width: 200px;
+             }
          }
        `}</style>
 
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 no-print">
         <div>
           <h2 className="page-title">Bitácora de Combustible</h2>
-          <p className="page-subtitle">Control de gastos y rendimiento por unidad</p>
+          <p className="page-subtitle">
+            {activeTab === 'loads' ? 'Control de gastos y rendimiento por unidad' : 'Adquisiciones de vales y combustible QR'}
+          </p>
         </div>
         <div className="flex gap-2">
+            {activeTab === 'loads' && (
             <button 
                 onClick={() => setShowPrintPreview(true)}
                 className="btn btn-secondary"
             >
-                <span className="material-symbols-outlined">print</span>
+                <span className="material-symbols-outlined ui-icon">print</span>
                 Vista Previa
             </button>
+            )}
             <button 
-            onClick={() => setShowModal(true)}
+            onClick={() => {
+              if (activeTab === 'loads') {
+                setShowModal(true);
+              } else {
+                resetAcquisitionForm();
+                setShowAcquisitionModal(true);
+              }
+            }}
             className="btn btn-primary"
             >
-            <span className="material-symbols-outlined">local_gas_station</span>
-            Agregar Carga
+            <span className="material-symbols-outlined ui-icon">{activeTab === 'loads' ? 'local_gas_station' : 'receipt_long'}</span>
+            {activeTab === 'loads' ? 'Agregar Carga' : 'Nueva Adquisicion'}
             </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 no-print">
-        <FuelStat label="Rendimiento Promedio" value={globalAveragePerformance > 0 ? globalAveragePerformance.toFixed(2) : "---"} unit="KM/L" icon="analytics" desc="Basado en historial de odómetro" />
-        <FuelStat label="Gasto Total" value={`$${(totalCost || 0).toLocaleString()}`} icon="attach_money" trend="+12%" isNegativeTrend />
-        <FuelStat label="Litros Totales" value={(totalLiters || 0).toLocaleString()} unit="L" icon="water_drop" desc={`${(fuelHistory?.length || 0)} cargas registradas`} />
+      <div className="no-print inline-flex rounded-xl border border-slate-200 bg-white p-1 gap-1">
+        <button
+          type="button"
+          onClick={() => setActiveTab('loads')}
+          className={`px-4 py-2 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all ${
+            activeTab === 'loads' ? 'bg-blue-50 text-blue-700' : 'text-slate-500 hover:bg-slate-50'
+          }`}
+        >
+          Cargas
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('acquisitions')}
+          className={`px-4 py-2 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all ${
+            activeTab === 'acquisitions' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-500 hover:bg-slate-50'
+          }`}
+        >
+          Adquisiciones
+        </button>
       </div>
+
+      {activeTab === 'loads' ? (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 no-print">
+          <FuelStat label="Rendimiento Promedio" value={globalAveragePerformance > 0 ? globalAveragePerformance.toFixed(2) : "---"} unit="KM/L" icon="analytics" desc="Basado en historial de odometro" />
+          <FuelStat label="Gasto Total" value={`$${(totalCost || 0).toLocaleString()}`} icon="attach_money" trend="+12%" isNegativeTrend />
+          <FuelStat label="Litros Totales" value={(totalLiters || 0).toLocaleString()} unit="L" icon="water_drop" desc={`${(fuelHistory?.length || 0)} cargas registradas`} />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 no-print">
+          <FuelStat label="Monto Total" value={`$${(acquisitionTotals.totalAmount || 0).toLocaleString()}`} icon="request_quote" />
+          <FuelStat label="Compras QR" value={String(acquisitionTotals.qrCount)} icon="qr_code_2" desc="Registros con codigo QR" />
+          <FuelStat label="Compras Vales" value={String(acquisitionTotals.vouchersCount)} icon="local_activity" desc="Registros con vales" />
+        </div>
+      )}
 
       <div className="card flex flex-col h-full no-print">
         <div className="px-4 py-3 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50">
           <div>
-            <h3 className="section-title">Historial de Consumo</h3>
-            <p className="label mt-0.5">Listado completo de cargas</p>
+            <h3 className="section-title">{activeTab === 'loads' ? 'Historial de Consumo' : 'Adquisiciones de Combustible'}</h3>
+            <p className="label mt-0.5">{activeTab === 'loads' ? 'Listado completo de cargas' : 'Registros de vales y combustible QR'}</p>
           </div>
           <button onClick={onSync} className="btn btn-ghost text-xs">
-            <span className="material-symbols-outlined text-sm">sync</span> Sincronizar
+            <span className="material-symbols-outlined ui-icon">sync</span> Sincronizar
           </button>
         </div>
         
         <div className="overflow-x-auto flex-1">
-          <table className="table-professional">
+          {activeTab === 'loads' ? (
+          <table className="table-professional table-density-compact">
             <thead>
               <tr>
                 <th>Fecha</th>
@@ -278,19 +483,86 @@ const Fuel: React.FC<FuelProps> = ({ fuelHistory = [], vehicles = [], drivers = 
                     </td>
                      <td className="text-right font-medium">${(Number(entry.cost) || 0).toFixed(2)}</td>
                      <td className="text-center">
+                       <div className="table-actions">
                         <button 
                           onClick={() => handleEdit(entry)}
-                          className="btn-icon"
+                          className="btn-icon btn-icon-primary"
                           aria-label="Editar"
                         >
-                          <span className="material-symbols-outlined text-lg">edit</span>
+                          <span className="material-symbols-outlined ui-icon">edit</span>
                         </button>
+                       </div>
                      </td>
                   </tr>
                 );
               })}
+              {processedHistory.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="px-6 py-10 text-center text-slate-400 text-sm font-bold">Sin registros de cargas.</td>
+                </tr>
+              )}
             </tbody>
           </table>
+          ) : (
+          <table className="table-professional table-density-compact">
+            <thead>
+              <tr>
+                <th>Consec.</th>
+                <th>Folio Interno</th>
+                <th>Modalidad</th>
+                <th>Vigencia</th>
+                <th>Descripcion</th>
+                <th>Area</th>
+                <th>Proveedor</th>
+                <th className="text-right">Monto</th>
+                <th className="text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {fuelAcquisitions.map((entry) => (
+                <tr key={entry.id}>
+                  <td className="font-black text-blue-700">{entry.consecutiveNumber || '---'}</td>
+                  <td className="font-medium">{entry.internalFolio || 'S/N'}</td>
+                  <td>
+                    <span className={`badge ${entry.isQr ? 'badge-success' : 'badge-warning'}`}>
+                      {entry.isQr ? 'QR' : 'VALES'}
+                    </span>
+                  </td>
+                  <td className="text-xs font-bold text-slate-500">
+                    {entry.validFrom ? new Date(entry.validFrom).toLocaleDateString() : '---'} - {entry.validTo ? new Date(entry.validTo).toLocaleDateString() : '---'}
+                  </td>
+                  <td className="font-medium">{entry.description}</td>
+                  <td className="font-medium">{entry.area}</td>
+                  <td className="font-medium">{entry.supplier}</td>
+                  <td className="text-right font-black">${(Number(entry.amount) || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td>
+                  <td className="text-center">
+                    <div className="table-actions">
+                      <button
+                        onClick={() => handlePrintAcquisition(entry)}
+                        className="btn-icon btn-icon-success"
+                        aria-label="Imprimir ticket de adquisicion"
+                      >
+                        <span className="material-symbols-outlined ui-icon">print</span>
+                      </button>
+                      <button
+                        onClick={() => handleEditAcquisition(entry)}
+                        className="btn-icon btn-icon-primary"
+                        aria-label="Editar adquisicion"
+                      >
+                        <span className="material-symbols-outlined ui-icon">edit</span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {fuelAcquisitions.length === 0 && (
+                <tr>
+                  <td colSpan={9} className="px-6 py-10 text-center text-slate-400 text-sm font-bold">Sin registros de adquisiciones.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+          )}
         </div>
       </div>
 
@@ -436,6 +708,271 @@ const Fuel: React.FC<FuelProps> = ({ fuelHistory = [], vehicles = [], drivers = 
       )}
 
       {/* VISTA PREVIA DE IMPRESIÓN (REPORTE DE COMBUSTIBLE) */}
+      {showAcquisitionModal && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-300 no-print">
+          <div className="bg-white rounded-xl w-full max-w-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <div className="flex items-center gap-3">
+                <div className="size-10 bg-emerald-100 rounded-lg flex items-center justify-center">
+                  <span className="material-symbols-outlined text-emerald-600" aria-hidden="true">receipt_long</span>
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-slate-900">{editingAcquisition ? 'Editar Adquisicion' : 'Nueva Adquisicion'}</h3>
+                </div>
+              </div>
+              <button
+                onClick={() => !isSavingAcquisition && setShowAcquisitionModal(false)}
+                disabled={isSavingAcquisition}
+                className="size-9 rounded-md hover:bg-white transition-all flex items-center justify-center text-slate-400 disabled:opacity-50"
+                aria-label="Cerrar modal"
+              >
+                <span className="material-symbols-outlined" aria-hidden="true">close</span>
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmitAcquisition} autoComplete="off" className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Consecutivo</label>
+                  <div className="w-full bg-blue-50 border border-blue-200 rounded-md px-4 py-3 text-sm font-black text-blue-700">
+                    {editingAcquisition?.consecutiveNumber || nextAcquisitionConsecutive}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Folio Interno</label>
+                  <input disabled={isSavingAcquisition} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all uppercase" value={acquisitionForm.internalFolio} onChange={e => setAcquisitionForm({...acquisitionForm, internalFolio: e.target.value})} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Fecha de Registro</label>
+                  <input type="date" required disabled={isSavingAcquisition} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all" value={acquisitionForm.date} onChange={e => setAcquisitionForm({...acquisitionForm, date: e.target.value})} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Modalidad</label>
+                  <select required disabled={isSavingAcquisition} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all" value={acquisitionForm.isQr ? 'qr' : 'voucher'} onChange={e => setAcquisitionForm({...acquisitionForm, isQr: e.target.value === 'qr'})}>
+                    <option value="voucher">Vales</option>
+                    <option value="qr">Codigo QR</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Rango Desde</label>
+                  <input type="date" required disabled={isSavingAcquisition} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all" value={acquisitionForm.validFrom} onChange={e => setAcquisitionForm({...acquisitionForm, validFrom: e.target.value})} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Rango Hasta</label>
+                  <input type="date" required disabled={isSavingAcquisition} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all" value={acquisitionForm.validTo} onChange={e => setAcquisitionForm({...acquisitionForm, validTo: e.target.value})} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Area</label>
+                  <select
+                    required
+                    disabled={isSavingAcquisition}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all"
+                    value={acquisitionForm.area}
+                    onChange={e => setAcquisitionForm({ ...acquisitionForm, area: e.target.value })}
+                  >
+                    <option value="">Seleccionar...</option>
+                    {acquisitionForm.area && !areaOptions.includes(acquisitionForm.area) && (
+                      <option value={acquisitionForm.area}>{acquisitionForm.area}</option>
+                    )}
+                    {areaOptions.map(name => (
+                      <option key={name} value={name}>
+                        {name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Proveedor</label>
+                  <select
+                    required
+                    disabled={isSavingAcquisition}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all"
+                    value={acquisitionForm.supplier}
+                    onChange={e => setAcquisitionForm({ ...acquisitionForm, supplier: e.target.value })}
+                  >
+                    <option value="">Seleccionar...</option>
+                    {acquisitionForm.supplier && !supplierOptions.includes(acquisitionForm.supplier) && (
+                      <option value={acquisitionForm.supplier}>{acquisitionForm.supplier}</option>
+                    )}
+                    {supplierOptions.map(name => (
+                      <option key={name} value={name}>
+                        {name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Monto ($)</label>
+                <input type="number" step="0.01" required disabled={isSavingAcquisition} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all" value={acquisitionForm.amount} onChange={e => setAcquisitionForm({...acquisitionForm, amount: e.target.value})} />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Descripcion</label>
+                <textarea rows={3} required disabled={isSavingAcquisition} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none resize-none focus:bg-white focus:border-primary transition-all" value={acquisitionForm.description} onChange={e => setAcquisitionForm({...acquisitionForm, description: e.target.value})} />
+              </div>
+
+              {acquisitionError && (
+                <p className="text-xs font-bold text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">
+                  {acquisitionError}
+                </p>
+              )}
+
+              <div className="pt-4 flex gap-3">
+                <button
+                  type="button"
+                  disabled={isSavingAcquisition}
+                  onClick={() => setShowAcquisitionModal(false)}
+                  className="flex-1 py-3 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-100 rounded-md transition-all disabled:opacity-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSavingAcquisition}
+                  className="flex-[2] py-3 bg-primary text-white text-[11px] font-black uppercase tracking-widest rounded-md hover:opacity-90 transition-all disabled:opacity-80 flex items-center justify-center gap-2"
+                >
+                  {isSavingAcquisition ? (
+                    <>
+                      <span className="material-symbols-outlined animate-spin text-lg">sync</span>
+                      Guardando...
+                    </>
+                  ) : (
+                    editingAcquisition ? 'Guardar Cambios' : 'Guardar Registro'
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showAcquisitionPrintPreview && selectedAcquisition && (
+        <div className="fixed inset-0 z-[210] bg-white flex flex-col overflow-y-auto">
+          <div className="sticky top-0 bg-slate-900 p-4 flex justify-between items-center text-white shadow-lg no-print">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setShowAcquisitionPrintPreview(false)}
+                className="bg-white/10 px-4 py-2 rounded-lg font-bold text-xs hover:bg-white/20 transition-all"
+              >
+                Cerrar
+              </button>
+              <h3 className="font-black uppercase tracking-widest text-sm">Vista Previa Ticket Adquisicion</h3>
+            </div>
+            <button onClick={() => window.print()} className="bg-primary px-8 py-2.5 rounded-md font-black text-[11px] uppercase tracking-widest flex items-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-blue-500/20">
+              <span className="material-symbols-outlined text-lg">picture_as_pdf</span> Imprimir Ticket PDF
+            </button>
+          </div>
+          <div className="flex-1 bg-slate-100 p-10 flex justify-center">
+            <div id="fuel-acquisition-printable" className="bg-white w-[21.59cm] min-h-[27.94cm] p-[1.5cm] shadow-2xl relative text-slate-900">
+              <div className="flex justify-between items-center mb-8 border-b-4 border-slate-900 pb-6">
+                <div className="flex items-center gap-6">
+                  <img
+                    src={appLogo}
+                    alt="Logo"
+                    className="w-24 object-contain"
+                    onError={(e) => {
+                      const img = e.currentTarget;
+                      if (img.dataset.fallbackApplied === '1') return;
+                      img.dataset.fallbackApplied = '1';
+                      img.src = defaultLogo;
+                    }}
+                  />
+                  <div className="flex flex-col">
+                    <span className="text-lg font-black text-slate-900 uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
+                    <span className="text-lg font-black text-slate-900 uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>
+                    <span className="text-[8pt] font-bold uppercase text-slate-400 mt-2 tracking-[0.2em]">Ticket de Adquisicion de Combustible</span>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="inline-block bg-slate-900 text-white px-4 py-1.5 font-black text-[10pt] uppercase tracking-widest rounded-sm mb-2">
+                    {selectedAcquisition.isQr ? 'Compra QR' : 'Vales de Gasolina'}
+                  </div>
+                  <p className="text-xs font-bold text-slate-600">
+                    No. <span className="font-black text-blue-600 text-lg ml-1">{selectedAcquisition.consecutiveNumber || '---'}</span>
+                  </p>
+                  <p className="text-xs font-bold text-slate-600">
+                    FOLIO INTERNO: <span className="font-black text-slate-900 text-lg ml-1">{(selectedAcquisition.internalFolio || 'S/N').toUpperCase()}</span>
+                  </p>
+                  <p className="text-[9pt] text-slate-400 font-bold mt-1">
+                    Fecha: {selectedAcquisition.date ? new Date(selectedAcquisition.date).toLocaleDateString('es-ES', {year: 'numeric', month: 'long', day: 'numeric'}) : '---'}
+                  </p>
+                  <p className="text-[8pt] text-slate-300 font-bold mt-1">
+                    Generado: {new Date().toLocaleDateString('es-ES', {day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'})}
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 mb-6">
+                <div className="grid grid-cols-2 gap-3 text-[9pt]">
+                  <p><span className="font-black text-slate-500 uppercase tracking-wider">Fecha Registro:</span> <span className="font-bold text-slate-900">{selectedAcquisition.date ? new Date(selectedAcquisition.date).toLocaleDateString('es-ES') : '---'}</span></p>
+                  <p><span className="font-black text-slate-500 uppercase tracking-wider">Area:</span> <span className="font-bold text-slate-900">{selectedAcquisition.area}</span></p>
+                  <p><span className="font-black text-slate-500 uppercase tracking-wider">Rango Vigencia:</span> <span className="font-bold text-slate-900">{selectedAcquisition.validFrom ? new Date(selectedAcquisition.validFrom).toLocaleDateString('es-ES') : '---'} - {selectedAcquisition.validTo ? new Date(selectedAcquisition.validTo).toLocaleDateString('es-ES') : '---'}</span></p>
+                  <p><span className="font-black text-slate-500 uppercase tracking-wider">Modalidad:</span> <span className="font-bold text-slate-900">{selectedAcquisition.isQr ? 'CODIGO QR' : 'VALES'}</span></p>
+                </div>
+              </div>
+
+              <div className="mb-8 bg-slate-50 border border-slate-200 rounded-lg p-6">
+                <div className="grid grid-cols-2 gap-8">
+                  <div>
+                    <p className="text-[8pt] font-black text-slate-400 uppercase tracking-widest mb-1">Proveedor</p>
+                    <p className="text-[12pt] font-black text-slate-900 uppercase break-words">{selectedAcquisition.supplier}</p>
+                  </div>
+                  <div className="text-right border-l border-slate-200 pl-8">
+                    <p className="text-[8pt] font-black text-slate-400 uppercase tracking-widest mb-1">Monto de Adquisicion</p>
+                    <p className="text-[20pt] font-black text-primary tracking-tighter">${(Number(selectedAcquisition.amount) || 0).toLocaleString('es-MX', {minimumFractionDigits: 2})}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2 mb-12">
+                <div className="bg-slate-900 text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">
+                  Descripcion / Concepto
+                </div>
+                <div className="bg-white p-4 rounded-lg border border-slate-200">
+                  <p className="text-[10pt] text-slate-700 leading-relaxed break-words">
+                    {selectedAcquisition.description || 'Sin descripcion.'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="signature-section">
+                <div className="grid grid-cols-3 gap-12 text-center">
+                  <div className="signature-line border-t-2 border-slate-900 pt-4">
+                    <p className="text-[9pt] font-black uppercase text-slate-900">{administrativeCoordinatorName}</p>
+                    <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">{administrativeCoordinatorPos}</p>
+                    <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Vo. Bo.</p>
+                  </div>
+                  <div className="signature-line border-t-2 border-slate-900 pt-4">
+                    <p className="text-[9pt] font-black uppercase text-slate-900">{directorName}</p>
+                    <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Director General</p>
+                    <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Autorizacion</p>
+                  </div>
+                  <div className="signature-line border-t-2 border-slate-900 pt-4">
+                    <p className="text-[9pt] font-black uppercase text-slate-900">Nombre y Firma</p>
+                    <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Recibido</p>
+                    <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Sello</p>
+                  </div>
+                </div>
+                <div className="text-center mt-8 border-t border-slate-200 pt-2">
+                  <p className="text-[7pt] font-black text-slate-300 uppercase tracking-[0.3em]">Sistema de Gestion de Parque Vehicular • DIF Municipal La Paz</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showPrintPreview && (
         <div className="fixed inset-0 z-[200] bg-white flex flex-col overflow-y-auto">
            <div className="sticky top-0 bg-slate-900 p-4 flex justify-between items-center text-white shadow-lg no-print">
@@ -453,7 +990,17 @@ const Fuel: React.FC<FuelProps> = ({ fuelHistory = [], vehicles = [], drivers = 
                 {/* Header Institucional */}
                 <div className="flex justify-between items-center mb-8 border-b-4 border-slate-900 pb-6">
                   <div className="flex items-center gap-6">
-                    <img src="/images/logo-dif.png" alt="Logo" className="w-24 object-contain" />
+                    <img
+                      src={appLogo}
+                      alt="Logo"
+                      className="w-24 object-contain"
+                      onError={(e) => {
+                        const img = e.currentTarget;
+                        if (img.dataset.fallbackApplied === '1') return;
+                        img.dataset.fallbackApplied = '1';
+                        img.src = defaultLogo;
+                      }}
+                    />
                     <div className="flex flex-col">
                       <span className="text-lg font-black text-slate-900 uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
                       <span className="text-lg font-black text-slate-900 uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>

@@ -226,7 +226,7 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
           onClick={handleOpenNew}
           className="btn btn-primary"
         >
-          <span className="material-symbols-outlined">add</span>
+          <span className="material-symbols-outlined ui-icon">add</span>
           Nueva Unidad
         </button>
       </div>
@@ -242,7 +242,7 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
         </div>
 
         <div className="overflow-x-auto">
-          <table className="table-professional">
+          <table className="table-professional table-density-compact">
             <thead>
               <tr>
                 <th>Unidad</th>
@@ -259,7 +259,7 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
                     <td>
                       <div className="flex items-center gap-3">
                          <div className="w-9 h-9 rounded-md bg-slate-100 flex items-center justify-center">
-                           <span className="material-symbols-outlined text-slate-500">directions_car</span>
+                           <span className="material-symbols-outlined ui-icon text-slate-500">directions_car</span>
                          </div>
                          <div>
                             <p className="font-medium text-slate-900">{vehicle.model}</p>
@@ -273,12 +273,16 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
                     <td className="text-center">
                        <span className="text-sm text-slate-600">{driver?.name || '—'}</span>
                     </td>
-                    <td className="text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => handlePrint(vehicle)} className="btn-icon" aria-label="Imprimir"><span className="material-symbols-outlined" aria-hidden="true">file_present</span></button>
-                        <button onClick={() => handleEdit(vehicle)} className="btn-icon" aria-label="Editar"><span className="material-symbols-outlined" aria-hidden="true">edit</span></button>
-                      </div>
-                    </td>
+                     <td className="text-right">
+                       <div className="table-actions">
+                         <button onClick={() => handlePrint(vehicle)} className="btn-icon btn-icon-success" aria-label="Imprimir">
+                           <span className="material-symbols-outlined ui-icon" aria-hidden="true">file_present</span>
+                         </button>
+                         <button onClick={() => handleEdit(vehicle)} className="btn-icon btn-icon-primary" aria-label="Editar">
+                           <span className="material-symbols-outlined ui-icon" aria-hidden="true">edit</span>
+                         </button>
+                       </div>
+                     </td>
                   </tr>
                 );
               })}
@@ -293,13 +297,13 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
             <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
               <div className="flex items-center gap-3">
                 <div className="size-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <span className="material-symbols-outlined text-blue-600" aria-hidden="true">directions_car</span>
+                  <span className="material-symbols-outlined ui-icon text-blue-600" aria-hidden="true">directions_car</span>
                 </div>
                 <div>
                   <h3 className="text-lg font-black text-slate-900">{editingVehicle ? 'Ficha de Unidad' : 'Nueva Unidad'}</h3>
                 </div>
               </div>
-              <button onClick={() => { if (!isSaving) { setFormError(''); setShowModal(false); } }} className="size-9 rounded-md hover:bg-white transition-all flex items-center justify-center text-slate-400" aria-label="Cerrar modal"><span className="material-symbols-outlined text-xl" aria-hidden="true">close</span></button>
+              <button onClick={() => { if (!isSaving) { setFormError(''); setShowModal(false); } }} className="size-9 rounded-md hover:bg-white transition-all flex items-center justify-center text-slate-400" aria-label="Cerrar modal"><span className="material-symbols-outlined ui-icon text-xl" aria-hidden="true">close</span></button>
             </div>
 
             <div className="flex border-b border-slate-100 bg-white px-6 overflow-x-auto">
@@ -387,7 +391,7 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
                         onClick={addAccessory}
                         className="bg-primary text-white size-12 rounded-md flex items-center justify-center hover:opacity-90 transition-all"
                       >
-                        <span className="material-symbols-outlined text-xl font-black">add</span>
+                        <span className="material-symbols-outlined ui-icon text-xl font-black">add</span>
                       </button>
                     </div>
 
@@ -395,7 +399,7 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
                       {accessoriesList.map((acc, index) => (
                         <div key={index} className="flex items-center gap-2 bg-blue-50 border border-primary/20 rounded-md px-3 py-2 group hover:bg-white transition-all">
                           <div className="size-5 bg-primary text-white rounded flex items-center justify-center">
-                            <span className="material-symbols-outlined text-xs">check</span>
+                            <span className="material-symbols-outlined ui-icon text-xs">check</span>
                           </div>
                           <span className="text-xs font-bold uppercase tracking-widest text-slate-700">{acc}</span>
                           <button 
@@ -403,13 +407,13 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
                             onClick={() => removeAccessory(index)}
                             className="size-5 rounded hover:bg-rose-100 text-slate-300 hover:text-rose-500 flex items-center justify-center transition-all"
                           >
-                            <span className="material-symbols-outlined text-xs">close</span>
+                            <span className="material-symbols-outlined ui-icon text-xs">close</span>
                           </button>
                         </div>
                       ))}
                       {accessoriesList.length === 0 && (
                         <div className="w-full py-8 border-2 border-dashed border-slate-100 rounded-md flex flex-col items-center justify-center opacity-40">
-                          <span className="material-symbols-outlined text-3xl mb-1">construction</span>
+                          <span className="material-symbols-outlined ui-icon text-3xl mb-1">construction</span>
                           <p className="text-[10px] font-black uppercase tracking-widest">Sin accesorios registrados</p>
                         </div>
                       )}
@@ -445,7 +449,7 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
             <div className="p-4 bg-slate-900 flex justify-between items-center text-white sticky top-0 z-50 shadow-md no-print">
               <button onClick={() => setShowPrintPreview(false)} className="bg-white/10 px-4 py-2 rounded-lg font-bold text-xs hover:bg-white/20 transition-all">Cerrar</button>
               <button onClick={() => window.print()} className="bg-primary px-8 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-blue-500/20">
-                <span className="material-symbols-outlined text-lg">picture_as_pdf</span> Imprimir Ficha PDF
+                <span className="material-symbols-outlined ui-icon">picture_as_pdf</span> Imprimir Ficha PDF
               </button>
             </div>
             <div className="flex-1 bg-slate-100 p-10 flex justify-center">
@@ -589,7 +593,7 @@ const StatusFilterBtn = ({ active, onClick, label, color }: any) => (
 
 const TabBtn = ({ active, onClick, label, icon }: any) => (
   <button onClick={onClick} className={`flex items-center gap-2 px-6 py-4 text-[10px] font-black uppercase tracking-widest transition-all border-b-2 ${active ? 'border-primary text-primary' : 'border-transparent text-slate-400 hover:text-slate-600'}`}>
-    <span className="material-symbols-outlined text-sm">{icon}</span>
+    <span className="material-symbols-outlined ui-icon text-sm">{icon}</span>
     {label}
   </button>
 );
