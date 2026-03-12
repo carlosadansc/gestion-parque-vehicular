@@ -14,7 +14,7 @@ Aplicación web para la administración integral del parque vehicular del Sistem
 - [Módulos del Sistema](#módulos-del-sistema)
 - [Google Sheets como Base de Datos](#google-sheets-como-base-de-datos)
 - [Configuración de Google Apps Script](#configuración-de-google-apps-script)
-- [Usuario por Defecto](#usuario-por-defecto)
+- [Acceso Inicial](#acceso-inicial)
 - [Capturas de Pantalla](#capturas-de-pantalla)
 - [Licencia](#licencia)
 
@@ -263,14 +263,14 @@ El código de Apps Script se encuentra en la sección **Configuración** de la a
 
 ---
 
-## Usuario por Defecto
+## Acceso Inicial
 
-| Campo | Valor |
-|-------|-------|
-| Usuario | `admin` |
-| Contraseña | `Macaco123` |
+No existe un usuario hardcodeado en la aplicación.
 
-> **Nota**: Se recomienda cambiar la contraseña después del primer acceso.
+Para el primer acceso:
+1. Captura y guarda la URL de Google Apps Script en la pantalla de login.
+2. Sincroniza para validar conexión.
+3. Si no hay usuarios, usa **Crear administrador inicial** desde la misma pantalla.
 
 ---
 

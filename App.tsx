@@ -50,6 +50,7 @@ const INCIDENT_TYPE_SET = new Set<Incident['type']>(['mechanical', 'traffic', 'a
 const INCIDENT_STATUS_SET = new Set<Incident['status']>(['critical', 'pending', 'resolved', 'in-workshop', 'in-resolution']);
 const PLANNING_STATUS_SET = new Set<NonNullable<Planning['status']>>(['scheduled', 'completed', 'cancelled']);
 const MAINTENANCE_STATUS_SET = new Set<MaintenanceRecord['status']>(['scheduled', 'in-progress', 'completed', 'cancelled']);
+const MAINTENANCE_PAYMENT_METHOD_SET = new Set<NonNullable<MaintenanceRecord['paymentMethod']>>(['transferencia', 'efectivo']);
 const USER_ROLE_SET = new Set<User['role']>(['admin', 'operator', 'viewer']);
 const USER_STATUS_SET = new Set<User['status']>(['active', 'inactive']);
 
@@ -199,6 +200,12 @@ const validateMaintenancePayload = (record: Omit<MaintenanceRecord, 'id'> | Main
   if (hasText(record.estimatedDeliveryDate)) ensure(isValidDateValue(record.estimatedDeliveryDate), 'La fecha estimada de entrega no es valida.');
   ensure(hasText(record.vehicleId) && vehicleList.some(v => v.id === record.vehicleId), 'Debes seleccionar un vehiculo valido.');
   ensure(isFiniteNumber(record.odometer) && Number(record.odometer) >= 0, 'El odometro debe ser un numero valido.');
+  if (hasText(record.paymentMethod)) {
+    ensure(
+      MAINTENANCE_PAYMENT_METHOD_SET.has(record.paymentMethod as NonNullable<MaintenanceRecord['paymentMethod']>),
+      'El metodo de pago del mantenimiento no es valido.'
+    );
+  }
 
   if (hasValue(record.invoiceAmount)) {
     ensure(isFiniteNumber(record.invoiceAmount), 'El monto de factura debe ser un numero valido.');
@@ -246,6 +253,11 @@ const validateInspectionPayload = (inspection: Omit<VehicleInspection, 'id'> | V
   ensure(isFiniteNumber(inspection.odometer) && Number(inspection.odometer) >= 0, 'El odometro de revision debe ser un numero valido.');
 };
 
+const stripPasswordFromUser = (user: User): User => {
+  const { password: _password, ...sessionUser } = user;
+  return sessionUser;
+};
+
 const App: React.FC = () => {
   type ToastType = 'success' | 'error' | 'info';
   type ToastItem = { id: number; type: ToastType; message: string };
@@ -257,6 +269,15 @@ const App: React.FC = () => {
   const [loginPass, setLoginPass] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState('');
+  const [setupError, setSetupError] = useState('');
+  const [serviceUrlInput, setServiceUrlInput] = useState(googleSheets.getServiceUrl());
+  const [isBootstrapping, setIsBootstrapping] = useState(false);
+  const [bootstrapForm, setBootstrapForm] = useState({
+    name: '',
+    username: '',
+    password: '',
+    confirmPassword: ''
+  });
   
   const [currentView, setCurrentView] = useState<View>(View.REPORTS);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -326,7 +347,9 @@ const App: React.FC = () => {
     if (savedUser) {
       try {
         const user = JSON.parse(savedUser);
-        setCurrentUser(user);
+        const sessionUser = stripPasswordFromUser(user);
+        setCurrentUser(sessionUser);
+        localStorage.setItem('fleet_pro_user', JSON.stringify(sessionUser));
       } catch (e) {
         localStorage.removeItem('fleet_pro_user');
       }
@@ -378,45 +401,133 @@ const App: React.FC = () => {
     );
   }, [pushToast, handleSync]);
 
+  const saveServiceUrlFromLogin = () => {
+    const trimmedUrl = serviceUrlInput.trim();
+    if (!trimmedUrl) {
+      setLoginError('Captura la URL de Google Apps Script.');
+      return false;
+    }
+    googleSheets.setServiceUrl(trimmedUrl);
+    setServiceUrlInput(trimmedUrl);
+    if (!googleSheets.isValidScriptUrl()) {
+      setLoginError('La URL debe contener script.google.com/macros/s/.../exec.');
+      return false;
+    }
+    setLoginError('');
+    return true;
+  };
+
+  const handleBootstrapAdmin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSetupError('');
+    setLoginError('');
+
+    if (appUsers.length > 0) {
+      setSetupError('Ya hay usuarios registrados. Inicia sesion con una cuenta existente.');
+      return;
+    }
+
+    if (!saveServiceUrlFromLogin()) return;
+
+    const name = bootstrapForm.name.trim();
+    const username = bootstrapForm.username.trim();
+    const password = bootstrapForm.password;
+    const confirmPassword = bootstrapForm.confirmPassword;
+
+    if (!name || !username || !password) {
+      setSetupError('Nombre, usuario y contrasena son obligatorios.');
+      return;
+    }
+    if (password.length < 8) {
+      setSetupError('La contrasena debe tener al menos 8 caracteres.');
+      return;
+    }
+    if (password !== confirmPassword) {
+      setSetupError('La confirmacion de contrasena no coincide.');
+      return;
+    }
+
+    const exists = appUsers.some(u => (u.username || '').trim().toLowerCase() === username.toLowerCase());
+    if (exists) {
+      setSetupError('El nombre de usuario ya existe.');
+      return;
+    }
+
+    setIsBootstrapping(true);
+    try {
+      const timestamp = new Date().toISOString();
+      const adminUser: User = {
+        id: `USR-${Date.now()}`,
+        name: name.toUpperCase(),
+        username: username.toUpperCase(),
+        password,
+        role: 'admin',
+        status: 'active',
+        lastLogin: timestamp
+      };
+
+      const saved = await googleSheets.pushData('user', adminUser);
+      if (!saved) {
+        throw new Error('No se pudo crear el administrador inicial en Google Sheets.');
+      }
+
+      const sessionUser = stripPasswordFromUser(adminUser);
+      setCurrentUser(sessionUser);
+      localStorage.setItem('fleet_pro_user', JSON.stringify(sessionUser));
+      setBootstrapForm({ name: '', username: '', password: '', confirmPassword: '' });
+      void handleSync();
+      pushToast('Administrador inicial creado correctamente.', 'success');
+    } catch (error) {
+      setSetupError(getErrorMessage(error, 'No se pudo crear el administrador inicial.'));
+    } finally {
+      setIsBootstrapping(false);
+    }
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError('');
-    
+    setSetupError('');
+
     if (!loginUsername.trim() || !loginPass.trim()) {
-      setLoginError('Por favor ingrese usuario y contraseña.');
+      setLoginError('Por favor ingrese usuario y contrasena.');
       return;
     }
-    
+
+    if (!saveServiceUrlFromLogin()) return;
+
     setIsSyncing(true);
     try {
       const timestamp = new Date().toISOString();
-      
-      // Check against appUsers if available, otherwise use default admin
       let authenticatedUser: User | null = null;
-      
-      if (appUsers.length > 0) {
-        // Validate against registered users (case-insensitive username)
-        const foundUser = appUsers.find(u => 
-          u.username.toLowerCase() === loginUsername.toLowerCase().trim()
-        );
-        
-        if (foundUser && await verifyPassword(loginPass, foundUser.password || '') && foundUser.status === 'active') {
-          authenticatedUser = { ...foundUser, lastLogin: timestamp };
-        }
-      } else {
-        // Default admin login for initial setup
-        if (loginUsername.toLowerCase() === 'admin' && loginPass === 'Macaco123') {
-          authenticatedUser = { 
-            id: 'USR-1',
-            name: 'Super Administrador', 
-            username: 'admin', 
-            role: 'admin', 
-            status: 'active',
-            lastLogin: timestamp
-          };
+      let usersSnapshot = appUsers;
+
+      if (usersSnapshot.length === 0) {
+        try {
+          const data = await googleSheets.fetchData();
+          if (data?.users) {
+            usersSnapshot = data.users;
+            setAppUsers(data.users);
+          }
+        } catch (_) {
+          // Keep actionable message below
         }
       }
-      
+
+      if (usersSnapshot.length === 0) {
+        setLoginError('No hay usuarios registrados. Crea el administrador inicial.');
+        setIsSyncing(false);
+        return;
+      }
+
+      const foundUser = usersSnapshot.find(u =>
+        u.username.toLowerCase() === loginUsername.toLowerCase().trim()
+      );
+
+      if (foundUser && hasText(foundUser.password) && await verifyPassword(loginPass, foundUser.password || '') && foundUser.status === 'active') {
+        authenticatedUser = stripPasswordFromUser({ ...foundUser, lastLogin: timestamp });
+      }
+
       if (authenticatedUser) {
         setCurrentUser(authenticatedUser);
         localStorage.setItem('fleet_pro_user', JSON.stringify(authenticatedUser));
@@ -424,12 +535,19 @@ const App: React.FC = () => {
         return;
       }
 
-      setLoginError('Usuario o contraseña incorrectos.');
+      const inactiveUser = usersSnapshot.find(u =>
+        u.username.toLowerCase() === loginUsername.toLowerCase().trim() && u.status !== 'active'
+      );
+      if (inactiveUser) {
+        setLoginError('El usuario esta inactivo. Contacta al administrador.');
+      } else {
+        setLoginError('Usuario o contrasena incorrectos.');
+      }
       setIsSyncing(false);
-    } catch (err: any) { 
-      setLoginError('Error de conexión o validación.'); 
+    } catch (err: any) {
+      setLoginError('Error de conexion o validacion.');
       setIsSyncing(false);
-    } 
+    }
   };
 
   const handleLogout = () => {
@@ -1235,37 +1353,69 @@ const App: React.FC = () => {
   if (!currentUser) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-        <div className="w-full max-w-sm bg-white rounded-xl border border-slate-200 p-8">
+        <div className="w-full max-w-md bg-white rounded-xl border border-slate-200 p-8">
           <div className="flex flex-col items-center mb-8">
             <img alt="DIF" className="w-14 h-14 object-contain mb-4" src="/images/logo-dif.png" />
             <h1 className="text-xl font-semibold text-slate-900">{settingsMap['APP_NAME'] || 'Flota Pro'}</h1>
             <p className="text-xs text-slate-500 mt-1">DIF La Paz - Control Vehicular</p>
           </div>
+
+          <div className="space-y-1.5 mb-4">
+            <label className="text-xs font-medium text-slate-600">URL Google Apps Script</label>
+            <input
+              type="url"
+              className="w-full px-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
+              placeholder="https://script.google.com/macros/s/.../exec"
+              value={serviceUrlInput}
+              onChange={e => setServiceUrlInput(e.target.value)}
+            />
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={saveServiceUrlFromLogin}
+                className="flex-1 bg-slate-100 text-slate-700 py-2 rounded-lg font-medium text-xs hover:bg-slate-200 transition-colors"
+              >
+                Guardar URL
+              </button>
+              <button
+                type="button"
+                disabled={isSyncing}
+                onClick={async () => {
+                  if (!saveServiceUrlFromLogin()) return;
+                  await handleSyncWithToast();
+                }}
+                className="flex-1 bg-slate-900 text-white py-2 rounded-lg font-medium text-xs hover:opacity-90 transition-opacity disabled:opacity-50"
+              >
+                {isSyncing ? 'Sincronizando...' : 'Sincronizar'}
+              </button>
+            </div>
+          </div>
+
           <form onSubmit={handleLogin} autoComplete="off" className="space-y-4">
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-slate-600">Usuario</label>
-              <input 
-                type="text" 
-                required 
+              <input
+                type="text"
+                required
                 className="w-full px-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
-                placeholder="admin" 
-                value={loginUsername} 
-                onChange={e => { setLoginUsername(e.target.value); setLoginError(''); }} 
+                placeholder="admin"
+                value={loginUsername}
+                onChange={e => { setLoginUsername(e.target.value); setLoginError(''); }}
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-600">Contraseña</label>
+              <label className="text-xs font-medium text-slate-600">Contrasena</label>
               <div className="relative">
-                <input 
-                  type={showPassword ? "text" : "password"} 
-                  required 
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
                   className="w-full px-4 py-2.5 pr-10 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
-                  placeholder="••••••••" 
-                  value={loginPass} 
-                  onChange={e => { setLoginPass(e.target.value); setLoginError(''); }} 
+                  placeholder="********"
+                  value={loginPass}
+                  onChange={e => { setLoginPass(e.target.value); setLoginError(''); }}
                 />
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
                 >
@@ -1277,14 +1427,61 @@ const App: React.FC = () => {
             </div>
             {loginError && <p className="text-red-500 text-xs text-center py-2">{loginError}</p>}
             <button type="submit" disabled={isSyncing} className="w-full bg-primary text-white py-2.5 rounded-lg font-medium text-sm hover:opacity-90 transition-opacity">
-              {isSyncing ? 'Iniciando...' : 'Iniciar Sesión'}
+              {isSyncing ? 'Iniciando...' : 'Iniciar sesion'}
             </button>
           </form>
+
+          {appUsers.length === 0 && (
+            <form onSubmit={handleBootstrapAdmin} autoComplete="off" className="mt-6 border-t border-slate-200 pt-6 space-y-3">
+              <p className="text-xs font-semibold text-slate-700">Configuracion inicial: crear administrador</p>
+              <input
+                type="text"
+                required
+                placeholder="Nombre completo"
+                value={bootstrapForm.name}
+                onChange={e => setBootstrapForm(prev => ({ ...prev, name: e.target.value }))}
+                className="w-full px-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
+              />
+              <input
+                type="text"
+                required
+                placeholder="Usuario"
+                value={bootstrapForm.username}
+                onChange={e => setBootstrapForm(prev => ({ ...prev, username: e.target.value }))}
+                className="w-full px-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
+              />
+              <input
+                type="password"
+                required
+                minLength={8}
+                placeholder="Contrasena (min. 8)"
+                value={bootstrapForm.password}
+                onChange={e => setBootstrapForm(prev => ({ ...prev, password: e.target.value }))}
+                className="w-full px-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
+              />
+              <input
+                type="password"
+                required
+                minLength={8}
+                placeholder="Confirmar contrasena"
+                value={bootstrapForm.confirmPassword}
+                onChange={e => setBootstrapForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                className="w-full px-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
+              />
+              {setupError && <p className="text-rose-500 text-xs">{setupError}</p>}
+              <button
+                type="submit"
+                disabled={isBootstrapping || isSyncing}
+                className="w-full bg-emerald-600 text-white py-2.5 rounded-lg font-medium text-sm hover:opacity-90 transition-opacity disabled:opacity-60"
+              >
+                {isBootstrapping ? 'Creando administrador...' : 'Crear administrador inicial'}
+              </button>
+            </form>
+          )}
         </div>
       </div>
     );
   }
-
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50">
       <Sidebar activeView={currentView} onViewChange={v => { setCurrentView(v); setSearchQuery(''); }} appName={settingsMap['APP_NAME'] || 'Flota Pro'} currentUser={currentUser} onLogout={handleLogout} />

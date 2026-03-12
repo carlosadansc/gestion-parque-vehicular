@@ -66,9 +66,9 @@ class GoogleSheetsService {
     }
     
     try {
-      await fetch(this.serviceUrl, {
+      const response = await fetch(this.serviceUrl, {
         method: 'POST',
-        mode: 'no-cors', 
+        mode: 'cors',
         cache: 'no-cache',
         headers: {
           'Content-Type': 'text/plain;charset=utf-8',
@@ -79,7 +79,25 @@ class GoogleSheetsService {
           timestamp: new Date().toISOString()
         })
       });
-      
+
+      if (!response.ok) {
+        console.error(`Error al enviar datos: HTTP ${response.status}`);
+        return false;
+      }
+
+      const responseText = await response.text();
+      if (!responseText) return true;
+
+      try {
+        const parsed = JSON.parse(responseText);
+        if (parsed?.status && parsed.status !== 'success') {
+          console.error('Error devuelto por Apps Script:', parsed?.message || parsed?.status);
+          return false;
+        }
+      } catch (_) {
+        // Some deployments may return plain text; successful HTTP is enough in that case.
+      }
+
       return true;
     } catch (error) {
       console.error('Error al enviar datos:', error);

@@ -23,12 +23,33 @@ const toDateTimeLocalValue = (value: unknown, fallback = ''): string => {
   return localDate.toISOString().slice(0, 16);
 };
 
+const DAILY_REVISION_RUBRICS = [
+  'Motor',
+  'Transmision',
+  'Clutch',
+  'Frenos',
+  'Direccion',
+  'Suspension',
+  'Amortiguadores',
+  'Llantas',
+  'Bateria',
+  'Luces',
+  'Limpiadores',
+  'Claxon',
+  'Palanca de Velocidades',
+  'Velocimetro',
+  'Medidor de Temperatura',
+  'Medidor de Aceite'
+];
+
 const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddInspection, onUpdateInspection, currentUser, settings = [] }) => {
   const [showModal, setShowModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showPrintPreview, setShowPrintPreview] = useState(false);
   const [selectedInspection, setSelectedInspection] = useState<VehicleInspection | null>(null);
   const [editingInspection, setEditingInspection] = useState<VehicleInspection | null>(null);
+  const [showDailyRevisionPrint, setShowDailyRevisionPrint] = useState(false);
+  const [dailyRevisionDate, setDailyRevisionDate] = useState(() => new Date());
   const [formError, setFormError] = useState('');
 
   const settingsMap = useMemo(() => {
@@ -117,10 +138,32 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
     setShowPrintPreview(true);
   };
 
+  const dailyRevisionRows = useMemo(() => {
+    return [...vehicles]
+      .filter(v => v.status !== 'inactive')
+      .sort((a, b) => String(a.plate || '').localeCompare(String(b.plate || ''), 'es'))
+      .map((vehicle, index) => ({
+        rowNumber: index + 1,
+        vehicle
+      }));
+  }, [vehicles]);
+
+  const dailyRevisionDateLabel = useMemo(
+    () => dailyRevisionDate.toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: '2-digit' }).toUpperCase(),
+    [dailyRevisionDate]
+  );
+  const dailyRevisionDateShort = useMemo(
+    () => dailyRevisionDate.toLocaleDateString('es-MX'),
+    [dailyRevisionDate]
+  );
+
   // Variables institucionales
   // Normalizar la ruta del logo (convertir rutas relativas a absolutas)
-  const rawLogo = settingsMap['APP_LOGO'] || '/images/logo-dif.png';
-  const appLogo = rawLogo.startsWith('./') ? rawLogo.replace('./', '/') : rawLogo;
+  const rawLogo = String(settingsMap['APP_LOGO'] || '').trim();
+  const normalizedLogo = rawLogo.replace(/\\/g, '/');
+  const appLogo = normalizedLogo
+    ? (normalizedLogo.startsWith('./') ? normalizedLogo.replace('./', '/') : normalizedLogo.startsWith('images/') ? `/${normalizedLogo}` : normalizedLogo)
+    : '/images/logo-dif.png';
   const managerName = settingsMap['VEHICLE_MANAGER_NAME'] || 'ENCARGADO DE PARQUE VEHICULAR';
   const managerPos = settingsMap['VEHICLE_MANAGER_POS'] || 'VALIDACIÓN TÉCNICA';
 
@@ -143,14 +186,16 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
             visibility: hidden;
           }
           
-          #inspection-printable, #inspection-printable * {
+          #inspection-printable, #inspection-printable *,
+          #daily-revision-printable, #daily-revision-printable * {
             visibility: visible;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
             color-adjust: exact !important;
           }
           
-          #inspection-printable {
+          #inspection-printable,
+          #daily-revision-printable {
             position: absolute;
             left: 0;
             top: 0;
@@ -321,13 +366,26 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
           <h2 className="page-title">Revisiones Técnicas</h2>
           <p className="page-subtitle">Historial de inspecciones y estado físico de unidades</p>
         </div>
-        <button 
-          onClick={() => setShowModal(true)}
-          className="btn btn-primary"
-        >
-          <span className="material-symbols-outlined">fact_check</span>
-          Nueva Revisión
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => {
+              setDailyRevisionDate(new Date());
+              setShowDailyRevisionPrint(true);
+            }}
+            disabled={!dailyRevisionRows.length}
+            className="btn btn-secondary"
+          >
+            <span className="material-symbols-outlined ui-icon">fact_check</span>
+            Bitacora Revision
+          </button>
+          <button 
+            onClick={() => setShowModal(true)}
+            className="btn btn-primary"
+          >
+            <span className="material-symbols-outlined">fact_check</span>
+            Nueva Revisión
+          </button>
+        </div>
       </div>
 
       <div className="card flex flex-col no-print">
@@ -481,6 +539,174 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
         </div>
       )}
 
+      {/* VISTA PREVIA DE BITACORA DE REVISION MECANICA */}
+      {showDailyRevisionPrint && dailyRevisionRows.length > 0 && (
+        <div id="daily-revision-preview-screen" className="fixed inset-0 z-[210] bg-white flex flex-col overflow-y-auto">
+          <div className="sticky top-0 bg-slate-900 p-4 flex justify-between items-center text-white shadow-lg no-print">
+            <div className="flex items-center gap-4">
+              <button onClick={() => setShowDailyRevisionPrint(false)} className="size-10 flex items-center justify-center hover:bg-white/10 rounded-full transition-colors">
+                <span className="material-symbols-outlined ui-icon">arrow_back</span>
+              </button>
+              <div>
+                <p className="text-sm font-black uppercase tracking-widest">Bitacora de Revision Mecanica</p>
+                <p className="text-xs text-slate-400">{dailyRevisionDateLabel}</p>
+              </div>
+            </div>
+            <button onClick={() => window.print()} className="bg-primary px-6 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center gap-2 shadow-lg hover:opacity-90 transition-all">
+              <span className="material-symbols-outlined ui-icon">picture_as_pdf</span> Imprimir / Descargar PDF
+            </button>
+          </div>
+
+          <style>{`
+            #daily-revision-printable .daily-revision-sheet {
+              margin-bottom: 1.5rem;
+            }
+            @media print {
+              @page { margin: 0.5cm; size: letter landscape; }
+              #daily-revision-preview-screen {
+                position: static !important;
+                inset: auto !important;
+                overflow: visible !important;
+                height: auto !important;
+                display: block !important;
+                background: white !important;
+              }
+              #daily-revision-preview-content {
+                padding: 0 !important;
+                background: white !important;
+                overflow: visible !important;
+                display: block !important;
+              }
+              #daily-revision-printable {
+                display: block !important;
+                width: 100% !important;
+              }
+              #daily-revision-printable .daily-revision-sheet {
+                margin: 0 !important;
+                box-shadow: none !important;
+                page-break-after: always;
+                break-after: page;
+              }
+              #daily-revision-printable .daily-revision-sheet:last-child {
+                page-break-after: auto;
+                break-after: auto;
+              }
+            }
+          `}</style>
+
+          <div id="daily-revision-preview-content" className="flex-1 bg-slate-100 p-6 flex justify-center overflow-auto">
+            <div id="daily-revision-printable" className="w-full">
+              {dailyRevisionRows.map((row, idx) => (
+                <div key={`${row.vehicle.id}-${idx}`} className="daily-revision-sheet mx-auto bg-white shadow-2xl relative text-slate-900" style={{ width: '27.94cm', minHeight: '21.59cm', padding: '0.8cm 1cm' }}>
+                  <div className="flex justify-between items-center border-b-2 border-slate-900 pb-3 mb-3">
+                    <div className="flex items-center gap-4">
+                      <img
+                        src={appLogo}
+                        alt="Logo"
+                        className="w-24 object-contain"
+                        onError={(e) => {
+                          const target = e.currentTarget;
+                          target.onerror = null;
+                          target.src = '/images/logo-dif.png';
+                        }}
+                      />
+                      <div className="flex flex-col">
+                        <span className="text-[10pt] font-black text-slate-900 uppercase leading-none tracking-tight">{settingsMap['INSTITUTION_NAME'] || 'SISTEMA DIF MUNICIPAL LA PAZ'}</span>
+                        <span className="text-[7pt] font-bold uppercase text-slate-400 mt-1 tracking-[0.2em]">Parque Vehicular - Revision Mecanica Diaria</span>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="inline-block bg-slate-900 text-white px-3 py-1 font-black text-[8pt] uppercase tracking-widest rounded-sm mb-1">
+                        Bitacora de Revision Mecanica
+                      </div>
+                      <p className="text-[8pt] text-slate-400 font-bold">Fecha: {dailyRevisionDateShort}</p>
+                      <p className="text-[7pt] text-slate-300 font-bold">Hoja {idx + 1} de {dailyRevisionRows.length}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-12 gap-x-3 gap-y-1.5 text-[8pt] mb-3">
+                    <div className="flex items-center gap-1 col-span-6">
+                      <span className="font-black text-slate-500 uppercase whitespace-nowrap">Unidad:</span>
+                      <span className="font-bold text-slate-900 border-b border-slate-300 flex-1 pb-0.5">{[row.vehicle.brand, row.vehicle.model, row.vehicle.year].filter(Boolean).join(' ') || row.vehicle.model || '---'}</span>
+                    </div>
+                    <div className="flex items-center gap-1 col-span-6">
+                      <span className="font-black text-slate-500 uppercase whitespace-nowrap">Fecha de revision:</span>
+                      <span className="font-bold text-slate-900 border-b border-slate-300 flex-1 pb-0.5">{dailyRevisionDateLabel}</span>
+                    </div>
+                    <div className="flex items-center gap-1 col-span-6">
+                      <span className="font-black text-slate-500 uppercase whitespace-nowrap">Odometro:</span>
+                      <span className="font-bold text-slate-900 border-b border-slate-300 flex-1 pb-0.5">&nbsp;</span>
+                      <span className="font-black text-slate-500 uppercase whitespace-nowrap">km</span>
+                    </div>
+                    <div className="flex items-center gap-2 col-span-6">
+                      <span className="font-black text-slate-500 uppercase whitespace-nowrap">Nivel Combustible:</span>
+                      <div className="relative flex-1 min-w-[200px]">
+                        <div className="absolute left-3 right-3 top-[7px] h-[2px] bg-slate-300"></div>
+                        <div className="relative flex items-start justify-between">
+                          {['E', '1/4', '1/2', '3/4', 'F'].map((level) => (
+                            <div key={level} className="flex flex-col items-center">
+                              <span className="size-4 rounded-full border-2 border-slate-500 bg-white"></span>
+                              <span className="text-[7pt] font-black text-slate-700 mt-0.5">{level}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 col-span-12">
+                      <span className="font-black text-slate-500 uppercase whitespace-nowrap">Nombre de quien reviso:</span>
+                      <span className="font-bold text-slate-900 border-b border-slate-300 flex-1 pb-1">&nbsp;</span>
+                    </div>
+                  </div>
+
+                  <div className="border border-slate-400 rounded overflow-hidden">
+                    <table className="w-full border-collapse" style={{ tableLayout: 'fixed' }}>
+                      <thead>
+                        <tr className="bg-[#9e1b32] text-white">
+                          <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase border-r border-slate-600 text-center" style={{ width: '8%' }}>#</th>
+                          <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase border-r border-slate-600 text-center" style={{ width: '48%' }}>Rubro</th>
+                          <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase border-r border-slate-600 text-center" style={{ width: '11%' }}>Bien</th>
+                          <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase border-r border-slate-600 text-center" style={{ width: '11%' }}>Regular</th>
+                          <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase border-r border-slate-600 text-center" style={{ width: '11%' }}>Mal</th>
+                          <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase text-center" style={{ width: '11%' }}>Muy Mal</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {DAILY_REVISION_RUBRICS.map((rubro, rubroIndex) => (
+                          <tr key={`${row.vehicle.id}-${rubroIndex}`} className={`${rubroIndex % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'} border-t border-slate-300`}>
+                            <td className="py-1.5 px-1 border-r border-slate-200 text-center text-[7pt] font-black text-slate-700">{rubroIndex + 1}</td>
+                            <td className="py-1.5 px-1 border-r border-slate-200 text-[7pt] font-bold text-slate-700">{rubro}</td>
+                            <td className="py-1.5 px-1 border-r border-slate-200 text-center text-[7pt] text-slate-500">[ ]</td>
+                            <td className="py-1.5 px-1 border-r border-slate-200 text-center text-[7pt] text-slate-500">[ ]</td>
+                            <td className="py-1.5 px-1 border-r border-slate-200 text-center text-[7pt] text-slate-500">[ ]</td>
+                            <td className="py-1.5 px-1 text-center text-[7pt] text-slate-500">[ ]</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div className="mt-3 border border-slate-300 rounded p-2">
+                    <p className="text-[7pt] font-black text-slate-500 uppercase mb-1">Observaciones Generales</p>
+                    <div className="h-14 border border-slate-200 rounded bg-white">&nbsp;</div>
+                  </div>
+
+                  <div className="mt-2 flex justify-between items-end">
+                    <div className="text-[7pt] text-slate-400">
+                      <p className="font-bold">* Formato diario: una hoja por vehiculo.</p>
+                      <p className="font-bold">* Reportar de inmediato cualquier condicion marcada como MAL o MUY MAL.</p>
+                    </div>
+                  </div>
+
+                  <div className="text-center mt-3 border-t border-slate-200 pt-2">
+                    <p className="text-[6pt] font-black text-slate-300 uppercase tracking-[0.3em]">Sistema de Gestion de Parque Vehicular - DIF Municipal La Paz</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* VISTA DE IMPRESIÓN */}
       {showPrintPreview && selectedInspection && (
         <div className="fixed inset-0 z-[200] bg-white flex flex-col overflow-y-auto">
@@ -496,7 +722,16 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
                 {/* Header Institucional - Formal Design */}
                 <div className="print-header flex justify-between items-center mb-8 border-b-4 border-slate-900 pb-6">
                   <div className="flex items-center gap-6">
-                    <img src="/images/logo-dif.png" alt="Logo" className="w-24 object-contain" />
+                    <img
+                      src={appLogo}
+                      alt="Logo"
+                      className="w-24 object-contain"
+                      onError={(e) => {
+                        const target = e.currentTarget;
+                        target.onerror = null;
+                        target.src = '/images/logo-dif.png';
+                      }}
+                    />
                     <div className="flex flex-col">
                       <span className="text-lg font-black text-slate-900 uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
                       <span className="text-lg font-black text-slate-900 uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>

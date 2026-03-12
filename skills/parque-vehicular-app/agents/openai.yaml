@@ -1,0 +1,4 @@
+interface:
+  display_name: "Parque Vehicular App"
+  short_description: "Flujos y cambios seguros para este repo React/Vite"
+  default_prompt: "Use $parque-vehicular-app to implement safely changes in modules, validations, Google Sheets sync, and printable formats."

@@ -184,6 +184,7 @@ export interface MaintenanceRecord {
   description: string;
   quoteNumber: string;
   quoteCost: number;
+  paymentMethod?: 'transferencia' | 'efectivo';
   invoiceNumber?: string;
   invoiceAmount?: number;
   odometer: number;

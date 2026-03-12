@@ -47,7 +47,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onUpdateSetting, onUrlCha
 
 const appsScriptCode = `
 /** 
- * API FLOTA PRO v8.7 - Combustible con hoja de adquisiciones
+ * API FLOTA PRO v8.8 - Mantenimiento con metodo de pago
  */
 
 const CONFIG = {
@@ -71,7 +71,7 @@ const CONFIG = {
     "Planeacion": ["id", "date", "vehicleId", "driverId", "areaId", "notes", "departureTime", "arrivalTime", "destination", "status"],
     "Areas": ["id", "name", "description"],
     "BitacorasViaje": ["id", "date", "departureTime", "arrivalTime", "driverId", "vehicleId", "initialOdometer", "finalOdometer", "destination", "areaId", "notes", "initialFuelLevel", "finalFuelLevel"],
-    "Mantenimiento": ["id", "consecutiveNumber", "date", "vehicleId", "serviceType", "description", "quoteNumber", "quoteCost", "invoiceNumber", "invoiceAmount", "odometer", "provider", "entryDate", "exitDate", "status", "estimatedDeliveryDate", "internalDocumentNumber", "providerContact"],
+    "Mantenimiento": ["id", "consecutiveNumber", "date", "vehicleId", "serviceType", "description", "quoteNumber", "quoteCost", "paymentMethod", "invoiceNumber", "invoiceAmount", "odometer", "provider", "entryDate", "exitDate", "status", "estimatedDeliveryDate", "internalDocumentNumber", "providerContact"],
     "TiposMantenimiento": ["id", "name"],
     "Proveedores": ["id", "name", "contact", "phone", "email", "address", "notes"],
     "Ajustes": ["key", "value"],
@@ -82,12 +82,6 @@ const CONFIG = {
 function doGet(e) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   Object.keys(CONFIG.sheets).forEach(name => getOrCreateSheet(ss, name));
-  
-  const userSheet = ss.getSheetByName("Usuarios");
-  if (userSheet.getLastRow() < 2) {
-    const defaultPassHash = Utilities.base64Encode(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, "Macaco123"));
-    userSheet.appendRow(["USR-1", "Administrador", "admin", defaultPassHash, "admin", "active", ""]);
-  }
 
   const data = {};
   Object.keys(CONFIG.sheets).forEach(name => {
@@ -371,7 +365,7 @@ function getSheetData(ss, name) {
               </div>
               <div className="bg-slate-900 rounded-xl p-6 shadow-inner">
                 <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-[10pt] font-black text-primary uppercase tracking-[0.2em] mb-4">Apps Script (v8.7 - Combustible y Adquisiciones)</h4>
+                  <h4 className="text-[10pt] font-black text-primary uppercase tracking-[0.2em] mb-4">Apps Script (v8.8 - Metodo de pago en mantenimiento)</h4>
                   <button onClick={async () => {
                     try {
                       await navigator.clipboard.writeText(appsScriptCode);
@@ -391,7 +385,7 @@ function getSheetData(ss, name) {
 
         <div className="xl:col-span-4 space-y-6">
           <div className="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm sticky top-28">
-            <h4 className="text-[10pt] font-black text-primary uppercase tracking-[0.2em] mb-4">Novedades v8.7</h4>
+            <h4 className="text-[10pt] font-black text-primary uppercase tracking-[0.2em] mb-4">Novedades v8.8</h4>
             <ul className="space-y-6">
               <li className="flex gap-4">
                 <span className="size-6 bg-primary text-white text-[10px] font-black flex items-center justify-center rounded-full shrink-0">1</span>
@@ -403,7 +397,11 @@ function getSheetData(ss, name) {
               </li>
               <li className="flex gap-4">
                 <span className="size-6 bg-primary text-white text-[10px] font-black flex items-center justify-center rounded-full shrink-0">3</span>
-                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Importante</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Debes actualizar el codigo en Apps Script para crear la hoja nueva y sincronizar adquisiciones.</p></div>
+                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Metodo de Pago en Mantenimiento</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Se agrega la columna "paymentMethod" en la hoja de mantenimiento para guardar transferencia o efectivo.</p></div>
+              </li>
+              <li className="flex gap-4">
+                <span className="size-6 bg-primary text-white text-[10px] font-black flex items-center justify-center rounded-full shrink-0">4</span>
+                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Importante</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Debes actualizar el codigo en Apps Script para crear o reconocer las nuevas columnas.</p></div>
               </li>
             </ul>
           </div>

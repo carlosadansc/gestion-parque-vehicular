@@ -38,6 +38,14 @@ const toDateTimeLocalValue = (value: unknown, fallback = ''): string => {
   return localDate.toISOString().slice(0, 16);
 };
 
+const normalizePaymentMethodValue = (value: unknown): '' | 'transferencia' | 'efectivo' => {
+  const raw = String(value ?? '').trim().toLowerCase();
+  if (!raw) return '';
+  if (raw.startsWith('transf')) return 'transferencia';
+  if (raw === 'efectivo' || raw === 'cash') return 'efectivo';
+  return '';
+};
+
 const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], maintenanceTypes = [], suppliers = [], settings = [], onAddRecord, onUpdateRecord, onAddMaintenanceType, onAddSupplier, onSync }) => {
   const [showModal, setShowModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -75,6 +83,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
     description: '',
     quoteNumber: '',
     quoteCost: '',
+    paymentMethod: '',
     invoiceNumber: '',
     invoiceAmount: '',
     odometer: '',
@@ -109,6 +118,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
       description: String(record.description ?? ''),
       quoteNumber: String(record.quoteNumber ?? ''),
       quoteCost: record.quoteCost !== undefined && record.quoteCost !== null ? String(record.quoteCost) : '',
+      paymentMethod: normalizePaymentMethodValue(record.paymentMethod),
       invoiceNumber: String(record.invoiceNumber ?? ''),
       invoiceAmount: record.invoiceAmount !== undefined && record.invoiceAmount !== null ? String(record.invoiceAmount) : '',
       odometer: record.odometer !== undefined && record.odometer !== null ? String(record.odometer) : '',
@@ -143,6 +153,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
         description: formData.description,
         quoteNumber: formData.quoteNumber,
         quoteCost: Number(formData.quoteCost) || 0,
+        paymentMethod: formData.paymentMethod ? formData.paymentMethod as MaintenanceRecord['paymentMethod'] : undefined,
         invoiceNumber: formData.invoiceNumber || undefined,
         invoiceAmount: formData.invoiceAmount ? Number(formData.invoiceAmount) : undefined,
         odometer: Number(formData.odometer) || 0,
@@ -211,6 +222,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
       description: '', 
       quoteNumber: '', 
       quoteCost: '', 
+      paymentMethod: '',
       invoiceNumber: '', 
       invoiceAmount: '', 
       odometer: '', 
@@ -527,6 +539,11 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                         <div>
                           <p className="font-black text-slate-900 text-sm">${(record.invoiceAmount || 0).toLocaleString()}</p>
                           <p className="text-[9px] font-black text-green-600 uppercase">Factura: {record.invoiceNumber}</p>
+                          {record.paymentMethod && (
+                            <p className="text-[9px] font-black text-slate-400 uppercase">
+                              Pago: {record.paymentMethod === 'transferencia' ? 'Transferencia' : 'Efectivo'}
+                            </p>
+                          )}
                         </div>
                       ) : (
                         <span className="text-[10px] text-slate-300 font-bold italic">Pendiente</span>
@@ -791,9 +808,24 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                         <input type="number" disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-black outline-none focus:bg-white focus:border-primary transition-all" value={formData.invoiceAmount} onChange={e => setFormData({...formData, invoiceAmount: e.target.value})} />
                       </div>
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Fecha de Salida Real</label>
-                      <input type="date" disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all" value={formData.exitDate} onChange={e => setFormData({...formData, exitDate: e.target.value})} />
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Método de Pago</label>
+                        <select
+                          disabled={isSaving}
+                          className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all"
+                          value={formData.paymentMethod}
+                          onChange={e => setFormData({ ...formData, paymentMethod: e.target.value })}
+                        >
+                          <option value="">Seleccionar...</option>
+                          <option value="transferencia">Transferencia</option>
+                          <option value="efectivo">Efectivo</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Fecha de Salida Real</label>
+                        <input type="date" disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all" value={formData.exitDate} onChange={e => setFormData({...formData, exitDate: e.target.value})} />
+                      </div>
                     </div>
                   </div>
 
@@ -918,6 +950,9 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                          <p className="text-[8pt] font-black text-slate-400 uppercase tracking-widest mb-1">Monto de Cotización</p>
                          <p className="text-[20pt] font-black text-primary tracking-tighter">${(Number(selectedRecord.quoteCost) || 0).toLocaleString('es-MX', {minimumFractionDigits: 2})}</p>
                          <p className="text-[9pt] font-bold text-slate-500 uppercase mt-1">Ref. Cotización: {selectedRecord.quoteNumber || 'S/N'}</p>
+                         <p className="text-[9pt] font-bold text-slate-500 uppercase mt-1">
+                           Método de Pago: {selectedRecord.paymentMethod ? (selectedRecord.paymentMethod === 'transferencia' ? 'Transferencia' : 'Efectivo') : 'No especificado'}
+                         </p>
                       </div>
                    </div>
                 </div>
