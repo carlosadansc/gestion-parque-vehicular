@@ -23,6 +23,11 @@ const toDateTimeLocalValue = (value: unknown, fallback = ''): string => {
   return localDate.toISOString().slice(0, 16);
 };
 
+const toDateInputValue = (value: Date): string => {
+  const localDate = new Date(value.getTime() - (value.getTimezoneOffset() * 60000));
+  return localDate.toISOString().slice(0, 10);
+};
+
 const DAILY_REVISION_RUBRICS = [
   'Motor',
   'Transmision',
@@ -48,8 +53,11 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
   const [showPrintPreview, setShowPrintPreview] = useState(false);
   const [selectedInspection, setSelectedInspection] = useState<VehicleInspection | null>(null);
   const [editingInspection, setEditingInspection] = useState<VehicleInspection | null>(null);
+  const [showDailyRevisionModal, setShowDailyRevisionModal] = useState(false);
   const [showDailyRevisionPrint, setShowDailyRevisionPrint] = useState(false);
   const [dailyRevisionDate, setDailyRevisionDate] = useState(() => new Date());
+  const [dailyRevisionDateInput, setDailyRevisionDateInput] = useState(() => toDateInputValue(new Date()));
+  const [dailyRevisionVehicleId, setDailyRevisionVehicleId] = useState('');
   const [formError, setFormError] = useState('');
 
   const settingsMap = useMemo(() => {
@@ -138,15 +146,37 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
     setShowPrintPreview(true);
   };
 
-  const dailyRevisionRows = useMemo(() => {
+  const availableDailyRevisionVehicles = useMemo(() => {
     return [...vehicles]
       .filter(v => v.status !== 'inactive')
       .sort((a, b) => String(a.plate || '').localeCompare(String(b.plate || ''), 'es'))
-      .map((vehicle, index) => ({
-        rowNumber: index + 1,
-        vehicle
-      }));
   }, [vehicles]);
+
+  const dailyRevisionVehicle = useMemo(
+    () => availableDailyRevisionVehicles.find(v => v.id === dailyRevisionVehicleId) || null,
+    [availableDailyRevisionVehicles, dailyRevisionVehicleId]
+  );
+
+  const dailyRevisionRows = useMemo(() => {
+    if (!dailyRevisionVehicle) return [];
+    return [{ rowNumber: 1, vehicle: dailyRevisionVehicle }];
+  }, [dailyRevisionVehicle]);
+
+  const handleOpenDailyRevisionModal = () => {
+    if (!availableDailyRevisionVehicles.length) return;
+    setDailyRevisionVehicleId(availableDailyRevisionVehicles[0].id);
+    setDailyRevisionDateInput(toDateInputValue(new Date()));
+    setShowDailyRevisionModal(true);
+  };
+
+  const handleDailyRevisionGenerate = () => {
+    if (!dailyRevisionVehicleId || !dailyRevisionDateInput) return;
+    const parsedDate = new Date(`${dailyRevisionDateInput}T12:00:00`);
+    if (Number.isNaN(parsedDate.getTime())) return;
+    setDailyRevisionDate(parsedDate);
+    setShowDailyRevisionModal(false);
+    setShowDailyRevisionPrint(true);
+  };
 
   const dailyRevisionDateLabel = useMemo(
     () => dailyRevisionDate.toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: '2-digit' }).toUpperCase(),
@@ -368,11 +398,8 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
         </div>
         <div className="flex items-center gap-3">
           <button
-            onClick={() => {
-              setDailyRevisionDate(new Date());
-              setShowDailyRevisionPrint(true);
-            }}
-            disabled={!dailyRevisionRows.length}
+            onClick={handleOpenDailyRevisionModal}
+            disabled={!availableDailyRevisionVehicles.length}
             className="btn btn-secondary"
           >
             <span className="material-symbols-outlined ui-icon">fact_check</span>
@@ -539,6 +566,75 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
         </div>
       )}
 
+      {showDailyRevisionModal && (
+        <div className="fixed inset-0 z-[140] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-300 no-print">
+          <div className="bg-white rounded-[2rem] w-full max-w-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+              <div>
+                <h3 className="text-xl font-black text-slate-900 tracking-tight">Bitacora de Revision</h3>
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Selecciona unidad y fecha</p>
+              </div>
+              <button onClick={() => setShowDailyRevisionModal(false)} className="size-10 rounded-full hover:bg-white hover:shadow-md transition-all flex items-center justify-center text-slate-400">
+                <span className="material-symbols-outlined ui-icon">close</span>
+              </button>
+            </div>
+            <div className="p-8 space-y-6">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Vehiculo</label>
+                <select
+                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none focus:ring-4 focus:ring-blue-500/10"
+                  value={dailyRevisionVehicleId}
+                  onChange={e => setDailyRevisionVehicleId(e.target.value)}
+                >
+                  <option value="">Seleccionar vehiculo...</option>
+                  {availableDailyRevisionVehicles.map(v => (
+                    <option key={v.id} value={v.id}>{v.plate} - {v.model}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Fecha de revision</label>
+                <input
+                  type="date"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none focus:ring-4 focus:ring-blue-500/10"
+                  value={dailyRevisionDateInput}
+                  onChange={e => setDailyRevisionDateInput(e.target.value)}
+                />
+              </div>
+              {dailyRevisionVehicle && (
+                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center gap-4">
+                  <div className="size-12 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm">
+                    <span className="material-symbols-outlined ui-icon">directions_car</span>
+                  </div>
+                  <div>
+                    <p className="font-bold text-slate-900 leading-tight">{dailyRevisionVehicle.model}</p>
+                    <p className="text-xs font-mono text-slate-500">{dailyRevisionVehicle.plate} {dailyRevisionVehicle.economicNumber ? `- No. Eco: ${dailyRevisionVehicle.economicNumber}` : ''}</p>
+                  </div>
+                </div>
+              )}
+              <div className="flex gap-4 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowDailyRevisionModal(false)}
+                  className="flex-1 py-3.5 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-50 rounded-2xl transition-all"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDailyRevisionGenerate}
+                  disabled={!dailyRevisionVehicleId || !dailyRevisionDateInput}
+                  className="flex-[2] py-3.5 bg-primary text-white text-[11px] font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-blue-500/20 hover:opacity-90 transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <span className="material-symbols-outlined ui-icon">description</span>
+                  Abrir Bitacora
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* VISTA PREVIA DE BITACORA DE REVISION MECANICA */}
       {showDailyRevisionPrint && dailyRevisionRows.length > 0 && (
         <div id="daily-revision-preview-screen" className="fixed inset-0 z-[210] bg-white flex flex-col overflow-y-auto">
@@ -550,6 +646,9 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
               <div>
                 <p className="text-sm font-black uppercase tracking-widest">Bitacora de Revision Mecanica</p>
                 <p className="text-xs text-slate-400">{dailyRevisionDateLabel}</p>
+                {dailyRevisionVehicle && (
+                  <p className="text-xs text-slate-400">{dailyRevisionVehicle.plate} - {dailyRevisionVehicle.model}</p>
+                )}
               </div>
             </div>
             <button onClick={() => window.print()} className="bg-primary px-6 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center gap-2 shadow-lg hover:opacity-90 transition-all">
@@ -562,7 +661,11 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
               margin-bottom: 1.5rem;
             }
             @media print {
-              @page { margin: 0.5cm; size: letter landscape; }
+              @page { margin: 0; size: letter landscape; }
+              html, body {
+                margin: 0 !important;
+                padding: 0 !important;
+              }
               #daily-revision-preview-screen {
                 position: static !important;
                 inset: auto !important;
@@ -584,6 +687,12 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
               #daily-revision-printable .daily-revision-sheet {
                 margin: 0 !important;
                 box-shadow: none !important;
+                width: 27.94cm !important;
+                height: 21.59cm !important;
+                min-height: 0 !important;
+                padding: 0.55cm 0.8cm !important;
+                box-sizing: border-box !important;
+                overflow: hidden !important;
                 page-break-after: always;
                 break-after: page;
               }
@@ -597,7 +706,7 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
           <div id="daily-revision-preview-content" className="flex-1 bg-slate-100 p-6 flex justify-center overflow-auto">
             <div id="daily-revision-printable" className="w-full">
               {dailyRevisionRows.map((row, idx) => (
-                <div key={`${row.vehicle.id}-${idx}`} className="daily-revision-sheet mx-auto bg-white shadow-2xl relative text-slate-900" style={{ width: '27.94cm', minHeight: '21.59cm', padding: '0.8cm 1cm' }}>
+                <div key={`${row.vehicle.id}-${idx}`} className="daily-revision-sheet mx-auto bg-white shadow-2xl relative text-slate-900" style={{ width: '27.94cm', minHeight: '21.59cm', padding: '0.8cm 1cm', boxSizing: 'border-box' }}>
                   <div className="flex justify-between items-center border-b-2 border-slate-900 pb-3 mb-3">
                     <div className="flex items-center gap-4">
                       <img
@@ -697,9 +806,6 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
                     </div>
                   </div>
 
-                  <div className="text-center mt-3 border-t border-slate-200 pt-2">
-                    <p className="text-[6pt] font-black text-slate-300 uppercase tracking-[0.3em]">Sistema de Gestion de Parque Vehicular - DIF Municipal La Paz</p>
-                  </div>
                 </div>
               ))}
             </div>
