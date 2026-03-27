@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { View, Vehicle, Driver, FuelEntry, FuelAcquisition, Incident, Planning, Area, TravelLog, MaintenanceRecord, AppSetting, User, VehicleInspection, MaintenanceType, Supplier } from './types';
+import { View, Vehicle, Driver, FuelEntry, FuelAcquisition, FuelDelivery, Incident, Planning, Area, TravelLog, MaintenanceRecord, AppSetting, User, VehicleInspection, MaintenanceType, Supplier } from './types';
 import { VEHICLES as initialVehicles, DRIVERS as initialDrivers, INCIDENTS as initialIncidents, FUEL_HISTORY as initialFuel } from './constants';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
@@ -135,6 +135,39 @@ const validateFuelAcquisitionPayload = (entry: Omit<FuelAcquisition, 'id'> | Fue
   if (hasValue(entry.consecutiveNumber)) {
     ensure(Number.isInteger(Number(entry.consecutiveNumber)) && Number(entry.consecutiveNumber) > 0, 'El consecutivo debe ser un entero positivo.');
   }
+};
+
+const validateFuelDeliveryPayload = (
+  entry: Omit<FuelDelivery, 'id'> | FuelDelivery,
+  acquisitionList: FuelAcquisition[],
+  deliveryList: FuelDelivery[],
+  currentId?: string
+) => {
+  ensure(isValidDateValue(entry.date), 'La fecha de entrega no es valida.');
+  ensure(hasText(entry.acquisitionId), 'Debes seleccionar una adquisicion valida.');
+  ensure(hasText(entry.area), 'El area destino es obligatoria.');
+  ensure(hasText(entry.purpose), 'El motivo de entrega es obligatorio.');
+  ensure(hasText(entry.recipientName), 'El nombre de quien recibe es obligatorio.');
+  ensure(isFiniteNumber(entry.amount) && Number(entry.amount) > 0, 'El monto entregado debe ser mayor a 0.');
+  ensure(entry.acquisitionType === 'qr' || entry.acquisitionType === 'voucher', 'El tipo de adquisicion de la entrega no es valido.');
+
+  const acquisition = acquisitionList.find(a => a.id === entry.acquisitionId);
+  ensure(Boolean(acquisition), 'La adquisicion seleccionada no existe.');
+
+  const expectedType: FuelDelivery['acquisitionType'] = acquisition?.isQr ? 'qr' : 'voucher';
+  ensure(entry.acquisitionType === expectedType, 'El tipo de entrega no coincide con la adquisicion seleccionada.');
+
+  const alreadyDelivered = deliveryList
+    .filter(d => d.acquisitionId === entry.acquisitionId && (!currentId || d.id !== currentId))
+    .reduce((acc, item) => acc + (Number(item.amount) || 0), 0);
+
+  const acquisitionAmount = Number(acquisition?.amount || 0);
+  const availableAmount = acquisitionAmount - alreadyDelivered;
+  const requestedAmount = Number(entry.amount);
+  ensure(
+    requestedAmount <= availableAmount + 0.0001,
+    `El monto entregado excede el saldo disponible de la adquisicion (${Math.max(availableAmount, 0).toFixed(2)}).`
+  );
 };
 
 const validateIncidentPayload = (incident: Omit<Incident, 'id'> | Incident, vehicleList: Vehicle[], driverList: Driver[]) => {
@@ -289,6 +322,7 @@ const App: React.FC = () => {
   const [incidents, setIncidents] = useState<Incident[]>(initialIncidents);
   const [fuelEntries, setFuelEntries] = useState<FuelEntry[]>(initialFuel);
   const [fuelAcquisitions, setFuelAcquisitions] = useState<FuelAcquisition[]>([]);
+  const [fuelDeliveries, setFuelDeliveries] = useState<FuelDelivery[]>([]);
   const [plannings, setPlannings] = useState<Planning[]>([]);
   const [areas, setAreas] = useState<Area[]>([]);
   const [travelLogs, setTravelLogs] = useState<TravelLog[]>([]);
@@ -372,6 +406,7 @@ const App: React.FC = () => {
         if (data.drivers) setDrivers(data.drivers);
         if (data.fuelEntries) setFuelEntries(data.fuelEntries);
         if (data.fuelAcquisitions) setFuelAcquisitions(data.fuelAcquisitions);
+        if (data.fuelDeliveries) setFuelDeliveries(data.fuelDeliveries);
         if (data.incidents) setIncidents(data.incidents);
         if (data.plannings) setPlannings(data.plannings);
         if (data.areas) setAreas(data.areas);
@@ -832,6 +867,51 @@ const App: React.FC = () => {
     }
   };
 
+  const handleAddFuelDelivery = async (newDelivery: Omit<FuelDelivery, 'id'>) => {
+    const previousFuelDeliveries = fuelDeliveries;
+    try {
+    const formatted = {
+      ...newDelivery,
+      area: (newDelivery.area || '').toUpperCase(),
+      purpose: (newDelivery.purpose || '').toUpperCase(),
+      recipientName: (newDelivery.recipientName || '').toUpperCase(),
+      recipientPosition: newDelivery.recipientPosition?.toUpperCase(),
+      notes: newDelivery.notes?.toUpperCase(),
+      acquisitionInternalFolio: newDelivery.acquisitionInternalFolio?.toUpperCase()
+    };
+    validateFuelDeliveryPayload(formatted, fuelAcquisitions, fuelDeliveries);
+    const deliveryWithId = { ...formatted, id: `FD-${Date.now()}` };
+    setFuelDeliveries([deliveryWithId, ...fuelDeliveries]);
+    await persistOrThrow('fuel-delivery', deliveryWithId, 'guardar');
+    } catch (error) {
+      setFuelDeliveries(previousFuelDeliveries);
+      throw error;
+    }
+  };
+
+  const handleUpdateFuelDelivery = async (updatedDelivery: FuelDelivery) => {
+    const previousFuelDeliveries = fuelDeliveries;
+    try {
+    const formatted = {
+      ...updatedDelivery,
+      area: (updatedDelivery.area || '').toUpperCase(),
+      purpose: (updatedDelivery.purpose || '').toUpperCase(),
+      recipientName: (updatedDelivery.recipientName || '').toUpperCase(),
+      recipientPosition: updatedDelivery.recipientPosition?.toUpperCase(),
+      notes: updatedDelivery.notes?.toUpperCase(),
+      acquisitionInternalFolio: updatedDelivery.acquisitionInternalFolio?.toUpperCase()
+    };
+    ensure(hasText(formatted.id), 'No se pudo identificar la entrega de combustible.');
+    ensure(fuelDeliveries.some(d => d.id === formatted.id), 'La entrega de combustible que intentas actualizar no existe.');
+    validateFuelDeliveryPayload(formatted, fuelAcquisitions, fuelDeliveries, formatted.id);
+    setFuelDeliveries(fuelDeliveries.map(d => d.id === formatted.id ? formatted : d));
+    await persistOrThrow('update-fuel-delivery', formatted, 'actualizar');
+    } catch (error) {
+      setFuelDeliveries(previousFuelDeliveries);
+      throw error;
+    }
+  };
+
   const handleAddIncident = async (newIncident: Omit<Incident, 'id'>) => {
     const previousIncidents = incidents;
     try {
@@ -1160,6 +1240,7 @@ const App: React.FC = () => {
           <Fuel
             fuelHistory={fuelEntries}
             fuelAcquisitions={fuelAcquisitions}
+            fuelDeliveries={fuelDeliveries}
             vehicles={vehicles}
             drivers={drivers}
             areas={areas}
@@ -1184,6 +1265,16 @@ const App: React.FC = () => {
               () => handleUpdateFuelAcquisition(payload),
               'Adquisicion de combustible actualizada.',
               'No se pudo actualizar la adquisicion de combustible.'
+            )}
+            onAddFuelDelivery={async (payload) => executeWithToast(
+              () => handleAddFuelDelivery(payload),
+              'Entrega de combustible registrada.',
+              'No se pudo registrar la entrega de combustible.'
+            )}
+            onUpdateFuelDelivery={async (payload) => executeWithToast(
+              () => handleUpdateFuelDelivery(payload),
+              'Entrega de combustible actualizada.',
+              'No se pudo actualizar la entrega de combustible.'
             )}
             onSync={handleSyncWithToast}
           />

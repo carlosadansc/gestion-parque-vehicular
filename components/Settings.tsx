@@ -47,7 +47,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onUpdateSetting, onUrlCha
 
 const appsScriptCode = `
 /** 
- * API FLOTA PRO v8.8 - Mantenimiento con metodo de pago
+ * API FLOTA PRO v8.9 - Entregas de combustible por adquisicion
  */
 
 const CONFIG = {
@@ -67,6 +67,7 @@ const CONFIG = {
     "Choferes": ["id", "name", "licenseType", "licenseNumber", "phone", "status", "assignedVehicleId", "image", "notes"],
     "Combustible": ["id", "date", "vehicleId", "driverId", "liters", "cost", "odometer"],
     "CombustibleAdquisiciones": ["id", "consecutiveNumber", "internalFolio", "date", "isQr", "validFrom", "validTo", "description", "amount", "area", "supplier"],
+    "CombustibleEntregas": ["id", "consecutiveNumber", "date", "acquisitionId", "acquisitionConsecutiveNumber", "acquisitionInternalFolio", "acquisitionType", "area", "amount", "purpose", "recipientName", "recipientPosition", "notes"],
     "Incidencias": ["id", "date", "type", "title", "description", "vehicleId", "driverId", "status"],
     "Planeacion": ["id", "date", "vehicleId", "driverId", "areaId", "notes", "departureTime", "arrivalTime", "destination", "status"],
     "Areas": ["id", "name", "description"],
@@ -94,6 +95,7 @@ function doGet(e) {
     drivers: data.choferes,
     fuelEntries: data.combustible,
     fuelAcquisitions: data.combustibleadquisiciones,
+    fuelDeliveries: data.combustibleentregas,
     incidents: data.incidencias,
     plannings: data.planeacion,
     areas: data.areas,
@@ -124,6 +126,7 @@ function doPost(e) {
     let sheetName = "";
      if (action === 'fuel' || action === 'update-fuel') sheetName = "Combustible";
     else if (action === 'fuel-acquisition' || action === 'update-fuel-acquisition') sheetName = "CombustibleAdquisiciones";
+    else if (action === 'fuel-delivery' || action === 'update-fuel-delivery') sheetName = "CombustibleEntregas";
     else if (action === 'incident' || action === 'update-incident') sheetName = "Incidencias";
     else if (action === 'vehicle' || action === 'update-vehicle') sheetName = "Vehiculos";
      else if (action === 'inspection' || action === 'update-inspection') sheetName = "Revisiones";
@@ -338,13 +341,6 @@ function getSheetData(ss, name) {
                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Cargo del Coordinador Administrativo</label>
                  <input className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm font-bold outline-none focus:border-primary transition-all" value={localSettings['ADMINISTRATIVE_COORDINATOR_POS'] || ''} onChange={e => handleUpdate('ADMINISTRATIVE_COORDINATOR_POS', e.target.value)} placeholder="Cargo del coordinador administrativo" />
                </div>
-              
-               <div className="space-y-6">
-                 <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
-                   <p className="text-sm font-semibold text-blue-800">Colores Institucionales</p>
-                   <p className="text-xs text-blue-600 mt-1">Los colores están configurados institucionalmente: Primary <span className="font-mono">#135bec</span> y Secondary <span className="font-mono">#0f172a</span></p>
-                 </div>
-               </div>
             </div>
           </section>
 
@@ -365,7 +361,7 @@ function getSheetData(ss, name) {
               </div>
               <div className="bg-slate-900 rounded-xl p-6 shadow-inner">
                 <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-[10pt] font-black text-primary uppercase tracking-[0.2em] mb-4">Apps Script (v8.8 - Metodo de pago en mantenimiento)</h4>
+                  <h4 className="text-[10pt] font-black text-primary uppercase tracking-[0.2em] mb-4">Apps Script (v8.9 - Entregas de combustible)</h4>
                   <button onClick={async () => {
                     try {
                       await navigator.clipboard.writeText(appsScriptCode);
@@ -385,7 +381,7 @@ function getSheetData(ss, name) {
 
         <div className="xl:col-span-4 space-y-6">
           <div className="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm sticky top-28">
-            <h4 className="text-[10pt] font-black text-primary uppercase tracking-[0.2em] mb-4">Novedades v8.8</h4>
+            <h4 className="text-[10pt] font-black text-primary uppercase tracking-[0.2em] mb-4">Novedades v8.9</h4>
             <ul className="space-y-6">
               <li className="flex gap-4">
                 <span className="size-6 bg-primary text-white text-[10px] font-black flex items-center justify-center rounded-full shrink-0">1</span>
@@ -402,6 +398,10 @@ function getSheetData(ss, name) {
               <li className="flex gap-4">
                 <span className="size-6 bg-primary text-white text-[10px] font-black flex items-center justify-center rounded-full shrink-0">4</span>
                 <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Importante</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Debes actualizar el codigo en Apps Script para crear o reconocer las nuevas columnas.</p></div>
+              </li>
+              <li className="flex gap-4">
+                <span className="size-6 bg-primary text-white text-[10px] font-black flex items-center justify-center rounded-full shrink-0">5</span>
+                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Entregas por Adquisicion</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Nueva hoja "CombustibleEntregas" para distribuir una adquisicion en varias entregas por area y motivo.</p></div>
               </li>
             </ul>
           </div>

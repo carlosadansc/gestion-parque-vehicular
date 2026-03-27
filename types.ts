@@ -144,6 +144,22 @@ export interface FuelAcquisition {
   supplier: string;
 }
 
+export interface FuelDelivery {
+  id: string;
+  consecutiveNumber?: number;
+  date: string;
+  acquisitionId: string;
+  acquisitionConsecutiveNumber?: number;
+  acquisitionInternalFolio?: string;
+  acquisitionType: 'qr' | 'voucher';
+  area: string;
+  amount: number;
+  purpose: string;
+  recipientName: string;
+  recipientPosition?: string;
+  notes?: string;
+}
+
 export interface TravelLog {
   id: string;
   date: string;
