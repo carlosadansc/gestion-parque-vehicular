@@ -104,6 +104,8 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, searchQuery, onAddInci
   const instName = settingsMap['INSTITUTION_NAME'] || 'SISTEMA PARA EL DESARROLLO INTEGRAL DE LA FAMILIA';
   const managerName = settingsMap['VEHICLE_MANAGER_NAME'] || 'RESPONSABLE DE ÁREA';
   const managerPos = settingsMap['VEHICLE_MANAGER_POS'] || 'ENCARGADO DE PARQUE VEHICULAR';
+  const coordName = settingsMap['ADMINISTRATIVE_COORDINATOR_NAME'] || '';
+  const coordPos = settingsMap['ADMINISTRATIVE_COORDINATOR_POS'] || 'COORDINADOR ADMINISTRATIVO';
   // Normalizar la ruta del logo (convertir rutas relativas a absolutas)
   const rawLogo = settingsMap['APP_LOGO'] || '/images/logo-dif.png';
   const appLogo = rawLogo.startsWith('./') ? rawLogo.replace('./', '/') : rawLogo;
@@ -212,7 +214,14 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, searchQuery, onAddInci
                   </span>
                 </div>
                 <div className="flex justify-between items-start">
-                  <h3 className="font-black text-slate-900 text-lg tracking-tight leading-tight flex-1">{incident.title}</h3>
+                  <div className="flex-1">
+                    {incident.consecutiveNumber != null && (
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-0.5">
+                        FOLIO INC-{String(incident.consecutiveNumber).padStart(4, '0')}
+                      </p>
+                    )}
+                    <h3 className="font-black text-slate-900 text-lg tracking-tight leading-tight">{incident.title}</h3>
+                  </div>
                   <div className="flex items-center gap-1 ml-2">
                     <button 
                         onClick={() => handleEdit(incident)}
@@ -418,7 +427,7 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, searchQuery, onAddInci
                   <div className="inline-block bg-slate-900 text-white px-4 py-1.5 font-black text-[10pt] uppercase tracking-widest rounded-sm mb-2">
                       Reporte de Incidencia Vehicular
                   </div>
-                  <p className="text-xs font-bold text-slate-600">FOLIO: <span className="font-black text-slate-900 text-lg ml-1">{(selectedIncident.id || '---').slice(-6).toUpperCase()}</span></p>
+                  <p className="text-xs font-bold text-slate-600">FOLIO: <span className="font-black text-slate-900 text-lg ml-1">INC-{String(selectedIncident.consecutiveNumber ?? 0).padStart(4, '0')}</span></p>
                   <p className="text-[9pt] text-slate-400 font-bold mt-1">Fecha de Emisión: {new Date().toLocaleDateString('es-ES', {year: 'numeric', month: 'long', day: 'numeric'})}</p>
                 </div>
               </div>
@@ -469,12 +478,19 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, searchQuery, onAddInci
 
                {/* Firmas - Formal Signature Section */}
                <div className="signature-section absolute bottom-[1.5cm] left-[1.5cm] right-[1.5cm]">
-                   <div className="grid grid-cols-2 gap-24 text-center">
+                   <div className={`grid gap-8 text-center ${coordName ? 'grid-cols-3' : 'grid-cols-2 gap-24'}`}>
                        <div className="signature-line border-t-2 border-slate-900 pt-4">
                            <p className="text-[9pt] font-black uppercase text-slate-900">{reportDriver?.name || 'OPERADOR RESPONSABLE'}</p>
                            <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Operador</p>
                            <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Aviso de Incidencia</p>
                        </div>
+                       {coordName && (
+                         <div className="signature-line border-t-2 border-slate-900 pt-4">
+                             <p className="text-[9pt] font-black uppercase text-slate-900">{coordName}</p>
+                             <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">{coordPos}</p>
+                             <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Vo. Bo.</p>
+                         </div>
+                       )}
                        <div className="signature-line border-t-2 border-slate-900 pt-4">
                            <p className="text-[9pt] font-black uppercase text-slate-900">{managerName}</p>
                            <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">{managerPos}</p>

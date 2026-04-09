@@ -47,7 +47,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onUpdateSetting, onUrlCha
 
 const appsScriptCode = `
 /** 
- * API FLOTA PRO v8.9 - Entregas de combustible por adquisicion
+ * API FLOTA PRO v9.0 - Folio consecutivo en Incidencias
  */
 
 const CONFIG = {
@@ -68,7 +68,7 @@ const CONFIG = {
     "Combustible": ["id", "date", "vehicleId", "driverId", "liters", "cost", "odometer"],
     "CombustibleAdquisiciones": ["id", "consecutiveNumber", "internalFolio", "date", "isQr", "validFrom", "validTo", "description", "amount", "area", "supplier"],
     "CombustibleEntregas": ["id", "consecutiveNumber", "date", "acquisitionId", "acquisitionConsecutiveNumber", "acquisitionInternalFolio", "acquisitionType", "area", "amount", "purpose", "recipientName", "recipientPosition", "notes"],
-    "Incidencias": ["id", "date", "type", "title", "description", "vehicleId", "driverId", "status"],
+    "Incidencias": ["id", "consecutiveNumber", "date", "type", "title", "description", "vehicleId", "driverId", "status"],
     "Planeacion": ["id", "date", "vehicleId", "driverId", "areaId", "notes", "departureTime", "arrivalTime", "destination", "status"],
     "Areas": ["id", "name", "description"],
     "BitacorasViaje": ["id", "date", "departureTime", "arrivalTime", "driverId", "vehicleId", "initialOdometer", "finalOdometer", "destination", "areaId", "notes", "initialFuelLevel", "finalFuelLevel"],
@@ -150,7 +150,7 @@ function doPost(e) {
     }
 
     const sheet = getOrCreateSheet(ss, sheetName);
-    const headersInSheet = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    const headersInSheet = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(h => String(h).trim());
 
     const requiresUniqueName = action === 'maintenance-type' ||
       action === 'update-maintenance-type' ||
@@ -262,8 +262,27 @@ function getOrCreateSheet(ss, name) {
     const headers = CONFIG.sheets[name];
     sheet.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight("bold").setBackground("#f1f5f9");
     sheet.setFrozenRows(1);
+  } else {
+    // Agregar columnas nuevas que no existian en versiones anteriores
+    ensureColumns(sheet, name);
   }
   return sheet;
+}
+
+function ensureColumns(sheet, name) {
+  const expected = CONFIG.sheets[name];
+  if (!expected) return;
+  const lastCol = sheet.getLastColumn();
+  const existing = lastCol > 0
+    ? sheet.getRange(1, 1, 1, lastCol).getValues()[0].map(h => h.toString().trim())
+    : [];
+  expected.forEach(col => {
+    if (!existing.includes(col)) {
+      const newCol = existing.length + 1;
+      sheet.getRange(1, newCol).setValue(col).setFontWeight("bold").setBackground("#f1f5f9");
+      existing.push(col);
+    }
+  });
 }
 
 function getSheetData(ss, name) {
@@ -361,7 +380,7 @@ function getSheetData(ss, name) {
               </div>
               <div className="bg-slate-900 rounded-xl p-6 shadow-inner">
                 <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-[10pt] font-black text-primary uppercase tracking-[0.2em] mb-4">Apps Script (v8.9 - Entregas de combustible)</h4>
+                  <h4 className="text-[10pt] font-black text-primary uppercase tracking-[0.2em] mb-4">Apps Script (v9.0 - Folio consecutivo en Incidencias)</h4>
                   <button onClick={async () => {
                     try {
                       await navigator.clipboard.writeText(appsScriptCode);
@@ -385,23 +404,23 @@ function getSheetData(ss, name) {
             <ul className="space-y-6">
               <li className="flex gap-4">
                 <span className="size-6 bg-primary text-white text-[10px] font-black flex items-center justify-center rounded-full shrink-0">1</span>
-                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Adquisiciones de Combustible</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Nueva hoja "CombustibleAdquisiciones" para vales y compras por codigo QR.</p></div>
+                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Folio Consecutivo en Incidencias</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Cada incidencia ahora recibe un folio INC-0001, INC-0002... que se muestra en las tarjetas y en el PDF.</p></div>
               </li>
               <li className="flex gap-4">
                 <span className="size-6 bg-primary text-white text-[10px] font-black flex items-center justify-center rounded-full shrink-0">2</span>
-                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Nuevo Tab en Combustible</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">El modulo de combustible ahora incluye un tab para registrar adquisiciones.</p></div>
+                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Firma del Coordinador Administrativo</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Si configuras el nombre del Coordinador Administrativo, aparecerá como tercer firmante en el reporte PDF de incidencias.</p></div>
               </li>
               <li className="flex gap-4">
                 <span className="size-6 bg-primary text-white text-[10px] font-black flex items-center justify-center rounded-full shrink-0">3</span>
-                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Metodo de Pago en Mantenimiento</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Se agrega la columna "paymentMethod" en la hoja de mantenimiento para guardar transferencia o efectivo.</p></div>
+                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Nueva columna en Incidencias</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">La hoja "Incidencias" ahora incluye la columna "consecutiveNumber". Actualiza el código en Apps Script.</p></div>
               </li>
               <li className="flex gap-4">
                 <span className="size-6 bg-primary text-white text-[10px] font-black flex items-center justify-center rounded-full shrink-0">4</span>
-                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Importante</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Debes actualizar el codigo en Apps Script para crear o reconocer las nuevas columnas.</p></div>
+                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Adquisiciones de Combustible</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Nueva hoja "CombustibleAdquisiciones" para vales y compras por codigo QR.</p></div>
               </li>
               <li className="flex gap-4">
                 <span className="size-6 bg-primary text-white text-[10px] font-black flex items-center justify-center rounded-full shrink-0">5</span>
-                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Entregas por Adquisicion</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Nueva hoja "CombustibleEntregas" para distribuir una adquisicion en varias entregas por area y motivo.</p></div>
+                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Importante</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Debes actualizar el codigo en Apps Script para crear o reconocer las nuevas columnas.</p></div>
               </li>
             </ul>
           </div>

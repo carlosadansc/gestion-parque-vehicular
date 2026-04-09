@@ -1,21 +1,20 @@
-﻿
-export enum View {
-  DASHBOARD = 'dashboard',
-  VEHICLES = 'vehicles',
-  DRIVERS = 'drivers',
-  FUEL = 'fuel',
-  INCIDENTS = 'incidents',
-  PLANNING = 'planning',
-  TRAVEL_LOGS = 'travel_logs',
-  MAINTENANCE = 'maintenance',
-  INSPECTIONS = 'inspections',
-  USERS = 'users',
-  SETTINGS = 'settings',
-  LOGIN = 'login',
-  REPORTS = 'reports'
+﻿export enum View {
+  DASHBOARD = "dashboard",
+  VEHICLES = "vehicles",
+  DRIVERS = "drivers",
+  FUEL = "fuel",
+  INCIDENTS = "incidents",
+  PLANNING = "planning",
+  TRAVEL_LOGS = "travel_logs",
+  MAINTENANCE = "maintenance",
+  INSPECTIONS = "inspections",
+  USERS = "users",
+  SETTINGS = "settings",
+  LOGIN = "login",
+  REPORTS = "reports",
 }
 
-export type UserRole = 'admin' | 'operator' | 'viewer';
+export type UserRole = "admin" | "operator" | "viewer";
 
 export interface User {
   id: string;
@@ -23,18 +22,27 @@ export interface User {
   username: string;
   password?: string;
   role: UserRole;
-  status: 'active' | 'inactive';
+  status: "active" | "inactive";
   lastLogin?: string;
 }
 
-export type Status = 'active' | 'inactive' | 'workshop' | 'available' | 'en-route' | 'on-break' | 'critical' | 'resolved' | 'pending';
+export type Status =
+  | "active"
+  | "inactive"
+  | "workshop"
+  | "available"
+  | "en-route"
+  | "on-break"
+  | "critical"
+  | "resolved"
+  | "pending";
 
 export interface Vehicle {
   id: string;
   plate: string;
   model: string;
   assignedDriverId?: string;
-  status: 'active' | 'workshop' | 'inactive';
+  status: "active" | "workshop" | "inactive";
   image: string;
   // Datos TÃ©cnicos (JSON Request)
   economicNumber?: string;
@@ -115,7 +123,7 @@ export interface Driver {
   licenseType: string;
   licenseNumber: string;
   phone: string;
-  status: 'available' | 'en-route' | 'on-break';
+  status: "available" | "en-route" | "on-break";
   assignedVehicleId?: string;
   notes?: string;
 }
@@ -151,7 +159,7 @@ export interface FuelDelivery {
   acquisitionId: string;
   acquisitionConsecutiveNumber?: number;
   acquisitionInternalFolio?: string;
-  acquisitionType: 'qr' | 'voucher';
+  acquisitionType: "qr" | "voucher";
   area: string;
   amount: number;
   purpose: string;
@@ -200,7 +208,7 @@ export interface MaintenanceRecord {
   description: string;
   quoteNumber: string;
   quoteCost: number;
-  paymentMethod?: 'transferencia' | 'efectivo';
+  paymentMethod?: "transferencia" | "efectivo";
   invoiceNumber?: string;
   invoiceAmount?: number;
   odometer: number;
@@ -210,18 +218,19 @@ export interface MaintenanceRecord {
   exitDate?: string;
   estimatedDeliveryDate?: string;
   internalDocumentNumber?: string;
-  status: 'scheduled' | 'in-progress' | 'completed' | 'cancelled';
+  status: "scheduled" | "in-progress" | "completed" | "cancelled";
 }
 
 export interface Incident {
   id: string;
-  type: 'mechanical' | 'traffic' | 'accident' | 'theft';
+  consecutiveNumber?: number; // Folio consecutivo automático
+  type: "mechanical" | "traffic" | "accident" | "theft";
   title: string;
   description: string;
   date: string;
   vehicleId: string;
   driverId: string;
-  status: 'critical' | 'pending' | 'resolved' | 'in-workshop' | 'in-resolution';
+  status: "critical" | "pending" | "resolved" | "in-workshop" | "in-resolution";
 }
 
 export interface Planning {
@@ -234,7 +243,7 @@ export interface Planning {
   departureTime?: string;
   arrivalTime?: string;
   destination?: string;
-  status?: 'scheduled' | 'completed' | 'cancelled'; // Added status field
+  status?: "scheduled" | "completed" | "cancelled"; // Added status field
 }
 
 export interface Area {
@@ -247,4 +256,3 @@ export interface AppSetting {
   key: string;
   value: string;
 }
-

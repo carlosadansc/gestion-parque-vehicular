@@ -30,7 +30,9 @@ const DEFAULT_SETTINGS: AppSetting[] = [
   { key: 'VEHICLE_MANAGER_NAME', value: 'ING. CARLOS ADÁN SÁNCHEZ CESEÑA' },
   { key: 'VEHICLE_MANAGER_POS', value: 'ENCARGADO DE PARQUE VEHICULAR' },
   { key: 'HEAD_OF_MATERIAL_RESOURCES', value: '' },
-  { key: 'HEAD_OF_MATERIAL_RESOURCES_POS', value: 'JEFE DE RECURSOS MATERIALES' }
+  { key: 'HEAD_OF_MATERIAL_RESOURCES_POS', value: 'JEFE DE RECURSOS MATERIALES' },
+  { key: 'ADMINISTRATIVE_COORDINATOR_NAME', value: '' },
+  { key: 'ADMINISTRATIVE_COORDINATOR_POS', value: 'COORDINADOR ADMINISTRATIVO' }
 ];
 
 const DEFAULT_MAINTENANCE_TYPES: MaintenanceType[] = [
@@ -921,7 +923,9 @@ const App: React.FC = () => {
       description: newIncident.description.toUpperCase() 
     };
     validateIncidentPayload(formatted, vehicles, drivers);
-    const incidentWithId = { ...formatted, id: `I-${Date.now()}` };
+    const nextConsecutive = incidents.reduce((max, i) => Math.max(max, i.consecutiveNumber || 0), 0) + 1;
+    const incidentWithId = { ...formatted, id: `I-${Date.now()}`, consecutiveNumber: nextConsecutive };
+    console.log('[DEBUG] Payload incidencia a enviar:', JSON.stringify(incidentWithId));
     setIncidents([incidentWithId, ...incidents]);
     await persistOrThrow('incident', incidentWithId, 'guardar');
     } catch (error) {
