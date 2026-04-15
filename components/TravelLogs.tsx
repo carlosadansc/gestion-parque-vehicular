@@ -342,8 +342,8 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
       </div>
 
       <div className="card flex flex-col no-print">
-        <div className="px-8 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-          <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Movimientos Recientes</h3>
+        <div className="px-8 py-5 border-b border-border flex items-center justify-between bg-surface-subtle/50">
+          <h3 className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Movimientos Recientes</h3>
           <button onClick={onSync} className="btn btn-ghost text-[10px] font-black uppercase tracking-widest">
             <span className="material-symbols-outlined ui-icon">sync</span> Actualizar Datos
           </button>
@@ -368,28 +368,28 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
                 const isComplete = log.arrivalTime && log.finalOdometer && Number(log.finalOdometer) > 0;
                 
                 return (
-                  <tr key={log.id} className="hover:bg-slate-50/50 transition-colors group">
+                  <tr key={log.id} className="hover:bg-surface-subtle/50 transition-colors group">
                     <td className="px-8 py-5">
-                      <p className="font-black text-slate-900 text-sm tracking-tight">
+                      <p className="font-black text-text text-sm tracking-tight">
                         {log.date ? new Date(log.date).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }) : '---'}
                       </p>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded ${isComplete ? 'bg-slate-100 text-slate-500' : 'bg-blue-100 text-blue-600 animate-pulse'}`}>
+                        <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded ${isComplete ? 'bg-surface-subtle text-text-muted' : 'bg-blue-100 text-blue-600 animate-pulse'}`}>
                           {formatTime(log.departureTime) || '--:--'} <span className="mx-1">→</span> {log.arrivalTime ? formatTime(log.arrivalTime) : 'EN RUTA'}
                         </span>
                       </div>
                     </td>
                     <td className="px-8 py-5">
-                      <p className="font-black text-slate-900 text-sm">{vehicle?.plate || log.vehicleId || 'S/P'}</p>
+                      <p className="font-black text-text text-sm">{vehicle?.plate || log.vehicleId || 'S/P'}</p>
                       <p className="text-[10px] text-primary font-bold uppercase tracking-widest">{driver?.name || log.driverId || '---'}</p>
                     </td>
                     <td className="px-8 py-5">
                       <p className="text-xs font-black text-slate-800 uppercase tracking-tight line-clamp-1">{log.destination || 'Sin destino'}</p>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase">{area?.name || 'General'}</p>
+                      <p className="text-[10px] text-text-muted font-bold uppercase">{area?.name || 'General'}</p>
                     </td>
                     <td className="px-8 py-5 text-right">
-                      <p className="text-[11px] text-slate-400 font-black">INI: {(Number(log.initialOdometer) || 0).toLocaleString()} km</p>
-                      <p className={`text-[11px] font-black ${isComplete ? 'text-slate-900' : 'text-blue-500 italic'}`}>
+                      <p className="text-[11px] text-text-muted font-black">INI: {(Number(log.initialOdometer) || 0).toLocaleString()} km</p>
+                      <p className={`text-[11px] font-black ${isComplete ? 'text-text' : 'text-blue-500 italic'}`}>
                         {isComplete ? `FIN: ${Number(log.finalOdometer).toLocaleString()} km` : 'PENDIENTE'}
                       </p>
                     </td>
@@ -436,55 +436,55 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
 
       {/* --- MODAL DETALLE DEL VIAJE --- */}
       {showDetailModal && viewingLog && (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-slate-900/70 backdrop-blur-sm p-4 animate-in fade-in duration-300 no-print">
-          <div className="bg-white rounded-xl w-full max-w-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col">
-            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-secondary/70 backdrop-blur-sm p-4 animate-in fade-in duration-300 no-print">
+          <div className="bg-surface rounded-xl w-full max-w-2xl border border-border overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col">
+            <div className="px-6 py-4 border-b border-border flex justify-between items-center bg-surface-subtle">
               <div className="flex items-center gap-3">
                 <div className="size-10 bg-blue-100 rounded-lg flex items-center justify-center">
                   <span className="material-symbols-outlined ui-icon text-blue-600" aria-hidden="true">route</span>
                 </div>
                 <div>
-                  <h3 className="text-lg font-black text-slate-900">Detalle de Recorrido</h3>
+                  <h3 className="text-lg font-black text-text">Detalle de Recorrido</h3>
                 </div>
               </div>
-              <button onClick={() => setShowDetailModal(false)} className="size-9 rounded-md hover:bg-white transition-all flex items-center justify-center text-slate-400" aria-label="Cerrar">
+              <button onClick={() => setShowDetailModal(false)} className="size-9 rounded-md hover:bg-surface transition-all flex items-center justify-center text-text-muted" aria-label="Cerrar">
                 <span className="material-symbols-outlined ui-icon" aria-hidden="true">close</span>
               </button>
             </div>
             <div className="p-6 overflow-y-auto max-h-[80vh] custom-scrollbar">
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                <div className="bg-slate-50 p-4 rounded-md border border-slate-100 flex items-center gap-3">
-                  <div className="size-10 rounded-lg bg-white flex items-center justify-center text-primary">
+                <div className="bg-surface-subtle p-4 rounded-md border border-border flex items-center gap-3">
+                  <div className="size-10 rounded-lg bg-surface flex items-center justify-center text-primary">
                     <span className="material-symbols-outlined ui-icon">directions_car</span>
                   </div>
                   <div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Vehículo</p>
-                    <p className="font-bold text-slate-900 leading-tight">{vehicles.find(v => v.id === viewingLog.vehicleId)?.model || 'Desconocido'}</p>
-                    <p className="text-xs font-mono text-slate-500">{vehicles.find(v => v.id === viewingLog.vehicleId)?.plate || viewingLog.vehicleId}</p>
+                    <p className="text-[10px] font-black text-text-muted uppercase tracking-widest">Vehículo</p>
+                    <p className="font-bold text-text leading-tight">{vehicles.find(v => v.id === viewingLog.vehicleId)?.model || 'Desconocido'}</p>
+                    <p className="text-xs font-mono text-text-muted">{vehicles.find(v => v.id === viewingLog.vehicleId)?.plate || viewingLog.vehicleId}</p>
                   </div>
                 </div>
-                <div className="bg-slate-50 p-4 rounded-md border border-slate-100 flex items-center gap-3">
-                  <div className="size-10 rounded-lg bg-white flex items-center justify-center text-primary">
+                <div className="bg-surface-subtle p-4 rounded-md border border-border flex items-center gap-3">
+                  <div className="size-10 rounded-lg bg-surface flex items-center justify-center text-primary">
                     <span className="material-symbols-outlined ui-icon">person</span>
                   </div>
                   <div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Chofer</p>
-                    <p className="font-bold text-slate-900 leading-tight">{drivers.find(d => d.id === viewingLog.driverId)?.name || 'Desconocido'}</p>
-                    <p className="text-xs text-slate-500 uppercase">{areas.find(a => a.id === viewingLog.areaId)?.name || 'Área General'}</p>
+                    <p className="text-[10px] font-black text-text-muted uppercase tracking-widest">Chofer</p>
+                    <p className="font-bold text-text leading-tight">{drivers.find(d => d.id === viewingLog.driverId)?.name || 'Desconocido'}</p>
+                    <p className="text-xs text-text-muted uppercase">{areas.find(a => a.id === viewingLog.areaId)?.name || 'Área General'}</p>
                   </div>
                 </div>
               </div>
 
               {/* Timeline Section */}
-              <div className="relative pl-4 border-l-2 border-slate-100 space-y-6 my-6">
+              <div className="relative pl-4 border-l-2 border-border space-y-6 my-6">
                  {/* Salida */}
                  <div className="relative">
                    <div className="absolute -left-[21px] top-1 size-3 bg-green-500 rounded-full ring-4 ring-white"></div>
                    <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Salida</p>
-                      <p className="text-xl font-black text-slate-900">{formatTime(viewingLog.departureTime)}</p>
-                      <p className="text-xs font-bold text-slate-500">Odómetro: {(Number(viewingLog.initialOdometer) || 0).toLocaleString()} km</p>
+                      <p className="text-[10px] font-black text-text-muted uppercase tracking-widest">Salida</p>
+                      <p className="text-xl font-black text-text">{formatTime(viewingLog.departureTime)}</p>
+                      <p className="text-xs font-bold text-text-muted">Odómetro: {(Number(viewingLog.initialOdometer) || 0).toLocaleString()} km</p>
                    </div>
                 </div>
 
@@ -492,21 +492,21 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
                 <div className="relative">
                    <div className="absolute -left-[21px] top-1 size-3 bg-blue-500 rounded-full ring-4 ring-white"></div>
                    <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Destino / Ruta</p>
+                      <p className="text-[10px] font-black text-text-muted uppercase tracking-widest">Destino / Ruta</p>
                       <p className="text-lg font-bold text-slate-800 uppercase">{viewingLog.destination}</p>
-                      <p className="text-xs text-slate-500 font-medium italic mt-1">{viewingLog.notes || 'Sin notas adicionales'}</p>
+                      <p className="text-xs text-text-muted font-medium italic mt-1">{viewingLog.notes || 'Sin notas adicionales'}</p>
                    </div>
                 </div>
 
                 {/* Llegada */}
                 <div className="relative">
-                   <div className={`absolute -left-[21px] top-1 size-3 rounded-full ring-4 ring-white ${viewingLog.arrivalTime ? 'bg-slate-900' : 'bg-slate-200'}`}></div>
+                   <div className={`absolute -left-[21px] top-1 size-3 rounded-full ring-4 ring-white ${viewingLog.arrivalTime ? 'bg-secondary' : 'bg-slate-200'}`}></div>
                    <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Llegada</p>
+                      <p className="text-[10px] font-black text-text-muted uppercase tracking-widest">Llegada</p>
                       {viewingLog.arrivalTime ? (
                         <>
-                          <p className="text-xl font-black text-slate-900">{formatTime(viewingLog.arrivalTime)}</p>
-                          <p className="text-xs font-bold text-slate-500">Odómetro: {(Number(viewingLog.finalOdometer) || 0).toLocaleString()} km</p>
+                          <p className="text-xl font-black text-text">{formatTime(viewingLog.arrivalTime)}</p>
+                          <p className="text-xs font-bold text-text-muted">Odómetro: {(Number(viewingLog.finalOdometer) || 0).toLocaleString()} km</p>
                         </>
                       ) : (
                         <span className="inline-block bg-amber-100 text-amber-700 px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-widest mt-1">En Ruta</span>
@@ -517,15 +517,15 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
 
               {/* Stats Cards */}
               <div className="grid grid-cols-2 gap-3 mb-6">
-                 <div className="bg-slate-50 p-4 rounded-md border border-slate-100 text-center">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Recorrido Total</p>
+                 <div className="bg-surface-subtle p-4 rounded-md border border-border text-center">
+                    <p className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-1">Recorrido Total</p>
                     <p className="text-xl font-black text-primary">
-                      {viewingLog.finalOdometer ? (Number(viewingLog.finalOdometer) - Number(viewingLog.initialOdometer)).toLocaleString() : '---'} <span className="text-sm text-slate-400 font-bold">km</span>
+                      {viewingLog.finalOdometer ? (Number(viewingLog.finalOdometer) - Number(viewingLog.initialOdometer)).toLocaleString() : '---'} <span className="text-sm text-text-muted font-bold">km</span>
                     </p>
                  </div>
-                 <div className="bg-slate-50 p-4 rounded-md border border-slate-100 text-center">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Tiempo Total</p>
-                    <p className="text-xl font-black text-slate-900">
+                 <div className="bg-surface-subtle p-4 rounded-md border border-border text-center">
+                    <p className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-1">Tiempo Total</p>
+                    <p className="text-xl font-black text-text">
                       {calculateDuration(viewingLog.departureTime, viewingLog.arrivalTime || '') || '---'}
                     </p>
                  </div>
@@ -535,21 +535,21 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
               <div className="bg-blue-50 p-4 rounded-md border border-blue-100">
                  <div className="flex justify-between items-end mb-2">
                     <p className="text-[10px] font-black text-blue-600 uppercase tracking-wider">Consumo de Combustible</p>
-                    <p className="text-xs font-bold text-slate-500">{viewingLog.finalFuelLevel !== undefined ? `${(viewingLog.initialFuelLevel || 100) - viewingLog.finalFuelLevel}% Consumido` : 'Pendiente'}</p>
+                    <p className="text-xs font-bold text-text-muted">{viewingLog.finalFuelLevel !== undefined ? `${(viewingLog.initialFuelLevel || 100) - viewingLog.finalFuelLevel}% Consumido` : 'Pendiente'}</p>
                  </div>
                  <div className="h-2 bg-slate-200 rounded-full overflow-hidden flex">
                     <div className="h-full bg-slate-300" style={{ width: `${100 - (viewingLog.initialFuelLevel || 100)}%` }}></div>
                     <div className="h-full bg-green-500" style={{ width: `${(viewingLog.initialFuelLevel || 100) - (viewingLog.finalFuelLevel || 0)}%` }}></div>
                     <div className="h-full bg-primary" style={{ width: `${viewingLog.finalFuelLevel || 0}%` }}></div>
                  </div>
-                 <div className="flex justify-between text-[9px] font-black text-slate-400 uppercase mt-2">
+                 <div className="flex justify-between text-[9px] font-black text-text-muted uppercase mt-2">
                     <span>Inicio: {viewingLog.initialFuelLevel}%</span>
                     <span>Fin: {viewingLog.finalFuelLevel !== undefined ? `${viewingLog.finalFuelLevel}%` : '---'}</span>
                  </div>
               </div>
 
             </div>
-            <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-end">
+            <div className="p-4 border-t border-border bg-surface-subtle flex justify-end">
                <button onClick={() => { setShowDetailModal(false); }} className="px-6 py-3 bg-primary text-white font-black text-xs uppercase tracking-widest rounded-md hover:opacity-90 transition-all">Aceptar</button>
             </div>
           </div>
@@ -558,14 +558,14 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
 
       {/* MODAL EDICIÓN/CREACIÓN */}
       {showModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-300 no-print">
-          <div className="bg-white rounded-[2.5rem] w-full max-w-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="px-10 py-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-secondary/60 backdrop-blur-sm p-4 animate-in fade-in duration-300 no-print">
+          <div className="bg-surface rounded-[2.5rem] w-full max-w-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="px-10 py-8 border-b border-border flex justify-between items-center bg-surface-subtle/50">
               <div>
-                <h3 className="text-2xl font-black text-slate-900 tracking-tight">{editingLog ? (editingLog.arrivalTime ? 'Editar Bitácora' : 'Registrar Llegada') : 'Nueva Salida'}</h3>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Control de movimientos de la unidad</p>
+                <h3 className="text-2xl font-black text-text tracking-tight">{editingLog ? (editingLog.arrivalTime ? 'Editar Bitácora' : 'Registrar Llegada') : 'Nueva Salida'}</h3>
+                <p className="text-xs font-bold text-text-muted uppercase tracking-widest mt-1">Control de movimientos de la unidad</p>
               </div>
-              <button onClick={() => { if (!isSaving) { setFormError(''); setShowModal(false); } }} disabled={isSaving} className="size-12 rounded-full hover:bg-white hover:shadow-md transition-all flex items-center justify-center text-slate-400">
+              <button onClick={() => { if (!isSaving) { setFormError(''); setShowModal(false); } }} disabled={isSaving} className="size-12 rounded-full hover:bg-surface hover:shadow-md transition-all flex items-center justify-center text-text-muted">
                 <span className="material-symbols-outlined ui-icon text-2xl">close</span>
               </button>
             </div>
@@ -574,42 +574,42 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
               {/* Formulario (igual que antes) */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Fecha</label>
-                  <input required disabled={isSaving} type="date" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} />
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Fecha</label>
+                  <input required disabled={isSaving} type="date" className="w-full bg-surface-subtle border border-border rounded-2xl px-5 py-3.5 text-sm font-bold outline-none" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Hora Salida</label>
-                  <input required type="time" disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none" value={formData.departureTime} onChange={e => setFormData({...formData, departureTime: e.target.value})} />
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Hora Salida</label>
+                  <input required type="time" disabled={isSaving} className="w-full bg-surface-subtle border border-border rounded-2xl px-5 py-3.5 text-sm font-bold outline-none" value={formData.departureTime} onChange={e => setFormData({...formData, departureTime: e.target.value})} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Hora Llegada (Opcional)</label>
-                  <input type="time" disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none focus:ring-4 focus:ring-blue-500/10" value={formData.arrivalTime} onChange={e => setFormData({...formData, arrivalTime: e.target.value})} />
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Hora Llegada (Opcional)</label>
+                  <input type="time" disabled={isSaving} className="w-full bg-surface-subtle border border-border rounded-2xl px-5 py-3.5 text-sm font-bold outline-none focus:ring-4 focus:ring-blue-500/10" value={formData.arrivalTime} onChange={e => setFormData({...formData, arrivalTime: e.target.value})} />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Unidad (Vehículo)</label>
-                  <select required disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none" value={formData.vehicleId} onChange={e => setFormData({...formData, vehicleId: e.target.value})} >
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Unidad (Vehículo)</label>
+                  <select required disabled={isSaving} className="w-full bg-surface-subtle border border-border rounded-2xl px-5 py-3.5 text-sm font-bold outline-none" value={formData.vehicleId} onChange={e => setFormData({...formData, vehicleId: e.target.value})} >
                     <option value="">Seleccionar vehículo...</option>
                     {vehicles.map(v => ( <option key={v.id} value={v.id}>{v.plate} - {v.model}</option> ))}
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Chofer asignado</label>
-                  <select required disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none" value={formData.driverId} onChange={e => setFormData({...formData, driverId: e.target.value})} >
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Chofer asignado</label>
+                  <select required disabled={isSaving} className="w-full bg-surface-subtle border border-border rounded-2xl px-5 py-3.5 text-sm font-bold outline-none" value={formData.driverId} onChange={e => setFormData({...formData, driverId: e.target.value})} >
                     <option value="">Seleccionar chofer...</option>
                     {drivers.map(d => ( <option key={d.id} value={d.id}>{d.name}</option> ))}
                   </select>
                 </div>
               </div>
 
-              <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100">
-                <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-4 border-b border-slate-200 pb-2">Datos de Salida</h4>
+              <div className="bg-surface-subtle rounded-2xl p-6 border border-border">
+                <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-4 border-b border-border pb-2">Datos de Salida</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Odómetro Inicial (KM)</label>
-                    <input required type="number" disabled={isSaving} className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-3 text-sm font-bold outline-none" placeholder="0" value={formData.initialOdometer} onChange={e => setFormData({...formData, initialOdometer: e.target.value})} />
+                    <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Odómetro Inicial (KM)</label>
+                    <input required type="number" disabled={isSaving} className="w-full bg-surface border border-border rounded-2xl px-5 py-3 text-sm font-bold outline-none" placeholder="0" value={formData.initialOdometer} onChange={e => setFormData({...formData, initialOdometer: e.target.value})} />
                   </div>
                   <FuelGaugeInput label="Gasolina (Salida)" value={formData.initialFuelLevel} onChange={(val) => setFormData({...formData, initialFuelLevel: Number(val)})} disabled={isSaving} />
                 </div>
@@ -619,29 +619,29 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
                  <h4 className="text-[10px] font-black text-blue-600 uppercase tracking-[0.2em] mb-4 border-b border-blue-200 pb-2">Datos de Retorno</h4>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Odómetro Final</label>
-                      <input type="number" disabled={isSaving} className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-3 text-sm font-bold outline-none focus:ring-4 focus:ring-blue-500/10" placeholder="Pendiente" value={formData.finalOdometer} onChange={e => setFormData({...formData, finalOdometer: e.target.value})} />
+                      <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Odómetro Final</label>
+                      <input type="number" disabled={isSaving} className="w-full bg-surface border border-border rounded-2xl px-5 py-3 text-sm font-bold outline-none focus:ring-4 focus:ring-blue-500/10" placeholder="Pendiente" value={formData.finalOdometer} onChange={e => setFormData({...formData, finalOdometer: e.target.value})} />
                     </div>
                     <FuelGaugeInput label="Gasolina (Llegada)" value={formData.finalFuelLevel} onChange={(val) => setFormData({...formData, finalFuelLevel: Number(val)})} disabled={isSaving} />
                  </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Destino / Comisión</label>
-                <input required disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none" placeholder="Motivo del traslado" value={formData.destination} onChange={e => setFormData({...formData, destination: e.target.value})} />
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Destino / Comisión</label>
+                <input required disabled={isSaving} className="w-full bg-surface-subtle border border-border rounded-2xl px-5 py-3.5 text-sm font-bold outline-none" placeholder="Motivo del traslado" value={formData.destination} onChange={e => setFormData({...formData, destination: e.target.value})} />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Área Solicitante</label>
-                  <select required disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none" value={formData.areaId} onChange={e => setFormData({...formData, areaId: e.target.value})}>
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Área Solicitante</label>
+                  <select required disabled={isSaving} className="w-full bg-surface-subtle border border-border rounded-2xl px-5 py-3.5 text-sm font-bold outline-none" value={formData.areaId} onChange={e => setFormData({...formData, areaId: e.target.value})}>
                     <option value="">Seleccionar área...</option>
                     {areas.map(a => (<option key={a.id} value={a.id}>{a.name}</option>))}
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Notas / Observaciones</label>
-                  <input disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none" placeholder="Opcional..." value={formData.notes} onChange={e => setFormData({...formData, notes: e.target.value})} />
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Notas / Observaciones</label>
+                  <input disabled={isSaving} className="w-full bg-surface-subtle border border-border rounded-2xl px-5 py-3.5 text-sm font-bold outline-none" placeholder="Opcional..." value={formData.notes} onChange={e => setFormData({...formData, notes: e.target.value})} />
                 </div>
               </div>
 
@@ -652,7 +652,7 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
               )}
 
               <div className="pt-6 flex gap-4">
-                <button type="button" disabled={isSaving} onClick={() => { setFormError(''); setShowModal(false); }} className="flex-1 py-4 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-50 rounded-2xl transition-all">Cancelar</button>
+                <button type="button" disabled={isSaving} onClick={() => { setFormError(''); setShowModal(false); }} className="flex-1 py-4 text-[11px] font-black uppercase tracking-widest text-text-muted hover:bg-surface-subtle rounded-2xl transition-all">Cancelar</button>
                 <button type="submit" disabled={isSaving} className="flex-[2] py-4 bg-primary text-white text-[11px] font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-blue-500/20 hover:opacity-90 transition-all flex items-center justify-center gap-3">
                   {isSaving ? <><span className="material-symbols-outlined ui-icon animate-spin">sync</span> Procesando...</> : (editingLog ? (editingLog.arrivalTime ? 'Guardar Cambios' : 'Registrar Llegada') : 'Confirmar Salida')}
                 </button>
@@ -664,58 +664,58 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
 
       {/* VISTA PREVIA DE IMPRESIÓN (NUEVO DISEÑO FICHA TÉCNICA) */}
       {showPrintPreview && selectedLog && (
-        <div className="fixed inset-0 z-[200] bg-white flex flex-col overflow-y-auto">
-           <div className="sticky top-0 bg-slate-900 p-4 flex justify-between items-center text-white shadow-lg no-print">
+        <div className="fixed inset-0 z-[200] bg-surface flex flex-col overflow-y-auto">
+           <div className="sticky top-0 bg-secondary p-4 flex justify-between items-center text-white shadow-lg no-print">
              <div className="flex items-center gap-4">
-                <button onClick={() => setShowPrintPreview(false)} className="size-10 flex items-center justify-center hover:bg-white/10 rounded-full transition-colors">Cerrar</button>
+                <button onClick={() => setShowPrintPreview(false)} className="size-10 flex items-center justify-center hover:bg-surface/10 rounded-full transition-colors">Cerrar</button>
              </div>
              <button onClick={() => window.print()} className="bg-primary px-6 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center gap-2 shadow-lg hover:opacity-90 transition-all">
                <span className="material-symbols-outlined ui-icon">print</span> Imprimir Ficha
              </button>
           </div>
           
-          <div className="flex-1 bg-slate-100 p-10 flex justify-center">
-            <div id="travel-printable" className="bg-white w-[21.59cm] min-h-[27.94cm] p-[1.5cm] shadow-2xl relative text-slate-900">
+          <div className="flex-1 bg-surface-subtle p-10 flex justify-center">
+            <div id="travel-printable" className="bg-surface w-[21.59cm] min-h-[27.94cm] p-[1.5cm] shadow-2xl relative text-text">
               
               {/* Header Institucional */}
               <div className="flex justify-between items-center mb-8 border-b-4 border-slate-900 pb-6">
                   <div className="flex items-center gap-6">
                     <img src="/images/logo-dif.png" alt="Logo" className="w-24 object-contain" />
                     <div className="flex flex-col">
-                      <span className="text-lg font-black text-slate-900 uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
-                      <span className="text-lg font-black text-slate-900 uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>
-                      <span className="text-[8pt] font-bold uppercase text-slate-400 mt-2 tracking-[0.2em]">Parque Vehicular • Bitácora de Operación</span>
+                      <span className="text-lg font-black text-text uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
+                      <span className="text-lg font-black text-text uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>
+                      <span className="text-[8pt] font-bold uppercase text-text-muted mt-2 tracking-[0.2em]">Parque Vehicular • Bitácora de Operación</span>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="inline-block bg-slate-900 text-white px-4 py-1.5 font-black text-[10pt] uppercase tracking-widest rounded-sm mb-2">
+                    <div className="inline-block bg-secondary text-white px-4 py-1.5 font-black text-[10pt] uppercase tracking-widest rounded-sm mb-2">
                         Ficha Técnica de Viaje
                     </div>
-                    <p className="text-xs font-bold text-slate-600">FOLIO: <span className="font-black text-slate-900 text-lg ml-1">{(selectedLog.id || '---').slice(-6).toUpperCase()}</span></p>
-                    <p className="text-[9pt] text-slate-400 font-bold mt-1">Fecha: {new Date(selectedLog.date).toLocaleDateString('es-ES', {year: 'numeric', month: 'long', day: 'numeric'})}</p>
+                    <p className="text-xs font-bold text-text-muted">FOLIO: <span className="font-black text-text text-lg ml-1">{(selectedLog.id || '---').slice(-6).toUpperCase()}</span></p>
+                    <p className="text-[9pt] text-text-muted font-bold mt-1">Fecha: {new Date(selectedLog.date).toLocaleDateString('es-ES', {year: 'numeric', month: 'long', day: 'numeric'})}</p>
                   </div>
               </div>
 
               {/* Datos de Identificación (Tabla) */}
               <div className="mb-8 mt-6">
-                  <h4 className="text-[9pt] font-black uppercase border-b-2 border-slate-200 pb-1 text-primary mb-4">Identificación del Servicio</h4>
+                  <h4 className="text-[9pt] font-black uppercase border-b-2 border-border pb-1 text-primary mb-4">Identificación del Servicio</h4>
                   <table className="w-full border-collapse">
                       <tbody>
-                          <tr className="border-b border-slate-200">
-                              <td className="py-2 text-[9pt] font-black text-slate-400 uppercase w-32">Operador</td>
-                              <td className="py-2 text-[11pt] font-bold text-slate-900">{selectedDriver?.name || '---'}</td>
-                              <td className="py-2 text-[9pt] font-black text-slate-400 uppercase w-32 text-right pr-4">Área</td>
-                              <td className="py-2 text-[11pt] font-bold text-slate-900 uppercase">{selectedArea?.name || '---'}</td>
+                          <tr className="border-b border-border">
+                              <td className="py-2 text-[9pt] font-black text-text-muted uppercase w-32">Operador</td>
+                              <td className="py-2 text-[11pt] font-bold text-text">{selectedDriver?.name || '---'}</td>
+                              <td className="py-2 text-[9pt] font-black text-text-muted uppercase w-32 text-right pr-4">Área</td>
+                              <td className="py-2 text-[11pt] font-bold text-text uppercase">{selectedArea?.name || '---'}</td>
                           </tr>
-                          <tr className="border-b border-slate-200">
-                              <td className="py-2 text-[9pt] font-black text-slate-400 uppercase">Vehículo</td>
-                              <td className="py-2 text-[11pt] font-bold text-slate-900">{selectedVehicle?.model || '---'}</td>
-                              <td className="py-2 text-[9pt] font-black text-slate-400 uppercase text-right pr-4">Placas</td>
-                              <td className="py-2 text-[11pt] font-bold text-slate-900 uppercase tracking-widest">{selectedVehicle?.plate || '---'}</td>
+                          <tr className="border-b border-border">
+                              <td className="py-2 text-[9pt] font-black text-text-muted uppercase">Vehículo</td>
+                              <td className="py-2 text-[11pt] font-bold text-text">{selectedVehicle?.model || '---'}</td>
+                              <td className="py-2 text-[9pt] font-black text-text-muted uppercase text-right pr-4">Placas</td>
+                              <td className="py-2 text-[11pt] font-bold text-text uppercase tracking-widest">{selectedVehicle?.plate || '---'}</td>
                           </tr>
                           <tr>
-                              <td className="py-2 text-[9pt] font-black text-slate-400 uppercase">Destino / Ruta</td>
-                              <td colSpan={3} className="py-2 text-[11pt] font-bold text-slate-900 uppercase">{selectedLog.destination || '---'}</td>
+                              <td className="py-2 text-[9pt] font-black text-text-muted uppercase">Destino / Ruta</td>
+                              <td colSpan={3} className="py-2 text-[11pt] font-bold text-text uppercase">{selectedLog.destination || '---'}</td>
                           </tr>
                       </tbody>
                   </table>
@@ -723,39 +723,39 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
 
               {/* Matriz de Recorrido (Tabla Comparativa) */}
               <div className="mb-8">
-                 <h4 className="bg-slate-900 text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">Resumen de Movimiento</h4>
-                 <div className="border border-slate-200 rounded-lg overflow-hidden">
+                 <h4 className="bg-secondary text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">Resumen de Movimiento</h4>
+                 <div className="border border-border rounded-lg overflow-hidden">
                     <table className="w-full text-center">
-                        <thead className="bg-slate-50 border-b border-slate-200">
+                        <thead className="bg-surface-subtle border-b border-border">
                             <tr>
-                                <th className="py-3 px-4 text-[8pt] font-black text-slate-500 uppercase tracking-widest">Concepto</th>
-                                <th className="py-3 px-4 text-[8pt] font-black text-slate-500 uppercase tracking-widest border-l border-slate-200">Salida</th>
-                                <th className="py-3 px-4 text-[8pt] font-black text-slate-500 uppercase tracking-widest border-l border-slate-200">Llegada</th>
-                                <th className="py-3 px-4 text-[8pt] font-black text-slate-500 uppercase tracking-widest border-l border-slate-200 bg-slate-100">Diferencia / Total</th>
+                                <th className="py-3 px-4 text-[8pt] font-black text-text-muted uppercase tracking-widest">Concepto</th>
+                                <th className="py-3 px-4 text-[8pt] font-black text-text-muted uppercase tracking-widest border-l border-border">Salida</th>
+                                <th className="py-3 px-4 text-[8pt] font-black text-text-muted uppercase tracking-widest border-l border-border">Llegada</th>
+                                <th className="py-3 px-4 text-[8pt] font-black text-text-muted uppercase tracking-widest border-l border-border bg-surface-subtle">Diferencia / Total</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
                             <tr>
-                                <td className="py-3 px-4 text-[9pt] font-black text-slate-400 uppercase text-left">Tiempo de Viaje</td>
-                                <td className="py-3 px-4 text-[10pt] font-bold text-slate-900 border-l border-slate-200">{formatTime(selectedLog.departureTime) || '--:--'}</td>
-                                <td className="py-3 px-4 text-[10pt] font-bold text-slate-900 border-l border-slate-200">{selectedLog.arrivalTime ? formatTime(selectedLog.arrivalTime) : 'PENDIENTE'}</td>
-                                <td className="py-3 px-4 text-[10pt] font-black text-slate-900 border-l border-slate-200 bg-slate-50">
+                                <td className="py-3 px-4 text-[9pt] font-black text-text-muted uppercase text-left">Tiempo de Viaje</td>
+                                <td className="py-3 px-4 text-[10pt] font-bold text-text border-l border-border">{formatTime(selectedLog.departureTime) || '--:--'}</td>
+                                <td className="py-3 px-4 text-[10pt] font-bold text-text border-l border-border">{selectedLog.arrivalTime ? formatTime(selectedLog.arrivalTime) : 'PENDIENTE'}</td>
+                                <td className="py-3 px-4 text-[10pt] font-black text-text border-l border-border bg-surface-subtle">
                                     {calculateDuration(selectedLog.departureTime, selectedLog.arrivalTime || '') || '---'}
                                 </td>
                             </tr>
                             <tr>
-                                <td className="py-3 px-4 text-[9pt] font-black text-slate-400 uppercase text-left">Kilometraje</td>
-                                <td className="py-3 px-4 text-[10pt] font-bold text-slate-900 border-l border-slate-200">{(Number(selectedLog.initialOdometer) || 0).toLocaleString()} km</td>
-                                <td className="py-3 px-4 text-[10pt] font-bold text-slate-900 border-l border-slate-200">{selectedLog.finalOdometer ? `${Number(selectedLog.finalOdometer).toLocaleString()} km` : '---'}</td>
-                                <td className="py-3 px-4 text-[10pt] font-black text-slate-900 border-l border-slate-200 bg-slate-50">
+                                <td className="py-3 px-4 text-[9pt] font-black text-text-muted uppercase text-left">Kilometraje</td>
+                                <td className="py-3 px-4 text-[10pt] font-bold text-text border-l border-border">{(Number(selectedLog.initialOdometer) || 0).toLocaleString()} km</td>
+                                <td className="py-3 px-4 text-[10pt] font-bold text-text border-l border-border">{selectedLog.finalOdometer ? `${Number(selectedLog.finalOdometer).toLocaleString()} km` : '---'}</td>
+                                <td className="py-3 px-4 text-[10pt] font-black text-text border-l border-border bg-surface-subtle">
                                     {selectedLog.finalOdometer ? `${(Number(selectedLog.finalOdometer) - Number(selectedLog.initialOdometer)).toLocaleString()} km` : '---'}
                                 </td>
                             </tr>
                             <tr>
-                                <td className="py-3 px-4 text-[9pt] font-black text-slate-400 uppercase text-left">Combustible (%)</td>
-                                <td className="py-3 px-4 text-[10pt] font-bold text-slate-900 border-l border-slate-200">{selectedLog.initialFuelLevel}%</td>
-                                <td className="py-3 px-4 text-[10pt] font-bold text-slate-900 border-l border-slate-200">{selectedLog.finalFuelLevel !== undefined ? `${selectedLog.finalFuelLevel}%` : '---'}</td>
-                                <td className="py-3 px-4 text-[10pt] font-black text-slate-900 border-l border-slate-200 bg-slate-50">
+                                <td className="py-3 px-4 text-[9pt] font-black text-text-muted uppercase text-left">Combustible (%)</td>
+                                <td className="py-3 px-4 text-[10pt] font-bold text-text border-l border-border">{selectedLog.initialFuelLevel}%</td>
+                                <td className="py-3 px-4 text-[10pt] font-bold text-text border-l border-border">{selectedLog.finalFuelLevel !== undefined ? `${selectedLog.finalFuelLevel}%` : '---'}</td>
+                                <td className="py-3 px-4 text-[10pt] font-black text-text border-l border-border bg-surface-subtle">
                                     {selectedLog.finalFuelLevel !== undefined ? `${(selectedLog.initialFuelLevel || 100) - selectedLog.finalFuelLevel}% Consumido` : '---'}
                                 </td>
                             </tr>
@@ -766,13 +766,13 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
 
               {/* Observaciones */}
               <div className="space-y-2 mb-12">
-                 <h4 className="text-[9pt] font-black uppercase border-b-2 border-slate-200 pb-1 text-primary">Observaciones / Incidencias</h4>
-                 <div className="bg-slate-50 p-6 rounded-lg min-h-[100px] border border-slate-100">
-                   <p className="text-[10pt] text-slate-700 leading-relaxed italic">
+                 <h4 className="text-[9pt] font-black uppercase border-b-2 border-border pb-1 text-primary">Observaciones / Incidencias</h4>
+                 <div className="bg-surface-subtle p-6 rounded-lg min-h-[100px] border border-border">
+                   <p className="text-[10pt] text-text leading-relaxed italic">
                       {selectedLog.notes || 'Sin observaciones registradas durante el servicio.'}
                    </p>
                  </div>
-                 <p className="text-[8pt] text-slate-400 mt-2 text-justify">
+                 <p className="text-[8pt] text-text-muted mt-2 text-justify">
                     * El operador certifica que los datos de kilometraje y niveles de combustible son correctos al momento de la entrega de la unidad.
                  </p>
               </div>
@@ -781,17 +781,17 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
                <div className="signature-section absolute bottom-[1.5cm] left-[1.5cm] right-[1.5cm]">
                    <div className="grid grid-cols-2 gap-24 text-center">
                        <div className="signature-line border-t-2 border-slate-900 pt-4">
-                           <p className="text-[9pt] font-black uppercase text-slate-900">{selectedDriver?.name || 'OPERADOR RESPONSABLE'}</p>
-                           <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Operador</p>
-                           <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Salida / Llegada</p>
+                           <p className="text-[9pt] font-black uppercase text-text">{selectedDriver?.name || 'OPERADOR RESPONSABLE'}</p>
+                           <p className="text-[7pt] font-bold text-text-muted mt-1 uppercase tracking-widest">Operador</p>
+                           <p className="text-[7pt] font-bold text-text-muted uppercase tracking-widest">Salida / Llegada</p>
                        </div>
                        <div className="signature-line border-t-2 border-slate-900 pt-4">
-                           <p className="text-[9pt] font-black uppercase text-slate-900">{managerName}</p>
-                           <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">{managerPos}</p>
-                           <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Validación</p>
+                           <p className="text-[9pt] font-black uppercase text-text">{managerName}</p>
+                           <p className="text-[7pt] font-bold text-text-muted mt-1 uppercase tracking-widest">{managerPos}</p>
+                           <p className="text-[7pt] font-bold text-text-muted uppercase tracking-widest">Validación</p>
                        </div>
                    </div>
-                   <div className="text-center mt-8 border-t border-slate-200 pt-2">
+                   <div className="text-center mt-8 border-t border-border pt-2">
                        <p className="text-[7pt] font-black text-slate-300 uppercase tracking-[0.3em]">Sistema de Gestion de Parque Vehicular • DIF Municipal La Paz</p>
                    </div>
                </div>
@@ -803,22 +803,22 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
 
       {/* MODAL SELECCIÓN DE VEHÍCULO PARA BITÁCORA EN BLANCO */}
       {showBlankBitacoraModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-300 no-print">
-          <div className="bg-white rounded-[2.5rem] w-full max-w-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-secondary/60 backdrop-blur-sm p-4 animate-in fade-in duration-300 no-print">
+          <div className="bg-surface rounded-[2.5rem] w-full max-w-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="px-8 py-6 border-b border-border flex justify-between items-center bg-surface-subtle/50">
               <div>
-                <h3 className="text-xl font-black text-slate-900 tracking-tight">Imprimir Bitácora en Blanco</h3>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Selecciona el vehículo para generar el formato</p>
+                <h3 className="text-xl font-black text-text tracking-tight">Imprimir Bitácora en Blanco</h3>
+                <p className="text-xs font-bold text-text-muted uppercase tracking-widest mt-1">Selecciona el vehículo para generar el formato</p>
               </div>
-              <button onClick={() => setShowBlankBitacoraModal(false)} className="size-10 rounded-full hover:bg-white hover:shadow-md transition-all flex items-center justify-center text-slate-400">
+              <button onClick={() => setShowBlankBitacoraModal(false)} className="size-10 rounded-full hover:bg-surface hover:shadow-md transition-all flex items-center justify-center text-text-muted">
                 <span className="material-symbols-outlined ui-icon">close</span>
               </button>
             </div>
             <div className="p-8 space-y-6">
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Vehículo</label>
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Vehículo</label>
                 <select
-                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none focus:ring-4 focus:ring-blue-500/10"
+                  className="w-full bg-surface-subtle border border-border rounded-2xl px-5 py-3.5 text-sm font-bold outline-none focus:ring-4 focus:ring-blue-500/10"
                   value={blankBitacoraVehicleId}
                   onChange={e => setBlankBitacoraVehicleId(e.target.value)}
                 >
@@ -829,13 +829,13 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
                 </select>
               </div>
               {blankBitacoraVehicleId && blankBitacoraVehicle && (
-                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center gap-4">
-                  <div className="size-12 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm">
+                <div className="bg-surface-subtle p-4 rounded-2xl border border-border flex items-center gap-4">
+                  <div className="size-12 rounded-xl bg-surface flex items-center justify-center text-primary shadow-sm">
                     <span className="material-symbols-outlined ui-icon">directions_car</span>
                   </div>
                   <div>
-                    <p className="font-bold text-slate-900 leading-tight">{blankBitacoraVehicle.model}</p>
-                    <p className="text-xs font-mono text-slate-500">{blankBitacoraVehicle.plate} {blankBitacoraVehicle.economicNumber ? `• No. Eco: ${blankBitacoraVehicle.economicNumber}` : ''}</p>
+                    <p className="font-bold text-text leading-tight">{blankBitacoraVehicle.model}</p>
+                    <p className="text-xs font-mono text-text-muted">{blankBitacoraVehicle.plate} {blankBitacoraVehicle.economicNumber ? `• No. Eco: ${blankBitacoraVehicle.economicNumber}` : ''}</p>
                   </div>
                 </div>
               )}
@@ -843,7 +843,7 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
                 <button
                   type="button"
                   onClick={() => setShowBlankBitacoraModal(false)}
-                  className="flex-1 py-3.5 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-50 rounded-2xl transition-all"
+                  className="flex-1 py-3.5 text-[11px] font-black uppercase tracking-widest text-text-muted hover:bg-surface-subtle rounded-2xl transition-all"
                 >
                   Cancelar
                 </button>
@@ -864,15 +864,15 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
 
       {/* VISTA PREVIA BITÁCORA EN BLANCO PARA IMPRIMIR */}
       {showBlankBitacoraPrint && blankBitacoraVehicle && (
-        <div className="fixed inset-0 z-[200] bg-white flex flex-col overflow-y-auto">
-          <div className="sticky top-0 bg-slate-900 p-4 flex justify-between items-center text-white shadow-lg no-print">
+        <div className="fixed inset-0 z-[200] bg-surface flex flex-col overflow-y-auto">
+          <div className="sticky top-0 bg-secondary p-4 flex justify-between items-center text-white shadow-lg no-print">
             <div className="flex items-center gap-4">
-              <button onClick={() => setShowBlankBitacoraPrint(false)} className="size-10 flex items-center justify-center hover:bg-white/10 rounded-full transition-colors">
+              <button onClick={() => setShowBlankBitacoraPrint(false)} className="size-10 flex items-center justify-center hover:bg-surface/10 rounded-full transition-colors">
                 <span className="material-symbols-outlined ui-icon">arrow_back</span>
               </button>
               <div>
                 <p className="text-sm font-black uppercase tracking-widest">Bitácora en Blanco</p>
-                <p className="text-xs text-slate-400">{blankBitacoraVehicle.plate} — {blankBitacoraVehicle.model}</p>
+                <p className="text-xs text-text-muted">{blankBitacoraVehicle.plate} — {blankBitacoraVehicle.model}</p>
               </div>
             </div>
             <button onClick={() => window.print()} className="bg-primary px-6 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center gap-2 shadow-lg hover:opacity-90 transition-all">
@@ -885,24 +885,24 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
               @page { margin: 0.4cm; size: letter landscape; }
             }
           `}</style>
-          <div className="flex-1 bg-slate-100 p-6 flex justify-center overflow-auto">
-            <div id="blank-bitacora-printable" className="bg-white shadow-2xl relative text-slate-900" style={{ width: '27.94cm', minHeight: '21.59cm', padding: '0.8cm 1cm' }}>
+          <div className="flex-1 bg-surface-subtle p-6 flex justify-center overflow-auto">
+            <div id="blank-bitacora-printable" className="bg-surface shadow-2xl relative text-text" style={{ width: '27.94cm', minHeight: '21.59cm', padding: '0.8cm 1cm' }}>
               
               {/* Header Institucional */}
               <div className="flex justify-between items-center border-b-2 border-slate-900 pb-3 mb-3">
                 <div className="flex items-center gap-4">
                   <img src="/images/logo-dif.png" alt="Logo" className="w-24 object-contain" />
                   <div className="flex flex-col">
-                    <span className="text-[10pt] font-black text-slate-900 uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
-                    <span className="text-[10pt] font-black text-slate-900 uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>
-                    <span className="text-[7pt] font-bold uppercase text-slate-400 mt-1 tracking-[0.2em]">Parque Vehicular • Bitácora de Viajes</span>
+                    <span className="text-[10pt] font-black text-text uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
+                    <span className="text-[10pt] font-black text-text uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>
+                    <span className="text-[7pt] font-bold uppercase text-text-muted mt-1 tracking-[0.2em]">Parque Vehicular • Bitácora de Viajes</span>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="inline-block bg-slate-900 text-white px-3 py-1 font-black text-[8pt] uppercase tracking-widest rounded-sm mb-1">
+                  <div className="inline-block bg-secondary text-white px-3 py-1 font-black text-[8pt] uppercase tracking-widest rounded-sm mb-1">
                     Bitácora de Viajes
                   </div>
-                  <p className="text-[8pt] text-slate-400 font-bold">Formato para llenado manual</p>
+                  <p className="text-[8pt] text-text-muted font-bold">Formato para llenado manual</p>
                 </div>
               </div>
 
@@ -910,41 +910,41 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
               <div className="mb-3">
                 {/* Campo Semana - será llenado a mano */}
                 <div className="flex items-center gap-2 mb-2 pb-2 border-b border-slate-300">
-                  <span className="font-black text-slate-500 uppercase whitespace-nowrap text-[8pt]">Semana del:</span>
-                  <span className="font-bold text-slate-900 border-b border-slate-300 flex-1 pb-0.5 text-[9pt]">___ al ___ de ____________ _______</span>
+                  <span className="font-black text-text-muted uppercase whitespace-nowrap text-[8pt]">Semana del:</span>
+                  <span className="font-bold text-text border-b border-slate-300 flex-1 pb-0.5 text-[9pt]">___ al ___ de ____________ _______</span>
                 </div>
                 <div className="grid grid-cols-6 gap-x-4 gap-y-1 text-[8pt]">
                   <div className="col-span-2 flex items-center gap-1">
-                    <span className="font-black text-slate-500 uppercase whitespace-nowrap">Vehículo:</span>
-                    <span className="font-bold text-slate-900 border-b border-slate-300 flex-1 pb-0.5">{blankBitacoraVehicle.model || '---'}</span>
+                    <span className="font-black text-text-muted uppercase whitespace-nowrap">Vehículo:</span>
+                    <span className="font-bold text-text border-b border-slate-300 flex-1 pb-0.5">{blankBitacoraVehicle.model || '---'}</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <span className="font-black text-slate-500 uppercase whitespace-nowrap">Marca:</span>
-                    <span className="font-bold text-slate-900 border-b border-slate-300 flex-1 pb-0.5">{blankBitacoraVehicle.brand || '---'}</span>
+                    <span className="font-black text-text-muted uppercase whitespace-nowrap">Marca:</span>
+                    <span className="font-bold text-text border-b border-slate-300 flex-1 pb-0.5">{blankBitacoraVehicle.brand || '---'}</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <span className="font-black text-slate-500 uppercase whitespace-nowrap">Año:</span>
-                    <span className="font-bold text-slate-900 border-b border-slate-300 flex-1 pb-0.5">{blankBitacoraVehicle.year || '---'}</span>
+                    <span className="font-black text-text-muted uppercase whitespace-nowrap">Año:</span>
+                    <span className="font-bold text-text border-b border-slate-300 flex-1 pb-0.5">{blankBitacoraVehicle.year || '---'}</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <span className="font-black text-slate-500 uppercase whitespace-nowrap">Placas:</span>
-                    <span className="font-bold text-slate-900 border-b border-slate-300 flex-1 pb-0.5 tracking-wider">{blankBitacoraVehicle.plate || '---'}</span>
+                    <span className="font-black text-text-muted uppercase whitespace-nowrap">Placas:</span>
+                    <span className="font-bold text-text border-b border-slate-300 flex-1 pb-0.5 tracking-wider">{blankBitacoraVehicle.plate || '---'}</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <span className="font-black text-slate-500 uppercase whitespace-nowrap">No. Eco:</span>
-                    <span className="font-bold text-slate-900 border-b border-slate-300 flex-1 pb-0.5">{blankBitacoraVehicle.economicNumber || '---'}</span>
+                    <span className="font-black text-text-muted uppercase whitespace-nowrap">No. Eco:</span>
+                    <span className="font-bold text-text border-b border-slate-300 flex-1 pb-0.5">{blankBitacoraVehicle.economicNumber || '---'}</span>
                   </div>
                   <div className="col-span-2 flex items-center gap-1">
-                    <span className="font-black text-slate-500 uppercase whitespace-nowrap">Color:</span>
-                    <span className="font-bold text-slate-900 border-b border-slate-300 flex-1 pb-0.5">{blankBitacoraVehicle.color || '---'}</span>
+                    <span className="font-black text-text-muted uppercase whitespace-nowrap">Color:</span>
+                    <span className="font-bold text-text border-b border-slate-300 flex-1 pb-0.5">{blankBitacoraVehicle.color || '---'}</span>
                   </div>
                   <div className="col-span-2 flex items-center gap-1">
-                    <span className="font-black text-slate-500 uppercase whitespace-nowrap">Tipo Combustible:</span>
-                    <span className="font-bold text-slate-900 border-b border-slate-300 flex-1 pb-0.5">{blankBitacoraVehicle.fuelType || '---'}</span>
+                    <span className="font-black text-text-muted uppercase whitespace-nowrap">Tipo Combustible:</span>
+                    <span className="font-bold text-text border-b border-slate-300 flex-1 pb-0.5">{blankBitacoraVehicle.fuelType || '---'}</span>
                   </div>
                   <div className="col-span-2 flex items-center gap-1">
-                    <span className="font-black text-slate-500 uppercase whitespace-nowrap">No. Inventario:</span>
-                    <span className="font-bold text-slate-900 border-b border-slate-300 flex-1 pb-0.5">{blankBitacoraVehicle.inventory || '---'}</span>
+                    <span className="font-black text-text-muted uppercase whitespace-nowrap">No. Inventario:</span>
+                    <span className="font-bold text-text border-b border-slate-300 flex-1 pb-0.5">{blankBitacoraVehicle.inventory || '---'}</span>
                   </div>
                 </div>
               </div>
@@ -970,18 +970,18 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
                   </thead>
                   <tbody>
                     {Array.from({ length: BLANK_ROWS }).map((_, i) => (
-                      <tr key={i} className={`${i % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'} border-t border-slate-300`}>
-                        <td className="py-3 px-1 border-r border-slate-200 text-center text-[7pt] text-slate-300">____/____/____</td>
-                        <td className="py-3 px-1 border-r border-slate-200">&nbsp;</td>
-                        <td className="py-3 px-1 border-r border-slate-200">&nbsp;</td>
-                        <td className="py-3 px-1 border-r border-slate-200 text-center text-[7pt] text-slate-300">__:__ __</td>
-                        <td className="py-3 px-1 border-r border-slate-200 text-center text-[7pt] text-slate-300">__:__ __</td>
-                        <td className="py-3 px-1 border-r border-slate-200">&nbsp;</td>
-                        <td className="py-3 px-1 border-r border-slate-200">&nbsp;</td>
-                        <td className="py-3 px-1 border-r border-slate-200">&nbsp;</td>
-                        <td className="py-3 px-1 border-r border-slate-200">&nbsp;</td>
-                        <td className="py-3 px-1 border-r border-slate-200">&nbsp;</td>
-                        <td className="py-3 px-1 border-r border-slate-200">&nbsp;</td>
+                      <tr key={i} className={`${i % 2 === 0 ? 'bg-surface' : 'bg-surface-subtle/50'} border-t border-slate-300`}>
+                        <td className="py-3 px-1 border-r border-border text-center text-[7pt] text-slate-300">____/____/____</td>
+                        <td className="py-3 px-1 border-r border-border">&nbsp;</td>
+                        <td className="py-3 px-1 border-r border-border">&nbsp;</td>
+                        <td className="py-3 px-1 border-r border-border text-center text-[7pt] text-slate-300">__:__ __</td>
+                        <td className="py-3 px-1 border-r border-border text-center text-[7pt] text-slate-300">__:__ __</td>
+                        <td className="py-3 px-1 border-r border-border">&nbsp;</td>
+                        <td className="py-3 px-1 border-r border-border">&nbsp;</td>
+                        <td className="py-3 px-1 border-r border-border">&nbsp;</td>
+                        <td className="py-3 px-1 border-r border-border">&nbsp;</td>
+                        <td className="py-3 px-1 border-r border-border">&nbsp;</td>
+                        <td className="py-3 px-1 border-r border-border">&nbsp;</td>
                         <td className="py-3 px-1">&nbsp;</td>
                       </tr>
                     ))}
@@ -991,20 +991,20 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
 
               {/* Footer con firmas de validación */}
               <div className="mt-4 flex justify-between items-end">
-                <div className="text-[7pt] text-slate-400">
+                <div className="text-[7pt] text-text-muted">
                   <p className="font-bold">* Cada registro debe ser llenado por el chofer responsable al momento de salida y llegada.</p>
                   <p className="font-bold">* Los niveles de tanque se registran como fracción (E, 1/4, 1/2, 3/4, F).</p>
                 </div>
                 {/* <div className="text-center min-w-[200px]">
                   <div className="border-t-2 border-slate-900 pt-2 mt-6">
-                    <p className="text-[8pt] font-black uppercase text-slate-900">{managerName}</p>
-                    <p className="text-[6pt] font-bold text-slate-400 uppercase tracking-widest">{managerPos}</p>
+                    <p className="text-[8pt] font-black uppercase text-text">{managerName}</p>
+                    <p className="text-[6pt] font-bold text-text-muted uppercase tracking-widest">{managerPos}</p>
                   </div>
                 </div> */}
               </div>
 
               {/* Footer institucional */}
-              <div className="text-center mt-3 border-t border-slate-200 pt-1">
+              <div className="text-center mt-3 border-t border-border pt-1">
                 <p className="text-[6pt] font-black text-slate-300 uppercase tracking-[0.3em]">Sistema de Gestión de Parque Vehicular • DIF Municipal La Paz</p>
               </div>
 
@@ -1019,7 +1019,7 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
 const FuelGaugeInput = ({ label, value, onChange, disabled }: any) => (
   <div className="space-y-3">
     <div className="flex justify-between items-center">
-      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">{label}</label>
+      <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">{label}</label>
       <span className={`text-xs font-black ${value < 25 ? 'text-rose-500' : 'text-primary'}`}>{value}%</span>
     </div>
     <div className="relative h-6 w-full">
@@ -1032,7 +1032,7 @@ const FuelGaugeInput = ({ label, value, onChange, disabled }: any) => (
         className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#135bec] absolute top-2"
       />
     </div>
-    <div className="flex justify-between text-[9px] font-black text-slate-400 uppercase px-1">
+    <div className="flex justify-between text-[9px] font-black text-text-muted uppercase px-1">
       <span>E</span>
       <span>1/4</span>
       <span>1/2</span>

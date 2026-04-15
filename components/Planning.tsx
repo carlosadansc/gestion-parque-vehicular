@@ -155,19 +155,19 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
 
   const getPlanningFieldClass = (field: keyof typeof planningFieldErrors) => {
     const hasError = Boolean(touched[field] && planningFieldErrors[field]);
-    return `w-full bg-slate-50 border rounded-md px-4 py-3 text-sm font-bold outline-none transition-all disabled:opacity-50 ${
+    return `w-full bg-surface-subtle border rounded-md px-4 py-3 text-sm font-bold outline-none transition-all disabled:opacity-50 ${
       hasError
-        ? 'border-rose-300 bg-rose-50 focus:bg-white focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10'
-        : 'border-slate-200 focus:bg-white focus:border-primary'
+        ? 'border-rose-300 bg-rose-50 focus:bg-surface focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10'
+        : 'border-border focus:bg-surface focus:border-primary'
     }`;
   };
 
   const getAreaFieldClass = (field: keyof typeof areaFieldErrors) => {
     const hasError = Boolean(areaTouched[field] && areaFieldErrors[field]);
-    return `flex-1 bg-slate-50 border rounded-md px-4 py-3 text-sm font-bold outline-none transition-all disabled:opacity-50 ${
+    return `flex-1 bg-surface-subtle border rounded-md px-4 py-3 text-sm font-bold outline-none transition-all disabled:opacity-50 ${
       hasError
-        ? 'border-rose-300 bg-rose-50 focus:bg-white focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10'
-        : 'border-slate-200 focus:bg-white focus:border-primary'
+        ? 'border-rose-300 bg-rose-50 focus:bg-surface focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10'
+        : 'border-border focus:bg-surface focus:border-primary'
     }`;
   };
 
@@ -374,7 +374,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
     const status = p.status || 'scheduled';
 
     const statusStyles = {
-      scheduled: 'border-slate-100 bg-slate-50 hover:bg-white',
+      scheduled: 'border-border bg-surface-subtle hover:bg-surface',
       completed: 'border-green-100 bg-green-50/50 hover:bg-green-50',
       cancelled: 'border-rose-100 bg-rose-50/50 hover:bg-rose-50 opacity-75'
     };
@@ -386,7 +386,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
     };
     const cardPadding = 'p-3 rounded-xl';
     const cardTitleClass = 'text-[11px] font-black leading-tight mb-1';
-    const cardMetaClass = 'text-[10px] font-bold text-slate-400 uppercase tracking-tight flex items-center gap-1.5';
+    const cardMetaClass = 'text-[10px] font-bold text-text-muted uppercase tracking-tight flex items-center gap-1.5';
 
     return (
       <div key={p.id} className={`${cardPadding} border group hover:shadow-md transition-all ${statusStyles[status]} hover:border-[#135bec]/30`}>
@@ -397,14 +397,14 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
           </div>
           <button 
             onClick={(e) => { e.stopPropagation(); handleEdit(p); }}
-            className="opacity-0 group-hover:opacity-100 size-6 rounded-lg hover:bg-slate-200/50 text-slate-400 hover:text-primary flex items-center justify-center transition-all"
+            className="opacity-0 group-hover:opacity-100 size-6 rounded-lg hover:bg-slate-200/50 text-text-muted hover:text-primary flex items-center justify-center transition-all"
           >
             <span className="material-symbols-outlined ui-icon text-sm">edit</span>
           </button>
         </div>
         
         {(p.departureTime || p.arrivalTime) && (
-          <div className={`mb-2 flex items-center gap-1.5 ${status === 'cancelled' ? 'text-slate-400 line-through' : 'text-slate-500'}`}>
+          <div className={`mb-2 flex items-center gap-1.5 ${status === 'cancelled' ? 'text-text-muted line-through' : 'text-text-muted'}`}>
             <span className="material-symbols-outlined ui-icon text-[14px]">schedule</span>
             <span className="text-[10px] font-bold">
               {formatTime(p.departureTime) || '--:--'} - {formatTime(p.arrivalTime) || '--:--'}
@@ -412,12 +412,12 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
           </div>
         )}
 
-        <p className={`${cardTitleClass} ${status === 'cancelled' ? 'text-slate-500 line-through' : 'text-slate-900'}`}>{driver?.name || p.driverId}</p>
+        <p className={`${cardTitleClass} ${status === 'cancelled' ? 'text-text-muted line-through' : 'text-text'}`}>{driver?.name || p.driverId}</p>
         <p className={cardMetaClass}><span className="material-symbols-outlined ui-icon text-xs">local_shipping</span>{vehicle?.model || p.vehicleId}</p>
         
         {!minimal && p.destination && (
-          <div className="mt-2 pt-2 border-t border-slate-200/50">
-              <p className={`text-[9px] font-bold uppercase line-clamp-2 ${status === 'cancelled' ? 'text-rose-400' : 'text-slate-500'}`}>
+          <div className="mt-2 pt-2 border-t border-border/50">
+              <p className={`text-[9px] font-bold uppercase line-clamp-2 ${status === 'cancelled' ? 'text-rose-400' : 'text-text-muted'}`}>
                 {status === 'cancelled' ? '(CANCELADO) ' : ''}{p.destination}
               </p>
           </div>
@@ -665,28 +665,28 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
         
         <div className="flex flex-col lg:flex-row lg:flex-wrap items-stretch lg:items-center gap-3 sm:gap-4 min-w-0">
            {/* Selector de Vista */}
-           <div className="flex bg-slate-100 p-1 rounded-lg w-full sm:w-auto justify-between sm:justify-start">
-<button onClick={() => setViewMode('day')} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${viewMode === 'day' ? 'bg-white text-primary' : 'text-slate-500 hover:text-slate-700'}`}>Día</button>
-                <button onClick={() => setViewMode('week')} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${viewMode === 'week' ? 'bg-white text-primary' : 'text-slate-500 hover:text-slate-700'}`}>Semana</button>
-                <button onClick={() => setViewMode('month')} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${viewMode === 'month' ? 'bg-white text-primary' : 'text-slate-500 hover:text-slate-700'}`}>Mes</button>
+           <div className="flex bg-surface-subtle p-1 rounded-lg w-full sm:w-auto justify-between sm:justify-start">
+<button onClick={() => setViewMode('day')} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${viewMode === 'day' ? 'bg-surface text-primary' : 'text-text-muted hover:text-text'}`}>Día</button>
+                <button onClick={() => setViewMode('week')} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${viewMode === 'week' ? 'bg-surface text-primary' : 'text-text-muted hover:text-text'}`}>Semana</button>
+                <button onClick={() => setViewMode('month')} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${viewMode === 'month' ? 'bg-surface text-primary' : 'text-text-muted hover:text-text'}`}>Mes</button>
            </div>
 
-           <div className="flex bg-slate-100 p-1 rounded-lg w-full sm:w-auto justify-between sm:justify-start">
-              <button onClick={() => setStatusFilter('all')} className={`px-3 py-1.5 rounded-md text-[11px] font-bold transition-all ${statusFilter === 'all' ? 'bg-white text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}>Todos</button>
-              <button onClick={() => setStatusFilter('scheduled')} className={`px-3 py-1.5 rounded-md text-[11px] font-bold transition-all ${statusFilter === 'scheduled' ? 'bg-white text-blue-700' : 'text-slate-500 hover:text-slate-700'}`}>Programado</button>
-              <button onClick={() => setStatusFilter('completed')} className={`px-3 py-1.5 rounded-md text-[11px] font-bold transition-all ${statusFilter === 'completed' ? 'bg-white text-emerald-700' : 'text-slate-500 hover:text-slate-700'}`}>Completado</button>
-              <button onClick={() => setStatusFilter('cancelled')} className={`px-3 py-1.5 rounded-md text-[11px] font-bold transition-all ${statusFilter === 'cancelled' ? 'bg-white text-rose-700' : 'text-slate-500 hover:text-slate-700'}`}>Cancelado</button>
+           <div className="flex bg-surface-subtle p-1 rounded-lg w-full sm:w-auto justify-between sm:justify-start">
+              <button onClick={() => setStatusFilter('all')} className={`px-3 py-1.5 rounded-md text-[11px] font-bold transition-all ${statusFilter === 'all' ? 'bg-surface text-slate-800' : 'text-text-muted hover:text-text'}`}>Todos</button>
+              <button onClick={() => setStatusFilter('scheduled')} className={`px-3 py-1.5 rounded-md text-[11px] font-bold transition-all ${statusFilter === 'scheduled' ? 'bg-surface text-blue-700' : 'text-text-muted hover:text-text'}`}>Programado</button>
+              <button onClick={() => setStatusFilter('completed')} className={`px-3 py-1.5 rounded-md text-[11px] font-bold transition-all ${statusFilter === 'completed' ? 'bg-surface text-emerald-700' : 'text-text-muted hover:text-text'}`}>Completado</button>
+              <button onClick={() => setStatusFilter('cancelled')} className={`px-3 py-1.5 rounded-md text-[11px] font-bold transition-all ${statusFilter === 'cancelled' ? 'bg-surface text-rose-700' : 'text-text-muted hover:text-text'}`}>Cancelado</button>
             </div>
 
            {/* Navegación de Fecha */}
-           <div className="flex items-center bg-white border border-slate-200 rounded-xl p-1 w-full lg:w-auto justify-between lg:justify-start">
-              <button onClick={() => navigate(-1)} className="size-9 flex items-center justify-center hover:bg-slate-50 text-slate-400 rounded-lg transition-colors">
+           <div className="flex items-center bg-surface border border-border rounded-xl p-1 w-full lg:w-auto justify-between lg:justify-start">
+              <button onClick={() => navigate(-1)} className="size-9 flex items-center justify-center hover:bg-surface-subtle text-text-muted rounded-lg transition-colors">
                 <span className="material-symbols-outlined ui-icon">chevron_left</span>
               </button>
-             <div className="px-4 text-[11px] font-black uppercase tracking-widest text-slate-700 min-w-[180px] text-center">
+             <div className="px-4 text-[11px] font-black uppercase tracking-widest text-text min-w-[180px] text-center">
                {getDateLabel()}
              </div>
-             <button onClick={() => navigate(1)} className="size-9 flex items-center justify-center hover:bg-slate-50 text-slate-400 rounded-lg transition-colors">
+             <button onClick={() => navigate(1)} className="size-9 flex items-center justify-center hover:bg-surface-subtle text-text-muted rounded-lg transition-colors">
                <span className="material-symbols-outlined ui-icon">chevron_right</span>
              </button>
            </div>
@@ -728,9 +728,9 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
             const dayPlannings = getDayPlannings(day);
             const isToday = day.toDateString() === new Date().toDateString();
             return (
-              <div key={idx} className={`flex flex-col min-h-[400px] bg-white rounded-2xl border transition-all ${isToday ? 'border-[#135bec] ring-1 ring-blue-500/10' : 'border-slate-200'}`}>
-                <div className={`p-4 border-b text-center ${isToday ? 'bg-blue-50 border-blue-100' : 'bg-slate-50 border-slate-100'}`}>
-                  <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${isToday ? 'text-blue-600' : 'text-slate-400'}`}>{day.toLocaleDateString('es-ES', { weekday: 'long' })}</p>
+              <div key={idx} className={`flex flex-col min-h-[400px] bg-surface rounded-2xl border transition-all ${isToday ? 'border-[#135bec] ring-1 ring-blue-500/10' : 'border-border'}`}>
+                <div className={`p-4 border-b text-center ${isToday ? 'bg-blue-50 border-blue-100' : 'bg-surface-subtle border-border'}`}>
+                  <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${isToday ? 'text-blue-600' : 'text-text-muted'}`}>{day.toLocaleDateString('es-ES', { weekday: 'long' })}</p>
                   <p className={`text-xl font-black mt-0.5 ${isToday ? 'text-blue-700' : 'text-slate-800'}`}>{day.getDate()}</p>
                 </div>
                 <div className="flex-1 overflow-y-auto max-h-[500px] custom-scrollbar p-3 space-y-3">
@@ -750,14 +750,14 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
       {/* --- VISTA DÍA (AGENDA) --- */}
       {viewMode === 'day' && (
         <div className="card overflow-hidden min-h-[500px] no-print">
-          <div className="p-8 border-b border-slate-100 bg-slate-50/50 flex justify-between items-end">
+          <div className="p-8 border-b border-border bg-surface-subtle/50 flex justify-between items-end">
              <div>
-                <h3 className="text-3xl font-black text-slate-900 capitalize tracking-tighter">{currentDate.toLocaleDateString('es-ES', { weekday: 'long' })}</h3>
-                <p className="text-slate-500 font-bold uppercase tracking-widest text-sm">{currentDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                <h3 className="text-3xl font-black text-text capitalize tracking-tighter">{currentDate.toLocaleDateString('es-ES', { weekday: 'long' })}</h3>
+                <p className="text-text-muted font-bold uppercase tracking-widest text-sm">{currentDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
              </div>
              <div className="text-right">
                 <span className="text-4xl font-black text-primary">{getDayPlannings(currentDate).length}</span>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Actividades</p>
+                <p className="text-[10px] font-black text-text-muted uppercase tracking-widest">Actividades</p>
              </div>
           </div>
           <div className="p-8">
@@ -766,7 +766,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
             </div>
             {getDayPlannings(currentDate).length === 0 && (
               <div className="flex flex-col items-center justify-center py-20 text-slate-300">
-                <div className="size-20 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+                <div className="size-20 bg-surface-subtle rounded-full flex items-center justify-center mb-4">
                    <span className="material-symbols-outlined ui-icon text-4xl">event_note</span>
                 </div>
                 <p className="text-sm font-black uppercase tracking-widest">No hay actividades programadas para este día</p>
@@ -780,16 +780,16 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
       {/* --- VISTA MES (CALENDARIO) --- */}
       {viewMode === 'month' && (
         <div className="card overflow-hidden no-print">
-          <div className="grid grid-cols-7 border-b border-slate-100 bg-slate-50/50">
+          <div className="grid grid-cols-7 border-b border-border bg-surface-subtle/50">
             {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map(day => (
-              <div key={day} className="py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">
+              <div key={day} className="py-4 text-center text-[10px] font-black text-text-muted uppercase tracking-widest">
                 {day}
               </div>
             ))}
           </div>
           <div className="grid grid-cols-7 grid-rows-5 lg:grid-rows-auto min-h-[600px]">
              {calendarDays.map((date, idx) => {
-               if (!date) return <div key={idx} className="bg-slate-50/30 border-r border-b border-slate-100"></div>;
+               if (!date) return <div key={idx} className="bg-surface-subtle/30 border-r border-b border-border"></div>;
                
                const dayPlannings = getDayPlannings(date);
                const isToday = date.toDateString() === new Date().toDateString();
@@ -799,9 +799,9 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
                  <div 
                     key={idx} 
                     onClick={() => handleDayClickInCalendar(date)}
-                    className={`min-h-[100px] p-2 border-r border-b border-slate-100 relative group cursor-pointer transition-all hover:bg-blue-50/30 ${isSelected ? 'bg-blue-50/50' : ''}`}
+                    className={`min-h-[100px] p-2 border-r border-b border-border relative group cursor-pointer transition-all hover:bg-blue-50/30 ${isSelected ? 'bg-blue-50/50' : ''}`}
                  >
-                    <div className={`size-7 flex items-center justify-center rounded-lg text-xs font-black mb-2 ${isToday ? 'bg-[#135bec] text-white' : 'text-slate-700'}`}>
+                    <div className={`size-7 flex items-center justify-center rounded-lg text-xs font-black mb-2 ${isToday ? 'bg-[#135bec] text-white' : 'text-text'}`}>
                       {date.getDate()}
                     </div>
                     
@@ -809,14 +809,14 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
                       {dayPlannings.slice(0, 3).map((p, i) => {
                          const area = areas.find(a => a.id === p.areaId);
                          return (
-                           <div key={i} className={`text-[9px] px-1.5 py-1 rounded font-bold truncate border transition-colors ${p.status === 'cancelled' ? 'bg-rose-50 text-rose-400 border-rose-100 line-through' : p.status === 'completed' ? 'bg-green-50 text-green-700 border-green-100' : 'bg-slate-100 text-slate-600 border-slate-200 group-hover:border-blue-200 group-hover:text-blue-700'}`}>
+                           <div key={i} className={`text-[9px] px-1.5 py-1 rounded font-bold truncate border transition-colors ${p.status === 'cancelled' ? 'bg-rose-50 text-rose-400 border-rose-100 line-through' : p.status === 'completed' ? 'bg-green-50 text-green-700 border-green-100' : 'bg-surface-subtle text-text-muted border-border group-hover:border-blue-200 group-hover:text-blue-700'}`}>
                               {p.departureTime && <span className="mr-1 opacity-70">{formatTime(p.departureTime)}</span>}
                               {area?.name || '---'}
                            </div>
                          )
                       })}
                       {dayPlannings.length > 3 && (
-                        <div className="text-[9px] font-black text-slate-400 text-center uppercase tracking-wide">
+                        <div className="text-[9px] font-black text-text-muted text-center uppercase tracking-wide">
                           + {dayPlannings.length - 3} más
                         </div>
                       )}
@@ -832,31 +832,31 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
 
       {/* MODAL IMPRESIÓN SEMANAL */}
       {showPrintPreview && document.getElementById('print-portal') && createPortal(
-        <div id="planning-print-modal" className="fixed inset-0 z-[200] bg-white flex flex-col overflow-y-auto">
-           <div className="sticky top-0 bg-slate-900 p-4 flex justify-between items-center text-white shadow-lg no-print">
-             <button onClick={() => setShowPrintPreview(false)} className="bg-white/10 px-4 py-2 rounded-lg font-bold text-xs hover:bg-white/20 transition-all">Cerrar</button>
+        <div id="planning-print-modal" className="fixed inset-0 z-[200] bg-surface flex flex-col overflow-y-auto">
+           <div className="sticky top-0 bg-secondary p-4 flex justify-between items-center text-white shadow-lg no-print">
+             <button onClick={() => setShowPrintPreview(false)} className="bg-surface/10 px-4 py-2 rounded-lg font-bold text-xs hover:bg-surface/20 transition-all">Cerrar</button>
              <button onClick={() => window.print()} className="bg-primary px-8 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-blue-500/20">
                <span className="material-symbols-outlined ui-icon text-lg">picture_as_pdf</span> Imprimir Planeación Semanal
              </button>
            </div>
-           <div className="flex-1 bg-slate-100 p-10 flex justify-center print:bg-white print:p-0 print:block">
-              <div id="planning-printable" className="bg-white w-[27.94cm] min-h-[21.59cm] p-[1.5cm] shadow-2xl relative text-slate-900 print:shadow-none print:w-full print:p-0 print:m-0 break-after-auto">
+           <div className="flex-1 bg-surface-subtle p-10 flex justify-center print:bg-surface print:p-0 print:block">
+              <div id="planning-printable" className="bg-surface w-[27.94cm] min-h-[21.59cm] p-[1.5cm] shadow-2xl relative text-text print:shadow-none print:w-full print:p-0 print:m-0 break-after-auto">
                 
                 {/* Header Institucional - Formal Design */}
                 <div className="print-header flex justify-between items-center mb-8 border-b-4 border-slate-900 pb-6">
                   <div className="flex items-center gap-6">
                      <img src="/images/logo-dif.png" alt="Logo" className="w-24 object-contain" />
                     <div className="flex flex-col">
-                      <span className="text-lg font-black text-slate-900 uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
-                      <span className="text-lg font-black text-slate-900 uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>
-                      <span className="text-[8pt] font-bold uppercase text-slate-400 mt-2 tracking-[0.2em]">Parque Vehicular</span>
+                      <span className="text-lg font-black text-text uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
+                      <span className="text-lg font-black text-text uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>
+                      <span className="text-[8pt] font-bold uppercase text-text-muted mt-2 tracking-[0.2em]">Parque Vehicular</span>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="inline-block bg-slate-900 text-white px-4 py-1.5 font-black text-[10pt] uppercase tracking-widest rounded-sm mb-2">
+                    <div className="inline-block bg-secondary text-white px-4 py-1.5 font-black text-[10pt] uppercase tracking-widest rounded-sm mb-2">
                         Programación Semanal
                     </div>
-                    <p className="text-[9pt] text-slate-400 font-bold mt-1 uppercase">
+                    <p className="text-[9pt] text-text-muted font-bold mt-1 uppercase">
                       Semana: {weekDays[0].toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })} - {weekDays[6].toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}
                     </p>
                     <p className="text-[8pt] text-slate-300 font-bold mt-1">
@@ -868,14 +868,14 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
                 {/* Tabla de Planeación - Formal Table */}
                 <div className="mb-8">
                   <table className="w-full border-collapse border border-slate-300">
-                    <thead className="bg-slate-100">
+                    <thead className="bg-surface-subtle">
                       <tr>
-                        <th className="border border-slate-300 px-3 py-3 text-[8pt] font-black uppercase text-slate-600 w-24">Fecha</th>
-                        <th className="border border-slate-300 px-3 py-3 text-[8pt] font-black uppercase text-slate-600 w-20">Horario</th>
-                        <th className="border border-slate-300 px-3 py-3 text-[8pt] font-black uppercase text-slate-600">Unidad / Chofer</th>
-                        <th className="border border-slate-300 px-3 py-3 text-[8pt] font-black uppercase text-slate-600">Destino / Actividad</th>
-                        <th className="border border-slate-300 px-3 py-3 text-[8pt] font-black uppercase text-slate-600 w-28">Estado</th>
-                        <th className="border border-slate-300 px-3 py-3 text-[8pt] font-black uppercase text-slate-600 w-32">Área Solicitante</th>
+                        <th className="border border-slate-300 px-3 py-3 text-[8pt] font-black uppercase text-text-muted w-24">Fecha</th>
+                        <th className="border border-slate-300 px-3 py-3 text-[8pt] font-black uppercase text-text-muted w-20">Horario</th>
+                        <th className="border border-slate-300 px-3 py-3 text-[8pt] font-black uppercase text-text-muted">Unidad / Chofer</th>
+                        <th className="border border-slate-300 px-3 py-3 text-[8pt] font-black uppercase text-text-muted">Destino / Actividad</th>
+                        <th className="border border-slate-300 px-3 py-3 text-[8pt] font-black uppercase text-text-muted w-28">Estado</th>
+                        <th className="border border-slate-300 px-3 py-3 text-[8pt] font-black uppercase text-text-muted w-32">Área Solicitante</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -887,7 +887,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
                           <React.Fragment key={day.toISOString()}>
                             {/* Header del día para separar visualmente */}
                             <tr className="day-header bg-slate-200/50 border-b border-slate-300">
-                              <td colSpan={6} className="px-3 py-2 text-[8pt] font-black uppercase text-slate-900">
+                              <td colSpan={6} className="px-3 py-2 text-[8pt] font-black uppercase text-text">
                                 {day.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
                               </td>
                             </tr>
@@ -896,23 +896,23 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
                               const driver = drivers.find(d => d.id === plan.driverId);
                               const area = areas.find(a => a.id === plan.areaId);
                               const statusLabel = plan.status === 'completed' ? 'COMPLETADO' : plan.status === 'cancelled' ? 'CANCELADO' : 'PROGRAMADO';
-                              const statusClass = plan.status === 'completed' ? 'text-green-700 bg-green-50' : plan.status === 'cancelled' ? 'text-rose-700 bg-rose-50 line-through' : 'text-slate-700 bg-slate-50';
+                              const statusClass = plan.status === 'completed' ? 'text-green-700 bg-green-50' : plan.status === 'cancelled' ? 'text-rose-700 bg-rose-50 line-through' : 'text-text bg-surface-subtle';
                               
                               return (
-                                <tr key={plan.id} className={`border-b border-slate-300 ${planIdx % 2 === 1 ? 'bg-slate-50/50' : ''}`}>
-                                  <td className="px-3 py-2 text-[8pt] font-bold text-center text-slate-500">
+                                <tr key={plan.id} className={`border-b border-slate-300 ${planIdx % 2 === 1 ? 'bg-surface-subtle/50' : ''}`}>
+                                  <td className="px-3 py-2 text-[8pt] font-bold text-center text-text-muted">
                                     {day.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' })}
                                   </td>
                                   <td className="px-3 py-2 text-[8pt] font-bold text-center">
                                     {formatTime(plan.departureTime)}
                                   </td>
                                   <td className="px-3 py-2 text-[8pt]">
-                                    <div className="font-black text-slate-900 print-truncate" style={{maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{vehicle?.model || '---'}</div>
-                                    <div className="text-[7pt] uppercase text-slate-500">{driver?.name || '---'}</div>
+                                    <div className="font-black text-text print-truncate" style={{maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{vehicle?.model || '---'}</div>
+                                    <div className="text-[7pt] uppercase text-text-muted">{driver?.name || '---'}</div>
                                   </td>
                                   <td className="px-3 py-2 text-[8pt]">
                                     <div className="font-bold text-slate-800 uppercase overflow-wrap" style={{maxWidth: '300px', wordWrap: 'break-word'}}>{plan.destination}</div>
-                                    {plan.notes && <div className="text-[7pt] italic text-slate-500">{plan.notes}</div>}
+                                    {plan.notes && <div className="text-[7pt] italic text-text-muted">{plan.notes}</div>}
                                   </td>
                                   <td className={`px-3 py-2 text-[7pt] font-black text-center uppercase ${statusClass}`}>
                                     {statusLabel}
@@ -928,7 +928,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
                       })}
                       {weekDays.every(day => getDayPlannings(day).length === 0) && (
                         <tr>
-                          <td colSpan={6} className="px-4 py-8 text-center text-[9pt] font-bold text-slate-400 uppercase italic">
+                          <td colSpan={6} className="px-4 py-8 text-center text-[9pt] font-bold text-text-muted uppercase italic">
                             Sin actividades programadas para esta semana.
                           </td>
                         </tr>
@@ -941,23 +941,23 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
                   {/* <div className="signature-section absolute bottom-[1.5cm] left-[1.5cm] right-[1.5cm]"> */}
                       {/* <div className="grid grid-cols-3 gap-8 text-center">
                         <div className="signature-line border-t-2 border-slate-900 pt-4">
-                            <p className="text-[9pt] font-black uppercase text-slate-900">{vehicleManager}</p>
-                            <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Encargado del Parque Vehicular</p>
-                            <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Realizó</p>
+                            <p className="text-[9pt] font-black uppercase text-text">{vehicleManager}</p>
+                            <p className="text-[7pt] font-bold text-text-muted mt-1 uppercase tracking-widest">Encargado del Parque Vehicular</p>
+                            <p className="text-[7pt] font-bold text-text-muted uppercase tracking-widest">Realizó</p>
                         </div>
                         <div className="signature-line border-t-2 border-slate-900 pt-4">
-                            <p className="text-[9pt] font-black uppercase text-slate-900">{adminCoordinator}</p>
-                            <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Coordinador Administrativo</p>
-                            <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Vo. Bo.</p>
+                            <p className="text-[9pt] font-black uppercase text-text">{adminCoordinator}</p>
+                            <p className="text-[7pt] font-bold text-text-muted mt-1 uppercase tracking-widest">Coordinador Administrativo</p>
+                            <p className="text-[7pt] font-bold text-text-muted uppercase tracking-widest">Vo. Bo.</p>
                         </div>
                         <div className="signature-line border-t-2 border-slate-900 pt-4">
-                            <p className="text-[9pt] font-black uppercase text-slate-900">{directorName}</p>
-                            <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Director General</p>
-                            <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Autorizó</p>
+                            <p className="text-[9pt] font-black uppercase text-text">{directorName}</p>
+                            <p className="text-[7pt] font-bold text-text-muted mt-1 uppercase tracking-widest">Director General</p>
+                            <p className="text-[7pt] font-bold text-text-muted uppercase tracking-widest">Autorizó</p>
                         </div>
                       </div> */}
-                      {/* <div className="print-footer text-center mt-8 border-t border-slate-200 pt-3">
-                          <div className="flex justify-between items-center text-[7pt] text-slate-400">
+                      {/* <div className="print-footer text-center mt-8 border-t border-border pt-3">
+                          <div className="flex justify-between items-center text-[7pt] text-text-muted">
                               <span>Sistema de Gestion de Parque Vehicular</span>
                               <span className="font-black uppercase tracking-[0.2em]">DIF Municipal La Paz B.C.S.</span>
                           </div>
@@ -969,25 +969,25 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
       , document.getElementById('print-portal')!)}
 
       {showAreaModal && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-300">
-          <div className="bg-white rounded-xl w-full max-w-lg border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-secondary/60 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+          <div className="bg-surface rounded-xl w-full max-w-lg border border-border overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="px-6 py-4 border-b border-border flex justify-between items-center bg-surface-subtle">
               <div className="flex items-center gap-3">
                 <div className="size-10 bg-purple-100 rounded-lg flex items-center justify-center">
                   <span className="material-symbols-outlined ui-icon text-purple-600" aria-hidden="true">layers</span>
                 </div>
                 <div>
-                  <h3 className="text-lg font-black text-slate-900">Catálogo de Áreas</h3>
+                  <h3 className="text-lg font-black text-text">Catálogo de Áreas</h3>
                 </div>
               </div>
-              <button onClick={() => { if (!isSavingArea) { setAreaFormError(''); setAreaTouched({}); setShowAreaModal(false); } }} disabled={isSavingArea} className="size-9 rounded-md hover:bg-white transition-all flex items-center justify-center text-slate-400 disabled:opacity-50" aria-label="Cerrar modal">
+              <button onClick={() => { if (!isSavingArea) { setAreaFormError(''); setAreaTouched({}); setShowAreaModal(false); } }} disabled={isSavingArea} className="size-9 rounded-md hover:bg-surface transition-all flex items-center justify-center text-text-muted disabled:opacity-50" aria-label="Cerrar modal">
                 <span className="material-symbols-outlined ui-icon" aria-hidden="true">close</span>
               </button>
             </div>
             <div className="p-6 space-y-5">
-              <form onSubmit={handleAreaSubmit} autoComplete="off" className="space-y-3 pb-5 border-b border-slate-100">
+              <form onSubmit={handleAreaSubmit} autoComplete="off" className="space-y-3 pb-5 border-b border-border">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Nueva Área</label>
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Nueva Área</label>
                   <div className="flex gap-2">
                     <input 
                       required disabled={isSavingArea}
@@ -1013,14 +1013,14 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
               </form>
               <div className="max-h-60 overflow-y-auto custom-scrollbar space-y-2">
                 {areas.map(a => (
-                  <div key={a.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-md border border-slate-100">
+                  <div key={a.id} className="flex items-center justify-between p-3 bg-surface-subtle rounded-md border border-border">
                     <div className="flex items-center gap-3">
                       <div className="size-8 rounded-md bg-blue-100 text-blue-600 flex items-center justify-center"><span className="material-symbols-outlined ui-icon text-base">location_on</span></div>
                       <span className="text-sm font-bold text-slate-800">{a.name}</span>
                     </div>
                     <button 
                       onClick={() => handleDeleteArea(a.id)}
-                      className="size-8 rounded-md hover:bg-rose-100 text-slate-400 hover:text-rose-600 flex items-center justify-center transition-colors"
+                      className="size-8 rounded-md hover:bg-rose-100 text-text-muted hover:text-rose-600 flex items-center justify-center transition-colors"
                       title="Eliminar área"
                     >
                       <span className="material-symbols-outlined ui-icon text-base">delete</span>
@@ -1034,30 +1034,30 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
       )}
 
       {showModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-300">
-          <div className="bg-white rounded-xl w-full max-w-xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-secondary/60 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+          <div className="bg-surface rounded-xl w-full max-w-xl border border-border overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="px-6 py-4 border-b border-border flex justify-between items-center bg-surface-subtle">
               <div className="flex items-center gap-3">
                 <div className="size-10 bg-indigo-100 rounded-lg flex items-center justify-center">
                   <span className="material-symbols-outlined ui-icon text-indigo-600" aria-hidden="true">event_available</span>
                 </div>
                 <div>
-                  <h3 className="text-lg font-black text-slate-900">{editingPlanning ? 'Editar Asignación' : 'Nueva Asignación'}</h3>
+                  <h3 className="text-lg font-black text-text">{editingPlanning ? 'Editar Asignación' : 'Nueva Asignación'}</h3>
                 </div>
               </div>
-              <button onClick={() => { if (!isSaving) { setFormError(''); setTouched({}); setShowModal(false); } }} disabled={isSaving} className="size-9 rounded-md hover:bg-white transition-all flex items-center justify-center text-slate-400 disabled:opacity-50" aria-label="Cerrar modal">
+              <button onClick={() => { if (!isSaving) { setFormError(''); setTouched({}); setShowModal(false); } }} disabled={isSaving} className="size-9 rounded-md hover:bg-surface transition-all flex items-center justify-center text-text-muted disabled:opacity-50" aria-label="Cerrar modal">
                 <span className="material-symbols-outlined ui-icon" aria-hidden="true">close</span>
               </button>
             </div>
             <form onSubmit={handleSubmit} autoComplete="off" className="p-6 space-y-5 overflow-y-auto max-h-[80vh] custom-scrollbar">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Fecha</label>
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Fecha</label>
                   <input required disabled={isSaving} type="date" className={getPlanningFieldClass('date')} value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} onBlur={() => markTouched('date')} />
                   {touched.date && planningFieldErrors.date && <p className="text-[11px] font-bold text-rose-600">{planningFieldErrors.date}</p>}
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Área / zona</label>
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Área / zona</label>
                   <select required disabled={isSaving} className={getPlanningFieldClass('areaId')} value={formData.areaId} onChange={e => setFormData({...formData, areaId: e.target.value})} onBlur={() => markTouched('areaId')}>
                     <option value="">Seleccionar área...</option>
                     {areas.map(a => (<option key={a.id} value={a.id}>{a.name}</option>))}
@@ -1068,12 +1068,12 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Hora Salida</label>
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Hora Salida</label>
                   <input type="time" disabled={isSaving} className={getPlanningFieldClass('departureTime')} value={formData.departureTime} onChange={e => setFormData({...formData, departureTime: e.target.value})} onBlur={() => markTouched('departureTime')} />
                   {touched.departureTime && planningFieldErrors.departureTime && <p className="text-[11px] font-bold text-rose-600">{planningFieldErrors.departureTime}</p>}
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Hora Llegada</label>
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Hora Llegada</label>
                   <input type="time" disabled={isSaving} className={getPlanningFieldClass('arrivalTime')} value={formData.arrivalTime} onChange={e => setFormData({...formData, arrivalTime: e.target.value})} onBlur={() => markTouched('arrivalTime')} />
                   {touched.arrivalTime && planningFieldErrors.arrivalTime && <p className="text-[11px] font-bold text-rose-600">{planningFieldErrors.arrivalTime}</p>}
                 </div>
@@ -1081,7 +1081,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Vehículo</label>
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Vehículo</label>
                   <select required disabled={isSaving} className={getPlanningFieldClass('vehicleId')} value={formData.vehicleId} onChange={e => setFormData({...formData, vehicleId: e.target.value})} onBlur={() => markTouched('vehicleId')}>
                     <option value="">Seleccionar...</option>
                     {vehicles.map(v => (<option key={v.id} value={v.id}>{v.plate} - {v.model}</option>))}
@@ -1089,7 +1089,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
                   {touched.vehicleId && planningFieldErrors.vehicleId && <p className="text-[11px] font-bold text-rose-600">{planningFieldErrors.vehicleId}</p>}
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Chofer</label>
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Chofer</label>
                   <select required disabled={isSaving} className={getPlanningFieldClass('driverId')} value={formData.driverId} onChange={e => setFormData({...formData, driverId: e.target.value})} onBlur={() => markTouched('driverId')}>
                     <option value="">Seleccionar...</option>
                     {drivers.map(d => ( <option key={d.id} value={d.id}>{d.name}</option> ))}
@@ -1099,21 +1099,21 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
               </div>
 
               <div className="space-y-2">
-                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Destino / Lugar</label>
+                 <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Destino / Lugar</label>
                  <input disabled={isSaving} className={getPlanningFieldClass('destination')} placeholder="Ej. CENTRO DE SALUD..." value={formData.destination} onChange={e => setFormData({...formData, destination: e.target.value})} onBlur={() => markTouched('destination')} />
                  {touched.destination && planningFieldErrors.destination && <p className="text-[11px] font-bold text-rose-600">{planningFieldErrors.destination}</p>}
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Notas (Opcional)</label>
-                <input disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all disabled:opacity-50" placeholder="Observaciones..." value={formData.notes} onChange={e => setFormData({...formData, notes: e.target.value})} />
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Notas (Opcional)</label>
+                <input disabled={isSaving} className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all disabled:opacity-50" placeholder="Observaciones..." value={formData.notes} onChange={e => setFormData({...formData, notes: e.target.value})} />
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Estado del Viaje</label>
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Estado del Viaje</label>
                 <select 
                     disabled={isSaving}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all disabled:opacity-50"
+                    className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all disabled:opacity-50"
                     value={formData.status}
                     onChange={e => setFormData({...formData, status: e.target.value as any})}
                 >
@@ -1130,7 +1130,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
               )}
 
               <div className="pt-4 flex gap-3">
-                <button type="button" disabled={isSaving} onClick={() => { setFormError(''); setTouched({}); setShowModal(false); }} className="flex-1 py-3 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-100 rounded-md transition-all disabled:opacity-50">Cancelar</button>
+                <button type="button" disabled={isSaving} onClick={() => { setFormError(''); setTouched({}); setShowModal(false); }} className="flex-1 py-3 text-[11px] font-black uppercase tracking-widest text-text-muted hover:bg-surface-subtle rounded-md transition-all disabled:opacity-50">Cancelar</button>
                 <button type="submit" disabled={isSaving} className="flex-[2] py-3 bg-primary text-white text-[11px] font-black uppercase tracking-widest rounded-md hover:opacity-90 transition-all disabled:opacity-80 flex items-center justify-center gap-2">
                   {isSaving ? <><span className="material-symbols-outlined ui-icon animate-spin">sync</span> {editingPlanning ? 'Actualizando asignación...' : 'Guardando asignación...'}</> : (editingPlanning ? 'Actualizar Asignación' : 'Confirmar Planeación')}
                 </button>

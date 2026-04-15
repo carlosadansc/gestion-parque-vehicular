@@ -886,12 +886,12 @@ const Fuel: React.FC<FuelProps> = ({
         </div>
       </div>
 
-      <div className="no-print inline-flex rounded-xl border border-slate-200 bg-white p-1 gap-1">
+      <div className="no-print inline-flex rounded-xl border border-border bg-surface p-1 gap-1">
         <button
           type="button"
           onClick={() => setActiveTab('loads')}
           className={`px-4 py-2 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all ${
-            activeTab === 'loads' ? 'bg-blue-50 text-blue-700' : 'text-slate-500 hover:bg-slate-50'
+            activeTab === 'loads' ? 'bg-blue-50 text-blue-700' : 'text-text-muted hover:bg-surface-subtle'
           }`}
         >
           Cargas
@@ -900,7 +900,7 @@ const Fuel: React.FC<FuelProps> = ({
           type="button"
           onClick={() => setActiveTab('acquisitions')}
           className={`px-4 py-2 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all ${
-            activeTab === 'acquisitions' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-500 hover:bg-slate-50'
+            activeTab === 'acquisitions' ? 'bg-emerald-50 text-emerald-700' : 'text-text-muted hover:bg-surface-subtle'
           }`}
         >
           Adquisiciones
@@ -909,7 +909,7 @@ const Fuel: React.FC<FuelProps> = ({
           type="button"
           onClick={() => setActiveTab('deliveries')}
           className={`px-4 py-2 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all ${
-            activeTab === 'deliveries' ? 'bg-amber-50 text-amber-700' : 'text-slate-500 hover:bg-slate-50'
+            activeTab === 'deliveries' ? 'bg-amber-50 text-amber-700' : 'text-text-muted hover:bg-surface-subtle'
           }`}
         >
           Entregas
@@ -937,7 +937,7 @@ const Fuel: React.FC<FuelProps> = ({
       )}
 
       <div className="card flex flex-col h-full no-print">
-        <div className="px-4 py-3 border-b border-slate-200 flex flex-col xl:flex-row xl:items-end justify-between gap-4 bg-slate-50">
+        <div className="px-4 py-3 border-b border-border flex flex-col xl:flex-row xl:items-end justify-between gap-4 bg-surface-subtle">
           <div>
             <h3 className="section-title">
               {activeTab === 'loads'
@@ -954,12 +954,12 @@ const Fuel: React.FC<FuelProps> = ({
                   : 'Distribución por áreas y motivo de entrega'}
             </p>
             {activeTab === 'acquisitions' && (
-              <p className="text-[11px] font-bold text-slate-500 mt-2">
+              <p className="text-[11px] font-bold text-text-muted mt-2">
                 Mostrando {filteredAcquisitions.length} de {fuelAcquisitions.length} adquisiciones.
               </p>
             )}
             {activeTab === 'deliveries' && (
-              <p className="text-[11px] font-bold text-slate-500 mt-2">
+              <p className="text-[11px] font-bold text-text-muted mt-2">
                 Mostrando {filteredDeliveries.length} de {fuelDeliveries.length} entregas.
               </p>
             )}
@@ -967,28 +967,28 @@ const Fuel: React.FC<FuelProps> = ({
           <div className="flex flex-col sm:flex-row sm:items-end gap-2">
             {activeTab === 'acquisitions' && (
               <>
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-widest">
                   Desde
                   <input
                     type="date"
-                    className="mt-1 w-full sm:w-auto bg-white border border-slate-200 rounded-md px-3 py-2 text-xs font-bold outline-none focus:border-primary"
+                    className="mt-1 w-full sm:w-auto bg-surface border border-border rounded-md px-3 py-2 text-xs font-bold outline-none focus:border-primary"
                     value={acquisitionFilters.startDate}
                     onChange={e => setAcquisitionFilters(prev => ({ ...prev, startDate: e.target.value }))}
                   />
                 </label>
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-widest">
                   Hasta
                   <input
                     type="date"
-                    className="mt-1 w-full sm:w-auto bg-white border border-slate-200 rounded-md px-3 py-2 text-xs font-bold outline-none focus:border-primary"
+                    className="mt-1 w-full sm:w-auto bg-surface border border-border rounded-md px-3 py-2 text-xs font-bold outline-none focus:border-primary"
                     value={acquisitionFilters.endDate}
                     onChange={e => setAcquisitionFilters(prev => ({ ...prev, endDate: e.target.value }))}
                   />
                 </label>
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-widest">
                   Tipo
                   <select
-                    className="mt-1 w-full sm:w-auto bg-white border border-slate-200 rounded-md px-3 py-2 text-xs font-bold outline-none focus:border-primary"
+                    className="mt-1 w-full sm:w-auto bg-surface border border-border rounded-md px-3 py-2 text-xs font-bold outline-none focus:border-primary"
                     value={acquisitionFilters.type}
                     onChange={e => setAcquisitionFilters(prev => ({ ...prev, type: e.target.value as 'all' | 'qr' | 'voucher' }))}
                   >
@@ -1008,28 +1008,28 @@ const Fuel: React.FC<FuelProps> = ({
             )}
             {activeTab === 'deliveries' && (
               <>
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-widest">
                   Desde
                   <input
                     type="date"
-                    className="mt-1 w-full sm:w-auto bg-white border border-slate-200 rounded-md px-3 py-2 text-xs font-bold outline-none focus:border-primary"
+                    className="mt-1 w-full sm:w-auto bg-surface border border-border rounded-md px-3 py-2 text-xs font-bold outline-none focus:border-primary"
                     value={deliveryFilters.startDate}
                     onChange={e => setDeliveryFilters(prev => ({ ...prev, startDate: e.target.value }))}
                   />
                 </label>
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-widest">
                   Hasta
                   <input
                     type="date"
-                    className="mt-1 w-full sm:w-auto bg-white border border-slate-200 rounded-md px-3 py-2 text-xs font-bold outline-none focus:border-primary"
+                    className="mt-1 w-full sm:w-auto bg-surface border border-border rounded-md px-3 py-2 text-xs font-bold outline-none focus:border-primary"
                     value={deliveryFilters.endDate}
                     onChange={e => setDeliveryFilters(prev => ({ ...prev, endDate: e.target.value }))}
                   />
                 </label>
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-widest">
                   Tipo
                   <select
-                    className="mt-1 w-full sm:w-auto bg-white border border-slate-200 rounded-md px-3 py-2 text-xs font-bold outline-none focus:border-primary"
+                    className="mt-1 w-full sm:w-auto bg-surface border border-border rounded-md px-3 py-2 text-xs font-bold outline-none focus:border-primary"
                     value={deliveryFilters.type}
                     onChange={e => setDeliveryFilters(prev => ({ ...prev, type: e.target.value as 'all' | 'qr' | 'voucher' }))}
                   >
@@ -1077,10 +1077,10 @@ const Fuel: React.FC<FuelProps> = ({
                       {entry.date ? new Date(entry.date).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }) : '---'}
                     </td>
                     <td>
-                      <p className="font-medium text-slate-900">{vehicle?.plate || entry.vehicleId || 'S/P'}</p>
-                      <p className="text-xs text-slate-400">{driver?.name || entry.driverId || '---'}</p>
+                      <p className="font-medium text-text">{vehicle?.plate || entry.vehicleId || 'S/P'}</p>
+                      <p className="text-xs text-text-muted">{driver?.name || entry.driverId || '---'}</p>
                     </td>
-                    <td className="text-right text-slate-500">{(Number(entry.odometer) || 0).toLocaleString()} km</td>
+                    <td className="text-right text-text-muted">{(Number(entry.odometer) || 0).toLocaleString()} km</td>
                     <td className="text-right font-medium">{entry.liters || 0} L</td>
                     <td className="text-right">
                       {entry.performance ? (
@@ -1088,7 +1088,7 @@ const Fuel: React.FC<FuelProps> = ({
                           {entry.performance.toFixed(2)} KM/L
                         </span>
                       ) : (
-                        <span className="text-xs text-slate-400 italic">Carga Inicial</span>
+                        <span className="text-xs text-text-muted italic">Carga Inicial</span>
                       )}
                     </td>
                      <td className="text-right font-medium">${(Number(entry.cost) || 0).toFixed(2)}</td>
@@ -1108,7 +1108,7 @@ const Fuel: React.FC<FuelProps> = ({
               })}
               {sortedFuelHistory.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-6 py-10 text-center text-slate-400 text-sm font-bold">Sin registros de cargas.</td>
+                  <td colSpan={7} className="px-6 py-10 text-center text-text-muted text-sm font-bold">Sin registros de cargas.</td>
                 </tr>
               )}
             </tbody>
@@ -1138,7 +1138,7 @@ const Fuel: React.FC<FuelProps> = ({
                       {entry.isQr ? 'QR' : 'VALES'}
                     </span>
                   </td>
-                  <td className="text-xs font-bold text-slate-500">
+                  <td className="text-xs font-bold text-text-muted">
                     {entry.validFrom ? new Date(entry.validFrom).toLocaleDateString() : '---'} - {entry.validTo ? new Date(entry.validTo).toLocaleDateString() : '---'}
                   </td>
                   <td className="font-medium">{entry.description}</td>
@@ -1167,7 +1167,7 @@ const Fuel: React.FC<FuelProps> = ({
               ))}
               {sortedAcquisitions.length === 0 && (
                 <tr>
-                  <td colSpan={9} className="px-6 py-10 text-center text-slate-400 text-sm font-bold">Sin registros para el filtro seleccionado.</td>
+                  <td colSpan={9} className="px-6 py-10 text-center text-text-muted text-sm font-bold">Sin registros para el filtro seleccionado.</td>
                 </tr>
               )}
             </tbody>
@@ -1196,8 +1196,8 @@ const Fuel: React.FC<FuelProps> = ({
                   <td className="font-black text-amber-700">{entry.consecutiveNumber || '---'}</td>
                   <td className="font-medium">{entry.date ? new Date(entry.date).toLocaleDateString('es-ES') : '---'}</td>
                   <td>
-                    <p className="font-medium text-slate-900">ADQ #{entry.acquisitionConsecutiveNumber || acquisition?.consecutiveNumber || '---'}</p>
-                    <p className="text-xs text-slate-500">Folio: {(entry.acquisitionInternalFolio || acquisition?.internalFolio || 'S/N').toUpperCase()}</p>
+                    <p className="font-medium text-text">ADQ #{entry.acquisitionConsecutiveNumber || acquisition?.consecutiveNumber || '---'}</p>
+                    <p className="text-xs text-text-muted">Folio: {(entry.acquisitionInternalFolio || acquisition?.internalFolio || 'S/N').toUpperCase()}</p>
                     <p className={`text-[10px] font-black mt-1 ${availableAfterDistribution <= 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
                       Saldo: ${Math.max(availableAfterDistribution, 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                     </p>
@@ -1211,7 +1211,7 @@ const Fuel: React.FC<FuelProps> = ({
                   <td className="font-medium">{entry.purpose}</td>
                   <td>
                     <p className="font-medium">{entry.recipientName}</p>
-                    <p className="text-xs text-slate-500">{entry.recipientPosition || '---'}</p>
+                    <p className="text-xs text-text-muted">{entry.recipientPosition || '---'}</p>
                   </td>
                   <td className="text-right font-black">${(Number(entry.amount) || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td>
                   <td className="text-center">
@@ -1237,7 +1237,7 @@ const Fuel: React.FC<FuelProps> = ({
               })}
               {sortedDeliveries.length === 0 && (
                 <tr>
-                  <td colSpan={9} className="px-6 py-10 text-center text-slate-400 text-sm font-bold">Sin entregas para el filtro seleccionado.</td>
+                  <td colSpan={9} className="px-6 py-10 text-center text-text-muted text-sm font-bold">Sin entregas para el filtro seleccionado.</td>
                 </tr>
               )}
             </tbody>
@@ -1247,21 +1247,21 @@ const Fuel: React.FC<FuelProps> = ({
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-300 no-print">
-          <div className="bg-white rounded-xl w-full max-w-xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-secondary/60 backdrop-blur-sm p-4 animate-in fade-in duration-300 no-print">
+          <div className="bg-surface rounded-xl w-full max-w-xl border border-border overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="px-6 py-4 border-b border-border flex justify-between items-center bg-surface-subtle">
               <div className="flex items-center gap-3">
                 <div className="size-10 bg-green-100 rounded-lg flex items-center justify-center">
                   <span className="material-symbols-outlined text-green-600" aria-hidden="true">local_gas_station</span>
                 </div>
                 <div>
-                  <h3 className="text-lg font-black text-slate-900">{editingEntry ? 'Editar Carga' : 'Nueva Carga'}</h3>
+                  <h3 className="text-lg font-black text-text">{editingEntry ? 'Editar Carga' : 'Nueva Carga'}</h3>
                 </div>
               </div>
               <button 
                 onClick={() => !isSaving && setShowModal(false)}
                 disabled={isSaving}
-                className="size-9 rounded-md hover:bg-white transition-all flex items-center justify-center text-slate-400 disabled:opacity-50"
+                className="size-9 rounded-md hover:bg-surface transition-all flex items-center justify-center text-text-muted disabled:opacity-50"
                 aria-label="Cerrar modal"
               >
                 <span className="material-symbols-outlined" aria-hidden="true">close</span>
@@ -1270,11 +1270,11 @@ const Fuel: React.FC<FuelProps> = ({
             
             <form onSubmit={handleSubmit} autoComplete="off" className="p-6 space-y-5">
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Fecha de la Carga</label>
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Fecha de la Carga</label>
                 <input 
                   type="date"
                   required disabled={isSaving}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all disabled:opacity-50"
+                  className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all disabled:opacity-50"
                   value={formData.date}
                   onChange={e => setFormData({...formData, date: e.target.value})}
                 />
@@ -1282,10 +1282,10 @@ const Fuel: React.FC<FuelProps> = ({
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Vehículo</label>
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Vehículo</label>
                   <select 
                     required disabled={isSaving}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all disabled:opacity-50"
+                    className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all disabled:opacity-50"
                     value={formData.vehicleId}
                     onChange={e => setFormData({...formData, vehicleId: e.target.value})}
                   >
@@ -1296,10 +1296,10 @@ const Fuel: React.FC<FuelProps> = ({
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Conductor</label>
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Conductor</label>
                   <select 
                     required disabled={isSaving}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all disabled:opacity-50"
+                    className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all disabled:opacity-50"
                     value={formData.driverId}
                     onChange={e => setFormData({...formData, driverId: e.target.value})}
                   >
@@ -1313,27 +1313,27 @@ const Fuel: React.FC<FuelProps> = ({
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Litros Cargados</label>
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Litros Cargados</label>
                   <div className="relative">
                     <input 
                       required disabled={isSaving}
                       type="number" step="0.01"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 pr-8 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all disabled:opacity-50"
+                      className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 pr-8 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all disabled:opacity-50"
                       placeholder="0.00"
                       value={formData.liters}
                       onChange={e => setFormData({...formData, liters: e.target.value})}
                     />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-black text-slate-400">L</span>
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-black text-text-muted">L</span>
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Costo Total ($)</label>
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Costo Total ($)</label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">$</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-text-muted">$</span>
                     <input 
                       required disabled={isSaving}
                       type="number" step="0.01"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-md pl-7 pr-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all disabled:opacity-50"
+                      className="w-full bg-surface-subtle border border-border rounded-md pl-7 pr-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all disabled:opacity-50"
                       placeholder="0.00"
                       value={formData.cost}
                       onChange={e => setFormData({...formData, cost: e.target.value})}
@@ -1343,11 +1343,11 @@ const Fuel: React.FC<FuelProps> = ({
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Lectura del Odómetro (Km)</label>
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Lectura del Odómetro (Km)</label>
                 <input 
                   required disabled={isSaving}
                   type="number"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all disabled:opacity-50"
+                  className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all disabled:opacity-50"
                   placeholder="Ej. 125400"
                   value={formData.odometer}
                   onChange={e => setFormData({...formData, odometer: e.target.value})}
@@ -1364,7 +1364,7 @@ const Fuel: React.FC<FuelProps> = ({
                 <button 
                   type="button" disabled={isSaving}
                   onClick={() => setShowModal(false)}
-                  className="flex-1 py-3 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-100 rounded-md transition-all disabled:opacity-50"
+                  className="flex-1 py-3 text-[11px] font-black uppercase tracking-widest text-text-muted hover:bg-surface-subtle rounded-md transition-all disabled:opacity-50"
                 >
                   Cancelar
                 </button>
@@ -1389,21 +1389,21 @@ const Fuel: React.FC<FuelProps> = ({
 
       {/* VISTA PREVIA DE IMPRESIÓN (REPORTE DE COMBUSTIBLE) */}
       {showAcquisitionModal && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-300 no-print">
-          <div className="bg-white rounded-xl w-full max-w-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-secondary/60 backdrop-blur-sm p-4 animate-in fade-in duration-300 no-print">
+          <div className="bg-surface rounded-xl w-full max-w-2xl border border-border overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="px-6 py-4 border-b border-border flex justify-between items-center bg-surface-subtle">
               <div className="flex items-center gap-3">
                 <div className="size-10 bg-emerald-100 rounded-lg flex items-center justify-center">
                   <span className="material-symbols-outlined text-emerald-600" aria-hidden="true">receipt_long</span>
                 </div>
                 <div>
-                  <h3 className="text-lg font-black text-slate-900">{editingAcquisition ? 'Editar Adquisición' : 'Nueva Adquisición'}</h3>
+                  <h3 className="text-lg font-black text-text">{editingAcquisition ? 'Editar Adquisición' : 'Nueva Adquisición'}</h3>
                 </div>
               </div>
               <button
                 onClick={() => !isSavingAcquisition && setShowAcquisitionModal(false)}
                 disabled={isSavingAcquisition}
-                className="size-9 rounded-md hover:bg-white transition-all flex items-center justify-center text-slate-400 disabled:opacity-50"
+                className="size-9 rounded-md hover:bg-surface transition-all flex items-center justify-center text-text-muted disabled:opacity-50"
                 aria-label="Cerrar modal"
               >
                 <span className="material-symbols-outlined" aria-hidden="true">close</span>
@@ -1413,25 +1413,25 @@ const Fuel: React.FC<FuelProps> = ({
             <form onSubmit={handleSubmitAcquisition} autoComplete="off" className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Consecutivo</label>
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Consecutivo</label>
                   <div className="w-full bg-blue-50 border border-blue-200 rounded-md px-4 py-3 text-sm font-black text-blue-700">
                     {editingAcquisition?.consecutiveNumber || nextAcquisitionConsecutive}
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Folio Interno</label>
-                  <input disabled={isSavingAcquisition} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all uppercase" value={acquisitionForm.internalFolio} onChange={e => setAcquisitionForm({...acquisitionForm, internalFolio: e.target.value})} />
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Folio Interno</label>
+                  <input disabled={isSavingAcquisition} className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all uppercase" value={acquisitionForm.internalFolio} onChange={e => setAcquisitionForm({...acquisitionForm, internalFolio: e.target.value})} />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Fecha de Registro</label>
-                  <input type="date" required disabled={isSavingAcquisition} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all" value={acquisitionForm.date} onChange={e => setAcquisitionForm({...acquisitionForm, date: e.target.value})} />
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Fecha de Registro</label>
+                  <input type="date" required disabled={isSavingAcquisition} className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all" value={acquisitionForm.date} onChange={e => setAcquisitionForm({...acquisitionForm, date: e.target.value})} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Modalidad</label>
-                  <select required disabled={isSavingAcquisition} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all" value={acquisitionForm.isQr ? 'qr' : 'voucher'} onChange={e => setAcquisitionForm({...acquisitionForm, isQr: e.target.value === 'qr'})}>
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Modalidad</label>
+                  <select required disabled={isSavingAcquisition} className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all" value={acquisitionForm.isQr ? 'qr' : 'voucher'} onChange={e => setAcquisitionForm({...acquisitionForm, isQr: e.target.value === 'qr'})}>
                     <option value="voucher">Vales</option>
                     <option value="qr">Codigo QR</option>
                   </select>
@@ -1440,22 +1440,22 @@ const Fuel: React.FC<FuelProps> = ({
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Rango Desde</label>
-                  <input type="date" required disabled={isSavingAcquisition} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all" value={acquisitionForm.validFrom} onChange={e => setAcquisitionForm({...acquisitionForm, validFrom: e.target.value})} />
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Rango Desde</label>
+                  <input type="date" required disabled={isSavingAcquisition} className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all" value={acquisitionForm.validFrom} onChange={e => setAcquisitionForm({...acquisitionForm, validFrom: e.target.value})} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Rango Hasta</label>
-                  <input type="date" required disabled={isSavingAcquisition} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all" value={acquisitionForm.validTo} onChange={e => setAcquisitionForm({...acquisitionForm, validTo: e.target.value})} />
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Rango Hasta</label>
+                  <input type="date" required disabled={isSavingAcquisition} className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all" value={acquisitionForm.validTo} onChange={e => setAcquisitionForm({...acquisitionForm, validTo: e.target.value})} />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Area</label>
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Area</label>
                   <select
                     required
                     disabled={isSavingAcquisition}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all"
+                    className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all"
                     value={acquisitionForm.area}
                     onChange={e => setAcquisitionForm({ ...acquisitionForm, area: e.target.value })}
                   >
@@ -1471,11 +1471,11 @@ const Fuel: React.FC<FuelProps> = ({
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Proveedor</label>
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Proveedor</label>
                   <select
                     required
                     disabled={isSavingAcquisition}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all"
+                    className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all"
                     value={acquisitionForm.supplier}
                     onChange={e => setAcquisitionForm({ ...acquisitionForm, supplier: e.target.value })}
                   >
@@ -1493,13 +1493,13 @@ const Fuel: React.FC<FuelProps> = ({
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Monto ($)</label>
-                <input type="number" step="0.01" required disabled={isSavingAcquisition} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all" value={acquisitionForm.amount} onChange={e => setAcquisitionForm({...acquisitionForm, amount: e.target.value})} />
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Monto ($)</label>
+                <input type="number" step="0.01" required disabled={isSavingAcquisition} className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all" value={acquisitionForm.amount} onChange={e => setAcquisitionForm({...acquisitionForm, amount: e.target.value})} />
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Descripcion</label>
-                <textarea rows={3} required disabled={isSavingAcquisition} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none resize-none focus:bg-white focus:border-primary transition-all" value={acquisitionForm.description} onChange={e => setAcquisitionForm({...acquisitionForm, description: e.target.value})} />
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Descripcion</label>
+                <textarea rows={3} required disabled={isSavingAcquisition} className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none resize-none focus:bg-surface focus:border-primary transition-all" value={acquisitionForm.description} onChange={e => setAcquisitionForm({...acquisitionForm, description: e.target.value})} />
               </div>
 
               {acquisitionError && (
@@ -1513,7 +1513,7 @@ const Fuel: React.FC<FuelProps> = ({
                   type="button"
                   disabled={isSavingAcquisition}
                   onClick={() => setShowAcquisitionModal(false)}
-                  className="flex-1 py-3 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-100 rounded-md transition-all disabled:opacity-50"
+                  className="flex-1 py-3 text-[11px] font-black uppercase tracking-widest text-text-muted hover:bg-surface-subtle rounded-md transition-all disabled:opacity-50"
                 >
                   Cancelar
                 </button>
@@ -1538,21 +1538,21 @@ const Fuel: React.FC<FuelProps> = ({
       )}
 
       {showDeliveryModal && (
-        <div className="fixed inset-0 z-[115] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-300 no-print">
-          <div className="bg-white rounded-xl w-full max-w-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+        <div className="fixed inset-0 z-[115] flex items-center justify-center bg-secondary/60 backdrop-blur-sm p-4 animate-in fade-in duration-300 no-print">
+          <div className="bg-surface rounded-xl w-full max-w-2xl border border-border overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="px-6 py-4 border-b border-border flex justify-between items-center bg-surface-subtle">
               <div className="flex items-center gap-3">
                 <div className="size-10 bg-amber-100 rounded-lg flex items-center justify-center">
                   <span className="material-symbols-outlined text-amber-600" aria-hidden="true">handshake</span>
                 </div>
                 <div>
-                  <h3 className="text-lg font-black text-slate-900">{editingDelivery ? 'Editar Entrega' : 'Nueva Entrega de Combustible'}</h3>
+                  <h3 className="text-lg font-black text-text">{editingDelivery ? 'Editar Entrega' : 'Nueva Entrega de Combustible'}</h3>
                 </div>
               </div>
               <button
                 onClick={() => !isSavingDelivery && setShowDeliveryModal(false)}
                 disabled={isSavingDelivery}
-                className="size-9 rounded-md hover:bg-white transition-all flex items-center justify-center text-slate-400 disabled:opacity-50"
+                className="size-9 rounded-md hover:bg-surface transition-all flex items-center justify-center text-text-muted disabled:opacity-50"
                 aria-label="Cerrar modal"
               >
                 <span className="material-symbols-outlined" aria-hidden="true">close</span>
@@ -1562,18 +1562,18 @@ const Fuel: React.FC<FuelProps> = ({
             <form onSubmit={handleSubmitDelivery} autoComplete="off" className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Consecutivo Entrega</label>
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Consecutivo Entrega</label>
                   <div className="w-full bg-amber-50 border border-amber-200 rounded-md px-4 py-3 text-sm font-black text-amber-700">
                     {editingDelivery?.consecutiveNumber || nextDeliveryConsecutive}
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Fecha de Entrega</label>
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Fecha de Entrega</label>
                   <input
                     type="date"
                     required
                     disabled={isSavingDelivery}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all"
+                    className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all"
                     value={deliveryForm.date}
                     onChange={e => setDeliveryForm({ ...deliveryForm, date: e.target.value })}
                   />
@@ -1581,11 +1581,11 @@ const Fuel: React.FC<FuelProps> = ({
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Adquisición Origen</label>
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Adquisición Origen</label>
                 <select
                   required
                   disabled={isSavingDelivery}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all"
+                  className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all"
                   value={deliveryForm.acquisitionId}
                   onChange={e => setDeliveryForm({ ...deliveryForm, acquisitionId: e.target.value })}
                 >
@@ -1605,11 +1605,11 @@ const Fuel: React.FC<FuelProps> = ({
               </div>
 
               {selectedAcquisitionForDelivery && (
-                <div className="bg-slate-50 border border-slate-200 rounded-md p-3 text-xs">
-                  <p className="font-black text-slate-700 uppercase tracking-wider">
+                <div className="bg-surface-subtle border border-border rounded-md p-3 text-xs">
+                  <p className="font-black text-text uppercase tracking-wider">
                     Adquisición: #{selectedAcquisitionForDelivery.consecutiveNumber || '---'} - {selectedAcquisitionForDelivery.isQr ? 'QR' : 'VALE'}
                   </p>
-                  <p className="font-bold text-slate-500 mt-1">
+                  <p className="font-bold text-text-muted mt-1">
                     Saldo disponible: ${Math.max(deliveryAvailableAmount, 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                   </p>
                 </div>
@@ -1617,11 +1617,11 @@ const Fuel: React.FC<FuelProps> = ({
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Area Destino</label>
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Area Destino</label>
                   <input
                     required
                     disabled={isSavingDelivery}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all"
+                    className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all"
                     value={deliveryForm.area}
                     onChange={e => setDeliveryForm({ ...deliveryForm, area: e.target.value })}
                     list="fuel-delivery-area-options"
@@ -1634,13 +1634,13 @@ const Fuel: React.FC<FuelProps> = ({
                   </datalist>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Monto Entregado ($)</label>
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Monto Entregado ($)</label>
                   <input
                     type="number"
                     step="0.01"
                     required
                     disabled={isSavingDelivery}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all"
+                    className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all"
                     value={deliveryForm.amount}
                     onChange={e => setDeliveryForm({ ...deliveryForm, amount: e.target.value })}
                     placeholder="0.00"
@@ -1649,12 +1649,12 @@ const Fuel: React.FC<FuelProps> = ({
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Motivo / Justificacion</label>
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Motivo / Justificacion</label>
                 <textarea
                   rows={3}
                   required
                   disabled={isSavingDelivery}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none resize-none focus:bg-white focus:border-primary transition-all"
+                  className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none resize-none focus:bg-surface focus:border-primary transition-all"
                   value={deliveryForm.purpose}
                   onChange={e => setDeliveryForm({ ...deliveryForm, purpose: e.target.value })}
                   placeholder="Ej. TRASLADO DE PACIENTES A COMUNIDADES RURALES"
@@ -1663,21 +1663,21 @@ const Fuel: React.FC<FuelProps> = ({
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Recibe</label>
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Recibe</label>
                   <input
                     required
                     disabled={isSavingDelivery}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all"
+                    className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all"
                     value={deliveryForm.recipientName}
                     onChange={e => setDeliveryForm({ ...deliveryForm, recipientName: e.target.value })}
                     placeholder="Nombre completo"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Cargo de Quien Recibe</label>
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Cargo de Quien Recibe</label>
                   <input
                     disabled={isSavingDelivery}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all"
+                    className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all"
                     value={deliveryForm.recipientPosition}
                     onChange={e => setDeliveryForm({ ...deliveryForm, recipientPosition: e.target.value })}
                     placeholder="Opcional"
@@ -1686,10 +1686,10 @@ const Fuel: React.FC<FuelProps> = ({
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Observaciones</label>
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Observaciones</label>
                 <input
                   disabled={isSavingDelivery}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all"
+                  className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all"
                   value={deliveryForm.notes}
                   onChange={e => setDeliveryForm({ ...deliveryForm, notes: e.target.value })}
                   placeholder="Opcional"
@@ -1707,7 +1707,7 @@ const Fuel: React.FC<FuelProps> = ({
                   type="button"
                   disabled={isSavingDelivery}
                   onClick={() => setShowDeliveryModal(false)}
-                  className="flex-1 py-3 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-100 rounded-md transition-all disabled:opacity-50"
+                  className="flex-1 py-3 text-[11px] font-black uppercase tracking-widest text-text-muted hover:bg-surface-subtle rounded-md transition-all disabled:opacity-50"
                 >
                   Cancelar
                 </button>
@@ -1732,18 +1732,18 @@ const Fuel: React.FC<FuelProps> = ({
       )}
 
       {showAcquisitionReportPreview && document.getElementById('print-portal') && createPortal(
-        <div id="fuel-acquisitions-report-modal" className="fixed inset-0 z-[205] bg-white flex flex-col overflow-y-auto">
-          <div className="sticky top-0 bg-slate-900 p-4 flex justify-between items-center text-white shadow-lg no-print">
+        <div id="fuel-acquisitions-report-modal" className="fixed inset-0 z-[205] bg-surface flex flex-col overflow-y-auto">
+          <div className="sticky top-0 bg-secondary p-4 flex justify-between items-center text-white shadow-lg no-print">
             <div className="flex items-center gap-4">
-              <button onClick={() => setShowAcquisitionReportPreview(false)} className="bg-white/10 px-4 py-2 rounded-lg font-bold text-xs hover:bg-white/20 transition-all">Cerrar</button>
+              <button onClick={() => setShowAcquisitionReportPreview(false)} className="bg-surface/10 px-4 py-2 rounded-lg font-bold text-xs hover:bg-surface/20 transition-all">Cerrar</button>
               <h3 className="font-black uppercase tracking-widest text-sm">Vista Previa Adquisicones de combustible</h3>
             </div>
             <button onClick={() => window.print()} className="bg-primary px-8 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-blue-500/20">
               <span className="material-symbols-outlined text-lg">picture_as_pdf</span> Imprimir Reporte PDF
             </button>
           </div>
-          <div className="print-page-host flex-1 bg-slate-100 p-10 flex justify-center">
-            <div id="fuel-acquisitions-report-printable" className="bg-white w-[27.94cm] min-h-[21.59cm] p-[1.5cm] shadow-2xl relative text-slate-900">
+          <div className="print-page-host flex-1 bg-surface-subtle p-10 flex justify-center">
+            <div id="fuel-acquisitions-report-printable" className="bg-surface w-[27.94cm] min-h-[21.59cm] p-[1.5cm] shadow-2xl relative text-text">
               <div className="flex justify-between items-center mb-8 border-b-4 border-slate-900 pb-6">
                 <div className="flex items-center gap-6">
                   <img
@@ -1758,24 +1758,24 @@ const Fuel: React.FC<FuelProps> = ({
                     }}
                   />
                   <div className="flex flex-col">
-                    <span className="text-lg font-black text-slate-900 uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
-                    <span className="text-lg font-black text-slate-900 uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>
-                    <span className="text-[8pt] font-bold uppercase text-slate-400 mt-2 tracking-[0.2em]">Adquisicones de combustible</span>
+                    <span className="text-lg font-black text-text uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
+                    <span className="text-lg font-black text-text uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>
+                    <span className="text-[8pt] font-bold uppercase text-text-muted mt-2 tracking-[0.2em]">Adquisicones de combustible</span>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="inline-block bg-slate-900 text-white px-4 py-1.5 font-black text-[10pt] uppercase tracking-widest rounded-sm mb-2">
+                  <div className="inline-block bg-secondary text-white px-4 py-1.5 font-black text-[10pt] uppercase tracking-widest rounded-sm mb-2">
                     Resumen Filtrado
                   </div>
-                  <p className="text-[8pt] font-black text-slate-500 uppercase tracking-widest">
+                  <p className="text-[8pt] font-black text-text-muted uppercase tracking-widest">
                     Tipo: {acquisitionFilters.type === 'all' ? 'Todos' : acquisitionFilters.type === 'qr' ? 'QR' : 'Vale'}
                   </p>
-                  <p className="text-[8pt] font-black text-slate-500 uppercase tracking-widest mt-1">
+                  <p className="text-[8pt] font-black text-text-muted uppercase tracking-widest mt-1">
                     Rango: {acquisitionFilters.startDate || acquisitionFilters.endDate
                       ? `${acquisitionFilters.startDate ? new Date(`${acquisitionFilters.startDate}T00:00:00`).toLocaleDateString('es-ES') : 'Inicio'} - ${acquisitionFilters.endDate ? new Date(`${acquisitionFilters.endDate}T00:00:00`).toLocaleDateString('es-ES') : 'Hoy'}`
                       : 'Todas las fechas'}
                   </p>
-                  <p className="text-[9pt] text-slate-400 font-bold mt-2">
+                  <p className="text-[9pt] text-text-muted font-bold mt-2">
                     Emision: {new Date().toLocaleDateString('es-ES', {year: 'numeric', month: 'long', day: 'numeric'})}
                   </p>
                 </div>
@@ -1784,54 +1784,54 @@ const Fuel: React.FC<FuelProps> = ({
               <div className="grid grid-cols-3 gap-4 mb-6">
                 <div className="bg-blue-50 border border-blue-100 p-4 rounded-lg">
                   <p className="text-[8pt] font-black text-blue-600 uppercase tracking-widest mb-1">Monto Total</p>
-                  <p className="text-2xl font-black text-slate-900">${(acquisitionTotals.totalAmount || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</p>
+                  <p className="text-2xl font-black text-text">${(acquisitionTotals.totalAmount || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</p>
                 </div>
                 <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-lg">
                   <p className="text-[8pt] font-black text-emerald-600 uppercase tracking-widest mb-1">Total QR</p>
-                  <p className="text-2xl font-black text-slate-900">${(acquisitionTotals.qrAmount || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</p>
-                  <p className="text-[8pt] font-bold text-slate-500 mt-1">{acquisitionTotals.qrCount} registros QR</p>
+                  <p className="text-2xl font-black text-text">${(acquisitionTotals.qrAmount || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</p>
+                  <p className="text-[8pt] font-bold text-text-muted mt-1">{acquisitionTotals.qrCount} registros QR</p>
                 </div>
                 <div className="bg-amber-50 border border-amber-100 p-4 rounded-lg">
                   <p className="text-[8pt] font-black text-amber-600 uppercase tracking-widest mb-1">Total Vales</p>
-                  <p className="text-2xl font-black text-slate-900">${(acquisitionTotals.vouchersAmount || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</p>
-                  <p className="text-[8pt] font-bold text-slate-500 mt-1">{acquisitionTotals.vouchersCount} registros con vale</p>
+                  <p className="text-2xl font-black text-text">${(acquisitionTotals.vouchersAmount || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</p>
+                  <p className="text-[8pt] font-bold text-text-muted mt-1">{acquisitionTotals.vouchersCount} registros con vale</p>
                 </div>
               </div>
 
               <div className="mb-8">
                 <table className="print-report-table print-report-table-acq w-full border-collapse border border-slate-300">
-                  <thead className="bg-slate-100">
+                  <thead className="bg-surface-subtle">
                     <tr>
-                      <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-slate-600">Consec.</th>
-                      <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-slate-600">Fecha</th>
-                      <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-slate-600">Folio</th>
-                      <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-slate-600">Tipo</th>
-                      <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-slate-600">Vigencia</th>
-                      <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-slate-600">Area</th>
-                      <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-slate-600">Proveedor</th>
-                      <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-slate-600 text-right">Monto</th>
+                      <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-text-muted">Consec.</th>
+                      <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-text-muted">Fecha</th>
+                      <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-text-muted">Folio</th>
+                      <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-text-muted">Tipo</th>
+                      <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-text-muted">Vigencia</th>
+                      <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-text-muted">Area</th>
+                      <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-text-muted">Proveedor</th>
+                      <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-text-muted text-right">Monto</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredAcquisitions.map((entry, idx) => (
                       <tr key={`${entry.id || 'acq'}-${idx}`} className="border-b border-slate-300">
                         <td className="px-2 py-2 text-[8pt] font-black text-blue-700 text-center">{entry.consecutiveNumber || '---'}</td>
-                        <td className="px-2 py-2 text-[8pt] font-bold text-center text-slate-500">
+                        <td className="px-2 py-2 text-[8pt] font-bold text-center text-text-muted">
                           {entry.date ? new Date(entry.date).toLocaleDateString('es-ES') : '---'}
                         </td>
-                        <td className="px-2 py-2 text-[8pt] font-bold text-slate-700 uppercase">{entry.internalFolio || 'S/N'}</td>
+                        <td className="px-2 py-2 text-[8pt] font-bold text-text uppercase">{entry.internalFolio || 'S/N'}</td>
                         <td className="px-2 py-2 text-[8pt] font-black uppercase text-center">{entry.isQr ? 'QR' : 'VALE'}</td>
-                        <td className="px-2 py-2 text-[8pt] font-bold text-slate-500">
+                        <td className="px-2 py-2 text-[8pt] font-bold text-text-muted">
                           {(entry.validFrom ? new Date(entry.validFrom).toLocaleDateString('es-ES') : '---')} - {(entry.validTo ? new Date(entry.validTo).toLocaleDateString('es-ES') : '---')}
                         </td>
-                        <td className="px-2 py-2 text-[8pt] font-bold text-slate-700 uppercase">{entry.area || '---'}</td>
-                        <td className="px-2 py-2 text-[8pt] font-bold text-slate-700 uppercase">{entry.supplier || '---'}</td>
-                        <td className="px-2 py-2 text-[8pt] text-right font-black text-slate-900 font-mono">${(Number(entry.amount) || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td>
+                        <td className="px-2 py-2 text-[8pt] font-bold text-text uppercase">{entry.area || '---'}</td>
+                        <td className="px-2 py-2 text-[8pt] font-bold text-text uppercase">{entry.supplier || '---'}</td>
+                        <td className="px-2 py-2 text-[8pt] text-right font-black text-text font-mono">${(Number(entry.amount) || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td>
                       </tr>
                     ))}
                     {filteredAcquisitions.length === 0 && (
                       <tr>
-                        <td colSpan={8} className="px-2 py-6 text-[9pt] text-center font-bold text-slate-500">
+                        <td colSpan={8} className="px-2 py-6 text-[9pt] text-center font-bold text-text-muted">
                           Sin adquisiciones para el filtro seleccionado.
                         </td>
                       </tr>
@@ -1846,18 +1846,18 @@ const Fuel: React.FC<FuelProps> = ({
       , document.getElementById('print-portal')!)}
 
       {showDeliveryReportPreview && document.getElementById('print-portal') && createPortal(
-        <div id="fuel-deliveries-report-modal" className="fixed inset-0 z-[206] bg-white flex flex-col overflow-y-auto">
-          <div className="sticky top-0 bg-slate-900 p-4 flex justify-between items-center text-white shadow-lg no-print">
+        <div id="fuel-deliveries-report-modal" className="fixed inset-0 z-[206] bg-surface flex flex-col overflow-y-auto">
+          <div className="sticky top-0 bg-secondary p-4 flex justify-between items-center text-white shadow-lg no-print">
             <div className="flex items-center gap-4">
-              <button onClick={() => setShowDeliveryReportPreview(false)} className="bg-white/10 px-4 py-2 rounded-lg font-bold text-xs hover:bg-white/20 transition-all">Cerrar</button>
+              <button onClick={() => setShowDeliveryReportPreview(false)} className="bg-surface/10 px-4 py-2 rounded-lg font-bold text-xs hover:bg-surface/20 transition-all">Cerrar</button>
               <h3 className="font-black uppercase tracking-widest text-sm">Vista Previa Entregas</h3>
             </div>
             <button onClick={() => window.print()} className="bg-primary px-8 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-blue-500/20">
               <span className="material-symbols-outlined text-lg">picture_as_pdf</span> Imprimir Reporte PDF
             </button>
           </div>
-          <div className="print-page-host flex-1 bg-slate-100 p-10 flex justify-center">
-            <div id="fuel-deliveries-report-printable" className="bg-white w-[27.94cm] min-h-[21.59cm] p-[1.5cm] shadow-2xl relative text-slate-900">
+          <div className="print-page-host flex-1 bg-surface-subtle p-10 flex justify-center">
+            <div id="fuel-deliveries-report-printable" className="bg-surface w-[27.94cm] min-h-[21.59cm] p-[1.5cm] shadow-2xl relative text-text">
               <div className="flex justify-between items-center mb-8 border-b-4 border-slate-900 pb-6">
                 <div className="flex items-center gap-6">
                   <img
@@ -1872,24 +1872,24 @@ const Fuel: React.FC<FuelProps> = ({
                     }}
                   />
                   <div className="flex flex-col">
-                    <span className="text-lg font-black text-slate-900 uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
-                    <span className="text-lg font-black text-slate-900 uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>
-                    <span className="text-[8pt] font-bold uppercase text-slate-400 mt-2 tracking-[0.2em]">Reporte General de Entregas de Combustible</span>
+                    <span className="text-lg font-black text-text uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
+                    <span className="text-lg font-black text-text uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>
+                    <span className="text-[8pt] font-bold uppercase text-text-muted mt-2 tracking-[0.2em]">Reporte General de Entregas de Combustible</span>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="inline-block bg-slate-900 text-white px-4 py-1.5 font-black text-[10pt] uppercase tracking-widest rounded-sm mb-2">
+                  <div className="inline-block bg-secondary text-white px-4 py-1.5 font-black text-[10pt] uppercase tracking-widest rounded-sm mb-2">
                     Resumen Filtrado
                   </div>
-                  <p className="text-[8pt] font-black text-slate-500 uppercase tracking-widest">
+                  <p className="text-[8pt] font-black text-text-muted uppercase tracking-widest">
                     Tipo: {deliveryFilters.type === 'all' ? 'Todos' : deliveryFilters.type === 'qr' ? 'QR' : 'Vale'}
                   </p>
-                  <p className="text-[8pt] font-black text-slate-500 uppercase tracking-widest mt-1">
+                  <p className="text-[8pt] font-black text-text-muted uppercase tracking-widest mt-1">
                     Rango: {deliveryFilters.startDate || deliveryFilters.endDate
                       ? `${deliveryFilters.startDate ? new Date(`${deliveryFilters.startDate}T00:00:00`).toLocaleDateString('es-ES') : 'Inicio'} - ${deliveryFilters.endDate ? new Date(`${deliveryFilters.endDate}T00:00:00`).toLocaleDateString('es-ES') : 'Hoy'}`
                       : 'Todas las fechas'}
                   </p>
-                  <p className="text-[9pt] text-slate-400 font-bold mt-2">
+                  <p className="text-[9pt] text-text-muted font-bold mt-2">
                     Emision: {new Date().toLocaleDateString('es-ES', {year: 'numeric', month: 'long', day: 'numeric'})}
                   </p>
                 </div>
@@ -1898,31 +1898,31 @@ const Fuel: React.FC<FuelProps> = ({
               <div className="grid grid-cols-3 gap-4 mb-6">
                 <div className="bg-blue-50 border border-blue-100 p-4 rounded-lg">
                   <p className="text-[8pt] font-black text-blue-600 uppercase tracking-widest mb-1">Entregado Total</p>
-                  <p className="text-2xl font-black text-slate-900">${(deliveryTotals.totalAmount || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</p>
+                  <p className="text-2xl font-black text-text">${(deliveryTotals.totalAmount || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</p>
                 </div>
                 <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-lg">
                   <p className="text-[8pt] font-black text-emerald-600 uppercase tracking-widest mb-1">Entregas QR</p>
-                  <p className="text-2xl font-black text-slate-900">${(deliveryTotals.qrAmount || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</p>
-                  <p className="text-[8pt] font-bold text-slate-500 mt-1">{deliveryTotals.qrCount} entregas QR</p>
+                  <p className="text-2xl font-black text-text">${(deliveryTotals.qrAmount || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</p>
+                  <p className="text-[8pt] font-bold text-text-muted mt-1">{deliveryTotals.qrCount} entregas QR</p>
                 </div>
                 <div className="bg-amber-50 border border-amber-100 p-4 rounded-lg">
                   <p className="text-[8pt] font-black text-amber-600 uppercase tracking-widest mb-1">Entregas Vales</p>
-                  <p className="text-2xl font-black text-slate-900">${(deliveryTotals.vouchersAmount || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</p>
-                  <p className="text-[8pt] font-bold text-slate-500 mt-1">{deliveryTotals.vouchersCount} entregas con vale</p>
+                  <p className="text-2xl font-black text-text">${(deliveryTotals.vouchersAmount || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</p>
+                  <p className="text-[8pt] font-bold text-text-muted mt-1">{deliveryTotals.vouchersCount} entregas con vale</p>
                 </div>
               </div>
 
               <div className="mb-8">
                 <table className="print-report-table print-report-table-del w-full border-collapse border border-slate-300">
-                  <thead className="bg-slate-100">
+                  <thead className="bg-surface-subtle">
                     <tr>
-                      <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-slate-600">Consec.</th>
-                      <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-slate-600">Fecha</th>
-                      <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-slate-600">Adquisición</th>
-                      <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-slate-600">Tipo</th>
-                      <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-slate-600">Area</th>
-                      <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-slate-600">Recibe</th>
-                      <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-slate-600 text-right">Monto</th>
+                      <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-text-muted">Consec.</th>
+                      <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-text-muted">Fecha</th>
+                      <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-text-muted">Adquisición</th>
+                      <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-text-muted">Tipo</th>
+                      <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-text-muted">Area</th>
+                      <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-text-muted">Recibe</th>
+                      <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-text-muted text-right">Monto</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1932,18 +1932,18 @@ const Fuel: React.FC<FuelProps> = ({
                       return (
                       <tr key={`${entry.id || 'delivery'}-${idx}`} className="border-b border-slate-300">
                         <td className="px-2 py-2 text-[8pt] font-black text-amber-700 text-center">{entry.consecutiveNumber || '---'}</td>
-                        <td className="px-2 py-2 text-[8pt] font-bold text-center text-slate-500">{entry.date ? new Date(entry.date).toLocaleDateString('es-ES') : '---'}</td>
-                        <td className="px-2 py-2 text-[8pt] font-bold text-slate-700 uppercase">ADQ #{entry.acquisitionConsecutiveNumber || '---'}</td>
+                        <td className="px-2 py-2 text-[8pt] font-bold text-center text-text-muted">{entry.date ? new Date(entry.date).toLocaleDateString('es-ES') : '---'}</td>
+                        <td className="px-2 py-2 text-[8pt] font-bold text-text uppercase">ADQ #{entry.acquisitionConsecutiveNumber || '---'}</td>
                         <td className="px-2 py-2 text-[8pt] font-black uppercase text-center">{deliveryType === 'qr' ? 'QR' : 'VALE'}</td>
-                        <td className="px-2 py-2 text-[8pt] font-bold text-slate-700 uppercase">{entry.area || '---'}</td>
-                        <td className="px-2 py-2 text-[8pt] font-bold text-slate-700 uppercase">{entry.recipientName || '---'}</td>
-                        <td className="px-2 py-2 text-[8pt] text-right font-black text-slate-900 font-mono">${(Number(entry.amount) || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td>
+                        <td className="px-2 py-2 text-[8pt] font-bold text-text uppercase">{entry.area || '---'}</td>
+                        <td className="px-2 py-2 text-[8pt] font-bold text-text uppercase">{entry.recipientName || '---'}</td>
+                        <td className="px-2 py-2 text-[8pt] text-right font-black text-text font-mono">${(Number(entry.amount) || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td>
                       </tr>
                     );
                     })}
                     {filteredDeliveries.length === 0 && (
                       <tr>
-                        <td colSpan={7} className="px-2 py-6 text-[9pt] text-center font-bold text-slate-500">
+                        <td colSpan={7} className="px-2 py-6 text-[9pt] text-center font-bold text-text-muted">
                           Sin entregas para el filtro seleccionado.
                         </td>
                       </tr>
@@ -1955,14 +1955,14 @@ const Fuel: React.FC<FuelProps> = ({
               <div className="signature-section mt-12">
                 <div className="grid grid-cols-2 gap-24 text-center">
                   <div className="signature-line border-t-2 border-slate-900 pt-4">
-                    <p className="text-[9pt] font-black uppercase text-slate-900">{managerName}</p>
-                    <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Encargado del Parque Vehicular</p>
-                    <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Elaboro</p>
+                    <p className="text-[9pt] font-black uppercase text-text">{managerName}</p>
+                    <p className="text-[7pt] font-bold text-text-muted mt-1 uppercase tracking-widest">Encargado del Parque Vehicular</p>
+                    <p className="text-[7pt] font-bold text-text-muted uppercase tracking-widest">Elaboro</p>
                   </div>
                   <div className="signature-line border-t-2 border-slate-900 pt-4">
-                    <p className="text-[9pt] font-black uppercase text-slate-900">{directorName}</p>
-                    <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Director General</p>
-                    <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Enterado</p>
+                    <p className="text-[9pt] font-black uppercase text-text">{directorName}</p>
+                    <p className="text-[7pt] font-bold text-text-muted mt-1 uppercase tracking-widest">Director General</p>
+                    <p className="text-[7pt] font-bold text-text-muted uppercase tracking-widest">Enterado</p>
                   </div>
                 </div>
               </div>
@@ -1972,18 +1972,18 @@ const Fuel: React.FC<FuelProps> = ({
       , document.getElementById('print-portal')!)}
 
       {showDeliveryReceiptPreview && selectedDelivery && document.getElementById('print-portal') && createPortal(
-        <div id="fuel-delivery-receipt-modal" className="fixed inset-0 z-[207] bg-white flex flex-col overflow-y-auto">
-          <div className="sticky top-0 bg-slate-900 p-4 flex justify-between items-center text-white shadow-lg no-print">
+        <div id="fuel-delivery-receipt-modal" className="fixed inset-0 z-[207] bg-surface flex flex-col overflow-y-auto">
+          <div className="sticky top-0 bg-secondary p-4 flex justify-between items-center text-white shadow-lg no-print">
             <div className="flex items-center gap-4">
-              <button onClick={() => setShowDeliveryReceiptPreview(false)} className="bg-white/10 px-4 py-2 rounded-lg font-bold text-xs hover:bg-white/20 transition-all">Cerrar</button>
+              <button onClick={() => setShowDeliveryReceiptPreview(false)} className="bg-surface/10 px-4 py-2 rounded-lg font-bold text-xs hover:bg-surface/20 transition-all">Cerrar</button>
               <h3 className="font-black uppercase tracking-widest text-sm">Recibo de Entrega</h3>
             </div>
             <button onClick={() => window.print()} className="bg-primary px-8 py-2.5 rounded-md font-black text-[11px] uppercase tracking-widest flex items-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-blue-500/20">
               <span className="material-symbols-outlined text-lg">picture_as_pdf</span> Imprimir Recibo PDF
             </button>
           </div>
-          <div className="print-page-host flex-1 bg-slate-100 p-10 flex justify-center">
-            <div id="fuel-delivery-receipt-printable" className="bg-white w-[21.59cm] min-h-[27.94cm] p-[1.5cm] shadow-2xl relative text-slate-900">
+          <div className="print-page-host flex-1 bg-surface-subtle p-10 flex justify-center">
+            <div id="fuel-delivery-receipt-printable" className="bg-surface w-[21.59cm] min-h-[27.94cm] p-[1.5cm] shadow-2xl relative text-text">
               <div className="flex justify-between items-center mb-8 border-b-4 border-slate-900 pb-6">
                 <div className="flex items-center gap-6">
                   <img
@@ -1998,61 +1998,61 @@ const Fuel: React.FC<FuelProps> = ({
                     }}
                   />
                   <div className="flex flex-col">
-                    <span className="text-lg font-black text-slate-900 uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
-                    <span className="text-lg font-black text-slate-900 uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>
-                    <span className="text-[8pt] font-bold uppercase text-slate-400 mt-2 tracking-[0.2em]">Recibo de Entrega de Combustible</span>
+                    <span className="text-lg font-black text-text uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
+                    <span className="text-lg font-black text-text uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>
+                    <span className="text-[8pt] font-bold uppercase text-text-muted mt-2 tracking-[0.2em]">Recibo de Entrega de Combustible</span>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="inline-block bg-slate-900 text-white px-4 py-1.5 font-black text-[10pt] uppercase tracking-widest rounded-sm mb-2">
+                  <div className="inline-block bg-secondary text-white px-4 py-1.5 font-black text-[10pt] uppercase tracking-widest rounded-sm mb-2">
                     Entrega
                   </div>
-                  <p className="text-xs font-bold text-slate-600">
+                  <p className="text-xs font-bold text-text-muted">
                     No. <span className="font-black text-amber-700 text-lg ml-1">{selectedDelivery.consecutiveNumber || '---'}</span>
                   </p>
-                  <p className="text-[9pt] text-slate-400 font-bold mt-1">
+                  <p className="text-[9pt] text-text-muted font-bold mt-1">
                     Fecha: {selectedDelivery.date ? new Date(selectedDelivery.date).toLocaleDateString('es-ES', {year: 'numeric', month: 'long', day: 'numeric'}) : '---'}
                   </p>
                 </div>
               </div>
 
-              <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 mb-6">
+              <div className="bg-surface-subtle border border-border rounded-lg p-4 mb-6">
                 <div className="grid grid-cols-2 gap-3 text-[9pt]">
-                  <p><span className="font-black text-slate-500 uppercase tracking-wider">Adquisición:</span> <span className="font-bold text-slate-900">#{selectedDelivery.acquisitionConsecutiveNumber || '---'} {`(${(selectedDelivery.acquisitionType || (fuelAcquisitions.find(item => item.id === selectedDelivery.acquisitionId)?.isQr ? 'qr' : 'voucher')) === 'qr' ? 'QR' : 'VALE'})`}</span></p>
-                  <p><span className="font-black text-slate-500 uppercase tracking-wider">Folio:</span> <span className="font-bold text-slate-900">{(selectedDelivery.acquisitionInternalFolio || 'S/N').toUpperCase()}</span></p>
-                  <p><span className="font-black text-slate-500 uppercase tracking-wider">Área Destino:</span> <span className="font-bold text-slate-900">{selectedDelivery.area}</span></p>
-                  <p><span className="font-black text-slate-500 uppercase tracking-wider">Monto Entregado:</span> <span className="font-black text-primary text-lg">${(Number(selectedDelivery.amount) || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</span></p>
+                  <p><span className="font-black text-text-muted uppercase tracking-wider">Adquisición:</span> <span className="font-bold text-text">#{selectedDelivery.acquisitionConsecutiveNumber || '---'} {`(${(selectedDelivery.acquisitionType || (fuelAcquisitions.find(item => item.id === selectedDelivery.acquisitionId)?.isQr ? 'qr' : 'voucher')) === 'qr' ? 'QR' : 'VALE'})`}</span></p>
+                  <p><span className="font-black text-text-muted uppercase tracking-wider">Folio:</span> <span className="font-bold text-text">{(selectedDelivery.acquisitionInternalFolio || 'S/N').toUpperCase()}</span></p>
+                  <p><span className="font-black text-text-muted uppercase tracking-wider">Área Destino:</span> <span className="font-bold text-text">{selectedDelivery.area}</span></p>
+                  <p><span className="font-black text-text-muted uppercase tracking-wider">Monto Entregado:</span> <span className="font-black text-primary text-lg">${(Number(selectedDelivery.amount) || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</span></p>
                 </div>
               </div>
 
-              <div className="mb-6 bg-slate-50 border border-slate-200 rounded-lg p-6">
-                <p className="text-[8pt] font-black text-slate-400 uppercase tracking-widest mb-2">Motivo / Justificacion</p>
-                <p className="text-[10pt] text-slate-700 leading-relaxed break-words">{selectedDelivery.purpose || '---'}</p>
+              <div className="mb-6 bg-surface-subtle border border-border rounded-lg p-6">
+                <p className="text-[8pt] font-black text-text-muted uppercase tracking-widest mb-2">Motivo / Justificacion</p>
+                <p className="text-[10pt] text-text leading-relaxed break-words">{selectedDelivery.purpose || '---'}</p>
               </div>
 
-              <div className="mb-8 bg-slate-50 border border-slate-200 rounded-lg p-6">
-                <p className="text-[8pt] font-black text-slate-400 uppercase tracking-widest mb-2">Recibe</p>
-                <p className="text-[11pt] font-black text-slate-900 uppercase">{selectedDelivery.recipientName || '---'}</p>
-                <p className="text-[8pt] font-bold text-slate-500 uppercase tracking-widest mt-1">{selectedDelivery.recipientPosition || 'SIN CARGO CAPTURADO'}</p>
-                <p className="text-[8pt] font-bold text-slate-400 mt-3">{selectedDelivery.notes || ''}</p>
+              <div className="mb-8 bg-surface-subtle border border-border rounded-lg p-6">
+                <p className="text-[8pt] font-black text-text-muted uppercase tracking-widest mb-2">Recibe</p>
+                <p className="text-[11pt] font-black text-text uppercase">{selectedDelivery.recipientName || '---'}</p>
+                <p className="text-[8pt] font-bold text-text-muted uppercase tracking-widest mt-1">{selectedDelivery.recipientPosition || 'SIN CARGO CAPTURADO'}</p>
+                <p className="text-[8pt] font-bold text-text-muted mt-3">{selectedDelivery.notes || ''}</p>
               </div>
 
               <div className="signature-section mt-14">
                 <div className="grid grid-cols-3 gap-12 text-center">
                   <div className="signature-line border-t-2 border-slate-900 pt-4">
-                    <p className="text-[9pt] font-black uppercase text-slate-900">{administrativeCoordinatorName}</p>
-                    <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">{administrativeCoordinatorPos}</p>
-                    <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Vo. Bo.</p>
+                    <p className="text-[9pt] font-black uppercase text-text">{administrativeCoordinatorName}</p>
+                    <p className="text-[7pt] font-bold text-text-muted mt-1 uppercase tracking-widest">{administrativeCoordinatorPos}</p>
+                    <p className="text-[7pt] font-bold text-text-muted uppercase tracking-widest">Vo. Bo.</p>
                   </div>
                   <div className="signature-line border-t-2 border-slate-900 pt-4">
-                    <p className="text-[9pt] font-black uppercase text-slate-900">{directorName}</p>
-                    <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Director General</p>
-                    <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Autorizacion</p>
+                    <p className="text-[9pt] font-black uppercase text-text">{directorName}</p>
+                    <p className="text-[7pt] font-bold text-text-muted mt-1 uppercase tracking-widest">Director General</p>
+                    <p className="text-[7pt] font-bold text-text-muted uppercase tracking-widest">Autorizacion</p>
                   </div>
                   <div className="signature-line border-t-2 border-slate-900 pt-4">
-                    <p className="text-[9pt] font-black uppercase text-slate-900">{selectedDelivery.recipientName || 'Nombre y Firma'}</p>
-                    <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Recibido</p>
-                    <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Sello</p>
+                    <p className="text-[9pt] font-black uppercase text-text">{selectedDelivery.recipientName || 'Nombre y Firma'}</p>
+                    <p className="text-[7pt] font-bold text-text-muted mt-1 uppercase tracking-widest">Recibido</p>
+                    <p className="text-[7pt] font-bold text-text-muted uppercase tracking-widest">Sello</p>
                   </div>
                 </div>
               </div>
@@ -2062,12 +2062,12 @@ const Fuel: React.FC<FuelProps> = ({
       , document.getElementById('print-portal')!)}
 
       {showAcquisitionPrintPreview && selectedAcquisition && document.getElementById('print-portal') && createPortal(
-        <div id="fuel-acquisition-ticket-modal" className="fixed inset-0 z-[210] bg-white flex flex-col overflow-y-auto">
-          <div className="sticky top-0 bg-slate-900 p-4 flex justify-between items-center text-white shadow-lg no-print">
+        <div id="fuel-acquisition-ticket-modal" className="fixed inset-0 z-[210] bg-surface flex flex-col overflow-y-auto">
+          <div className="sticky top-0 bg-secondary p-4 flex justify-between items-center text-white shadow-lg no-print">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setShowAcquisitionPrintPreview(false)}
-                className="bg-white/10 px-4 py-2 rounded-lg font-bold text-xs hover:bg-white/20 transition-all"
+                className="bg-surface/10 px-4 py-2 rounded-lg font-bold text-xs hover:bg-surface/20 transition-all"
               >
                 Cerrar
               </button>
@@ -2077,8 +2077,8 @@ const Fuel: React.FC<FuelProps> = ({
               <span className="material-symbols-outlined text-lg">picture_as_pdf</span> Imprimir Ticket PDF
             </button>
           </div>
-          <div className="print-page-host flex-1 bg-slate-100 p-10 flex justify-center">
-            <div id="fuel-acquisition-printable" className="bg-white w-[21.59cm] min-h-[27.94cm] p-[1.5cm] shadow-2xl relative text-slate-900">
+          <div className="print-page-host flex-1 bg-surface-subtle p-10 flex justify-center">
+            <div id="fuel-acquisition-printable" className="bg-surface w-[21.59cm] min-h-[27.94cm] p-[1.5cm] shadow-2xl relative text-text">
               <div className="flex justify-between items-center mb-8 border-b-4 border-slate-900 pb-6">
                 <div className="flex items-center gap-6">
                   <img
@@ -2093,22 +2093,22 @@ const Fuel: React.FC<FuelProps> = ({
                     }}
                   />
                   <div className="flex flex-col">
-                    <span className="text-lg font-black text-slate-900 uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
-                    <span className="text-lg font-black text-slate-900 uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>
-                    <span className="text-[8pt] font-bold uppercase text-slate-400 mt-2 tracking-[0.2em]">Ticket de Adquisición de Combustible</span>
+                    <span className="text-lg font-black text-text uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
+                    <span className="text-lg font-black text-text uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>
+                    <span className="text-[8pt] font-bold uppercase text-text-muted mt-2 tracking-[0.2em]">Ticket de Adquisición de Combustible</span>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="inline-block bg-slate-900 text-white px-4 py-1.5 font-black text-[10pt] uppercase tracking-widest rounded-sm mb-2">
+                  <div className="inline-block bg-secondary text-white px-4 py-1.5 font-black text-[10pt] uppercase tracking-widest rounded-sm mb-2">
                     {selectedAcquisition.isQr ? 'Compra QR' : 'Vales de Gasolina'}
                   </div>
-                  <p className="text-xs font-bold text-slate-600">
+                  <p className="text-xs font-bold text-text-muted">
                     No. <span className="font-black text-blue-600 text-lg ml-1">{selectedAcquisition.consecutiveNumber || '---'}</span>
                   </p>
-                  <p className="text-xs font-bold text-slate-600">
-                    FOLIO INTERNO: <span className="font-black text-slate-900 text-lg ml-1">{(selectedAcquisition.internalFolio || 'S/N').toUpperCase()}</span>
+                  <p className="text-xs font-bold text-text-muted">
+                    FOLIO INTERNO: <span className="font-black text-text text-lg ml-1">{(selectedAcquisition.internalFolio || 'S/N').toUpperCase()}</span>
                   </p>
-                  <p className="text-[9pt] text-slate-400 font-bold mt-1">
+                  <p className="text-[9pt] text-text-muted font-bold mt-1">
                     Fecha: {selectedAcquisition.date ? new Date(selectedAcquisition.date).toLocaleDateString('es-ES', {year: 'numeric', month: 'long', day: 'numeric'}) : '---'}
                   </p>
                   <p className="text-[8pt] text-slate-300 font-bold mt-1">
@@ -2117,34 +2117,34 @@ const Fuel: React.FC<FuelProps> = ({
                 </div>
               </div>
 
-              <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 mb-6">
+              <div className="bg-surface-subtle border border-border rounded-lg p-4 mb-6">
                 <div className="grid grid-cols-2 gap-3 text-[9pt]">
-                  <p><span className="font-black text-slate-500 uppercase tracking-wider">Fecha Registro:</span> <span className="font-bold text-slate-900">{selectedAcquisition.date ? new Date(selectedAcquisition.date).toLocaleDateString('es-ES') : '---'}</span></p>
-                  <p><span className="font-black text-slate-500 uppercase tracking-wider">Área:</span> <span className="font-bold text-slate-900">{selectedAcquisition.area}</span></p>
-                  <p><span className="font-black text-slate-500 uppercase tracking-wider">Rango Vigencia:</span> <span className="font-bold text-slate-900">{selectedAcquisition.validFrom ? new Date(selectedAcquisition.validFrom).toLocaleDateString('es-ES') : '---'} - {selectedAcquisition.validTo ? new Date(selectedAcquisition.validTo).toLocaleDateString('es-ES') : '---'}</span></p>
-                  <p><span className="font-black text-slate-500 uppercase tracking-wider">Modalidad:</span> <span className="font-bold text-slate-900">{selectedAcquisition.isQr ? 'CÓDIGO QR' : 'VALES'}</span></p>
+                  <p><span className="font-black text-text-muted uppercase tracking-wider">Fecha Registro:</span> <span className="font-bold text-text">{selectedAcquisition.date ? new Date(selectedAcquisition.date).toLocaleDateString('es-ES') : '---'}</span></p>
+                  <p><span className="font-black text-text-muted uppercase tracking-wider">Área:</span> <span className="font-bold text-text">{selectedAcquisition.area}</span></p>
+                  <p><span className="font-black text-text-muted uppercase tracking-wider">Rango Vigencia:</span> <span className="font-bold text-text">{selectedAcquisition.validFrom ? new Date(selectedAcquisition.validFrom).toLocaleDateString('es-ES') : '---'} - {selectedAcquisition.validTo ? new Date(selectedAcquisition.validTo).toLocaleDateString('es-ES') : '---'}</span></p>
+                  <p><span className="font-black text-text-muted uppercase tracking-wider">Modalidad:</span> <span className="font-bold text-text">{selectedAcquisition.isQr ? 'CÓDIGO QR' : 'VALES'}</span></p>
                 </div>
               </div>
 
-              <div className="mb-8 bg-slate-50 border border-slate-200 rounded-lg p-6">
+              <div className="mb-8 bg-surface-subtle border border-border rounded-lg p-6">
                 <div className="grid grid-cols-2 gap-8">
                   <div>
-                    <p className="text-[8pt] font-black text-slate-400 uppercase tracking-widest mb-1">Proveedor</p>
-                    <p className="text-[12pt] font-black text-slate-900 uppercase break-words">{selectedAcquisition.supplier}</p>
+                    <p className="text-[8pt] font-black text-text-muted uppercase tracking-widest mb-1">Proveedor</p>
+                    <p className="text-[12pt] font-black text-text uppercase break-words">{selectedAcquisition.supplier}</p>
                   </div>
-                  <div className="text-right border-l border-slate-200 pl-8">
-                    <p className="text-[8pt] font-black text-slate-400 uppercase tracking-widest mb-1">Monto de Adquisición</p>
+                  <div className="text-right border-l border-border pl-8">
+                    <p className="text-[8pt] font-black text-text-muted uppercase tracking-widest mb-1">Monto de Adquisición</p>
                     <p className="text-[20pt] font-black text-primary tracking-tighter">${(Number(selectedAcquisition.amount) || 0).toLocaleString('es-MX', {minimumFractionDigits: 2})}</p>
                   </div>
                 </div>
               </div>
 
               <div className="space-y-2 mb-12">
-                <div className="bg-slate-900 text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">
+                <div className="bg-secondary text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">
                   Descripcion / Concepto
                 </div>
-                <div className="bg-white p-4 rounded-lg border border-slate-200">
-                  <p className="text-[10pt] text-slate-700 leading-relaxed break-words">
+                <div className="bg-surface p-4 rounded-lg border border-border">
+                  <p className="text-[10pt] text-text leading-relaxed break-words">
                     {selectedAcquisition.description || 'Sin descripción.'}
                   </p>
                 </div>
@@ -2153,22 +2153,22 @@ const Fuel: React.FC<FuelProps> = ({
               <div className="signature-section">
                 <div className="grid grid-cols-3 gap-12 text-center">
                   <div className="signature-line border-t-2 border-slate-900 pt-4">
-                    <p className="text-[9pt] font-black uppercase text-slate-900">{administrativeCoordinatorName}</p>
-                    <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">{administrativeCoordinatorPos}</p>
-                    <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Vo. Bo.</p>
+                    <p className="text-[9pt] font-black uppercase text-text">{administrativeCoordinatorName}</p>
+                    <p className="text-[7pt] font-bold text-text-muted mt-1 uppercase tracking-widest">{administrativeCoordinatorPos}</p>
+                    <p className="text-[7pt] font-bold text-text-muted uppercase tracking-widest">Vo. Bo.</p>
                   </div>
                   <div className="signature-line border-t-2 border-slate-900 pt-4">
-                    <p className="text-[9pt] font-black uppercase text-slate-900">{directorName}</p>
-                    <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Director General</p>
-                    <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Autorizacion</p>
+                    <p className="text-[9pt] font-black uppercase text-text">{directorName}</p>
+                    <p className="text-[7pt] font-bold text-text-muted mt-1 uppercase tracking-widest">Director General</p>
+                    <p className="text-[7pt] font-bold text-text-muted uppercase tracking-widest">Autorizacion</p>
                   </div>
                   <div className="signature-line border-t-2 border-slate-900 pt-4">
-                    <p className="text-[9pt] font-black uppercase text-slate-900">Nombre y Firma</p>
-                    <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Recibido</p>
-                    <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Sello</p>
+                    <p className="text-[9pt] font-black uppercase text-text">Nombre y Firma</p>
+                    <p className="text-[7pt] font-bold text-text-muted mt-1 uppercase tracking-widest">Recibido</p>
+                    <p className="text-[7pt] font-bold text-text-muted uppercase tracking-widest">Sello</p>
                   </div>
                 </div>
-                <div className="text-center mt-8 border-t border-slate-200 pt-2">
+                <div className="text-center mt-8 border-t border-border pt-2">
                   <p className="text-[7pt] font-black text-slate-300 uppercase tracking-[0.3em]">Sistema de Gestion de Parque Vehicular • DIF Municipal La Paz</p>
                 </div>
               </div>
@@ -2178,18 +2178,18 @@ const Fuel: React.FC<FuelProps> = ({
       , document.getElementById('print-portal')!)}
 
       {showPrintPreview && document.getElementById('print-portal') && createPortal(
-        <div id="fuel-loads-report-modal" className="fixed inset-0 z-[200] bg-white flex flex-col overflow-y-auto">
-           <div className="sticky top-0 bg-slate-900 p-4 flex justify-between items-center text-white shadow-lg no-print">
+        <div id="fuel-loads-report-modal" className="fixed inset-0 z-[200] bg-surface flex flex-col overflow-y-auto">
+           <div className="sticky top-0 bg-secondary p-4 flex justify-between items-center text-white shadow-lg no-print">
              <div className="flex items-center gap-4">
-               <button onClick={() => setShowPrintPreview(false)} className="bg-white/10 px-4 py-2 rounded-lg font-bold text-xs hover:bg-white/20 transition-all">Cerrar</button>
+               <button onClick={() => setShowPrintPreview(false)} className="bg-surface/10 px-4 py-2 rounded-lg font-bold text-xs hover:bg-surface/20 transition-all">Cerrar</button>
                <h3 className="font-black uppercase tracking-widest text-sm">Vista Previa de Impresión</h3>
              </div>
              <button onClick={() => window.print()} className="bg-primary px-8 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-blue-500/20">
                <span className="material-symbols-outlined text-lg">picture_as_pdf</span> Imprimir Reporte PDF
              </button>
            </div>
-           <div className="print-page-host flex-1 bg-slate-100 p-10 flex justify-center">
-              <div id="fuel-printable" className="bg-white w-[27.94cm] min-h-[21.59cm] p-[1.5cm] shadow-2xl relative text-slate-900">
+           <div className="print-page-host flex-1 bg-surface-subtle p-10 flex justify-center">
+              <div id="fuel-printable" className="bg-surface w-[27.94cm] min-h-[21.59cm] p-[1.5cm] shadow-2xl relative text-text">
                 
                 {/* Header Institucional */}
                 <div className="flex justify-between items-center mb-8 border-b-4 border-slate-900 pb-6">
@@ -2206,45 +2206,45 @@ const Fuel: React.FC<FuelProps> = ({
                       }}
                     />
                     <div className="flex flex-col">
-                      <span className="text-lg font-black text-slate-900 uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
-                      <span className="text-lg font-black text-slate-900 uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>
-                      <span className="text-[8pt] font-bold uppercase text-slate-400 mt-2 tracking-[0.2em]">Parque Vehicular • Control de Combustible</span>
+                      <span className="text-lg font-black text-text uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
+                      <span className="text-lg font-black text-text uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>
+                      <span className="text-[8pt] font-bold uppercase text-text-muted mt-2 tracking-[0.2em]">Parque Vehicular • Control de Combustible</span>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="inline-block bg-slate-900 text-white px-4 py-1.5 font-black text-[10pt] uppercase tracking-widest rounded-sm mb-2">
+                    <div className="inline-block bg-secondary text-white px-4 py-1.5 font-black text-[10pt] uppercase tracking-widest rounded-sm mb-2">
                         Bitácora General
                     </div>
-                    <p className="text-[9pt] text-slate-400 font-bold mt-1">Fecha de Emisión: {new Date().toLocaleDateString('es-ES', {year: 'numeric', month: 'long', day: 'numeric'})}</p>
+                    <p className="text-[9pt] text-text-muted font-bold mt-1">Fecha de Emisión: {new Date().toLocaleDateString('es-ES', {year: 'numeric', month: 'long', day: 'numeric'})}</p>
                   </div>
                 </div>
 
                 <div className="flex gap-4 mb-6">
                     <div className="bg-blue-50 border border-blue-100 p-4 rounded-lg flex-1">
                         <p className="text-[8pt] font-black text-blue-600 uppercase tracking-widest mb-1">Total Ejercido</p>
-                        <p className="text-2xl font-black text-slate-900">${(totalCost || 0).toLocaleString()}</p>
+                        <p className="text-2xl font-black text-text">${(totalCost || 0).toLocaleString()}</p>
                     </div>
-                    <div className="bg-slate-50 border border-slate-100 p-4 rounded-lg flex-1">
-                        <p className="text-[8pt] font-black text-slate-400 uppercase tracking-widest mb-1">Litros Consumidos</p>
-                        <p className="text-2xl font-black text-slate-900">{(totalLiters || 0).toLocaleString()} L</p>
+                    <div className="bg-surface-subtle border border-border p-4 rounded-lg flex-1">
+                        <p className="text-[8pt] font-black text-text-muted uppercase tracking-widest mb-1">Litros Consumidos</p>
+                        <p className="text-2xl font-black text-text">{(totalLiters || 0).toLocaleString()} L</p>
                     </div>
-                    <div className="bg-slate-50 border border-slate-100 p-4 rounded-lg flex-1">
-                        <p className="text-[8pt] font-black text-slate-400 uppercase tracking-widest mb-1">Rendimiento Promedio</p>
-                        <p className="text-2xl font-black text-slate-900">{globalAveragePerformance > 0 ? globalAveragePerformance.toFixed(2) : "---"} KM/L</p>
+                    <div className="bg-surface-subtle border border-border p-4 rounded-lg flex-1">
+                        <p className="text-[8pt] font-black text-text-muted uppercase tracking-widest mb-1">Rendimiento Promedio</p>
+                        <p className="text-2xl font-black text-text">{globalAveragePerformance > 0 ? globalAveragePerformance.toFixed(2) : "---"} KM/L</p>
                     </div>
                 </div>
 
                 {/* Tabla */}
                 <div className="mb-8">
                   <table className="w-full border-collapse border border-slate-300">
-                    <thead className="bg-slate-100">
+                    <thead className="bg-surface-subtle">
                       <tr>
-                        <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-slate-600 w-24">Fecha</th>
-                        <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-slate-600">Vehículo</th>
-                        <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-slate-600">Conductor</th>
-                        <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-slate-600 text-right">Odómetro</th>
-                        <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-slate-600 text-right">Litros</th>
-                        <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-slate-600 text-right">Costo</th>
+                        <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-text-muted w-24">Fecha</th>
+                        <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-text-muted">Vehículo</th>
+                        <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-text-muted">Conductor</th>
+                        <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-text-muted text-right">Odómetro</th>
+                        <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-text-muted text-right">Litros</th>
+                        <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-text-muted text-right">Costo</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -2253,13 +2253,13 @@ const Fuel: React.FC<FuelProps> = ({
                         const driver = drivers.find(d => d.id === entry.driverId);
                         return (
                           <tr key={idx} className="border-b border-slate-300">
-                            <td className="px-2 py-2 text-[8pt] font-bold text-center text-slate-500">
+                            <td className="px-2 py-2 text-[8pt] font-bold text-center text-text-muted">
                               {entry.date ? new Date(entry.date).toLocaleDateString('es-ES') : '-'}
                             </td>
-                            <td className="px-2 py-2 text-[8pt] font-black text-slate-900 uppercase">
+                            <td className="px-2 py-2 text-[8pt] font-black text-text uppercase">
                               {vehicle?.plate || '---'} ({vehicle?.model || ''})
                             </td>
-                            <td className="px-2 py-2 text-[8pt] font-bold text-slate-700 uppercase">
+                            <td className="px-2 py-2 text-[8pt] font-bold text-text uppercase">
                               {driver?.name || '---'}
                             </td>
                             <td className="px-2 py-2 text-[8pt] text-right font-mono">
@@ -2268,7 +2268,7 @@ const Fuel: React.FC<FuelProps> = ({
                             <td className="px-2 py-2 text-[8pt] text-right font-mono">
                               {entry.liters}
                             </td>
-                            <td className="px-2 py-2 text-[8pt] text-right font-black text-slate-900 font-mono">
+                            <td className="px-2 py-2 text-[8pt] text-right font-black text-text font-mono">
                               ${(Number(entry.cost) || 0).toLocaleString('es-MX', {minimumFractionDigits: 2})}
                             </td>
                           </tr>
@@ -2282,17 +2282,17 @@ const Fuel: React.FC<FuelProps> = ({
                  <div className="signature-section absolute bottom-[1.5cm] left-[1.5cm] right-[1.5cm]">
                      <div className="grid grid-cols-2 gap-24 text-center">
                          <div className="signature-line border-t-2 border-slate-900 pt-4">
-                             <p className="text-[9pt] font-black uppercase text-slate-900">{managerName}</p>
-                             <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Encargado del Parque Vehicular</p>
-                             <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Elaboró</p>
+                             <p className="text-[9pt] font-black uppercase text-text">{managerName}</p>
+                             <p className="text-[7pt] font-bold text-text-muted mt-1 uppercase tracking-widest">Encargado del Parque Vehicular</p>
+                             <p className="text-[7pt] font-bold text-text-muted uppercase tracking-widest">Elaboró</p>
                          </div>
                          <div className="signature-line border-t-2 border-slate-900 pt-4">
-                             <p className="text-[9pt] font-black uppercase text-slate-900">{directorName}</p>
-                             <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Director General</p>
-                             <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Enterado</p>
+                             <p className="text-[9pt] font-black uppercase text-text">{directorName}</p>
+                             <p className="text-[7pt] font-bold text-text-muted mt-1 uppercase tracking-widest">Director General</p>
+                             <p className="text-[7pt] font-bold text-text-muted uppercase tracking-widest">Enterado</p>
                          </div>
                      </div>
-                     <div className="text-center mt-8 border-t border-slate-200 pt-2">
+                     <div className="text-center mt-8 border-t border-border pt-2">
                          <p className="text-[7pt] font-black text-slate-300 uppercase tracking-[0.3em]">Sistema de Gestion de Parque Vehicular • DIF Municipal La Paz</p>
                      </div>
                  </div>
@@ -2305,19 +2305,19 @@ const Fuel: React.FC<FuelProps> = ({
 };
 
 const FuelStat: React.FC<{ label: string, value: string, unit?: string, icon: string, trend?: string, isNegativeTrend?: boolean, desc?: string }> = ({ label, value, unit, icon, trend, isNegativeTrend, desc }) => (
-  <div className="bg-white p-6 rounded-2xl border border-slate-200 group hover:border-blue-500/30 transition-all">
+  <div className="bg-surface p-6 rounded-2xl border border-border group hover:border-blue-500/30 transition-all">
     <div className="flex items-center justify-between mb-4">
-      <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">{label}</p>
+      <p className="text-text-muted text-xs font-bold uppercase tracking-widest">{label}</p>
       <div className="bg-blue-50 text-blue-600 p-2 rounded-xl group-hover:scale-110 transition-transform">
         <span className="material-symbols-outlined text-[20px]">{icon}</span>
       </div>
     </div>
     <div className="space-y-1">
-      <p className="text-slate-900 text-3xl font-black tracking-tighter">
-        {value} {unit && <span className="text-lg text-slate-400 font-bold ml-1">{unit}</span>}
+      <p className="text-text text-3xl font-black tracking-tighter">
+        {value} {unit && <span className="text-lg text-text-muted font-bold ml-1">{unit}</span>}
       </p>
       {trend && <p className={`${isNegativeTrend ? 'text-rose-600' : 'text-green-600'} text-[11px] font-black`}>{trend}</p>}
-      {desc && <p className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">{desc}</p>}
+      {desc && <p className="text-[11px] text-text-muted font-bold uppercase tracking-wider">{desc}</p>}
     </div>
   </div>
 );

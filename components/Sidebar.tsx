@@ -26,24 +26,24 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange, appName, cu
 
   const navButtonClass = (isActive: boolean, extra = '') =>
     `group flex items-center gap-3 px-3 py-2.5 rounded-md text-left text-sm transition-colors ${
-      isActive ? 'bg-primary text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'
+      isActive ? 'bg-primary text-white' : 'text-text-muted hover:text-text hover:bg-surface-subtle'
     } ${extra}`.trim();
 
   const navIconClass = (isActive: boolean) =>
     `material-symbols-outlined ui-icon text-[20px] ${
-      isActive ? 'text-white' : 'text-slate-400 group-hover:text-white'
+      isActive ? 'text-white' : 'text-text-muted group-hover:text-text'
     }`;
 
   return (
     <aside 
-      className="w-60 flex flex-col shrink-0 z-50 bg-[#0f172a]"
+      className="w-60 flex flex-col shrink-0 z-50 bg-surface border-r border-border transition-colors transition-opacity"
     >
       <div className="p-4 flex-1 flex flex-col min-h-0 h-full">
         <div className="flex items-center gap-3 mb-6">
           <img alt="DIF" className="w-10 h-10 object-contain" src="/images/logo-dif.png" />
           <div className="flex flex-col min-w-0">
-            <h1 className="text-white text-sm font-medium truncate">{appName}</h1>
-            <p className="text-slate-500 text-xs">Gestión Vehicular</p>
+            <h1 className="text-text text-sm font-medium truncate">{appName}</h1>
+            <p className="text-text-muted text-xs">Gestión Vehicular</p>
           </div>
         </div>
 
@@ -61,7 +61,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange, appName, cu
           
           {currentUser?.role === 'admin' && (
             <>
-              <div className="my-3 border-t border-white/10"></div>
+              <div className="my-3 border-t border-border"></div>
               <button
                 onClick={() => onViewChange(View.USERS)}
                 className={navButtonClass(activeView === View.USERS)}
@@ -81,17 +81,17 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange, appName, cu
           </button>
         </nav>
 
-        <div className="mt-4 pt-4 border-t border-white/10">
+        <div className="mt-4 pt-4 border-t border-border">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center text-white text-xs font-medium">
               {currentUser?.name?.[0]?.toUpperCase() || 'U'}
             </div>
             <div className="flex flex-col min-w-0 flex-1">
-              <p className="text-white text-sm truncate">{currentUser?.name}</p>
-              <p className="text-slate-500 text-xs">{currentUser?.role === 'admin' ? 'Admin' : 'Usuario'}</p>
+              <p className="text-text text-sm truncate">{currentUser?.name}</p>
+              <p className="text-text-muted text-xs">{currentUser?.role === 'admin' ? 'Admin' : 'Usuario'}</p>
             </div>
           </div>
-          <button onClick={onLogout} className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-md text-slate-500 hover:text-white hover:bg-white/5 transition-colors text-sm">
+          <button onClick={onLogout} className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-md text-text-muted hover:text-text hover:bg-surface-subtle transition-colors text-sm">
             <span className="material-symbols-outlined ui-icon text-[18px]">logout</span>
             Cerrar Sesión
           </button>

@@ -325,6 +325,7 @@ const App: React.FC = () => {
   const [isSyncing, setIsSyncing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [syncStatus, setSyncStatus] = useState<'synced' | 'pending' | 'error'>('pending');
+  const [darkMode, setDarkMode] = useState(false);
 
   const [vehicles, setVehicles] = useState<Vehicle[]>(initialVehicles);
   const [drivers, setDrivers] = useState<Driver[]>(initialDrivers);
@@ -400,9 +401,29 @@ const App: React.FC = () => {
     }
     setIsLoading(false);
     
+    const isDark = localStorage.getItem('fleet_theme') === 'dark';
+    setDarkMode(isDark);
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+    }
+
     // Auto-sync with Google Sheets on app start
     handleSync();
   }, []);
+
+  const toggleDarkMode = () => {
+    setDarkMode((prev) => {
+      const next = !prev;
+      if (next) {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('fleet_theme', 'dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('fleet_theme', 'light');
+      }
+      return next;
+    });
+  };
 
   const handleSync = async (): Promise<boolean> => {
     const url = googleSheets.getServiceUrl();
@@ -912,10 +933,10 @@ const App: React.FC = () => {
       notes: updatedDelivery.notes?.toUpperCase(),
       acquisitionInternalFolio: updatedDelivery.acquisitionInternalFolio?.toUpperCase()
     };
-    ensure(hasText(formatted.id), 'No se pudo identificar la entrega de combustible.');
-    ensure(fuelDeliveries.some(d => d.id === formatted.id), 'La entrega de combustible que intentas actualizar no existe.');
+    ensure(hasText(updatedDelivery.id), 'No se pudo identificar la entrega de combustible.');
+    ensure(fuelDeliveries.some(d => d.id === updatedDelivery.id), 'La entrega de combustible que intentas actualizar no existe.');
     validateFuelDeliveryPayload(formatted, fuelAcquisitions, fuelDeliveries, formatted.id);
-    setFuelDeliveries(fuelDeliveries.map(d => d.id === formatted.id ? formatted : d));
+    setFuelDeliveries(fuelDeliveries.map(d => d.id === updatedDelivery.id ? formatted : d));
     await persistOrThrow('update-fuel-delivery', formatted, 'actualizar');
     } catch (error) {
       setFuelDeliveries(previousFuelDeliveries);
@@ -988,10 +1009,10 @@ const App: React.FC = () => {
       notes: updatedPlanning.notes?.toUpperCase(),
       destination: updatedPlanning.destination?.toUpperCase()
     };
-    ensure(hasText(formatted.id), 'No se pudo identificar la planeación a actualizar.');
-    ensure(plannings.some(p => p.id === formatted.id), 'La planeación que intentas actualizar no existe.');
+    ensure(hasText(updatedPlanning.id), 'No se pudo identificar la planeación a actualizar.');
+    ensure(plannings.some(p => p.id === updatedPlanning.id), 'La planeación que intentas actualizar no existe.');
     validatePlanningPayload(formatted, vehicles, drivers, areas);
-    setPlannings(plannings.map(p => p.id === formatted.id ? formatted : p));
+    setPlannings(plannings.map(p => p.id === updatedPlanning.id ? formatted : p));
     await persistOrThrow('update-planning', formatted, 'actualizar');
     } catch (error) {
       setPlannings(previousPlannings);
@@ -1056,10 +1077,10 @@ const App: React.FC = () => {
       destination: updatedLog.destination.toUpperCase(), 
       notes: updatedLog.notes?.toUpperCase() 
     };
-    ensure(hasText(formatted.id), 'No se pudo identificar la bitácora a actualizar.');
-    ensure(travelLogs.some(t => t.id === formatted.id), 'La bitácora que intentas actualizar no existe.');
+    ensure(hasText(updatedLog.id), 'No se pudo identificar la bitácora a actualizar.');
+    ensure(travelLogs.some(t => t.id === updatedLog.id), 'La bitácora que intentas actualizar no existe.');
     validateTravelLogPayload(formatted, vehicles, drivers, areas);
-    setTravelLogs(travelLogs.map(t => t.id === formatted.id ? formatted : t));
+    setTravelLogs(travelLogs.map(t => t.id === updatedLog.id ? formatted : t));
     await persistOrThrow('update-travel-log', formatted, 'actualizar');
     } catch (error) {
       setTravelLogs(previousTravelLogs);
@@ -1097,10 +1118,10 @@ const App: React.FC = () => {
       provider: updatedRecord.provider.toUpperCase(),
       invoiceNumber: updatedRecord.invoiceNumber?.toUpperCase()
     };
-    ensure(hasText(formatted.id), 'No se pudo identificar el mantenimiento a actualizar.');
-    ensure(maintenanceRecords.some(r => r.id === formatted.id), 'El mantenimiento que intentas actualizar no existe.');
+    ensure(hasText(updatedRecord.id), 'No se pudo identificar el mantenimiento a actualizar.');
+    ensure(maintenanceRecords.some(r => r.id === updatedRecord.id), 'El mantenimiento que intentas actualizar no existe.');
     validateMaintenancePayload(formatted, vehicles);
-    setMaintenanceRecords(maintenanceRecords.map(r => r.id === formatted.id ? formatted : r));
+    setMaintenanceRecords(maintenanceRecords.map(r => r.id === updatedRecord.id ? formatted : r));
     await persistOrThrow('update-maintenance', formatted, 'actualizar');
     } catch (error) {
       setMaintenanceRecords(previousMaintenanceRecords);
@@ -1475,7 +1496,7 @@ const App: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-surface flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
       </div>
     );
@@ -1483,19 +1504,19 @@ const App: React.FC = () => {
 
   if (!currentUser) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-        <div className="w-full max-w-md bg-white rounded-xl border border-slate-200 p-8">
+      <div className="min-h-screen bg-surface-subtle flex items-center justify-center p-4">
+        <div className="w-full max-w-md card p-8">
           <div className="flex flex-col items-center mb-8">
             <img alt="DIF" className="w-14 h-14 object-contain mb-4" src="/images/logo-dif.png" />
-            <h1 className="text-xl font-semibold text-slate-900">{settingsMap['APP_NAME'] || 'Flota Pro'}</h1>
-            <p className="text-xs text-slate-500 mt-1">DIF La Paz - Control Vehicular</p>
+            <h1 className="text-xl font-semibold text-text">{settingsMap['APP_NAME'] || 'Flota Pro'}</h1>
+            <p className="text-xs text-text-muted mt-1">DIF La Paz - Control Vehicular</p>
           </div>
 
           <div className="space-y-1.5 mb-4">
-            <label className="text-xs font-medium text-slate-600">URL Google Apps Script</label>
+            <label className="form-label">URL Google Apps Script</label>
             <input
               type="url"
-              className="w-full px-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
+              className="form-input"
               placeholder="https://script.google.com/macros/s/.../exec"
               value={serviceUrlInput}
               onChange={e => setServiceUrlInput(e.target.value)}
@@ -1504,7 +1525,7 @@ const App: React.FC = () => {
               <button
                 type="button"
                 onClick={saveServiceUrlFromLogin}
-                className="flex-1 bg-slate-100 text-slate-700 py-2 rounded-lg font-medium text-xs hover:bg-slate-200 transition-colors"
+                className="flex-1 btn-secondary py-2 rounded-lg font-medium text-xs"
               >
                 Guardar URL
               </button>
@@ -1515,7 +1536,7 @@ const App: React.FC = () => {
                   if (!saveServiceUrlFromLogin()) return;
                   await handleSyncWithToast();
                 }}
-                className="flex-1 bg-slate-900 text-white py-2 rounded-lg font-medium text-xs hover:opacity-90 transition-opacity disabled:opacity-50"
+                className="flex-1 bg-text text-surface py-2 rounded-lg font-medium text-xs hover:opacity-90 transition-opacity disabled:opacity-50"
               >
                 {isSyncing ? 'Sincronizando...' : 'Sincronizar'}
               </button>
@@ -1524,23 +1545,23 @@ const App: React.FC = () => {
 
           <form onSubmit={handleLogin} autoComplete="off" className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-600">Usuario</label>
+              <label className="form-label">Usuario</label>
               <input
                 type="text"
                 required
-                className="w-full px-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
+                className="form-input"
                 placeholder="admin"
                 value={loginUsername}
                 onChange={e => { setLoginUsername(e.target.value); setLoginError(''); }}
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-600">Contrasena</label>
+              <label className="form-label">Contrasena</label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
-                  className="w-full px-4 py-2.5 pr-10 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
+                  className="form-input pr-10"
                   placeholder="********"
                   value={loginPass}
                   onChange={e => { setLoginPass(e.target.value); setLoginError(''); }}
@@ -1563,15 +1584,15 @@ const App: React.FC = () => {
           </form>
 
           {appUsers.length === 0 && (
-            <form onSubmit={handleBootstrapAdmin} autoComplete="off" className="mt-6 border-t border-slate-200 pt-6 space-y-3">
-              <p className="text-xs font-semibold text-slate-700">Configuracion inicial: crear administrador</p>
+            <form onSubmit={handleBootstrapAdmin} autoComplete="off" className="mt-6 border-t border-border pt-6 space-y-3">
+              <p className="text-xs font-semibold text-text">Configuracion inicial: crear administrador</p>
               <input
                 type="text"
                 required
                 placeholder="Nombre completo"
                 value={bootstrapForm.name}
                 onChange={e => setBootstrapForm(prev => ({ ...prev, name: e.target.value }))}
-                className="w-full px-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
+                className="form-input"
               />
               <input
                 type="text"
@@ -1579,7 +1600,7 @@ const App: React.FC = () => {
                 placeholder="Usuario"
                 value={bootstrapForm.username}
                 onChange={e => setBootstrapForm(prev => ({ ...prev, username: e.target.value }))}
-                className="w-full px-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
+                className="form-input"
               />
               <input
                 type="password"
@@ -1588,7 +1609,7 @@ const App: React.FC = () => {
                 placeholder="Contrasena (min. 8)"
                 value={bootstrapForm.password}
                 onChange={e => setBootstrapForm(prev => ({ ...prev, password: e.target.value }))}
-                className="w-full px-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
+                className="form-input"
               />
               <input
                 type="password"
@@ -1597,9 +1618,9 @@ const App: React.FC = () => {
                 placeholder="Confirmar contraseña"
                 value={bootstrapForm.confirmPassword}
                 onChange={e => setBootstrapForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                className="w-full px-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
+                className="form-input"
               />
-              {setupError && <p className="text-rose-500 text-xs">{setupError}</p>}
+              {setupError && <p className="text-red-500 text-xs">{setupError}</p>}
               <button
                 type="submit"
                 disabled={isBootstrapping || isSyncing}
@@ -1613,11 +1634,22 @@ const App: React.FC = () => {
       </div>
     );
   }
+
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50">
+    <div className="flex h-screen overflow-hidden bg-surface-subtle transition-colors">
       <Sidebar activeView={currentView} onViewChange={v => { setCurrentView(v); setSearchQuery(''); }} appName={settingsMap['APP_NAME'] || 'Flota Pro'} currentUser={currentUser} onLogout={handleLogout} />
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <Header title={currentView.toUpperCase()} isSyncing={isSyncing} syncStatus={syncStatus} onSync={handleSyncWithToast} view={currentView} searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+        <Header 
+          title={currentView.toUpperCase()} 
+          isSyncing={isSyncing} 
+          syncStatus={syncStatus} 
+          onSync={handleSyncWithToast} 
+          view={currentView} 
+          searchQuery={searchQuery} 
+          onSearchChange={setSearchQuery} 
+          darkMode={darkMode}
+          onToggleDarkMode={toggleDarkMode}
+        />
         <div className="flex-1 overflow-y-auto p-6">
           <div className="max-w-7xl mx-auto">{renderContent()}</div>
         </div>

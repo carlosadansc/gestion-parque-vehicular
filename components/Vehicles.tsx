@@ -245,7 +245,7 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
       </div>
 
       <div className="card">
-        <div className="px-4 py-3 border-b border-slate-200 bg-slate-50 flex items-center justify-between gap-2">
+        <div className="px-4 py-3 border-b border-border bg-surface-subtle flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <button onClick={() => setStatusFilter('todos')} className={`filter-pill ${statusFilter === 'todos' ? 'filter-pill-active' : 'filter-pill-inactive'}`}>Todos</button>
             <button onClick={() => setStatusFilter('active')} className={`filter-pill ${statusFilter === 'active' ? 'filter-pill-success' : 'filter-pill-inactive'}`}>Activo</button>
@@ -271,20 +271,20 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
                   <tr key={vehicle.id}>
                     <td>
                       <div className="flex items-center gap-3">
-                         <div className="w-9 h-9 rounded-md bg-slate-100 flex items-center justify-center">
-                           <span className="material-symbols-outlined ui-icon text-slate-500">directions_car</span>
+                         <div className="w-9 h-9 rounded-md bg-surface-subtle flex items-center justify-center">
+                           <span className="material-symbols-outlined ui-icon text-text-muted">directions_car</span>
                          </div>
                          <div>
-                            <p className="font-medium text-slate-900">{vehicle.model}</p>
+                            <p className="font-medium text-text">{vehicle.model}</p>
                             <p className="text-xs text-primary">{vehicle.brand} {vehicle.line}</p>
                          </div>
                       </div>
                     </td>
                     <td>
-                      <span className="inline-flex items-center px-2 py-1 rounded-md bg-slate-100 text-xs font-medium text-slate-700">{vehicle.plate}</span>
+                      <span className="inline-flex items-center px-2 py-1 rounded-md bg-surface-subtle text-xs font-medium text-text">{vehicle.plate}</span>
                     </td>
                     <td className="text-center">
-                       <span className="text-sm text-slate-600">{driver?.name || '—'}</span>
+                       <span className="text-sm text-text-muted">{driver?.name || '—'}</span>
                     </td>
                      <td className="text-right">
                        <div className="table-actions">
@@ -305,21 +305,21 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-300">
-          <div className="bg-white rounded-xl w-full max-w-4xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]">
-            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-secondary/60 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+          <div className="bg-surface rounded-xl w-full max-w-4xl border border-border overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]">
+            <div className="px-6 py-4 border-b border-border flex justify-between items-center bg-surface-subtle">
               <div className="flex items-center gap-3">
                 <div className="size-10 bg-blue-100 rounded-lg flex items-center justify-center">
                   <span className="material-symbols-outlined ui-icon text-blue-600" aria-hidden="true">directions_car</span>
                 </div>
                 <div>
-                  <h3 className="text-lg font-black text-slate-900">{editingVehicle ? 'Ficha de Unidad' : 'Nueva Unidad'}</h3>
+                  <h3 className="text-lg font-black text-text">{editingVehicle ? 'Ficha de Unidad' : 'Nueva Unidad'}</h3>
                 </div>
               </div>
-              <button onClick={() => { if (!isSaving) { setFormError(''); setShowModal(false); } }} className="size-9 rounded-md hover:bg-white transition-all flex items-center justify-center text-slate-400" aria-label="Cerrar modal"><span className="material-symbols-outlined ui-icon text-xl" aria-hidden="true">close</span></button>
+              <button onClick={() => { if (!isSaving) { setFormError(''); setShowModal(false); } }} className="size-9 rounded-md hover:bg-surface transition-all flex items-center justify-center text-text-muted" aria-label="Cerrar modal"><span className="material-symbols-outlined ui-icon text-xl" aria-hidden="true">close</span></button>
             </div>
 
-            <div className="flex border-b border-slate-100 bg-white px-6 overflow-x-auto">
+            <div className="flex border-b border-border bg-surface px-6 overflow-x-auto">
               <TabBtn active={activeTab === 'general'} onClick={() => setActiveTab('general')} label="Generales" icon="info" />
               <TabBtn active={activeTab === 'technical'} onClick={() => setActiveTab('technical')} label="Técnicos" icon="settings_suggest" />
               <TabBtn active={activeTab === 'condition'} onClick={() => setActiveTab('condition')} label="Estado Mecánico (16 Puntos)" icon="health_and_safety" />
@@ -390,10 +390,10 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
               {activeTab === 'accessories' && (
                 <div className="space-y-10 animate-in slide-in-from-left-4">
                   <div className="space-y-4">
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Listado de Accesorios</label>
+                    <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Listado de Accesorios</label>
                     <div className="flex gap-3">
                       <input 
-                        className="flex-1 bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all uppercase"
+                        className="flex-1 bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all uppercase"
                         placeholder="Escribe el nombre de un accesorio y presiona Enter..."
                         value={newAccessory}
                         onChange={(e) => setNewAccessory(e.target.value)}
@@ -410,11 +410,11 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
 
                     <div className="flex flex-wrap gap-2 mt-4">
                       {accessoriesList.map((acc, index) => (
-                        <div key={index} className="flex items-center gap-2 bg-blue-50 border border-primary/20 rounded-md px-3 py-2 group hover:bg-white transition-all">
+                        <div key={index} className="flex items-center gap-2 bg-blue-50 border border-primary/20 rounded-md px-3 py-2 group hover:bg-surface transition-all">
                           <div className="size-5 bg-primary text-white rounded flex items-center justify-center">
                             <span className="material-symbols-outlined ui-icon text-xs">check</span>
                           </div>
-                          <span className="text-xs font-bold uppercase tracking-widest text-slate-700">{acc}</span>
+                          <span className="text-xs font-bold uppercase tracking-widest text-text">{acc}</span>
                           <button 
                             type="button"
                             onClick={() => removeAccessory(index)}
@@ -425,7 +425,7 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
                         </div>
                       ))}
                       {accessoriesList.length === 0 && (
-                        <div className="w-full py-8 border-2 border-dashed border-slate-100 rounded-md flex flex-col items-center justify-center opacity-40">
+                        <div className="w-full py-8 border-2 border-dashed border-border rounded-md flex flex-col items-center justify-center opacity-40">
                           <span className="material-symbols-outlined ui-icon text-3xl mb-1">construction</span>
                           <p className="text-[10px] font-black uppercase tracking-widest">Sin accesorios registrados</p>
                         </div>
@@ -433,9 +433,9 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
                     </div>
                   </div>
 
-                  <div className="space-y-4 pt-8 border-t border-slate-100">
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Observaciones de Carrocería</label>
-                    <textarea rows={4} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none resize-none focus:bg-white focus:border-primary transition-all" placeholder="Detalles de golpe, rayones, seguros, observaciones adicionales..." value={formData.observations} onChange={e => setFormData({...formData, observations: e.target.value})} />
+                  <div className="space-y-4 pt-8 border-t border-border">
+                    <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Observaciones de Carrocería</label>
+                    <textarea rows={4} className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none resize-none focus:bg-surface focus:border-primary transition-all" placeholder="Detalles de golpe, rayones, seguros, observaciones adicionales..." value={formData.observations} onChange={e => setFormData({...formData, observations: e.target.value})} />
                   </div>
                 </div>
               )}
@@ -447,7 +447,7 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
               )}
 
               <div className="pt-6 flex gap-3">
-                <button type="button" onClick={() => { setFormError(''); setShowModal(false); }} className="flex-1 py-3 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-100 rounded-md transition-all">Cancelar</button>
+                <button type="button" onClick={() => { setFormError(''); setShowModal(false); }} className="flex-1 py-3 text-[11px] font-black uppercase tracking-widest text-text-muted hover:bg-surface-subtle rounded-md transition-all">Cancelar</button>
                 <button type="submit" disabled={isSaving} className="flex-[2] py-3 bg-primary text-white text-[11px] font-black uppercase tracking-widest rounded-md hover:opacity-90 transition-all flex items-center justify-center gap-2">
                   {isSaving ? 'Guardando...' : (editingVehicle ? 'Guardar Cambios' : 'Registrar Vehículo')}
                 </button>
@@ -458,80 +458,80 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
       )}
 
        {showPrintPreview && selectedForPrint && (
-         <div className="fixed inset-0 z-[200] bg-white flex flex-col overflow-y-auto">
-            <div className="p-4 bg-slate-900 flex justify-between items-center text-white sticky top-0 z-50 shadow-md no-print">
-              <button onClick={() => setShowPrintPreview(false)} className="bg-white/10 px-4 py-2 rounded-lg font-bold text-xs hover:bg-white/20 transition-all">Cerrar</button>
+         <div className="fixed inset-0 z-[200] bg-surface flex flex-col overflow-y-auto">
+            <div className="p-4 bg-secondary flex justify-between items-center text-white sticky top-0 z-50 shadow-md no-print">
+              <button onClick={() => setShowPrintPreview(false)} className="bg-surface/10 px-4 py-2 rounded-lg font-bold text-xs hover:bg-surface/20 transition-all">Cerrar</button>
               <button onClick={() => window.print()} className="bg-primary px-8 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-blue-500/20">
                 <span className="material-symbols-outlined ui-icon">picture_as_pdf</span> Imprimir Ficha PDF
               </button>
             </div>
-            <div className="flex-1 bg-slate-100 p-10 flex justify-center">
-               <div id="tech-sheet-printable" className="bg-white w-[21.59cm] min-h-[27.94cm] p-[1.5cm] shadow-2xl relative text-slate-900">
+            <div className="flex-1 bg-surface-subtle p-10 flex justify-center">
+               <div id="tech-sheet-printable" className="bg-surface w-[21.59cm] min-h-[27.94cm] p-[1.5cm] shadow-2xl relative text-text">
                 
                  {/* Header Institucional */}
                  <div className="flex justify-between items-center mb-8 border-b-4 border-slate-900 pb-6">
                    <div className="flex items-center gap-6">
                      <img src="/images/logo-dif.png" alt="Logo" className="w-24 object-contain" />
                      <div className="flex flex-col">
-                       <span className="text-lg font-black text-slate-900 uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia del Municipio de La Paz B.C.S.</span>
-                       <span className="text-[8pt] font-bold uppercase text-slate-400 mt-2 tracking-[0.2em]">Parque Vehicular • Control Patrimonial</span>
+                       <span className="text-lg font-black text-text uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia del Municipio de La Paz B.C.S.</span>
+                       <span className="text-[8pt] font-bold uppercase text-text-muted mt-2 tracking-[0.2em]">Parque Vehicular • Control Patrimonial</span>
                      </div>
                    </div>
                   <div className="text-right">
-                    <div className="inline-block bg-slate-900 text-white px-4 py-1.5 font-black text-[10pt] uppercase tracking-widest rounded-sm mb-2">
+                    <div className="inline-block bg-secondary text-white px-4 py-1.5 font-black text-[10pt] uppercase tracking-widest rounded-sm mb-2">
                         Ficha Técnica
                     </div>
-                    <p className="text-xs font-bold text-slate-600">N° INVENTARIO: <span className="font-black text-slate-900 text-lg ml-1">{selectedForPrint.inventory || 'SIN ASIGNAR'}</span></p>
-                    <p className="text-[9pt] text-slate-400 font-bold mt-1">Fecha de Emisión: {new Date().toLocaleDateString('es-ES', {year: 'numeric', month: 'long', day: 'numeric'})}</p>
+                    <p className="text-xs font-bold text-text-muted">N° INVENTARIO: <span className="font-black text-text text-lg ml-1">{selectedForPrint.inventory || 'SIN ASIGNAR'}</span></p>
+                    <p className="text-[9pt] text-text-muted font-bold mt-1">Fecha de Emisión: {new Date().toLocaleDateString('es-ES', {year: 'numeric', month: 'long', day: 'numeric'})}</p>
                   </div>
                 </div>
                 
                 {/* Datos Principales */}
                  <div className="mb-8 mt-6 break-inside-avoid">
                      <div className="grid grid-cols-2 gap-x-8 gap-y-4">
-                          <div className="border-b border-slate-200 pb-2">
-                              <div className="text-[9pt] font-black text-slate-400 uppercase">Número Económico</div>
-                              <div className="text-[16pt] font-black text-slate-900 tracking-widest">{selectedForPrint.economicNumber || '---'}</div>
+                          <div className="border-b border-border pb-2">
+                              <div className="text-[9pt] font-black text-text-muted uppercase">Número Económico</div>
+                              <div className="text-[16pt] font-black text-text tracking-widest">{selectedForPrint.economicNumber || '---'}</div>
                           </div>
-                          <div className="border-b border-slate-200 pb-2">
-                              <div className="text-[9pt] font-black text-slate-400 uppercase">Placas</div>
-                              <div className="text-[16pt] font-black text-slate-900 tracking-widest">{selectedForPrint.plate}</div>
+                          <div className="border-b border-border pb-2">
+                              <div className="text-[9pt] font-black text-text-muted uppercase">Placas</div>
+                              <div className="text-[16pt] font-black text-text tracking-widest">{selectedForPrint.plate}</div>
                           </div>
-                          <div className="border-b border-slate-200 pb-2">
-                              <div className="text-[9pt] font-black text-slate-400 uppercase">Marca/Línea</div>
-                              <div className="text-[11pt] font-bold text-slate-900">{selectedForPrint.brand} {selectedForPrint.line}</div>
+                          <div className="border-b border-border pb-2">
+                              <div className="text-[9pt] font-black text-text-muted uppercase">Marca/Línea</div>
+                              <div className="text-[11pt] font-bold text-text">{selectedForPrint.brand} {selectedForPrint.line}</div>
                           </div>
-                         <div className="border-b border-slate-200 pb-2">
-                             <div className="text-[9pt] font-black text-slate-400 uppercase">Modelo (Año)</div>
-                             <div className="text-[11pt] font-bold text-slate-900">{selectedForPrint.year}</div>
+                         <div className="border-b border-border pb-2">
+                             <div className="text-[9pt] font-black text-text-muted uppercase">Modelo (Año)</div>
+                             <div className="text-[11pt] font-bold text-text">{selectedForPrint.year}</div>
                          </div>
-                         <div className="border-b border-slate-200 pb-2">
-                             <div className="text-[9pt] font-black text-slate-400 uppercase">Descripción</div>
-                             <div className="text-[11pt] font-bold text-slate-900">{selectedForPrint.model}</div>
+                         <div className="border-b border-border pb-2">
+                             <div className="text-[9pt] font-black text-text-muted uppercase">Descripción</div>
+                             <div className="text-[11pt] font-bold text-text">{selectedForPrint.model}</div>
                          </div>
-                         <div className="border-b border-slate-200 pb-2">
-                             <div className="text-[9pt] font-black text-slate-400 uppercase">Serie VIN</div>
-                             <div className="text-[11pt] font-bold text-slate-900 font-mono tracking-wider">{selectedForPrint.vin || '---'}</div>
+                         <div className="border-b border-border pb-2">
+                             <div className="text-[9pt] font-black text-text-muted uppercase">Serie VIN</div>
+                             <div className="text-[11pt] font-bold text-text font-mono tracking-wider">{selectedForPrint.vin || '---'}</div>
                          </div>
-                         <div className="border-b border-slate-200 pb-2">
-                             <div className="text-[9pt] font-black text-slate-400 uppercase">Motor/Cilindros</div>
-                             <div className="text-[11pt] font-bold text-slate-900">{selectedForPrint.cylinders} Cilindros / {selectedForPrint.fuelType}</div>
+                         <div className="border-b border-border pb-2">
+                             <div className="text-[9pt] font-black text-text-muted uppercase">Motor/Cilindros</div>
+                             <div className="text-[11pt] font-bold text-text">{selectedForPrint.cylinders} Cilindros / {selectedForPrint.fuelType}</div>
                          </div>
-                         <div className="border-b border-slate-200 pb-2">
-                             <div className="text-[9pt] font-black text-slate-400 uppercase">Color</div>
-                             <div className="text-[11pt] font-bold text-slate-900">{selectedForPrint.color}</div>
+                         <div className="border-b border-border pb-2">
+                             <div className="text-[9pt] font-black text-text-muted uppercase">Color</div>
+                             <div className="text-[11pt] font-bold text-text">{selectedForPrint.color}</div>
                          </div>
-                         <div className="border-b border-slate-200 pb-2">
-                             <div className="text-[9pt] font-black text-slate-400 uppercase">Resguardo</div>
-                             <div className="text-[11pt] font-bold text-slate-900">{drivers.find(d => d.id === selectedForPrint.assignedDriverId)?.name || 'SIN ASIGNAR'}</div>
+                         <div className="border-b border-border pb-2">
+                             <div className="text-[9pt] font-black text-text-muted uppercase">Resguardo</div>
+                             <div className="text-[11pt] font-bold text-text">{drivers.find(d => d.id === selectedForPrint.assignedDriverId)?.name || 'SIN ASIGNAR'}</div>
                          </div>
                      </div>
                  </div>
 
                 {/* Diagnostico Mecanico */}
                 <div className="mb-8 break-inside-avoid">
-                   <h4 className="bg-slate-900 text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">Estado General (16 Puntos)</h4>
-                   <div className="grid grid-cols-4 gap-y-3 gap-x-6 border-2 border-slate-100 p-6 rounded-xl">
+                   <h4 className="bg-secondary text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">Estado General (16 Puntos)</h4>
+                   <div className="grid grid-cols-4 gap-y-3 gap-x-6 border-2 border-border p-6 rounded-xl">
                       <ConditionPrint label="1. Motor" status={selectedForPrint.engineStatus} />
                       <ConditionPrint label="2. Transmisión" status={selectedForPrint.transmissionStatus} />
                       <ConditionPrint label="3. Clutch" status={selectedForPrint.clutchStatus} />
@@ -556,17 +556,17 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
 
                 <div className="grid grid-cols-2 gap-8 mb-10 break-inside-avoid">
                    <div className="space-y-2">
-                      <h4 className="text-[9pt] font-black uppercase border-b-2 border-slate-200 pb-1 text-primary">Accesorios Registrados</h4>
-                      <div className="bg-slate-50 p-4 rounded-lg min-h-[80px] border border-slate-100">
-                        <p className="text-[8pt] font-bold text-slate-700 leading-relaxed uppercase">
+                      <h4 className="text-[9pt] font-black uppercase border-b-2 border-border pb-1 text-primary">Accesorios Registrados</h4>
+                      <div className="bg-surface-subtle p-4 rounded-lg min-h-[80px] border border-border">
+                        <p className="text-[8pt] font-bold text-text leading-relaxed uppercase">
                             {selectedForPrint.accessories_notes || 'SIN ACCESORIOS REGISTRADOS.'}
                         </p>
                       </div>
                    </div>
                    <div className="space-y-2">
-                      <h4 className="text-[9pt] font-black uppercase border-b-2 border-slate-200 pb-1 text-primary">Observaciones Generales</h4>
-                      <div className="bg-slate-50 p-4 rounded-lg min-h-[80px] border border-slate-100">
-                        <p className="text-[8pt] text-slate-600 leading-relaxed italic">{selectedForPrint.observations || 'Sin observaciones de carrocería o daños visibles.'}</p>
+                      <h4 className="text-[9pt] font-black uppercase border-b-2 border-border pb-1 text-primary">Observaciones Generales</h4>
+                      <div className="bg-surface-subtle p-4 rounded-lg min-h-[80px] border border-border">
+                        <p className="text-[8pt] text-text-muted leading-relaxed italic">{selectedForPrint.observations || 'Sin observaciones de carrocería o daños visibles.'}</p>
                       </div>
                    </div>
                 </div>
@@ -574,17 +574,17 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
                  <div className="signature-section">
                      <div className="grid grid-cols-2 gap-24 text-center">
                      <div className="border-t-2 border-slate-900 pt-4">
-                         <p className="text-[9pt] font-black uppercase text-slate-900">{headOfMaterialsName || 'Jefe de Recursos Materiales'}</p>
-                         <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">{headOfMaterialsPosition}</p>
-                         <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Elaboró</p>
+                         <p className="text-[9pt] font-black uppercase text-text">{headOfMaterialsName || 'Jefe de Recursos Materiales'}</p>
+                         <p className="text-[7pt] font-bold text-text-muted mt-1 uppercase tracking-widest">{headOfMaterialsPosition}</p>
+                         <p className="text-[7pt] font-bold text-text-muted uppercase tracking-widest">Elaboró</p>
                      </div>
                      <div className="border-t-2 border-slate-900 pt-4">
-                         <p className="text-[9pt] font-black uppercase text-slate-900">{directorName || 'Director General'}</p>
-                         <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">{directorPosition}</p>
-                         <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Vo. Bo.</p>
+                         <p className="text-[9pt] font-black uppercase text-text">{directorName || 'Director General'}</p>
+                         <p className="text-[7pt] font-bold text-text-muted mt-1 uppercase tracking-widest">{directorPosition}</p>
+                         <p className="text-[7pt] font-bold text-text-muted uppercase tracking-widest">Vo. Bo.</p>
                      </div>
                      </div>
-                    <div className="text-center mt-8 border-t border-slate-200 pt-2">
+                    <div className="text-center mt-8 border-t border-border pt-2">
                         <p className="text-[7pt] font-black text-slate-300 uppercase tracking-[0.3em]">Sistema de Gestion de Parque Vehicular • DIF Municipal La Paz</p>
                     </div>
                 </div>
@@ -598,14 +598,14 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
 
 // Helper Components
 const StatusFilterBtn = ({ active, onClick, label, color }: any) => (
-  <button onClick={onClick} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${active ? 'bg-primary text-white' : 'bg-white border border-slate-200 text-slate-500'}`}>
+  <button onClick={onClick} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${active ? 'bg-primary text-white' : 'bg-surface border border-border text-text-muted'}`}>
     <div className={`size-2 rounded-full ${color}`}></div>
     {label}
   </button>
 );
 
 const TabBtn = ({ active, onClick, label, icon }: any) => (
-  <button onClick={onClick} className={`flex items-center gap-2 px-6 py-4 text-[10px] font-black uppercase tracking-widest transition-all border-b-2 ${active ? 'border-primary text-primary' : 'border-transparent text-slate-400 hover:text-slate-600'}`}>
+  <button onClick={onClick} className={`flex items-center gap-2 px-6 py-4 text-[10px] font-black uppercase tracking-widest transition-all border-b-2 ${active ? 'border-primary text-primary' : 'border-transparent text-text-muted hover:text-text-muted'}`}>
     <span className="material-symbols-outlined ui-icon text-sm">{icon}</span>
     {label}
   </button>
@@ -613,15 +613,15 @@ const TabBtn = ({ active, onClick, label, icon }: any) => (
 
 const InputField = ({ label, value, onChange, type = 'text', placeholder = '' }: any) => (
   <div className="space-y-2">
-    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">{label}</label>
-    <input type={type} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all" />
+    <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">{label}</label>
+    <input type={type} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all" />
   </div>
 );
 
 const SelectField = ({ label, value, onChange, options }: any) => (
   <div className="space-y-2">
-    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">{label}</label>
-    <select value={value} onChange={(e) => onChange(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all">
+    <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">{label}</label>
+    <select value={value} onChange={(e) => onChange(e.target.value)} className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all">
       {options.map((opt: any) => <option key={opt.v} value={opt.v}>{opt.l}</option>)}
     </select>
   </div>
@@ -629,8 +629,8 @@ const SelectField = ({ label, value, onChange, options }: any) => (
 
 const ConditionInput = ({ label, value, onChange }: any) => (
   <div className="space-y-2">
-    <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">{label}</label>
-    <select value={value} onChange={(e) => onChange(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none">
+    <label className="text-[9px] font-black text-text-muted uppercase tracking-widest ml-1">{label}</label>
+    <select value={value} onChange={(e) => onChange(e.target.value)} className="w-full bg-surface-subtle border border-border rounded-xl px-3 py-2 text-xs font-bold outline-none">
       <option value="Bien">Bien</option>
       <option value="Regular">Regular</option>
       <option value="Mal">Mal</option>
@@ -650,10 +650,10 @@ const ConditionPrint = ({ label, status }: any) => {
   const colorClass = getStatusColorClass(status);
   return (
     <div className="flex items-center gap-3">
-       <div className={`size-3 rounded-full border border-slate-200 ${colorClass} print:border-0`} style={{printColorAdjust: 'exact', WebkitPrintColorAdjust: 'exact'}}></div>
+       <div className={`size-3 rounded-full border border-border ${colorClass} print:border-0`} style={{printColorAdjust: 'exact', WebkitPrintColorAdjust: 'exact'}}></div>
        <div className="flex flex-col">
-         <span className="text-[7pt] font-black uppercase text-slate-400 leading-none">{label}</span>
-         <span className="text-[8pt] font-bold text-slate-900 uppercase leading-tight">{status || 'BIEN'}</span>
+         <span className="text-[7pt] font-black uppercase text-text-muted leading-none">{label}</span>
+         <span className="text-[8pt] font-bold text-text uppercase leading-tight">{status || 'BIEN'}</span>
        </div>
     </div>
   );

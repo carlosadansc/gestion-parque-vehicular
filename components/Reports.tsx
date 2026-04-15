@@ -221,10 +221,10 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
   // --- COMPONENTES UI ---
 
    const KPICard = ({ title, value, subtext, color }: any) => (
-     <div className={`bg-white p-4 border-l-4 ${color === 'blue' ? 'border-l-blue-500' : color === 'green' ? 'border-l-emerald-500' : 'border-l-rose-500'} border-y border-r border-slate-200`}>
-      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{title}</p>
-      <p className="text-3xl font-black text-slate-900 mt-2 tracking-tight">{value}</p>
-      {subtext && <p className="text-xs font-bold text-slate-500 mt-1">{subtext}</p>}
+     <div className={`bg-surface p-4 border-l-4 ${color === 'blue' ? 'border-l-blue-500' : color === 'green' ? 'border-l-emerald-500' : 'border-l-rose-500'} border-y border-r border-border`}>
+      <p className="text-[10px] font-black text-text-muted uppercase tracking-widest">{title}</p>
+      <p className="text-3xl font-black text-text mt-2 tracking-tight">{value}</p>
+      {subtext && <p className="text-xs font-bold text-text-muted mt-1">{subtext}</p>}
     </div>
    );
 
@@ -595,28 +595,28 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
             <p className="page-subtitle break-words">Análisis de vehículos</p>
           </div>
          <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 no-print">
-          <div className="flex flex-col sm:flex-row gap-4 bg-white p-2 rounded-2xl border border-slate-200">
+          <div className="flex flex-col sm:flex-row gap-4 bg-surface p-2 rounded-2xl border border-border">
            <div className="flex items-center gap-2 px-2">
-             <span className="text-[10px] font-black text-slate-400 uppercase">Desde</span>
+             <span className="text-[10px] font-black text-text-muted uppercase">Desde</span>
              <input 
                type="date" 
-               className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-bold outline-none focus:border-primary"
+               className="bg-surface-subtle border border-border rounded-lg px-3 py-1.5 text-xs font-bold outline-none focus:border-primary"
                value={dateRange.start}
                onChange={e => setDateRange({...dateRange, start: e.target.value})}
              />
            </div>
            <div className="flex items-center gap-2 px-2">
-             <span className="text-[10px] font-black text-slate-400 uppercase">Hasta</span>
+             <span className="text-[10px] font-black text-text-muted uppercase">Hasta</span>
              <input 
                type="date" 
-               className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-bold outline-none focus:border-primary"
+               className="bg-surface-subtle border border-border rounded-lg px-3 py-1.5 text-xs font-bold outline-none focus:border-primary"
                value={dateRange.end}
                onChange={e => setDateRange({...dateRange, end: e.target.value})}
              />
            </div>
            <div className="w-[1px] bg-slate-200 hidden sm:block"></div>
            <select 
-             className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-bold outline-none focus:border-primary uppercase min-w-[150px]"
+             className="bg-surface-subtle border border-border rounded-lg px-3 py-1.5 text-xs font-bold outline-none focus:border-primary uppercase min-w-[150px]"
              value={selectedVehicleId}
              onChange={e => setSelectedVehicleId(e.target.value)}
            >
@@ -650,20 +650,20 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
                   }}
                 />
                <div className="flex flex-col">
-                 <span className="text-xl font-black text-slate-900 uppercase leading-none tracking-tight">Reporte de Analisis de Vehiculos</span>
-                 <span className="text-lg font-black text-slate-900 uppercase leading-tight tracking-tight">Sistema DIF Municipal La Paz B.C.S.</span>
-                 <span className="text-[8pt] font-bold uppercase text-slate-400 mt-2 tracking-[0.2em]">Gestión de Parque Vehicular</span>
+                 <span className="text-xl font-black text-text uppercase leading-none tracking-tight">Reporte de Analisis de Vehiculos</span>
+                 <span className="text-lg font-black text-text uppercase leading-tight tracking-tight">Sistema DIF Municipal La Paz B.C.S.</span>
+                 <span className="text-[8pt] font-bold uppercase text-text-muted mt-2 tracking-[0.2em]">Gestión de Parque Vehicular</span>
                </div>
              </div>
              <div className="text-right">
-                 <div className="inline-block bg-slate-900 text-white px-4 py-1.5 font-black text-[10pt] uppercase tracking-widest rounded-sm mb-2">
+                 <div className="inline-block bg-secondary text-white px-4 py-1.5 font-black text-[10pt] uppercase tracking-widest rounded-sm mb-2">
                      Reporte Ejecutivo
                  </div>
-                 <p className="text-[9pt] font-black text-slate-400 uppercase tracking-widest">Periodo del Reporte</p>
-                 <p className="text-lg font-black text-slate-900">
+                 <p className="text-[9pt] font-black text-text-muted uppercase tracking-widest">Periodo del Reporte</p>
+                 <p className="text-lg font-black text-text">
                      {new Date(dateRange.start).toLocaleDateString('es-ES', {day: '2-digit', month: 'short', year: 'numeric'})} — {new Date(dateRange.end).toLocaleDateString('es-ES', {day: '2-digit', month: 'short', year: 'numeric'})}
                  </p>
-                 <p className="text-[8pt] text-slate-400 font-bold mt-1">
+                 <p className="text-[8pt] text-text-muted font-bold mt-1">
                      Generado: {new Date().toLocaleDateString('es-ES', {day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'})}
                  </p>
              </div>
@@ -689,8 +689,8 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
               
              {/* GRAPH 1: COSTOS POR VEHICULO */}
              {activeReport === 'financial' || activeReport === 'operations' ? (
-<div className="bg-white p-5 border border-slate-200 break-inside-avoid">
-                      <h3 className="text-lg font-black text-slate-900 mb-4 tracking-tight">Top 10 Costos por Vehículo</h3>
+<div className="bg-surface p-5 border border-border break-inside-avoid">
+                      <h3 className="text-lg font-black text-text mb-4 tracking-tight">Top 10 Costos por Vehículo</h3>
                      <div className="h-[300px] w-full">
                          <ResponsiveContainer width="100%" height="100%">
                              <BarChart data={costByVehicleData} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
@@ -712,8 +712,8 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
 
              {/* GRAPH 2: TENDENCIA DIARIA */}
              {activeReport === 'financial' || activeReport === 'operations' ? (
-<div className="bg-white p-5 border border-slate-200 break-inside-avoid">
-                      <h3 className="text-lg font-black text-slate-900 mb-4 tracking-tight">Gasto Diario de Combustible</h3>
+<div className="bg-surface p-5 border border-border break-inside-avoid">
+                      <h3 className="text-lg font-black text-text mb-4 tracking-tight">Gasto Diario de Combustible</h3>
                      <div className="h-[300px] w-full">
                          <ResponsiveContainer width="100%" height="100%">
                              <LineChart data={efficiencyData}>
@@ -730,8 +730,8 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
 
             {/* GRAPH 3: INCIDENCIAS */}
             {activeReport === 'incidents' || activeReport === 'operations' ? (
-                <div className="bg-white p-6 rounded-[2rem] border border-slate-200 break-inside-avoid">
-                    <h3 className="text-lg font-black text-slate-900 mb-6 tracking-tight">Distribución de Incidencias</h3>
+                <div className="bg-surface p-6 rounded-[2rem] border border-border break-inside-avoid">
+                    <h3 className="text-lg font-black text-text mb-6 tracking-tight">Distribución de Incidencias</h3>
                     <div className="h-[300px] w-full flex">
                         <ResponsiveContainer width="60%" height="100%">
                             <PieChart>
@@ -755,7 +755,7 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
                             {incidentTypeData.map((d: any, i: number) => (
                                 <div key={i} className="flex items-center gap-2">
                                     <div className="size-3 rounded-full" style={{backgroundColor: d.color}}></div>
-                                    <span className="text-xs font-bold text-slate-600 uppercase">{d.name}: {d.value}</span>
+                                    <span className="text-xs font-bold text-text-muted uppercase">{d.name}: {d.value}</span>
                                 </div>
                             ))}
                         </div>
@@ -768,29 +768,29 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
        <div className="space-y-8 print-section">
            {/* Tabla de Gastos */}
            <div className="break-inside-avoid">
-               <div className="text-white bg-slate-900  px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">
+               <div className="text-white bg-secondary  px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">
                    Desglose Financiero Detallado
                </div>
                <table className="w-full text-left border-collapse data-table">
                    <thead>
-                       <tr className="bg-slate-100 text-slate-600">
-                           <SortableTh label="Vehículo" sortKey="vehicle" sortConfig={costByVehicleSortConfig} onSort={requestCostByVehicleSort} className="p-3 text-[9px] font-black uppercase border border-slate-200" />
-                           <SortableTh label="Combustible" sortKey="fuel" sortConfig={costByVehicleSortConfig} onSort={requestCostByVehicleSort} align="right" className="p-3 text-[9px] font-black uppercase text-right border border-slate-200" />
-                           <SortableTh label="Mantenimiento" sortKey="maintenance" sortConfig={costByVehicleSortConfig} onSort={requestCostByVehicleSort} align="right" className="p-3 text-[9px] font-black uppercase text-right border border-slate-200" />
-                           <SortableTh label="Total" sortKey="total" sortConfig={costByVehicleSortConfig} onSort={requestCostByVehicleSort} align="right" className="p-3 text-[9px] font-black uppercase text-right border border-slate-200" />
+                       <tr className="bg-surface-subtle text-text-muted">
+                           <SortableTh label="Vehículo" sortKey="vehicle" sortConfig={costByVehicleSortConfig} onSort={requestCostByVehicleSort} className="p-3 text-[9px] font-black uppercase border border-border" />
+                           <SortableTh label="Combustible" sortKey="fuel" sortConfig={costByVehicleSortConfig} onSort={requestCostByVehicleSort} align="right" className="p-3 text-[9px] font-black uppercase text-right border border-border" />
+                           <SortableTh label="Mantenimiento" sortKey="maintenance" sortConfig={costByVehicleSortConfig} onSort={requestCostByVehicleSort} align="right" className="p-3 text-[9px] font-black uppercase text-right border border-border" />
+                           <SortableTh label="Total" sortKey="total" sortConfig={costByVehicleSortConfig} onSort={requestCostByVehicleSort} align="right" className="p-3 text-[9px] font-black uppercase text-right border border-border" />
                        </tr>
                    </thead>
                    <tbody>
                        {sortedCostByVehicleData.map((item, idx) => (
-                           <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
-                               <td className="p-3 text-[10px] font-bold border border-slate-200 print-truncate max-w-[150px]">{item.name}</td>
-                               <td className="p-3 text-[10px] text-right font-mono border border-slate-200">${item.fuel.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
-                               <td className="p-3 text-[10px] text-right font-mono border border-slate-200">${item.maintenance.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
-                               <td className="p-3 text-[10px] text-right font-black font-mono border border-slate-200 bg-slate-50">${(item.fuel + item.maintenance).toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+                           <tr key={idx} className={idx % 2 === 0 ? 'bg-surface' : 'bg-surface-subtle/50'}>
+                               <td className="p-3 text-[10px] font-bold border border-border print-truncate max-w-[150px]">{item.name}</td>
+                               <td className="p-3 text-[10px] text-right font-mono border border-border">${item.fuel.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+                               <td className="p-3 text-[10px] text-right font-mono border border-border">${item.maintenance.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+                               <td className="p-3 text-[10px] text-right font-black font-mono border border-border bg-surface-subtle">${(item.fuel + item.maintenance).toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
                            </tr>
                        ))}
                        {/* Total Row */}
-                       <tr className="bg-slate-900 text-white font-black">
+                       <tr className="bg-secondary text-white font-black">
                            <td className="p-3 text-[10px] font-black uppercase border border-slate-700">Total General</td>
                            <td className="p-3 text-[10px] text-right font-mono border border-slate-700">${kpis.totalFuelCost.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
                            <td className="p-3 text-[10px] text-right font-mono border border-slate-700">${kpis.totalMaintenanceCost.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
@@ -802,8 +802,8 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
        </div>
 
          {/* FOOTER - FORMAL DOCUMENT */}
-       <div className="hidden print:block print-footer mt-12 pt-4 border-t-2 border-slate-200">
-           <div className="flex justify-between items-center text-[8pt] text-slate-400">
+       <div className="hidden print:block print-footer mt-12 pt-4 border-t-2 border-border">
+           <div className="flex justify-between items-center text-[8pt] text-text-muted">
                <div>
                    <p className="font-bold">Sistema de Gestión de Parque Vehicular</p>
                    <p>DIF Municipal La Paz B.C.S.</p>
@@ -825,9 +825,9 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
 
       {/* Print Preview Modal - EXACT COPY OF PRINT CONTENT */}
        {showPrintPreview && (
-         <div className="fixed inset-0 z-[200] bg-white flex flex-col overflow-y-auto">
-            <div className="p-4 bg-slate-900 flex justify-between items-center text-white sticky top-0 z-50 shadow-md no-print">
-            <button onClick={() => setShowPrintPreview(false)} className="bg-white/10 px-4 py-2 rounded-lg font-bold text-xs hover:bg-white/20 transition-all">
+         <div className="fixed inset-0 z-[200] bg-surface flex flex-col overflow-y-auto">
+            <div className="p-4 bg-secondary flex justify-between items-center text-white sticky top-0 z-50 shadow-md no-print">
+            <button onClick={() => setShowPrintPreview(false)} className="bg-surface/10 px-4 py-2 rounded-lg font-bold text-xs hover:bg-surface/20 transition-all">
               Cerrar
             </button>
             <div className="flex gap-2">
@@ -836,7 +836,7 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
               </button>
             </div>
           </div>
-           <div className="flex-1 bg-slate-100 p-10 flex justify-center">
+           <div className="flex-1 bg-surface-subtle p-10 flex justify-center">
              <div id="report-printable-preview" className="print-preview-container">
               {/* PRINT ONLY HEADER - COMPACT */}
               <div className="flex print-header justify-between items-center mb-4 pb-4 border-b-2 border-slate-900">
@@ -853,20 +853,20 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
                     }}
                   />
                   <div className="flex flex-col">
-                    <span className="text-xl font-black text-slate-900 uppercase leading-none tracking-tight">Reporte de Analisis de Vehiculos</span>
-                    <span className="text-lg font-black text-slate-900 uppercase leading-tight tracking-tight">Sistema DIF Municipal La Paz B.C.S.</span>
-                    <span className="text-[8pt] font-bold uppercase text-slate-400 mt-2 tracking-[0.2em]">Gestión de Parque Vehicular</span>
+                    <span className="text-xl font-black text-text uppercase leading-none tracking-tight">Reporte de Analisis de Vehiculos</span>
+                    <span className="text-lg font-black text-text uppercase leading-tight tracking-tight">Sistema DIF Municipal La Paz B.C.S.</span>
+                    <span className="text-[8pt] font-bold uppercase text-text-muted mt-2 tracking-[0.2em]">Gestión de Parque Vehicular</span>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="inline-block bg-slate-900 text-white px-4 py-1.5 font-black text-[10pt] uppercase tracking-widest rounded-sm mb-2">
+                  <div className="inline-block bg-secondary text-white px-4 py-1.5 font-black text-[10pt] uppercase tracking-widest rounded-sm mb-2">
                     Reporte Ejecutivo
                   </div>
-                  <p className="text-[9pt] font-black text-slate-400 uppercase tracking-widest">Periodo del Reporte</p>
-                  <p className="text-lg font-black text-slate-900">
+                  <p className="text-[9pt] font-black text-text-muted uppercase tracking-widest">Periodo del Reporte</p>
+                  <p className="text-lg font-black text-text">
                     {new Date(dateRange.start).toLocaleDateString('es-ES', {day: '2-digit', month: 'short', year: 'numeric'})} — {new Date(dateRange.end).toLocaleDateString('es-ES', {day: '2-digit', month: 'short', year: 'numeric'})}
                   </p>
-                  <p className="text-[8pt] text-slate-400 font-bold mt-1">
+                  <p className="text-[8pt] text-text-muted font-bold mt-1">
                     Generado: {new Date().toLocaleDateString('es-ES', {day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'})}
                   </p>
                 </div>
@@ -874,33 +874,33 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
 
               {/* KPI SUMMARY - COMPACT FOR PRINT */}
               <div className="grid grid-cols-4 gap-3 mb-4 kpi-grid print:kpi-grid">
-                <div className="bg-white p-2 border-l-4 border-l-blue-500 border border-slate-200 shadow-sm">
-                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-wider">Gasto Total</p>
-                  <p className="text-xl font-black text-slate-900 mt-1 tracking-tight">${kpis.totalCost.toLocaleString()}</p>
-                  <p className="text-[7px] font-bold text-slate-500 mt-0.5">Comb. + Mant.</p>
+                <div className="bg-surface p-2 border-l-4 border-l-blue-500 border border-border shadow-sm">
+                  <p className="text-[8px] font-black text-text-muted uppercase tracking-wider">Gasto Total</p>
+                  <p className="text-xl font-black text-text mt-1 tracking-tight">${kpis.totalCost.toLocaleString()}</p>
+                  <p className="text-[7px] font-bold text-text-muted mt-0.5">Comb. + Mant.</p>
                 </div>
-                <div className="bg-white p-2 border-l-4 border-l-emerald-500 border border-slate-200 shadow-sm">
-                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-wider">Combustible</p>
-                  <p className="text-xl font-black text-slate-900 mt-1 tracking-tight">${kpis.totalFuelCost.toLocaleString()}</p>
-                  <p className="text-[7px] font-bold text-slate-500 mt-0.5">{kpis.totalLiters.toLocaleString()} L</p>
+                <div className="bg-surface p-2 border-l-4 border-l-emerald-500 border border-border shadow-sm">
+                  <p className="text-[8px] font-black text-text-muted uppercase tracking-wider">Combustible</p>
+                  <p className="text-xl font-black text-text mt-1 tracking-tight">${kpis.totalFuelCost.toLocaleString()}</p>
+                  <p className="text-[7px] font-bold text-text-muted mt-0.5">{kpis.totalLiters.toLocaleString()} L</p>
                 </div>
-                <div className="bg-white p-2 border-l-4 border-l-rose-500 border border-slate-200 shadow-sm">
-                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-wider">Mantenimiento</p>
-                  <p className="text-xl font-black text-slate-900 mt-1 tracking-tight">${kpis.totalMaintenanceCost.toLocaleString()}</p>
-                  <p className="text-[7px] font-bold text-slate-500 mt-0.5">Facturado</p>
+                <div className="bg-surface p-2 border-l-4 border-l-rose-500 border border-border shadow-sm">
+                  <p className="text-[8px] font-black text-text-muted uppercase tracking-wider">Mantenimiento</p>
+                  <p className="text-xl font-black text-text mt-1 tracking-tight">${kpis.totalMaintenanceCost.toLocaleString()}</p>
+                  <p className="text-[7px] font-bold text-text-muted mt-0.5">Facturado</p>
                 </div>
-                <div className="bg-white p-2 border-l-4 border-l-blue-500 border border-slate-200 shadow-sm">
-                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-wider">Incidencias</p>
-                  <p className="text-xl font-black text-slate-900 mt-1 tracking-tight">{kpis.incidentCount}</p>
-                  <p className="text-[7px] font-bold text-slate-500 mt-0.5">Reportes</p>
+                <div className="bg-surface p-2 border-l-4 border-l-blue-500 border border-border shadow-sm">
+                  <p className="text-[8px] font-black text-text-muted uppercase tracking-wider">Incidencias</p>
+                  <p className="text-xl font-black text-text mt-1 tracking-tight">{kpis.incidentCount}</p>
+                  <p className="text-[7px] font-bold text-text-muted mt-0.5">Reportes</p>
                 </div>
               </div>
 
               {/* GRAPHS SECTION */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4 break-inside-avoid charts-grid">
                 {/* GRAPH 1: COSTOS POR VEHICULO */}
-                <div className="bg-white p-4 border border-slate-200 shadow-sm break-inside-avoid">
-                  <h3 className="text-base font-black text-slate-900 mb-3 tracking-tight">Top 10 Costos por Vehículo</h3>
+                <div className="bg-surface p-4 border border-border shadow-sm break-inside-avoid">
+                  <h3 className="text-base font-black text-text mb-3 tracking-tight">Top 10 Costos por Vehículo</h3>
                   <div className="h-[220px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={costByVehicleData} layout="vertical" margin={{ top: 5, right: 20, left: 30, bottom: 5 }}>
@@ -920,8 +920,8 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
                 </div>
 
                 {/* GRAPH 2: GASTO DIARIO DE COMBUSTIBLE */}
-                <div className="bg-white p-4 border border-slate-200 shadow-sm break-inside-avoid">
-                  <h3 className="text-base font-black text-slate-900 mb-3 tracking-tight">Gasto Diario de Combustible</h3>
+                <div className="bg-surface p-4 border border-border shadow-sm break-inside-avoid">
+                  <h3 className="text-base font-black text-text mb-3 tracking-tight">Gasto Diario de Combustible</h3>
                   <div className="h-[220px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart data={efficiencyData}>
@@ -939,28 +939,28 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
               {/* DETAILED FINANCIAL TABLE FOR PRINT - COMPACT */}
               <div className="space-y-4 print-section">
                 <div className="break-inside-avoid">
-                  <div className="bg-slate-900 text-white px-3 py-1 text-[8pt] font-black uppercase tracking-widest mb-3 inline-block rounded-sm">
+                  <div className="bg-secondary text-white px-3 py-1 text-[8pt] font-black uppercase tracking-widest mb-3 inline-block rounded-sm">
                     Desglose Financiero Detallado
                   </div>
                   <table className="w-full text-left border-collapse data-table">
                     <thead>
-                      <tr className="bg-slate-100 text-slate-600">
-                        <SortableTh label="Vehículo" sortKey="vehicle" sortConfig={costByVehicleSortConfig} onSort={requestCostByVehicleSort} className="p-2 text-[8px] font-black uppercase border border-slate-200" />
-                        <SortableTh label="Combustible" sortKey="fuel" sortConfig={costByVehicleSortConfig} onSort={requestCostByVehicleSort} align="right" className="p-2 text-[8px] font-black uppercase text-right border border-slate-200" />
-                        <SortableTh label="Mantenimiento" sortKey="maintenance" sortConfig={costByVehicleSortConfig} onSort={requestCostByVehicleSort} align="right" className="p-2 text-[8px] font-black uppercase text-right border border-slate-200" />
-                        <SortableTh label="Total" sortKey="total" sortConfig={costByVehicleSortConfig} onSort={requestCostByVehicleSort} align="right" className="p-2 text-[8px] font-black uppercase text-right border border-slate-200" />
+                      <tr className="bg-surface-subtle text-text-muted">
+                        <SortableTh label="Vehículo" sortKey="vehicle" sortConfig={costByVehicleSortConfig} onSort={requestCostByVehicleSort} className="p-2 text-[8px] font-black uppercase border border-border" />
+                        <SortableTh label="Combustible" sortKey="fuel" sortConfig={costByVehicleSortConfig} onSort={requestCostByVehicleSort} align="right" className="p-2 text-[8px] font-black uppercase text-right border border-border" />
+                        <SortableTh label="Mantenimiento" sortKey="maintenance" sortConfig={costByVehicleSortConfig} onSort={requestCostByVehicleSort} align="right" className="p-2 text-[8px] font-black uppercase text-right border border-border" />
+                        <SortableTh label="Total" sortKey="total" sortConfig={costByVehicleSortConfig} onSort={requestCostByVehicleSort} align="right" className="p-2 text-[8px] font-black uppercase text-right border border-border" />
                       </tr>
                     </thead>
                     <tbody>
                       {sortedCostByVehicleData.map((item, idx) => (
-                        <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
-                          <td className="p-2 text-[9px] font-bold border border-slate-200 print-truncate max-w-[100px]">{item.name}</td>
-                          <td className="p-2 text-[9px] text-right font-mono border border-slate-200">${item.fuel.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
-                          <td className="p-2 text-[9px] text-right font-mono border border-slate-200">${item.maintenance.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
-                          <td className="p-2 text-[9px] text-right font-black font-mono border border-slate-200 bg-slate-50">${(item.fuel + item.maintenance).toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+                        <tr key={idx} className={idx % 2 === 0 ? 'bg-surface' : 'bg-surface-subtle/50'}>
+                          <td className="p-2 text-[9px] font-bold border border-border print-truncate max-w-[100px]">{item.name}</td>
+                          <td className="p-2 text-[9px] text-right font-mono border border-border">${item.fuel.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+                          <td className="p-2 text-[9px] text-right font-mono border border-border">${item.maintenance.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+                          <td className="p-2 text-[9px] text-right font-black font-mono border border-border bg-surface-subtle">${(item.fuel + item.maintenance).toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
                         </tr>
                       ))}
-                      <tr className="bg-slate-900 text-white font-black">
+                      <tr className="bg-secondary text-white font-black">
                         <td className="p-2 text-[8px] font-black uppercase border border-slate-700">Total General</td>
                         <td className="p-2 text-[8px] text-right font-mono border border-slate-700">${kpis.totalFuelCost.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
                         <td className="p-2 text-[8px] text-right font-mono border border-slate-700">${kpis.totalMaintenanceCost.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
@@ -972,8 +972,8 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
               </div>
 
               {/* FOOTER - FORMAL DOCUMENT */}
-              <div className="hidden print:block print-footer mt-6 pt-3 border-t border-slate-200">
-                <div className="flex justify-between items-center text-[8pt] text-slate-400">
+              <div className="hidden print:block print-footer mt-6 pt-3 border-t border-border">
+                <div className="flex justify-between items-center text-[8pt] text-text-muted">
                   <div>
                     <p className="font-bold">Sistema de Gestión de Parque Vehicular</p>
                     <p>DIF Municipal La Paz B.C.S.</p>

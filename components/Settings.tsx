@@ -320,82 +320,82 @@ function getSheetData(ss, name) {
     <div className="space-y-8 animate-in fade-in duration-500 pb-20">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-black text-slate-900 tracking-tight">Configuración del Sistema</h2>
-          <p className="text-slate-500 text-sm font-medium mt-1">Ajustes del conector en la nube y seguridad de accesos</p>
+          <h2 className="text-2xl font-black text-text tracking-tight">Configuración del Sistema</h2>
+          <p className="text-text-muted text-sm font-medium mt-1">Ajustes del conector en la nube y seguridad de accesos</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
         <div className="xl:col-span-8 space-y-8">
-          <section className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="p-6 border-b border-slate-100 bg-slate-50 flex items-center gap-3">
+          <section className="bg-surface rounded-2xl border border-border shadow-sm overflow-hidden">
+            <div className="p-6 border-b border-border bg-surface-subtle flex items-center gap-3">
               <span className="material-symbols-outlined text-primary filled">palette</span>
-              <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Identidad Visual</h3>
+              <h3 className="text-sm font-black text-text uppercase tracking-widest">Identidad Visual</h3>
             </div>
             <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Nombre de la App</label>
-                <input className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm font-bold outline-none focus:border-primary transition-all" value={localSettings['APP_NAME'] || ''} onChange={e => handleUpdate('APP_NAME', e.target.value)} />
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Nombre de la App</label>
+                <input className="w-full bg-surface-subtle border border-border rounded-xl p-4 text-sm font-bold outline-none focus:border-primary transition-all" value={localSettings['APP_NAME'] || ''} onChange={e => handleUpdate('APP_NAME', e.target.value)} />
               </div>
               
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Jefe de Recursos Materiales</label>
-                <input className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm font-bold outline-none focus:border-primary transition-all" value={localSettings['HEAD_OF_MATERIAL_RESOURCES'] || ''} onChange={e => handleUpdate('HEAD_OF_MATERIAL_RESOURCES', e.target.value)} placeholder="Nombre del jefe de recursos materiales" />
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Jefe de Recursos Materiales</label>
+                <input className="w-full bg-surface-subtle border border-border rounded-xl p-4 text-sm font-bold outline-none focus:border-primary transition-all" value={localSettings['HEAD_OF_MATERIAL_RESOURCES'] || ''} onChange={e => handleUpdate('HEAD_OF_MATERIAL_RESOURCES', e.target.value)} placeholder="Nombre del jefe de recursos materiales" />
               </div>
               
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Director General</label>
-                <input className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm font-bold outline-none focus:border-primary transition-all" value={localSettings['INSTITUTION_HEAD_NAME'] || ''} onChange={e => handleUpdate('INSTITUTION_HEAD_NAME', e.target.value)} placeholder="Nombre del director general" />
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Director General</label>
+                <input className="w-full bg-surface-subtle border border-border rounded-xl p-4 text-sm font-bold outline-none focus:border-primary transition-all" value={localSettings['INSTITUTION_HEAD_NAME'] || ''} onChange={e => handleUpdate('INSTITUTION_HEAD_NAME', e.target.value)} placeholder="Nombre del director general" />
               </div>
               
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Encargado de Parque Vehicular</label>
-                <input className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm font-bold outline-none focus:border-primary transition-all" value={localSettings['VEHICLE_MANAGER_NAME'] || ''} onChange={e => handleUpdate('VEHICLE_MANAGER_NAME', e.target.value)} placeholder="Nombre del encargado de parque vehicular" />
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Encargado de Parque Vehicular</label>
+                <input className="w-full bg-surface-subtle border border-border rounded-xl p-4 text-sm font-bold outline-none focus:border-primary transition-all" value={localSettings['VEHICLE_MANAGER_NAME'] || ''} onChange={e => handleUpdate('VEHICLE_MANAGER_NAME', e.target.value)} placeholder="Nombre del encargado de parque vehicular" />
               </div>
               
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Cargo del Director General</label>
-                <input className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm font-bold outline-none focus:border-primary transition-all" value={localSettings['INSTITUTION_HEAD_POS'] || ''} onChange={e => handleUpdate('INSTITUTION_HEAD_POS', e.target.value)} placeholder="Cargo del director general" />
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Cargo del Director General</label>
+                <input className="w-full bg-surface-subtle border border-border rounded-xl p-4 text-sm font-bold outline-none focus:border-primary transition-all" value={localSettings['INSTITUTION_HEAD_POS'] || ''} onChange={e => handleUpdate('INSTITUTION_HEAD_POS', e.target.value)} placeholder="Cargo del director general" />
               </div>
               
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Cargo del Encargado de Parque Vehicular</label>
-                <input className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm font-bold outline-none focus:border-primary transition-all" value={localSettings['VEHICLE_MANAGER_POS'] || ''} onChange={e => handleUpdate('VEHICLE_MANAGER_POS', e.target.value)} placeholder="Cargo del encargado de parque vehicular" />
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Cargo del Encargado de Parque Vehicular</label>
+                <input className="w-full bg-surface-subtle border border-border rounded-xl p-4 text-sm font-bold outline-none focus:border-primary transition-all" value={localSettings['VEHICLE_MANAGER_POS'] || ''} onChange={e => handleUpdate('VEHICLE_MANAGER_POS', e.target.value)} placeholder="Cargo del encargado de parque vehicular" />
               </div>
               
                <div className="space-y-3">
-                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Cargo del Jefe de Recursos Materiales</label>
-                 <input className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm font-bold outline-none focus:border-primary transition-all" value={localSettings['HEAD_OF_MATERIAL_RESOURCES_POS'] || ''} onChange={e => handleUpdate('HEAD_OF_MATERIAL_RESOURCES_POS', e.target.value)} placeholder="Cargo del jefe de recursos materiales" />
+                 <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Cargo del Jefe de Recursos Materiales</label>
+                 <input className="w-full bg-surface-subtle border border-border rounded-xl p-4 text-sm font-bold outline-none focus:border-primary transition-all" value={localSettings['HEAD_OF_MATERIAL_RESOURCES_POS'] || ''} onChange={e => handleUpdate('HEAD_OF_MATERIAL_RESOURCES_POS', e.target.value)} placeholder="Cargo del jefe de recursos materiales" />
                </div>
                
                <div className="space-y-3">
-                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Coordinador Administrativo</label>
-                 <input className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm font-bold outline-none focus:border-primary transition-all" value={localSettings['ADMINISTRATIVE_COORDINATOR_NAME'] || ''} onChange={e => handleUpdate('ADMINISTRATIVE_COORDINATOR_NAME', e.target.value)} placeholder="Nombre del coordinador administrativo" />
+                 <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Coordinador Administrativo</label>
+                 <input className="w-full bg-surface-subtle border border-border rounded-xl p-4 text-sm font-bold outline-none focus:border-primary transition-all" value={localSettings['ADMINISTRATIVE_COORDINATOR_NAME'] || ''} onChange={e => handleUpdate('ADMINISTRATIVE_COORDINATOR_NAME', e.target.value)} placeholder="Nombre del coordinador administrativo" />
                </div>
                
                <div className="space-y-3">
-                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Cargo del Coordinador Administrativo</label>
-                 <input className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm font-bold outline-none focus:border-primary transition-all" value={localSettings['ADMINISTRATIVE_COORDINATOR_POS'] || ''} onChange={e => handleUpdate('ADMINISTRATIVE_COORDINATOR_POS', e.target.value)} placeholder="Cargo del coordinador administrativo" />
+                 <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Cargo del Coordinador Administrativo</label>
+                 <input className="w-full bg-surface-subtle border border-border rounded-xl p-4 text-sm font-bold outline-none focus:border-primary transition-all" value={localSettings['ADMINISTRATIVE_COORDINATOR_POS'] || ''} onChange={e => handleUpdate('ADMINISTRATIVE_COORDINATOR_POS', e.target.value)} placeholder="Cargo del coordinador administrativo" />
                </div>
             </div>
           </section>
 
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="p-6 border-b border-slate-100 bg-[#0f172a] text-white flex items-center justify-between">
+          <div className="bg-surface rounded-2xl border border-border shadow-sm overflow-hidden">
+            <div className="p-6 border-b border-border bg-[#0f172a] text-white flex items-center justify-between">
               <h3 className="text-sm font-black flex items-center gap-2 uppercase tracking-widest"><span className="material-symbols-outlined text-primary">bolt</span>Configuración Google Sheets</h3>
             </div>
             <div className="p-8 space-y-8">
               <div className="space-y-3">
-                <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-1">URL /exec</label>
-                <div className={`flex rounded-xl border transition-all ${saveStatus === 'error' ? 'border-rose-500 ring-4 ring-rose-50' : 'border-slate-200 focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/10'}`}>
-                  <input className="flex-1 text-slate-900 text-sm font-bold p-4 bg-transparent outline-none" placeholder="https://script.google.com/macros/s/.../exec" value={serviceUrl} onChange={(e) => { setServiceUrl(e.target.value); if (urlError) setUrlError(''); }} />
+                <label className="text-[11px] font-black text-text-muted uppercase tracking-widest ml-1">URL /exec</label>
+                <div className={`flex rounded-xl border transition-all ${saveStatus === 'error' ? 'border-rose-500 ring-4 ring-rose-50' : 'border-border focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/10'}`}>
+                  <input className="flex-1 text-text text-sm font-bold p-4 bg-transparent outline-none" placeholder="https://script.google.com/macros/s/.../exec" value={serviceUrl} onChange={(e) => { setServiceUrl(e.target.value); if (urlError) setUrlError(''); }} />
                   <button onClick={handleSaveUrl} disabled={saveStatus === 'saving'} className="bg-primary text-white px-6 font-black text-[10px] uppercase tracking-widest hover:opacity-90 transition-all">{saveStatus === 'saving' ? 'Guardando...' : 'Actualizar'}</button>
                 </div>
                 {urlError && (
                   <p className="text-xs font-bold text-rose-600">{urlError}</p>
                 )}
               </div>
-              <div className="bg-slate-900 rounded-xl p-6 shadow-inner">
+              <div className="bg-secondary rounded-xl p-6 shadow-inner">
                 <div className="flex items-center justify-between mb-4">
                   <h4 className="text-[10pt] font-black text-primary uppercase tracking-[0.2em] mb-4">Apps Script (v9.1 - Catálogo de tipos de incidencia)</h4>
                   <button onClick={async () => {
@@ -409,35 +409,35 @@ function getSheetData(ss, name) {
                     }
                   }} className="bg-slate-800 hover:bg-slate-700 text-white text-[10px] font-black py-1.5 px-3 rounded-lg transition-colors border border-slate-700">{copyStatus === 'copied' ? 'COPIADO' : copyStatus === 'error' ? 'ERROR AL COPIAR' : 'COPIAR CÓDIGO'}</button>
                 </div>
-                <pre className="text-[10px] font-mono text-slate-400 overflow-x-auto max-h-48 custom-scrollbar leading-relaxed">{appsScriptCode}</pre>
+                <pre className="text-[10px] font-mono text-text-muted overflow-x-auto max-h-48 custom-scrollbar leading-relaxed">{appsScriptCode}</pre>
               </div>
             </div>
           </div>
         </div>
 
         <div className="xl:col-span-4 space-y-6">
-          <div className="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm sticky top-28">
+          <div className="bg-surface p-8 rounded-[2rem] border border-border shadow-sm sticky top-28">
             <h4 className="text-[10pt] font-black text-primary uppercase tracking-[0.2em] mb-4">Novedades v8.9</h4>
             <ul className="space-y-6">
               <li className="flex gap-4">
                 <span className="size-6 bg-primary text-white text-[10px] font-black flex items-center justify-center rounded-full shrink-0">1</span>
-                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Folio Consecutivo en Incidencias</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Cada incidencia ahora recibe un folio INC-0001, INC-0002... que se muestra en las tarjetas y en el PDF.</p></div>
+                <div><p className="text-[11px] font-black text-text uppercase tracking-widest mb-1">Folio Consecutivo en Incidencias</p><p className="text-[11px] font-bold text-text-muted leading-relaxed">Cada incidencia ahora recibe un folio INC-0001, INC-0002... que se muestra en las tarjetas y en el PDF.</p></div>
               </li>
               <li className="flex gap-4">
                 <span className="size-6 bg-primary text-white text-[10px] font-black flex items-center justify-center rounded-full shrink-0">2</span>
-                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Firma del Coordinador Administrativo</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Si configuras el nombre del Coordinador Administrativo, aparecerá como tercer firmante en el reporte PDF de incidencias.</p></div>
+                <div><p className="text-[11px] font-black text-text uppercase tracking-widest mb-1">Firma del Coordinador Administrativo</p><p className="text-[11px] font-bold text-text-muted leading-relaxed">Si configuras el nombre del Coordinador Administrativo, aparecerá como tercer firmante en el reporte PDF de incidencias.</p></div>
               </li>
               <li className="flex gap-4">
                 <span className="size-6 bg-primary text-white text-[10px] font-black flex items-center justify-center rounded-full shrink-0">3</span>
-                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Nuevo catálogo de incidencias</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">La hoja "TiposIncidencia" alimenta el dropdown y permite guardar nuevos tipos desde el formulario.</p></div>
+                <div><p className="text-[11px] font-black text-text uppercase tracking-widest mb-1">Nuevo catálogo de incidencias</p><p className="text-[11px] font-bold text-text-muted leading-relaxed">La hoja "TiposIncidencia" alimenta el dropdown y permite guardar nuevos tipos desde el formulario.</p></div>
               </li>
               <li className="flex gap-4">
                 <span className="size-6 bg-primary text-white text-[10px] font-black flex items-center justify-center rounded-full shrink-0">4</span>
-                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Adquisiciones de Combustible</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Nueva hoja "CombustibleAdquisiciones" para vales y compras por código QR.</p></div>
+                <div><p className="text-[11px] font-black text-text uppercase tracking-widest mb-1">Adquisiciones de Combustible</p><p className="text-[11px] font-bold text-text-muted leading-relaxed">Nueva hoja "CombustibleAdquisiciones" para vales y compras por código QR.</p></div>
               </li>
               <li className="flex gap-4">
                 <span className="size-6 bg-primary text-white text-[10px] font-black flex items-center justify-center rounded-full shrink-0">5</span>
-                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Importante</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Debes actualizar el código en Apps Script para crear o reconocer las nuevas columnas.</p></div>
+                <div><p className="text-[11px] font-black text-text uppercase tracking-widest mb-1">Importante</p><p className="text-[11px] font-bold text-text-muted leading-relaxed">Debes actualizar el código en Apps Script para crear o reconocer las nuevas columnas.</p></div>
               </li>
             </ul>
           </div>

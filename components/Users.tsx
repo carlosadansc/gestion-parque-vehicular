@@ -30,8 +30,8 @@ const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUs
         <div className="size-28 bg-rose-50 rounded-[3rem] flex items-center justify-center text-rose-500 shadow-xl shadow-rose-500/10 mb-8 border border-rose-100">
           <span className="material-symbols-outlined ui-icon text-6xl filled">admin_panel_settings</span>
         </div>
-        <h2 className="text-3xl font-black text-slate-900 tracking-tight mb-3">Módulo Restringido</h2>
-        <p className="text-slate-400 font-bold uppercase text-[10px] tracking-[0.3em] max-w-xs leading-relaxed">
+        <h2 className="text-3xl font-black text-text tracking-tight mb-3">Módulo Restringido</h2>
+        <p className="text-text-muted font-bold uppercase text-[10px] tracking-[0.3em] max-w-xs leading-relaxed">
           Se requiere nivel de acceso <span className="text-rose-500">Administrador</span> para gestionar las cuentas del sistema.
         </p>
       </div>
@@ -138,8 +138,8 @@ const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUs
       </div>
 
       <div className="card overflow-hidden">
-        <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between gap-2">
-          <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Cuentas activas en Google Sheets</p>
+        <div className="px-4 py-3 border-b border-border bg-surface-subtle/50 flex items-center justify-between gap-2">
+          <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">Cuentas activas en Google Sheets</p>
           <span className="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-[11px] font-medium">
             {users.length} Usuarios
           </span>
@@ -158,17 +158,17 @@ const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUs
             </thead>
             <tbody className="divide-y divide-slate-100">
               {sortedUsers.map((user) => (
-                <tr key={user.id} className="hover:bg-slate-50/80 transition-all group">
+                <tr key={user.id} className="hover:bg-surface-subtle/80 transition-all group">
                   <td>
                     <div className="flex items-center gap-4">
-                      <div className="size-12 rounded-2xl bg-slate-100 flex items-center justify-center font-black text-slate-400 group-hover:bg-primary group-hover:text-white transition-all shadow-sm">
+                      <div className="size-12 rounded-2xl bg-surface-subtle flex items-center justify-center font-black text-text-muted group-hover:bg-primary group-hover:text-white transition-all shadow-sm">
                         {user.name[0].toUpperCase()}
                       </div>
                       <div>
-                        <p className="font-black text-slate-900 text-[15px] tracking-tight">{user.name}</p>
+                        <p className="font-black text-text text-[15px] tracking-tight">{user.name}</p>
                         <div className="flex items-center gap-1.5 mt-0.5">
                            <span className={`size-2 rounded-full ${user.status === 'active' ? 'bg-green-500' : 'bg-slate-300'}`}></span>
-                           <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                           <span className="text-[9px] font-black text-text-muted uppercase tracking-widest">
                              {user.status === 'active' ? 'ACTIVO' : 'INACTIVO'}
                            </span>
                         </div>
@@ -182,13 +182,13 @@ const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUs
                     <span className={`inline-flex px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest border ${
                       user.role === 'admin' ? 'bg-indigo-50 text-indigo-700 border-indigo-100' :
                       user.role === 'operator' ? 'bg-blue-50 text-blue-700 border-blue-100' :
-                      'bg-slate-100 text-slate-500 border-slate-200'
+                      'bg-surface-subtle text-text-muted border-border'
                     }`}>
                       {getRoleLabel(user.role)}
                     </span>
                   </td>
                   <td>
-                    <p className="text-xs font-bold text-slate-400">
+                    <p className="text-xs font-bold text-text-muted">
                       {user.lastLogin ? new Date(user.lastLogin).toLocaleString('es-ES') : 'Nunca ha ingresado'}
                     </p>
                   </td>
@@ -208,24 +208,24 @@ const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUs
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4 animate-in fade-in duration-300">
-          <div className="bg-white rounded-[3rem] w-full max-w-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-500">
-            <div className="px-12 py-10 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-secondary/60 backdrop-blur-md p-4 animate-in fade-in duration-300">
+          <div className="bg-surface rounded-[3rem] w-full max-w-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-500">
+            <div className="px-12 py-10 border-b border-border bg-surface-subtle/50 flex justify-between items-center">
               <div>
-                <h3 className="text-2xl font-black text-slate-900 tracking-tighter">{editingUser ? 'Actualizar Cuenta' : 'Registrar Nuevo Acceso'}</h3>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Configuración de credenciales de seguridad</p>
+                <h3 className="text-2xl font-black text-text tracking-tighter">{editingUser ? 'Actualizar Cuenta' : 'Registrar Nuevo Acceso'}</h3>
+                <p className="text-[10px] font-black text-text-muted uppercase tracking-widest mt-1">Configuración de credenciales de seguridad</p>
               </div>
-              <button onClick={() => { if (!isSaving) { setFormError(''); setShowModal(false); } }} className="size-12 rounded-full hover:bg-white hover:shadow-md transition-all flex items-center justify-center text-slate-400" aria-label="Cerrar">
+              <button onClick={() => { if (!isSaving) { setFormError(''); setShowModal(false); } }} className="size-12 rounded-full hover:bg-surface hover:shadow-md transition-all flex items-center justify-center text-text-muted" aria-label="Cerrar">
                 <span className="material-symbols-outlined ui-icon text-2xl" aria-hidden="true">close</span>
               </button>
             </div>
             
             <form onSubmit={handleSubmit} autoComplete="off" className="p-12 space-y-8">
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Nombre Completo (Personal)</label>
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Nombre Completo (Personal)</label>
                 <input 
                   required disabled={isSaving} 
-                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-bold text-sm outline-none focus:ring-4 focus:ring-primary/10 transition-all uppercase" 
+                  className="w-full bg-surface-subtle border border-border rounded-2xl px-6 py-4 font-bold text-sm outline-none focus:ring-4 focus:ring-primary/10 transition-all uppercase" 
                   placeholder="NOMBRE DEL EMPLEADO"
                   value={formData.name} 
                   onChange={e => handleInputChange('name', e.target.value)} 
@@ -234,22 +234,22 @@ const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUs
 
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">ID Usuario (@)</label>
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">ID Usuario (@)</label>
                   <input 
                     required disabled={isSaving} 
-                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-bold text-sm outline-none focus:ring-4 focus:ring-primary/10 transition-all uppercase" 
+                    className="w-full bg-surface-subtle border border-border rounded-2xl px-6 py-4 font-bold text-sm outline-none focus:ring-4 focus:ring-primary/10 transition-all uppercase" 
                     placeholder="USUARIO"
                     value={formData.username} 
                     onChange={e => handleInputChange('username', e.target.value)} 
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Contraseña</label>
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Contraseña</label>
                   <input 
                     type="password"
                     disabled={isSaving} 
                     autoComplete="new-password"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-bold text-sm outline-none focus:ring-4 focus:ring-primary/10 transition-all" 
+                    className="w-full bg-surface-subtle border border-border rounded-2xl px-6 py-4 font-bold text-sm outline-none focus:ring-4 focus:ring-primary/10 transition-all" 
                     placeholder={editingUser ? "Omitir para no cambiar" : "••••••••"}
                     value={formData.password} 
                     onChange={e => handleInputChange('password', e.target.value)} 
@@ -259,10 +259,10 @@ const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUs
 
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Permisos</label>
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Permisos</label>
                   <select 
                     required disabled={isSaving} 
-                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-bold text-sm outline-none appearance-none" 
+                    className="w-full bg-surface-subtle border border-border rounded-2xl px-6 py-4 font-bold text-sm outline-none appearance-none" 
                     value={formData.role} 
                     onChange={e => handleInputChange('role', e.target.value)}
                   >
@@ -272,10 +272,10 @@ const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUs
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Estado</label>
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Estado</label>
                   <select 
                     required disabled={isSaving} 
-                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-bold text-sm outline-none appearance-none" 
+                    className="w-full bg-surface-subtle border border-border rounded-2xl px-6 py-4 font-bold text-sm outline-none appearance-none" 
                     value={formData.status} 
                     onChange={e => handleInputChange('status', e.target.value)}
                   >
@@ -295,7 +295,7 @@ const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUs
                 <button 
                   type="button" disabled={isSaving} 
                   onClick={() => { setFormError(''); setShowModal(false); }} 
-                  className="flex-1 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-all"
+                  className="flex-1 py-4 text-[11px] font-black uppercase tracking-widest text-text-muted hover:text-text-muted transition-all"
                 >
                   Cancelar
                 </button>

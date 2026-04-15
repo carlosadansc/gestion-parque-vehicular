@@ -429,8 +429,8 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
       </div>
 
       <div className="card flex flex-col no-print">
-        <div className="px-8 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-          <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Últimas Revisiones</h3>
+        <div className="px-8 py-5 border-b border-border flex items-center justify-between bg-surface-subtle/50">
+          <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider">Últimas Revisiones</h3>
         </div>
         
         <div className="overflow-x-auto">
@@ -448,31 +448,31 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
               {sortedInspections.map((insp) => {
                 const vehicle = vehicles.find(v => v.id === insp.vehicleId);
                 return (
-                  <tr key={insp.id} className="hover:bg-slate-50/50 transition-colors group">
+                  <tr key={insp.id} className="hover:bg-surface-subtle/50 transition-colors group">
                     <td className="px-8 py-5">
-                      <p className="font-black text-slate-900 text-sm">{formatDateTime(insp.date)}</p>
+                      <p className="font-black text-text text-sm">{formatDateTime(insp.date)}</p>
                     </td>
                     <td className="px-8 py-5">
-                      <p className="font-black text-slate-900 text-sm">{vehicle?.plate || insp.vehicleId}</p>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase">{vehicle?.model || 'Desconocido'}</p>
+                      <p className="font-black text-text text-sm">{vehicle?.plate || insp.vehicleId}</p>
+                      <p className="text-[10px] text-text-muted font-bold uppercase">{vehicle?.model || 'Desconocido'}</p>
                     </td>
                     <td className="px-8 py-5">
-                      <p className="text-xs font-bold text-slate-700 uppercase">{insp.inspectorName}</p>
+                      <p className="text-xs font-bold text-text uppercase">{insp.inspectorName}</p>
                     </td>
                     <td className="px-8 py-5 text-right">
-                      <p className="text-[11px] font-black text-slate-500">{(Number(insp.odometer) || 0).toLocaleString()} km</p>
+                      <p className="text-[11px] font-black text-text-muted">{(Number(insp.odometer) || 0).toLocaleString()} km</p>
                     </td>
                      <td className="px-8 py-5 text-center">
                         <div className="flex items-center justify-center gap-2">
                           <button 
                             onClick={() => handlePrintRequest(insp)}
-                            className="size-9 bg-white border border-slate-200 text-slate-400 hover:text-primary hover:border-blue-200 rounded-xl transition-all flex items-center justify-center shadow-sm"
+                            className="size-9 bg-surface border border-border text-text-muted hover:text-primary hover:border-blue-200 rounded-xl transition-all flex items-center justify-center shadow-sm"
                           >
                             <span className="material-symbols-outlined text-lg">description</span>
                           </button>
                           <button 
                             onClick={() => handleEdit(insp)}
-                            className="size-9 bg-white border border-slate-200 text-slate-400 hover:text-primary hover:border-blue-200 rounded-xl transition-all flex items-center justify-center shadow-sm"
+                            className="size-9 bg-surface border border-border text-text-muted hover:text-primary hover:border-blue-200 rounded-xl transition-all flex items-center justify-center shadow-sm"
                           >
                             <span className="material-symbols-outlined text-lg">edit</span>
                           </button>
@@ -495,18 +495,18 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-300 no-print">
-          <div className="bg-white rounded-xl w-full max-w-4xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-300">
-             <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-secondary/60 backdrop-blur-sm p-4 animate-in fade-in duration-300 no-print">
+          <div className="bg-surface rounded-xl w-full max-w-4xl border border-border overflow-hidden animate-in zoom-in-95 duration-300">
+             <div className="px-6 py-4 border-b border-border flex justify-between items-center bg-surface-subtle">
                <div className="flex items-center gap-3">
                  <div className="size-10 bg-amber-100 rounded-lg flex items-center justify-center">
                    <span className="material-symbols-outlined text-amber-600" aria-hidden="true">health_and_safety</span>
                  </div>
                  <div>
-                   <h3 className="text-lg font-black text-slate-900">{editingInspection ? 'Editar Revisión' : 'Registrar Revisión'}</h3>
+                   <h3 className="text-lg font-black text-text">{editingInspection ? 'Editar Revisión' : 'Registrar Revisión'}</h3>
                  </div>
                </div>
-               <button onClick={() => !isSaving && setShowModal(false)} disabled={isSaving} className="size-9 rounded-md hover:bg-white transition-all flex items-center justify-center text-slate-400 disabled:opacity-50" aria-label="Cerrar modal">
+               <button onClick={() => !isSaving && setShowModal(false)} disabled={isSaving} className="size-9 rounded-md hover:bg-surface transition-all flex items-center justify-center text-text-muted disabled:opacity-50" aria-label="Cerrar modal">
                  <span className="material-symbols-outlined" aria-hidden="true">close</span>
                </button>
              </div>
@@ -514,16 +514,16 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
             <form onSubmit={handleSubmit} autoComplete="off" className="p-6 space-y-6 overflow-y-auto max-h-[80vh] custom-scrollbar">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Fecha y Hora</label>
-                  <input required disabled={isSaving} type="datetime-local" className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} />
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Fecha y Hora</label>
+                  <input required disabled={isSaving} type="datetime-local" className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Inspector</label>
-                  <input required disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all uppercase" placeholder="Nombre completo" value={formData.inspectorName} onChange={e => setFormData({...formData, inspectorName: e.target.value})} />
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Inspector</label>
+                  <input required disabled={isSaving} className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all uppercase" placeholder="Nombre completo" value={formData.inspectorName} onChange={e => setFormData({...formData, inspectorName: e.target.value})} />
                 </div>
                 <div className="space-y-2">
-                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Vehículo</label>
-                   <select required disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all" value={formData.vehicleId} onChange={e => setFormData({...formData, vehicleId: e.target.value})}>
+                   <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Vehículo</label>
+                   <select required disabled={isSaving} className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all" value={formData.vehicleId} onChange={e => setFormData({...formData, vehicleId: e.target.value})}>
                    <option value="">Seleccionar...</option>
                    {vehicles.map(v => (<option key={v.id} value={v.id}>{v.plate} - {v.model}</option>))}
                   </select>
@@ -531,11 +531,11 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
               </div>
               
               <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Odómetro Actual (Km)</label>
-                  <input type="number" required disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all" placeholder="0" value={formData.odometer} onChange={e => setFormData({...formData, odometer: e.target.value})} />
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Odómetro Actual (Km)</label>
+                  <input type="number" required disabled={isSaving} className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all" placeholder="0" value={formData.odometer} onChange={e => setFormData({...formData, odometer: e.target.value})} />
               </div>
 
-              <div className="space-y-4 pt-4 border-t border-slate-100">
+              <div className="space-y-4 pt-4 border-t border-border">
                 <h4 className="text-xs font-black text-primary uppercase tracking-wider">Puntos de Revisión (16 Puntos)</h4>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <ConditionSelect label="1. Motor" value={formData.engineStatus} onChange={v => setFormData({...formData, engineStatus: v})} disabled={isSaving} />
@@ -558,8 +558,8 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Observaciones Generales</label>
-                <textarea rows={3} disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all resize-none" placeholder="Detalles adicionales..." value={formData.observations} onChange={e => setFormData({...formData, observations: e.target.value})} />
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Observaciones Generales</label>
+                <textarea rows={3} disabled={isSaving} className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all resize-none" placeholder="Detalles adicionales..." value={formData.observations} onChange={e => setFormData({...formData, observations: e.target.value})} />
               </div>
 
               {formError && (
@@ -569,7 +569,7 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
               )}
 
               <div className="pt-4 flex gap-3">
-                <button type="button" disabled={isSaving} onClick={() => setShowModal(false)} className="flex-1 py-3 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-100 rounded-md transition-all disabled:opacity-50">Cancelar</button>
+                <button type="button" disabled={isSaving} onClick={() => setShowModal(false)} className="flex-1 py-3 text-[11px] font-black uppercase tracking-widest text-text-muted hover:bg-surface-subtle rounded-md transition-all disabled:opacity-50">Cancelar</button>
                 <button type="submit" disabled={isSaving} className="flex-[2] py-3 bg-primary text-white text-[11px] font-black uppercase tracking-widest rounded-md hover:opacity-90 transition-all disabled:opacity-80 flex items-center justify-center gap-2">
                   {isSaving ? <><span className="material-symbols-outlined animate-spin">sync</span> Guardando...</> : (editingInspection ? 'Guardar Cambios' : 'Registrar Revisión')}
                 </button>
@@ -580,22 +580,22 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
       )}
 
       {showDailyRevisionModal && (
-        <div className="fixed inset-0 z-[140] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-300 no-print">
-          <div className="bg-white rounded-[2rem] w-full max-w-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+        <div className="fixed inset-0 z-[140] flex items-center justify-center bg-secondary/60 backdrop-blur-sm p-4 animate-in fade-in duration-300 no-print">
+          <div className="bg-surface rounded-[2rem] w-full max-w-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="px-8 py-6 border-b border-border flex justify-between items-center bg-surface-subtle/50">
               <div>
-                <h3 className="text-xl font-black text-slate-900 tracking-tight">Bitacora de Revision</h3>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Selecciona unidad y fecha</p>
+                <h3 className="text-xl font-black text-text tracking-tight">Bitacora de Revision</h3>
+                <p className="text-xs font-bold text-text-muted uppercase tracking-widest mt-1">Selecciona unidad y fecha</p>
               </div>
-              <button onClick={() => setShowDailyRevisionModal(false)} className="size-10 rounded-full hover:bg-white hover:shadow-md transition-all flex items-center justify-center text-slate-400">
+              <button onClick={() => setShowDailyRevisionModal(false)} className="size-10 rounded-full hover:bg-surface hover:shadow-md transition-all flex items-center justify-center text-text-muted">
                 <span className="material-symbols-outlined ui-icon">close</span>
               </button>
             </div>
             <div className="p-8 space-y-6">
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Vehiculo</label>
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Vehiculo</label>
                 <select
-                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none focus:ring-4 focus:ring-blue-500/10"
+                  className="w-full bg-surface-subtle border border-border rounded-2xl px-5 py-3.5 text-sm font-bold outline-none focus:ring-4 focus:ring-blue-500/10"
                   value={dailyRevisionVehicleId}
                   onChange={e => setDailyRevisionVehicleId(e.target.value)}
                 >
@@ -606,22 +606,22 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
                 </select>
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Fecha de revisión</label>
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Fecha de revisión</label>
                 <input
                   type="date"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none focus:ring-4 focus:ring-blue-500/10"
+                  className="w-full bg-surface-subtle border border-border rounded-2xl px-5 py-3.5 text-sm font-bold outline-none focus:ring-4 focus:ring-blue-500/10"
                   value={dailyRevisionDateInput}
                   onChange={e => setDailyRevisionDateInput(e.target.value)}
                 />
               </div>
               {dailyRevisionVehicle && (
-                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center gap-4">
-                  <div className="size-12 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm">
+                <div className="bg-surface-subtle p-4 rounded-2xl border border-border flex items-center gap-4">
+                  <div className="size-12 rounded-xl bg-surface flex items-center justify-center text-primary shadow-sm">
                     <span className="material-symbols-outlined ui-icon">directions_car</span>
                   </div>
                   <div>
-                    <p className="font-bold text-slate-900 leading-tight">{dailyRevisionVehicle.model}</p>
-                    <p className="text-xs font-mono text-slate-500">{dailyRevisionVehicle.plate} {dailyRevisionVehicle.economicNumber ? `- No. Eco: ${dailyRevisionVehicle.economicNumber}` : ''}</p>
+                    <p className="font-bold text-text leading-tight">{dailyRevisionVehicle.model}</p>
+                    <p className="text-xs font-mono text-text-muted">{dailyRevisionVehicle.plate} {dailyRevisionVehicle.economicNumber ? `- No. Eco: ${dailyRevisionVehicle.economicNumber}` : ''}</p>
                   </div>
                 </div>
               )}
@@ -629,7 +629,7 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
                 <button
                   type="button"
                   onClick={() => setShowDailyRevisionModal(false)}
-                  className="flex-1 py-3.5 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-50 rounded-2xl transition-all"
+                  className="flex-1 py-3.5 text-[11px] font-black uppercase tracking-widest text-text-muted hover:bg-surface-subtle rounded-2xl transition-all"
                 >
                   Cancelar
                 </button>
@@ -650,17 +650,17 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
 
       {/* VISTA PREVIA DE BITACORA DE REVISION MECANICA */}
       {showDailyRevisionPrint && dailyRevisionRows.length > 0 && (
-        <div id="daily-revision-preview-screen" className="fixed inset-0 z-[210] bg-white flex flex-col overflow-y-auto">
-          <div className="sticky top-0 bg-slate-900 p-4 flex justify-between items-center text-white shadow-lg no-print">
+        <div id="daily-revision-preview-screen" className="fixed inset-0 z-[210] bg-surface flex flex-col overflow-y-auto">
+          <div className="sticky top-0 bg-secondary p-4 flex justify-between items-center text-white shadow-lg no-print">
             <div className="flex items-center gap-4">
-              <button onClick={() => setShowDailyRevisionPrint(false)} className="size-10 flex items-center justify-center hover:bg-white/10 rounded-full transition-colors">
+              <button onClick={() => setShowDailyRevisionPrint(false)} className="size-10 flex items-center justify-center hover:bg-surface/10 rounded-full transition-colors">
                 <span className="material-symbols-outlined ui-icon">arrow_back</span>
               </button>
               <div>
                 <p className="text-sm font-black uppercase tracking-widest">Bitacora de Revision Mecanica</p>
-                <p className="text-xs text-slate-400">{dailyRevisionDateLabel}</p>
+                <p className="text-xs text-text-muted">{dailyRevisionDateLabel}</p>
                 {dailyRevisionVehicle && (
-                  <p className="text-xs text-slate-400">{dailyRevisionVehicle.plate} - {dailyRevisionVehicle.model}</p>
+                  <p className="text-xs text-text-muted">{dailyRevisionVehicle.plate} - {dailyRevisionVehicle.model}</p>
                 )}
               </div>
             </div>
@@ -716,10 +716,10 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
             }
           `}</style>
 
-          <div id="daily-revision-preview-content" className="flex-1 bg-slate-100 p-6 flex justify-center overflow-auto">
+          <div id="daily-revision-preview-content" className="flex-1 bg-surface-subtle p-6 flex justify-center overflow-auto">
             <div id="daily-revision-printable" className="w-full">
               {dailyRevisionRows.map((row, idx) => (
-                <div key={`${row.vehicle.id}-${idx}`} className="daily-revision-sheet mx-auto bg-white shadow-2xl relative text-slate-900" style={{ width: '27.94cm', minHeight: '21.59cm', padding: '0.8cm 1cm', boxSizing: 'border-box' }}>
+                <div key={`${row.vehicle.id}-${idx}`} className="daily-revision-sheet mx-auto bg-surface shadow-2xl relative text-text" style={{ width: '27.94cm', minHeight: '21.59cm', padding: '0.8cm 1cm', boxSizing: 'border-box' }}>
                   <div className="flex justify-between items-center border-b-2 border-slate-900 pb-3 mb-3">
                     <div className="flex items-center gap-4">
                       <img
@@ -733,50 +733,50 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
                         }}
                       />
                       <div className="flex flex-col">
-                        <span className="text-[10pt] font-black text-slate-900 uppercase leading-none tracking-tight">{settingsMap['INSTITUTION_NAME'] || 'SISTEMA DIF MUNICIPAL LA PAZ'}</span>
-                        <span className="text-[7pt] font-bold uppercase text-slate-400 mt-1 tracking-[0.2em]">Parque Vehicular - Revision Mecanica Diaria</span>
+                        <span className="text-[10pt] font-black text-text uppercase leading-none tracking-tight">{settingsMap['INSTITUTION_NAME'] || 'SISTEMA DIF MUNICIPAL LA PAZ'}</span>
+                        <span className="text-[7pt] font-bold uppercase text-text-muted mt-1 tracking-[0.2em]">Parque Vehicular - Revision Mecanica Diaria</span>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="inline-block bg-slate-900 text-white px-3 py-1 font-black text-[8pt] uppercase tracking-widest rounded-sm mb-1">
+                      <div className="inline-block bg-secondary text-white px-3 py-1 font-black text-[8pt] uppercase tracking-widest rounded-sm mb-1">
                         Bitacora de Revision Mecanica
                       </div>
-                      <p className="text-[8pt] text-slate-400 font-bold">Fecha: {dailyRevisionDateShort}</p>
+                      <p className="text-[8pt] text-text-muted font-bold">Fecha: {dailyRevisionDateShort}</p>
                       <p className="text-[7pt] text-slate-300 font-bold">Hoja {idx + 1} de {dailyRevisionRows.length}</p>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-12 gap-x-3 gap-y-1.5 text-[8pt] mb-3">
                     <div className="flex items-center gap-1 col-span-6">
-                      <span className="font-black text-slate-500 uppercase whitespace-nowrap">Unidad:</span>
-                      <span className="font-bold text-slate-900 border-b border-slate-300 flex-1 pb-0.5">{[row.vehicle.brand, row.vehicle.model, row.vehicle.year].filter(Boolean).join(' ') || row.vehicle.model || '---'}</span>
+                      <span className="font-black text-text-muted uppercase whitespace-nowrap">Unidad:</span>
+                      <span className="font-bold text-text border-b border-slate-300 flex-1 pb-0.5">{[row.vehicle.brand, row.vehicle.model, row.vehicle.year].filter(Boolean).join(' ') || row.vehicle.model || '---'}</span>
                     </div>
                     <div className="flex items-center gap-1 col-span-6">
-                      <span className="font-black text-slate-500 uppercase whitespace-nowrap">Fecha de revisión:</span>
-                      <span className="font-bold text-slate-900 border-b border-slate-300 flex-1 pb-0.5">{dailyRevisionDateLabel}</span>
+                      <span className="font-black text-text-muted uppercase whitespace-nowrap">Fecha de revisión:</span>
+                      <span className="font-bold text-text border-b border-slate-300 flex-1 pb-0.5">{dailyRevisionDateLabel}</span>
                     </div>
                     <div className="flex items-center gap-1 col-span-6">
-                      <span className="font-black text-slate-500 uppercase whitespace-nowrap">Odometro:</span>
-                      <span className="font-bold text-slate-900 border-b border-slate-300 flex-1 pb-0.5">&nbsp;</span>
-                      <span className="font-black text-slate-500 uppercase whitespace-nowrap">km</span>
+                      <span className="font-black text-text-muted uppercase whitespace-nowrap">Odometro:</span>
+                      <span className="font-bold text-text border-b border-slate-300 flex-1 pb-0.5">&nbsp;</span>
+                      <span className="font-black text-text-muted uppercase whitespace-nowrap">km</span>
                     </div>
                     <div className="flex items-center gap-2 col-span-6">
-                      <span className="font-black text-slate-500 uppercase whitespace-nowrap">Nivel Combustible:</span>
+                      <span className="font-black text-text-muted uppercase whitespace-nowrap">Nivel Combustible:</span>
                       <div className="relative flex-1 min-w-[200px]">
                         <div className="absolute left-3 right-3 top-[7px] h-[2px] bg-slate-300"></div>
                         <div className="relative flex items-start justify-between">
                           {['E', '1/4', '1/2', '3/4', 'F'].map((level) => (
                             <div key={level} className="flex flex-col items-center">
-                              <span className="size-4 rounded-full border-2 border-slate-500 bg-white"></span>
-                              <span className="text-[7pt] font-black text-slate-700 mt-0.5">{level}</span>
+                              <span className="size-4 rounded-full border-2 border-slate-500 bg-surface"></span>
+                              <span className="text-[7pt] font-black text-text mt-0.5">{level}</span>
                             </div>
                           ))}
                         </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-1 col-span-12">
-                      <span className="font-black text-slate-500 uppercase whitespace-nowrap">Nombre de quien reviso:</span>
-                      <span className="font-bold text-slate-900 border-b border-slate-300 flex-1 pb-1">&nbsp;</span>
+                      <span className="font-black text-text-muted uppercase whitespace-nowrap">Nombre de quien reviso:</span>
+                      <span className="font-bold text-text border-b border-slate-300 flex-1 pb-1">&nbsp;</span>
                     </div>
                   </div>
 
@@ -794,13 +794,13 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
                       </thead>
                       <tbody>
                         {DAILY_REVISION_RUBRICS.map((rubro, rubroIndex) => (
-                          <tr key={`${row.vehicle.id}-${rubroIndex}`} className={`${rubroIndex % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'} border-t border-slate-300`}>
-                            <td className="py-1.5 px-1 border-r border-slate-200 text-center text-[7pt] font-black text-slate-700">{rubroIndex + 1}</td>
-                            <td className="py-1.5 px-1 border-r border-slate-200 text-[7pt] font-bold text-slate-700">{rubro}</td>
-                            <td className="py-1.5 px-1 border-r border-slate-200 text-center text-[7pt] text-slate-500">[ ]</td>
-                            <td className="py-1.5 px-1 border-r border-slate-200 text-center text-[7pt] text-slate-500">[ ]</td>
-                            <td className="py-1.5 px-1 border-r border-slate-200 text-center text-[7pt] text-slate-500">[ ]</td>
-                            <td className="py-1.5 px-1 text-center text-[7pt] text-slate-500">[ ]</td>
+                          <tr key={`${row.vehicle.id}-${rubroIndex}`} className={`${rubroIndex % 2 === 0 ? 'bg-surface' : 'bg-surface-subtle/50'} border-t border-slate-300`}>
+                            <td className="py-1.5 px-1 border-r border-border text-center text-[7pt] font-black text-text">{rubroIndex + 1}</td>
+                            <td className="py-1.5 px-1 border-r border-border text-[7pt] font-bold text-text">{rubro}</td>
+                            <td className="py-1.5 px-1 border-r border-border text-center text-[7pt] text-text-muted">[ ]</td>
+                            <td className="py-1.5 px-1 border-r border-border text-center text-[7pt] text-text-muted">[ ]</td>
+                            <td className="py-1.5 px-1 border-r border-border text-center text-[7pt] text-text-muted">[ ]</td>
+                            <td className="py-1.5 px-1 text-center text-[7pt] text-text-muted">[ ]</td>
                           </tr>
                         ))}
                       </tbody>
@@ -808,12 +808,12 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
                   </div>
 
                   <div className="mt-3 border border-slate-300 rounded p-2">
-                    <p className="text-[7pt] font-black text-slate-500 uppercase mb-1">Observaciones Generales</p>
-                    <div className="h-14 border border-slate-200 rounded bg-white">&nbsp;</div>
+                    <p className="text-[7pt] font-black text-text-muted uppercase mb-1">Observaciones Generales</p>
+                    <div className="h-14 border border-border rounded bg-surface">&nbsp;</div>
                   </div>
 
                   <div className="mt-2 flex justify-between items-end">
-                    <div className="text-[7pt] text-slate-400">
+                    <div className="text-[7pt] text-text-muted">
                       <p className="font-bold">* Formato diario: una hoja por vehículo.</p>
                       <p className="font-bold">* Reportar de inmediato cualquier condición marcada como MAL o MUY MAL.</p>
                     </div>
@@ -828,15 +828,15 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
 
       {/* VISTA DE IMPRESIÓN */}
       {showPrintPreview && selectedInspection && (
-        <div className="fixed inset-0 z-[200] bg-white flex flex-col overflow-y-auto">
-           <div className="sticky top-0 bg-slate-900 p-4 flex justify-between items-center text-white shadow-lg no-print">
-              <button onClick={() => setShowPrintPreview(false)} className="bg-white/10 px-4 py-2 rounded-lg font-bold text-xs hover:bg-white/20 transition-all">Cerrar</button>
+        <div className="fixed inset-0 z-[200] bg-surface flex flex-col overflow-y-auto">
+           <div className="sticky top-0 bg-secondary p-4 flex justify-between items-center text-white shadow-lg no-print">
+              <button onClick={() => setShowPrintPreview(false)} className="bg-surface/10 px-4 py-2 rounded-lg font-bold text-xs hover:bg-surface/20 transition-all">Cerrar</button>
               <button onClick={() => window.print()} className="bg-primary px-8 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-blue-500/20">
                 <span className="material-symbols-outlined text-lg">picture_as_pdf</span> Imprimir Reporte PDF
               </button>
             </div>
-            <div className="flex-1 bg-slate-100 p-10 flex justify-center">
-               <div id="inspection-printable" className="bg-white w-[21.59cm] min-h-[27.94cm] p-[1.5cm] shadow-2xl relative text-slate-900">
+            <div className="flex-1 bg-surface-subtle p-10 flex justify-center">
+               <div id="inspection-printable" className="bg-surface w-[21.59cm] min-h-[27.94cm] p-[1.5cm] shadow-2xl relative text-text">
                 
                 {/* Header Institucional - Formal Design */}
                 <div className="print-header flex justify-between items-center mb-8 border-b-4 border-slate-900 pb-6">
@@ -852,47 +852,47 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
                       }}
                     />
                     <div className="flex flex-col">
-                      <span className="text-lg font-black text-slate-900 uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
-                      <span className="text-lg font-black text-slate-900 uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>
-                      <span className="text-[8pt] font-bold uppercase text-slate-400 mt-2 tracking-[0.2em]">Coordinación de Parque Vehicular • Inspecciones Técnicas</span>
+                      <span className="text-lg font-black text-text uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
+                      <span className="text-lg font-black text-text uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>
+                      <span className="text-[8pt] font-bold uppercase text-text-muted mt-2 tracking-[0.2em]">Coordinación de Parque Vehicular • Inspecciones Técnicas</span>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="inline-block bg-slate-900 text-white px-4 py-1.5 font-black text-[10pt] uppercase tracking-widest rounded-sm mb-2">
+                    <div className="inline-block bg-secondary text-white px-4 py-1.5 font-black text-[10pt] uppercase tracking-widest rounded-sm mb-2">
                         Reporte de Revisión
                     </div>
-                    <p className="text-xs font-bold text-slate-600">FOLIO: <span className="font-black text-slate-900 text-lg ml-1">{(selectedInspection.id || '---').slice(-6).toUpperCase()}</span></p>
-                    <p className="text-[9pt] text-slate-400 font-bold mt-1">Fecha: {new Date(selectedInspection.date).toLocaleDateString('es-ES', {year: 'numeric', month: 'long', day: 'numeric'})}</p>
+                    <p className="text-xs font-bold text-text-muted">FOLIO: <span className="font-black text-text text-lg ml-1">{(selectedInspection.id || '---').slice(-6).toUpperCase()}</span></p>
+                    <p className="text-[9pt] text-text-muted font-bold mt-1">Fecha: {new Date(selectedInspection.date).toLocaleDateString('es-ES', {year: 'numeric', month: 'long', day: 'numeric'})}</p>
                     <p className="text-[8pt] text-slate-300 font-bold mt-1">Generado: {new Date().toLocaleDateString('es-ES', {day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'})}</p>
                   </div>
                 </div>
 
                 {/* Datos Principales - Formal Table */}
                 <div className="mb-8 mt-6 break-inside-avoid">
-                    <div className="bg-slate-900 text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">
+                    <div className="bg-secondary text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">
                         Datos del Vehículo
                     </div>
                     <table className="w-full border-collapse">
                         <tbody>
-                            <tr className="border-b border-slate-200">
-                                <td className="py-3 text-[9pt] font-black text-slate-400 uppercase w-48">Placas</td>
-                                <td className="py-3 text-[16pt] font-black text-slate-900 tracking-widest">{vehicles.find(v => v.id === selectedInspection.vehicleId)?.plate || '---'}</td>
+                            <tr className="border-b border-border">
+                                <td className="py-3 text-[9pt] font-black text-text-muted uppercase w-48">Placas</td>
+                                <td className="py-3 text-[16pt] font-black text-text tracking-widest">{vehicles.find(v => v.id === selectedInspection.vehicleId)?.plate || '---'}</td>
                             </tr>
-                            <tr className="border-b border-slate-200">
-                                <td className="py-3 text-[9pt] font-black text-slate-400 uppercase">Unidad / Modelo</td>
-                                <td className="py-3 text-[11pt] font-bold text-slate-900 overflow-wrap" style={{maxWidth: '300px', wordWrap: 'break-word'}}>{vehicles.find(v => v.id === selectedInspection.vehicleId)?.model || '---'}</td>
+                            <tr className="border-b border-border">
+                                <td className="py-3 text-[9pt] font-black text-text-muted uppercase">Unidad / Modelo</td>
+                                <td className="py-3 text-[11pt] font-bold text-text overflow-wrap" style={{maxWidth: '300px', wordWrap: 'break-word'}}>{vehicles.find(v => v.id === selectedInspection.vehicleId)?.model || '---'}</td>
                             </tr>
-                            <tr className="border-b border-slate-200">
-                                <td className="py-3 text-[9pt] font-black text-slate-400 uppercase">Inspector Responsable</td>
-                                <td className="py-3 text-[11pt] font-bold text-slate-900">{selectedInspection.inspectorName}</td>
+                            <tr className="border-b border-border">
+                                <td className="py-3 text-[9pt] font-black text-text-muted uppercase">Inspector Responsable</td>
+                                <td className="py-3 text-[11pt] font-bold text-text">{selectedInspection.inspectorName}</td>
                             </tr>
-                            <tr className="border-b border-slate-200">
-                                <td className="py-3 text-[9pt] font-black text-slate-400 uppercase">Kilometraje Registrado</td>
-                                <td className="py-3 text-[11pt] font-bold text-slate-900">{(Number(selectedInspection.odometer) || 0).toLocaleString()} km</td>
+                            <tr className="border-b border-border">
+                                <td className="py-3 text-[9pt] font-black text-text-muted uppercase">Kilometraje Registrado</td>
+                                <td className="py-3 text-[11pt] font-bold text-text">{(Number(selectedInspection.odometer) || 0).toLocaleString()} km</td>
                             </tr>
                             <tr>
-                                <td className="py-3 text-[9pt] font-black text-slate-400 uppercase">Hora de Inspección</td>
-                                <td className="py-3 text-[11pt] font-bold text-slate-900">{new Date(selectedInspection.date).toLocaleTimeString('es-ES', {hour: '2-digit', minute: '2-digit', hour12: true})}</td>
+                                <td className="py-3 text-[9pt] font-black text-text-muted uppercase">Hora de Inspección</td>
+                                <td className="py-3 text-[11pt] font-bold text-text">{new Date(selectedInspection.date).toLocaleTimeString('es-ES', {hour: '2-digit', minute: '2-digit', hour12: true})}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -900,10 +900,10 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
 
                 {/* Checklist Diagnostico - Formal Grid */}
                 <div className="mb-8 break-inside-avoid">
-                   <div className="bg-slate-900 text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">
+                   <div className="bg-secondary text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">
                        Evaluación de Componentes (16 Puntos)
                    </div>
-                   <div className="checklist-grid grid grid-cols-4 gap-y-4 gap-x-6 border-2 border-slate-100 p-6 rounded-xl">
+                   <div className="checklist-grid grid grid-cols-4 gap-y-4 gap-x-6 border-2 border-border p-6 rounded-xl">
                       <ConditionPrint label="1. Motor" status={selectedInspection.engineStatus} />
                       <ConditionPrint label="2. Transmisión" status={selectedInspection.transmissionStatus} />
                       <ConditionPrint label="3. Clutch" status={selectedInspection.clutchStatus} />
@@ -928,11 +928,11 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
 
                  {/* Observations - With Overflow Handling */}
                  <div className="space-y-2 mb-12 break-inside-avoid">
-                    <div className="bg-slate-900 text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">
+                    <div className="bg-secondary text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">
                         Observaciones del Inspector
                     </div>
-                    <div className="observations-box bg-slate-50 p-6 rounded-lg min-h-[80px] border border-slate-100">
-                      <p className="text-[10pt] text-slate-700 leading-relaxed italic" style={{wordWrap: 'break-word', overflowWrap: 'break-word'}}>
+                    <div className="observations-box bg-surface-subtle p-6 rounded-lg min-h-[80px] border border-border">
+                      <p className="text-[10pt] text-text leading-relaxed italic" style={{wordWrap: 'break-word', overflowWrap: 'break-word'}}>
                          {selectedInspection.observations || 'Sin observaciones particulares registradas durante la inspección.'}
                       </p>
                     </div>
@@ -942,17 +942,17 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
                   <div className="signature-section break-inside-avoid">
                       <div className="grid grid-cols-2 gap-24 text-center">
                         <div className="signature-line border-t-2 border-slate-900 pt-4">
-                            <p className="text-[9pt] font-black uppercase text-slate-900">{selectedInspection.inspectorName}</p>
-                            <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Inspector Técnico</p>
-                            <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Revisión</p>
+                            <p className="text-[9pt] font-black uppercase text-text">{selectedInspection.inspectorName}</p>
+                            <p className="text-[7pt] font-bold text-text-muted mt-1 uppercase tracking-widest">Inspector Técnico</p>
+                            <p className="text-[7pt] font-bold text-text-muted uppercase tracking-widest">Revisión</p>
                         </div>
                         <div className="signature-line border-t-2 border-slate-900 pt-4">
-                            <p className="text-[9pt] font-black uppercase text-slate-900">{managerName}</p>
-                            <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">{managerPos}</p>
-                            <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Validación</p>
+                            <p className="text-[9pt] font-black uppercase text-text">{managerName}</p>
+                            <p className="text-[7pt] font-bold text-text-muted mt-1 uppercase tracking-widest">{managerPos}</p>
+                            <p className="text-[7pt] font-bold text-text-muted uppercase tracking-widest">Validación</p>
                         </div>
                       </div>
-                      <div className="text-center mt-8 border-t border-slate-200 pt-2">
+                      <div className="text-center mt-8 border-t border-border pt-2">
                         <p className="text-[7pt] font-black text-slate-300 uppercase tracking-[0.3em]">Sistema de Gestion de Parque Vehicular • DIF Municipal La Paz</p>
                     </div>
                   </div>
@@ -977,11 +977,11 @@ const ConditionSelect = ({ label, value, onChange, disabled }: any) => (
   <div className="space-y-2">
     <div className="flex items-center gap-2 ml-1">
        <div className={`size-2 rounded-full ${getStatusColorClass(value)}`}></div>
-       <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{label}</label>
+       <label className="text-[9px] font-black text-text-muted uppercase tracking-widest">{label}</label>
     </div>
     <select 
       disabled={disabled}
-      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:ring-2 focus:ring-primary/10 transition-all" 
+      className="w-full bg-surface-subtle border border-border rounded-xl px-3 py-2 text-xs font-bold outline-none focus:ring-2 focus:ring-primary/10 transition-all" 
       value={value} 
       onChange={e => onChange(e.target.value)}
     >
@@ -997,10 +997,10 @@ const ConditionPrint = ({ label, status }: any) => {
   const colorClass = getStatusColorClass(status);
   return (
     <div className="flex items-center gap-3">
-       <div className={`size-3 rounded-full border border-slate-200 ${colorClass} print:border-0`} style={{printColorAdjust: 'exact', WebkitPrintColorAdjust: 'exact'}}></div>
+       <div className={`size-3 rounded-full border border-border ${colorClass} print:border-0`} style={{printColorAdjust: 'exact', WebkitPrintColorAdjust: 'exact'}}></div>
        <div className="flex flex-col">
-         <span className="text-[7pt] font-black uppercase text-slate-400 leading-none">{label}</span>
-         <span className="text-[8pt] font-bold text-slate-900 uppercase leading-tight">{status || 'BIEN'}</span>
+         <span className="text-[7pt] font-black uppercase text-text-muted leading-none">{label}</span>
+         <span className="text-[8pt] font-bold text-text uppercase leading-tight">{status || 'BIEN'}</span>
        </div>
     </div>
   );

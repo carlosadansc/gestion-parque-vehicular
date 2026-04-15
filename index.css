@@ -1,16 +1,17 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #135bec;
-  --color-secondary: #0f172a;
+  --color-primary: var(--primary-color);
+  --color-secondary: var(--color-secondary);
+  --color-secondary-invert: var(--secondary-color-invert);
   --color-success: #10b981;
   --color-warning: #f59e0b;
   --color-danger: #ef4444;
-  --color-surface: #ffffff;
-  --color-surface-subtle: #f8fafc;
-  --color-border: #e2e8f0;
-  --color-text: #0f172a;
-  --color-text-muted: #64748b;
+  --color-surface: var(--color-surface);
+  --color-surface-subtle: var(--color-surface-subtle);
+  --color-border: var(--color-border);
+  --color-text: var(--color-text);
+  --color-text-muted: var(--color-text-muted);
   
   --radius-sm: 0.25rem;
   --radius-md: 0.5rem;
@@ -32,9 +33,27 @@
 }
 
 :root {
-  --primary-color: #135bec;
+  --primary-color: #64748b; /* Neutral slate */
   --secondary-color: #0f172a;
+  --secondary-color-invert: #f8fafc;
+  --color-surface: #ffffff;
+  --color-surface-subtle: #f8fafc;
+  --color-border: #e2e8f0;
+  --color-text: #0f172a;
+  --color-text-muted: #64748b;
   color-scheme: light;
+}
+
+.dark {
+  --primary-color: #cbd5e1; /* Lighter neutral for dark mode */
+  --secondary-color: #0f172a; /* Actually, we can just keep the sidebar dark, or adapt it. Let's make it adapt */
+  --secondary-color-invert: #f8fafc;
+  --color-surface: #0f172a;
+  --color-surface-subtle: #1e293b;
+  --color-border: #334155;
+  --color-text: #f8fafc;
+  --color-text-muted: #94a3b8;
+  color-scheme: dark;
 }
 
 * {
@@ -45,8 +64,9 @@ body {
   font-family: 'Inter', 'Plus Jakarta Sans', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f8fafc;
+  background-color: var(--color-surface-subtle);
   color: var(--color-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .material-symbols-outlined { font-variation-settings: "FILL" 0, "wght" 500, "GRAD" 0, "opsz" 24; }
@@ -81,12 +101,12 @@ body {
 
 /* Card minimal */
 .card { 
-  background-color: white; 
+  background-color: var(--color-surface); 
   border-radius: var(--radius-lg); 
   border: 1px solid var(--color-border);
 }
 .card-hover:hover { 
-  border-color: #cbd5e1; 
+  border-color: var(--color-text-muted); 
 }
 .card-header { 
   padding: 1rem 1.25rem; 
@@ -101,13 +121,13 @@ body {
 
 /* Card variants */
 .card-lg { 
-  background-color: white; 
+  background-color: var(--color-surface); 
   border-radius: 1.5rem; 
   border: 1px solid var(--color-border);
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 }
 .card-xl { 
-  background-color: white; 
+  background-color: var(--color-surface); 
   border-radius: 1.5rem; 
   border: 1px solid var(--color-border);
   box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
@@ -115,7 +135,7 @@ body {
 
 /* Modal */
 .modal { 
-  background-color: white; 
+  background-color: var(--color-surface); 
   border-radius: 1.5rem; 
   border: 1px solid var(--color-border);
   overflow: hidden;
@@ -123,7 +143,7 @@ body {
 
 /* Table */
 .table-card { 
-  background-color: white; 
+  background-color: var(--color-surface); 
   border-radius: var(--radius-lg); 
   border: 1px solid var(--color-border);
   overflow: hidden;
@@ -197,10 +217,10 @@ body {
   color: white; 
 }
 .btn-primary:hover { 
-  background-color: #0f4ce8;
+  opacity: 0.9;
 }
 .btn-secondary { 
-  background-color: white; 
+  background-color: var(--color-surface); 
   color: var(--color-text); 
   border: 1px solid var(--color-border); 
 }
@@ -224,19 +244,19 @@ body {
   padding: 0; 
   border-radius: var(--radius-md); 
   border: 1px solid var(--color-border);
-  background-color: white;
+  background-color: var(--color-surface);
   color: var(--color-text-muted);
   transition: all 0.2s ease;
 }
 .btn-icon:hover { 
-  background-color: #f8fafc; 
-  border-color: #cbd5e1;
+  background-color: var(--color-surface-subtle); 
+  border-color: var(--color-text-muted);
   color: var(--color-text);
 }
 .btn-icon:focus-visible {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(19, 91, 236, 0.12);
+  box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.12);
 }
 .btn-icon .material-symbols-outlined {
   font-size: 1.1rem;
@@ -248,6 +268,12 @@ body {
 .btn-icon-success:hover { color: #065f46; border-color: #6ee7b7; background-color: #d1fae5; }
 .btn-icon-danger { color: #b91c1c; border-color: #fecaca; background-color: #fff1f2; }
 .btn-icon-danger:hover { color: #991b1b; border-color: #fda4af; background-color: #ffe4e6; }
+.dark .btn-icon-primary { color: #bfdbfe; border-color: #1d4ed8; background-color: #1e3a8a; }
+.dark .btn-icon-primary:hover { border-color: #93c5fd; background-color: #1e40af; }
+.dark .btn-icon-success { color: #a7f3d0; border-color: #047857; background-color: #064e3b; }
+.dark .btn-icon-success:hover { border-color: #6ee7b7; background-color: #065f46; }
+.dark .btn-icon-danger { color: #fecaca; border-color: #b91c1c; background-color: #7f1d1d; }
+.dark .btn-icon-danger:hover { border-color: #fda4af; background-color: #991b1b; }
 
 /* Form Elements minimal */
 .form-label { 
@@ -260,7 +286,7 @@ body {
 .form-input { 
   width: 100%; 
   padding: 0.75rem 1rem; 
-  background-color: white; 
+  background-color: var(--color-surface); 
   border: 1px solid var(--color-border); 
   border-radius: var(--radius-md); 
   font-size: 0.875rem; 
@@ -268,16 +294,16 @@ body {
   color: var(--color-text); 
   transition: all 0.2s ease; 
 }
-.form-input::placeholder { color: #94a3b8; }
+.form-input::placeholder { color: var(--color-text-muted); opacity: 0.5; }
 .form-input:focus { 
   border-color: var(--primary-color); 
-  box-shadow: 0 0 0 3px rgba(19, 91, 236, 0.08); 
+  box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.08); 
   outline: none; 
 }
 .form-select { 
   width: 100%; 
   padding: 0.75rem 1rem; 
-  background-color: white; 
+  background-color: var(--color-surface); 
   border: 1px solid var(--color-border); 
   border-radius: var(--radius-md); 
   font-size: 0.875rem; 
@@ -288,13 +314,13 @@ body {
 }
 .form-select:focus { 
   border-color: var(--primary-color); 
-  box-shadow: 0 0 0 3px rgba(19, 91, 236, 0.08); 
+  box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.08); 
   outline: none; 
 }
 .form-textarea { 
   width: 100%; 
   padding: 0.75rem 1rem; 
-  background-color: white; 
+  background-color: var(--color-surface); 
   border: 1px solid var(--color-border); 
   border-radius: var(--radius-md); 
   font-size: 0.875rem; 
@@ -304,16 +330,16 @@ body {
   min-height: 100px; 
   transition: all 0.2s ease; 
 }
-.form-textarea::placeholder { color: #94a3b8; }
+.form-textarea::placeholder { color: var(--color-text-muted); opacity: 0.5; }
 .form-textarea:focus { 
   border-color: var(--primary-color); 
-  box-shadow: 0 0 0 3px rgba(19, 91, 236, 0.08); 
+  box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.08); 
   outline: none; 
 }
 
 /* Table minimal */
 .table-container { 
-  background-color: white; 
+  background-color: var(--color-surface); 
   border-radius: var(--radius-lg); 
   border: 1px solid var(--color-border); 
   overflow: hidden; 
@@ -344,7 +370,7 @@ body {
   transition: background-color 0.15s ease; 
 }
 .table-professional tbody tr:nth-child(even) {
-  background-color: #fcfdff;
+  background-color: var(--color-surface);
 }
 .table-professional tbody tr:hover { 
   background-color: var(--color-surface-subtle); 
@@ -469,15 +495,6 @@ body {
 *:focus-visible { 
   outline: 2px solid var(--primary-color); 
   outline-offset: 2px; 
-}
-
-/* Input focus states */
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible {
-  outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(19, 91, 236, 0.08);
 }
 
 /* Touch */

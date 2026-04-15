@@ -305,11 +305,11 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, incidentTypes = [], se
         <SummaryCard label="Robos" value={incidents.filter(i => i.type === 'theft').length.toString()} icon="local_police" color="purple" />
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden no-print">
-        <div className="px-6 py-4 border-b border-slate-100 bg-slate-50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+      <div className="bg-surface border border-border rounded-2xl shadow-sm overflow-hidden no-print">
+        <div className="px-6 py-4 border-b border-border bg-surface-subtle flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <div>
-            <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">Listado de incidencias</h2>
-            <p className="text-xs font-bold text-slate-400 mt-1">
+            <h2 className="text-sm font-black text-text uppercase tracking-widest">Listado de incidencias</h2>
+            <p className="text-xs font-bold text-text-muted mt-1">
               Mostrando {filteredIncidents.length} de {incidents.length} reportes.
             </p>
           </div>
@@ -317,15 +317,15 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, incidentTypes = [], se
 
         <div className="overflow-x-auto">
           <table className="w-full min-w-[1080px] text-left">
-            <thead className="bg-white border-b border-slate-200">
+            <thead className="bg-surface border-b border-border">
               <tr>
-                <SortableTh label="Folio" sortKey="folio" sortConfig={sortConfig} onSort={requestSort} className="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400" />
-                <SortableTh label="Fecha" sortKey="date" sortConfig={sortConfig} onSort={requestSort} className="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400" />
-                <SortableTh label="Tipo" sortKey="type" sortConfig={sortConfig} onSort={requestSort} className="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400" />
-                <SortableTh label="Incidencia" sortKey="title" sortConfig={sortConfig} onSort={requestSort} className="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400" />
-                <SortableTh label="Conductor" sortKey="driver" sortConfig={sortConfig} onSort={requestSort} className="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400" />
-                <SortableTh label="Estado" sortKey="status" sortConfig={sortConfig} onSort={requestSort} className="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400" />
-                <th className="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">Acciones</th>
+                <SortableTh label="Folio" sortKey="folio" sortConfig={sortConfig} onSort={requestSort} className="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-text-muted" />
+                <SortableTh label="Fecha" sortKey="date" sortConfig={sortConfig} onSort={requestSort} className="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-text-muted" />
+                <SortableTh label="Tipo" sortKey="type" sortConfig={sortConfig} onSort={requestSort} className="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-text-muted" />
+                <SortableTh label="Incidencia" sortKey="title" sortConfig={sortConfig} onSort={requestSort} className="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-text-muted" />
+                <SortableTh label="Conductor" sortKey="driver" sortConfig={sortConfig} onSort={requestSort} className="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-text-muted" />
+                <SortableTh label="Estado" sortKey="status" sortConfig={sortConfig} onSort={requestSort} className="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-text-muted" />
+                <th className="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-text-muted text-right">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -338,29 +338,29 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, incidentTypes = [], se
                   : incident.id;
 
                 return (
-                  <tr key={incident.id} className="hover:bg-slate-50/80 transition-colors">
+                  <tr key={incident.id} className="hover:bg-surface-subtle/80 transition-colors">
                     <td className="px-5 py-4 align-top">
-                      <p className="text-xs font-black text-slate-900 tracking-tight whitespace-nowrap">{folio}</p>
+                      <p className="text-xs font-black text-text tracking-tight whitespace-nowrap">{folio}</p>
                     </td>
                     <td className="px-5 py-4 align-top">
-                      <p className="text-xs font-bold text-slate-600 whitespace-nowrap">
+                      <p className="text-xs font-bold text-text-muted whitespace-nowrap">
                         {new Date(incident.date).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}
                       </p>
                     </td>
                     <td className="px-5 py-4 align-top">
-                      <span className={`inline-flex items-center rounded-md border px-2.5 py-1 text-[10px] font-black uppercase tracking-widest whitespace-nowrap ${typeBadgeClasses[incident.type] || 'bg-slate-100 text-slate-700 border-slate-200'}`}>
+                      <span className={`inline-flex items-center rounded-md border px-2.5 py-1 text-[10px] font-black uppercase tracking-widest whitespace-nowrap ${typeBadgeClasses[incident.type] || 'bg-surface-subtle text-text border-border'}`}>
                         {typeLabel}
                       </span>
                     </td>
                     <td className="px-5 py-4 align-top max-w-[320px]">
-                      <p className="text-sm font-black text-slate-900 leading-snug">{incident.title}</p>
-                      <p className="text-xs font-medium text-slate-500 leading-relaxed mt-1 line-clamp-2">{incident.description}</p>
+                      <p className="text-sm font-black text-text leading-snug">{incident.title}</p>
+                      <p className="text-xs font-medium text-text-muted leading-relaxed mt-1 line-clamp-2">{incident.description}</p>
                     </td>
                     <td className="px-5 py-4 align-top">
-                      <p className="text-xs font-bold text-slate-700 max-w-[180px] truncate">{driver?.name || incident.driverId || '---'}</p>
+                      <p className="text-xs font-bold text-text max-w-[180px] truncate">{driver?.name || incident.driverId || '---'}</p>
                     </td>
                     <td className="px-5 py-4 align-top">
-                      <span className={`inline-flex items-center rounded-md border px-2.5 py-1 text-[10px] font-black uppercase tracking-widest whitespace-nowrap ${statusBadgeClasses[incident.status] || 'bg-slate-100 text-slate-700 border-slate-200'}`}>
+                      <span className={`inline-flex items-center rounded-md border px-2.5 py-1 text-[10px] font-black uppercase tracking-widest whitespace-nowrap ${statusBadgeClasses[incident.status] || 'bg-surface-subtle text-text border-border'}`}>
                         {statusLabel}
                       </span>
                     </td>
@@ -391,7 +391,7 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, incidentTypes = [], se
                 <tr>
                   <td colSpan={7} className="px-6 py-14 text-center">
                     <span className="material-symbols-outlined text-slate-300 text-5xl mb-3">find_in_page</span>
-                    <p className="text-sm font-black text-slate-500 uppercase tracking-widest">No hay incidencias para mostrar</p>
+                    <p className="text-sm font-black text-text-muted uppercase tracking-widest">No hay incidencias para mostrar</p>
                   </td>
                 </tr>
               )}
@@ -401,21 +401,21 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, incidentTypes = [], se
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-300 no-print">
-          <div className="bg-white rounded-xl w-full max-w-xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-secondary/60 backdrop-blur-sm p-4 animate-in fade-in duration-300 no-print">
+          <div className="bg-surface rounded-xl w-full max-w-xl border border-border overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="px-6 py-4 border-b border-border flex justify-between items-center bg-surface-subtle">
               <div className="flex items-center gap-3">
                 <div className="size-10 bg-rose-100 rounded-lg flex items-center justify-center">
                   <span className="material-symbols-outlined text-rose-600" aria-hidden="true">warning</span>
                 </div>
                 <div>
-                  <h3 className="text-lg font-black text-slate-900">{editingIncident ? 'Editar Incidencia' : 'Reportar Incidencia'}</h3>
+                  <h3 className="text-lg font-black text-text">{editingIncident ? 'Editar Incidencia' : 'Reportar Incidencia'}</h3>
                 </div>
               </div>
               <button 
                 onClick={() => !isSaving && setShowModal(false)}
                 disabled={isSaving}
-                className="size-9 rounded-md hover:bg-white transition-all flex items-center justify-center text-slate-400 disabled:opacity-50"
+                className="size-9 rounded-md hover:bg-surface transition-all flex items-center justify-center text-text-muted disabled:opacity-50"
                 aria-label="Cerrar modal"
               >
                 <span className="material-symbols-outlined" aria-hidden="true">close</span>
@@ -425,10 +425,10 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, incidentTypes = [], se
             <form onSubmit={handleSubmit} autoComplete="off" className="p-6 space-y-5">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Tipo de Incidencia</label>
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Tipo de Incidencia</label>
                   <select 
                     disabled={isSaving}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all disabled:opacity-50"
+                    className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all disabled:opacity-50"
                     value={incidentTypeSelectValue}
                     onChange={e => {
                       const nextType = e.target.value;
@@ -451,7 +451,7 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, incidentTypes = [], se
                       required
                       disabled={isSaving}
                       maxLength={80}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all disabled:opacity-50"
+                      className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all disabled:opacity-50"
                       placeholder="Escribe el nuevo tipo"
                       value={customIncidentType}
                       onChange={e => setCustomIncidentType(e.target.value)}
@@ -459,10 +459,10 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, incidentTypes = [], se
                   )}
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Prioridad / Estado</label>
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Prioridad / Estado</label>
                   <select 
                     disabled={isSaving}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all disabled:opacity-50"
+                    className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all disabled:opacity-50"
                     value={formData.status}
                     onChange={e => setFormData({...formData, status: e.target.value as any})}
                   >
@@ -476,10 +476,10 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, incidentTypes = [], se
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Título corto</label>
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Título corto</label>
                 <input 
                   required disabled={isSaving}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all disabled:opacity-50"
+                  className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all disabled:opacity-50"
                   placeholder="Ej. Falla en frenos, Choque leve..."
                   value={formData.title}
                   onChange={e => setFormData({...formData, title: e.target.value})}
@@ -487,10 +487,10 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, incidentTypes = [], se
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Descripción detallada</label>
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Descripción detallada</label>
                 <textarea 
                   rows={3} disabled={isSaving}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all resize-none disabled:opacity-50"
+                  className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all resize-none disabled:opacity-50"
                   placeholder="Explica qué sucedió..."
                   value={formData.description}
                   onChange={e => setFormData({...formData, description: e.target.value})}
@@ -499,10 +499,10 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, incidentTypes = [], se
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Vehículo (Placa)</label>
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Vehículo (Placa)</label>
                   <select 
                     required disabled={isSaving}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all disabled:opacity-50"
+                    className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all disabled:opacity-50"
                     value={formData.vehicleId}
                     onChange={e => setFormData({...formData, vehicleId: e.target.value})}
                   >
@@ -513,10 +513,10 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, incidentTypes = [], se
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Conductor</label>
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Conductor</label>
                   <select 
                     required disabled={isSaving}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all disabled:opacity-50"
+                    className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all disabled:opacity-50"
                     value={formData.driverId}
                     onChange={e => setFormData({...formData, driverId: e.target.value})}
                   >
@@ -538,7 +538,7 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, incidentTypes = [], se
                 <button 
                   type="button" disabled={isSaving}
                   onClick={() => setShowModal(false)}
-                  className="flex-1 py-3 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-100 rounded-md transition-all disabled:opacity-50"
+                  className="flex-1 py-3 text-[11px] font-black uppercase tracking-widest text-text-muted hover:bg-surface-subtle rounded-md transition-all disabled:opacity-50"
                 >
                   Cancelar
                 </button>
@@ -563,10 +563,10 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, incidentTypes = [], se
 
       {/* VISTA PREVIA DE REPORTE FORMAL (ESTILO FICHA VEHICULO) */}
       {showPrintPreview && selectedIncident && (
-        <div className="fixed inset-0 z-[200] bg-white flex flex-col overflow-y-auto">
-           <div className="sticky top-0 bg-slate-900 p-4 flex justify-between items-center text-white shadow-lg no-print">
+        <div className="fixed inset-0 z-[200] bg-surface flex flex-col overflow-y-auto">
+           <div className="sticky top-0 bg-secondary p-4 flex justify-between items-center text-white shadow-lg no-print">
              <div className="flex items-center gap-4">
-                <button onClick={() => setShowPrintPreview(false)} className="bg-white/10 px-4 py-2 rounded-lg font-bold text-xs hover:bg-white/20 transition-all">Cerrar</button>
+                <button onClick={() => setShowPrintPreview(false)} className="bg-surface/10 px-4 py-2 rounded-lg font-bold text-xs hover:bg-surface/20 transition-all">Cerrar</button>
                 <h3 className="font-black text-sm uppercase tracking-widest">Vista Previa</h3>
              </div>
              <button onClick={() => window.print()} className="bg-primary px-8 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-blue-500/20">
@@ -574,54 +574,54 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, incidentTypes = [], se
              </button>
           </div>
           
-          <div className="flex-1 bg-slate-100 p-10 flex justify-center">
-            <div id="incident-printable" className="bg-white w-[21.59cm] min-h-[27.94cm] p-[1.5cm] shadow-2xl relative text-slate-900">
+          <div className="flex-1 bg-surface-subtle p-10 flex justify-center">
+            <div id="incident-printable" className="bg-surface w-[21.59cm] min-h-[27.94cm] p-[1.5cm] shadow-2xl relative text-text">
               
               {/* Header Institucional */}
               <div className="flex justify-between items-center mb-8 border-b-4 border-slate-900 pb-6">
                 <div className="flex items-center gap-6">
                   <img src="/images/logo-dif.png" alt="Logo" className="w-24 object-contain" />
                   <div className="flex flex-col">
-                    <span className="text-lg font-black text-slate-900 uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
-                    <span className="text-lg font-black text-slate-900 uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>
-                    <span className="text-[8pt] font-bold uppercase text-slate-400 mt-2 tracking-[0.2em]">Parque Vehicular • Incidencias</span>
+                    <span className="text-lg font-black text-text uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
+                    <span className="text-lg font-black text-text uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>
+                    <span className="text-[8pt] font-bold uppercase text-text-muted mt-2 tracking-[0.2em]">Parque Vehicular • Incidencias</span>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="inline-block bg-slate-900 text-white px-4 py-1.5 font-black text-[10pt] uppercase tracking-widest rounded-sm mb-2">
+                  <div className="inline-block bg-secondary text-white px-4 py-1.5 font-black text-[10pt] uppercase tracking-widest rounded-sm mb-2">
                       Reporte de Incidencia Vehicular
                   </div>
-                  <p className="text-xs font-bold text-slate-600">FOLIO: <span className="font-black text-slate-900 text-lg ml-1">INC-{String(selectedIncident.consecutiveNumber ?? 0).padStart(4, '0')}</span></p>
-                  <p className="text-[9pt] text-slate-400 font-bold mt-1">Fecha de Emisión: {new Date().toLocaleDateString('es-ES', {year: 'numeric', month: 'long', day: 'numeric'})}</p>
+                  <p className="text-xs font-bold text-text-muted">FOLIO: <span className="font-black text-text text-lg ml-1">INC-{String(selectedIncident.consecutiveNumber ?? 0).padStart(4, '0')}</span></p>
+                  <p className="text-[9pt] text-text-muted font-bold mt-1">Fecha de Emisión: {new Date().toLocaleDateString('es-ES', {year: 'numeric', month: 'long', day: 'numeric'})}</p>
                 </div>
               </div>
 
               {/* Datos de Identificación (Tabla) */}
               <div className="mb-8 mt-6">
-                  <h4 className="text-[9pt] font-black uppercase border-b-2 border-slate-200 pb-1 text-primary mb-4">Detalles del Evento</h4>
+                  <h4 className="text-[9pt] font-black uppercase border-b-2 border-border pb-1 text-primary mb-4">Detalles del Evento</h4>
                   <table className="w-full border-collapse">
                       <tbody>
-                          <tr className="border-b border-slate-200">
-                              <td className="py-2 text-[9pt] font-black text-slate-400 uppercase w-48">Tipo de Incidencia</td>
-                              <td className="py-2 text-[11pt] font-bold text-slate-900 uppercase">{typeMap[selectedIncident.type] || selectedIncident.type}</td>
-                              <td className="py-2 text-[9pt] font-black text-slate-400 uppercase w-32 text-right pr-4">Fecha Evento</td>
-                              <td className="py-2 text-[11pt] font-bold text-slate-900">{new Date(selectedIncident.date).toLocaleDateString('es-ES', {day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit'})}</td>
+                          <tr className="border-b border-border">
+                              <td className="py-2 text-[9pt] font-black text-text-muted uppercase w-48">Tipo de Incidencia</td>
+                              <td className="py-2 text-[11pt] font-bold text-text uppercase">{typeMap[selectedIncident.type] || selectedIncident.type}</td>
+                              <td className="py-2 text-[9pt] font-black text-text-muted uppercase w-32 text-right pr-4">Fecha Evento</td>
+                              <td className="py-2 text-[11pt] font-bold text-text">{new Date(selectedIncident.date).toLocaleDateString('es-ES', {day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit'})}</td>
                           </tr>
-                          <tr className="border-b border-slate-200">
-                              <td className="py-2 text-[9pt] font-black text-slate-400 uppercase">Unidad Involucrada</td>
-                              <td className="py-2 text-[11pt] font-bold text-slate-900">{reportVehicle?.model || '---'}</td>
-                              <td className="py-2 text-[9pt] font-black text-slate-400 uppercase text-right pr-4">Placas</td>
-                              <td className="py-2 text-[11pt] font-bold text-slate-900 uppercase tracking-widest">{reportVehicle?.plate || selectedIncident.vehicleId || '---'}</td>
+                          <tr className="border-b border-border">
+                              <td className="py-2 text-[9pt] font-black text-text-muted uppercase">Unidad Involucrada</td>
+                              <td className="py-2 text-[11pt] font-bold text-text">{reportVehicle?.model || '---'}</td>
+                              <td className="py-2 text-[9pt] font-black text-text-muted uppercase text-right pr-4">Placas</td>
+                              <td className="py-2 text-[11pt] font-bold text-text uppercase tracking-widest">{reportVehicle?.plate || selectedIncident.vehicleId || '---'}</td>
                           </tr>
-                          <tr className="border-b border-slate-200">
-                              <td className="py-2 text-[9pt] font-black text-slate-400 uppercase">Operador Responsable</td>
-                              <td className="py-2 text-[11pt] font-bold text-slate-900">{reportDriver?.name || selectedIncident.driverId || '---'}</td>
-                              <td className="py-2 text-[9pt] font-black text-slate-400 uppercase text-right pr-4">Estatus</td>
-                              <td className="py-2 text-[11pt] font-bold text-slate-900 uppercase">{statusMap[selectedIncident.status] || selectedIncident.status}</td>
+                          <tr className="border-b border-border">
+                              <td className="py-2 text-[9pt] font-black text-text-muted uppercase">Operador Responsable</td>
+                              <td className="py-2 text-[11pt] font-bold text-text">{reportDriver?.name || selectedIncident.driverId || '---'}</td>
+                              <td className="py-2 text-[9pt] font-black text-text-muted uppercase text-right pr-4">Estatus</td>
+                              <td className="py-2 text-[11pt] font-bold text-text uppercase">{statusMap[selectedIncident.status] || selectedIncident.status}</td>
                           </tr>
                           <tr>
-                              <td className="py-2 text-[9pt] font-black text-slate-400 uppercase">Resumen / Título</td>
-                              <td colSpan={3} className="py-2 text-[11pt] font-bold text-slate-900 uppercase">{selectedIncident.title}</td>
+                              <td className="py-2 text-[9pt] font-black text-text-muted uppercase">Resumen / Título</td>
+                              <td colSpan={3} className="py-2 text-[11pt] font-bold text-text uppercase">{selectedIncident.title}</td>
                           </tr>
                       </tbody>
                   </table>
@@ -629,13 +629,13 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, incidentTypes = [], se
 
               {/* Descripción */}
               <div className="mb-12">
-                 <h4 className="text-[9pt] font-black uppercase border-b-2 border-slate-200 pb-1 text-primary mb-4">Descripción de los Hechos</h4>
-                 <div className="bg-slate-50 p-6 rounded-lg min-h-[200px] border border-slate-100">
-                   <p className="text-[10pt] text-slate-700 leading-relaxed italic whitespace-pre-wrap text-justify">
+                 <h4 className="text-[9pt] font-black uppercase border-b-2 border-border pb-1 text-primary mb-4">Descripción de los Hechos</h4>
+                 <div className="bg-surface-subtle p-6 rounded-lg min-h-[200px] border border-border">
+                   <p className="text-[10pt] text-text leading-relaxed italic whitespace-pre-wrap text-justify">
                       {selectedIncident.description || 'Sin descripción detallada disponible.'}
                    </p>
                  </div>
-                 <p className="text-[8pt] text-slate-400 mt-2 text-justify">
+                 <p className="text-[8pt] text-text-muted mt-2 text-justify">
                     * El presente reporte describe los hechos acontecidos y sirve como constancia administrativa para el seguimiento correspondiente.
                  </p>
               </div>
@@ -644,26 +644,26 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, incidentTypes = [], se
                <div className="signature-section absolute bottom-[1.5cm] left-[1.5cm] right-[1.5cm]">
                    <div className="grid gap-8 text-center grid-cols-3">
                        <div className="signature-line border-t-2 border-slate-900 pt-4">
-                           <p className="text-[9pt] font-black uppercase text-slate-900 h-4"></p>
-                           <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Nombre y Firma</p>
-                           <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Reporta Incidencia</p>
+                           <p className="text-[9pt] font-black uppercase text-text h-4"></p>
+                           <p className="text-[7pt] font-bold text-text-muted mt-1 uppercase tracking-widest">Nombre y Firma</p>
+                           <p className="text-[7pt] font-bold text-text-muted uppercase tracking-widest">Reporta Incidencia</p>
                        </div>
                        <div className="signature-line border-t-2 border-slate-900 pt-4">
-                           <p className="text-[9pt] font-black uppercase text-slate-900">{managerName}</p>
-                           <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">{managerPos}</p>
-                           <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Validación</p>
+                           <p className="text-[9pt] font-black uppercase text-text">{managerName}</p>
+                           <p className="text-[7pt] font-bold text-text-muted mt-1 uppercase tracking-widest">{managerPos}</p>
+                           <p className="text-[7pt] font-bold text-text-muted uppercase tracking-widest">Validación</p>
                        </div>
                        <div className="signature-line border-t-2 border-slate-900 pt-4">
                            {coordName ? (
-                               <p className="text-[9pt] font-black uppercase text-slate-900">{coordName}</p>
+                               <p className="text-[9pt] font-black uppercase text-text">{coordName}</p>
                            ) : (
-                               <p className="text-[9pt] font-black uppercase text-slate-900 h-4"></p>
+                               <p className="text-[9pt] font-black uppercase text-text h-4"></p>
                            )}
-                           <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">{coordPos}</p>
-                           <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Enterado</p>
+                           <p className="text-[7pt] font-bold text-text-muted mt-1 uppercase tracking-widest">{coordPos}</p>
+                           <p className="text-[7pt] font-bold text-text-muted uppercase tracking-widest">Enterado</p>
                        </div>
                    </div>
-                   <div className="text-center mt-8 border-t border-slate-200 pt-2">
+                   <div className="text-center mt-8 border-t border-border pt-2">
                         <p className="text-[7pt] font-black text-slate-300 uppercase tracking-[0.3em]">Sistema de Gestión de Parque Vehicular • DIF Municipal La Paz</p>
                    </div>
                </div>
@@ -679,10 +679,10 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, incidentTypes = [], se
 const SummaryCard: React.FC<{ label: string, value: string, trend?: string, icon?: string, color: string }> = ({ label, value, trend, icon, color }) => {
   const borderColors: any = { green: 'border-l-green-500', blue: 'border-l-blue-500', amber: 'border-l-amber-500', rose: 'border-l-rose-500', purple: 'border-l-purple-500' };
   return (
-    <div className={`bg-white p-6 rounded-2xl border border-slate-200 border-l-4 ${borderColors[color]}`}>
-      <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.15em]">{label}</p>
+    <div className={`bg-surface p-6 rounded-2xl border border-border border-l-4 ${borderColors[color]}`}>
+      <p className="text-text-muted text-[10px] font-black uppercase tracking-[0.15em]">{label}</p>
       <div className="flex items-center justify-between mt-2.5">
-        <span className="text-3xl font-black tracking-tighter text-slate-900">{value}</span>
+        <span className="text-3xl font-black tracking-tighter text-text">{value}</span>
         {trend ? <span className="text-green-600 bg-green-50 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">{trend}</span> : <span className="material-symbols-outlined text-slate-200 text-2xl">{icon}</span>}
       </div>
     </div>

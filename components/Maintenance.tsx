@@ -459,35 +459,35 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
         <div className="card p-4">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600"><span className="material-symbols-outlined text-lg">payments</span></div>
-            <span className="text-xs font-medium text-slate-500">Total Facturado</span>
+            <span className="text-xs font-medium text-text-muted">Total Facturado</span>
           </div>
-          <p className="text-xl font-semibold text-slate-900">${(stats.totalInvoiced || 0).toLocaleString()}</p>
+          <p className="text-xl font-semibold text-text">${(stats.totalInvoiced || 0).toLocaleString()}</p>
         </div>
         <div className="card p-4">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600"><span className="material-symbols-outlined text-lg">request_quote</span></div>
-            <span className="text-xs font-medium text-slate-500">En Curso</span>
+            <span className="text-xs font-medium text-text-muted">En Curso</span>
           </div>
-          <p className="text-xl font-semibold text-slate-900">${(stats.totalQuoted || 0).toLocaleString()}</p>
+          <p className="text-xl font-semibold text-text">${(stats.totalQuoted || 0).toLocaleString()}</p>
         </div>
         <div className="card p-4">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-9 h-9 rounded-lg bg-rose-50 flex items-center justify-center text-rose-600"><span className="material-symbols-outlined text-lg">car_repair</span></div>
-            <span className="text-xs font-medium text-slate-500">En Taller</span>
+            <span className="text-xs font-medium text-text-muted">En Taller</span>
           </div>
-          <p className="text-xl font-semibold text-slate-900">{stats.inWorkshop || 0}</p>
+          <p className="text-xl font-semibold text-text">{stats.inWorkshop || 0}</p>
         </div>
         <div className="card p-4">
           <div className="flex items-center gap-3 mb-2">
             <div className="size-9 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600"><span className="material-symbols-outlined text-lg">task_alt</span></div>
-            <span className="text-xs font-medium text-slate-500">Completados</span>
+            <span className="text-xs font-medium text-text-muted">Completados</span>
           </div>
-          <p className="text-xl font-bold text-slate-900">{stats.completed || 0}</p>
+          <p className="text-xl font-bold text-text">{stats.completed || 0}</p>
         </div>
       </div>
 
       <div className="card no-print">
-        <div className="px-4 py-3 border-b border-slate-200 bg-slate-50 flex items-center justify-between gap-2">
+        <div className="px-4 py-3 border-b border-border bg-surface-subtle flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <button onClick={() => setFilterStatus('todos')} className={`filter-pill ${filterStatus === 'todos' ? 'filter-pill-active' : 'filter-pill-inactive'}`}>Todos</button>
             <button onClick={() => setFilterStatus('in-progress')} className={`filter-pill ${filterStatus === 'in-progress' ? 'filter-pill-warning' : 'filter-pill-inactive'}`}>En Taller</button>
@@ -518,46 +518,46 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                 const statusLabel = statusMap[record.status] || (record.status || 'PENDIENTE').toUpperCase();
 
                 return (
-                  <tr key={record.id} className="hover:bg-slate-50/80 transition-colors group">
+                  <tr key={record.id} className="hover:bg-surface-subtle/80 transition-colors group">
                     <td className="px-8 py-5">
-                      <p className="font-black text-slate-900 text-[13px] tracking-tight">{serviceLabel}</p>
+                      <p className="font-black text-text text-[13px] tracking-tight">{serviceLabel}</p>
                       <div className="flex items-center gap-2 mt-0.5">
                         {record.consecutiveNumber && <p className="text-[9px] font-black text-blue-600 uppercase tracking-wider">N° {record.consecutiveNumber}</p>}
                         {record.internalDocumentNumber && <p className="text-[9px] font-black text-indigo-600 uppercase tracking-wider">OFICIO: {record.internalDocumentNumber}</p>}
                       </div>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{new Date(record.date).toLocaleDateString()}</p>
+                      <p className="text-[10px] text-text-muted font-bold uppercase tracking-wider">{new Date(record.date).toLocaleDateString()}</p>
                     </td>
                     <td className="px-8 py-5">
-                      <p className="font-black text-slate-900 text-[13px] tracking-tight">{vehicle?.plate || 'S/P'} - {vehicle?.model || 'Desconocido'}</p>
+                      <p className="font-black text-text text-[13px] tracking-tight">{vehicle?.plate || 'S/P'} - {vehicle?.model || 'Desconocido'}</p>
                       <p className="text-[10px] text-primary font-bold uppercase tracking-widest overflow-truncate">{record.provider}</p>
-                      {record.providerContact && <p className="text-[9px] text-slate-400 font-bold uppercase">Enc: {record.providerContact}</p>}
+                      {record.providerContact && <p className="text-[9px] text-text-muted font-bold uppercase">Enc: {record.providerContact}</p>}
                     </td>
                     <td className="px-8 py-5">
                       <span className={`inline-flex items-center px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${
                         record.status === 'completed' ? 'bg-green-50 text-green-700 border-green-200' :
                         record.status === 'in-progress' ? 'bg-rose-50 text-rose-700 border-rose-200' :
                         record.status === 'scheduled' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                        'bg-slate-50 text-slate-500 border-slate-200'
+                        'bg-surface-subtle text-text-muted border-border'
                       }`}>
                         {statusLabel}
                       </span>
                       {record.status === 'in-progress' && record.estimatedDeliveryDate && (
-                        <p className="text-[9px] font-bold text-slate-400 mt-1 uppercase">
+                        <p className="text-[9px] font-bold text-text-muted mt-1 uppercase">
                           Entr. Est.: {new Date(record.estimatedDeliveryDate).toLocaleDateString()}
                         </p>
                       )}
                     </td>
-                    <td className="px-8 py-5 text-right font-bold text-slate-500 text-xs">
+                    <td className="px-8 py-5 text-right font-bold text-text-muted text-xs">
                       ${(record.quoteCost || 0).toLocaleString()}
                       {record.quoteNumber && <p className="text-[9px] font-black text-slate-300">#{record.quoteNumber}</p>}
                     </td>
                     <td className="px-8 py-5 text-right">
                       {record.invoiceAmount ? (
                         <div>
-                          <p className="font-black text-slate-900 text-sm">${(record.invoiceAmount || 0).toLocaleString()}</p>
+                          <p className="font-black text-text text-sm">${(record.invoiceAmount || 0).toLocaleString()}</p>
                           <p className="text-[9px] font-black text-green-600 uppercase">Factura: {record.invoiceNumber}</p>
                           {record.paymentMethod && (
-                            <p className="text-[9px] font-black text-slate-400 uppercase">
+                            <p className="text-[9px] font-black text-text-muted uppercase">
                               Pago: {record.paymentMethod === 'transferencia' ? 'Transferencia' : 'Efectivo'}
                             </p>
                           )}
@@ -593,16 +593,16 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-300 no-print">
-          <div className="bg-white rounded-2xl w-full max-w-4xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-secondary/60 backdrop-blur-sm p-4 animate-in fade-in duration-300 no-print">
+          <div className="bg-surface rounded-2xl w-full max-w-4xl border border-border overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="px-8 py-6 border-b border-border flex justify-between items-center bg-surface-subtle/50">
               <div>
-                <h3 className="text-xl font-black text-slate-900 tracking-tight">
+                <h3 className="text-xl font-black text-text tracking-tight">
                   {editingRecord ? 'Actualizar Reporte de Servicio' : 'Nuevo Registro de Mantenimiento'}
                 </h3>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-0.5">Control de ingresos y facturación de taller</p>
+                <p className="text-xs font-bold text-text-muted uppercase tracking-widest mt-0.5">Control de ingresos y facturación de taller</p>
               </div>
-              <button onClick={() => !isSaving && setShowModal(false)} disabled={isSaving} className="size-10 rounded-lg hover:bg-white transition-all flex items-center justify-center text-slate-400" aria-label="Cerrar modal">
+              <button onClick={() => !isSaving && setShowModal(false)} disabled={isSaving} className="size-10 rounded-lg hover:bg-surface transition-all flex items-center justify-center text-text-muted" aria-label="Cerrar modal">
                 <span className="material-symbols-outlined" aria-hidden="true">close</span>
               </button>
             </div>
@@ -616,39 +616,39 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                     <div className="size-8 bg-blue-100 rounded-lg flex items-center justify-center">
                       <span className="material-symbols-outlined text-blue-600 text-lg" aria-hidden="true">directions_car</span>
                     </div>
-                    <h4 className="text-sm font-black text-slate-900 uppercase tracking-wider">Datos del Servicio</h4>
+                    <h4 className="text-sm font-black text-text uppercase tracking-wider">Datos del Servicio</h4>
                   </div>
                   
-                  <div className="bg-white p-6 rounded-2xl border border-slate-200 space-y-4">
+                  <div className="bg-surface p-6 rounded-2xl border border-border space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Consecutivo</label>
+                        <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Consecutivo</label>
                         <div className="w-full bg-blue-50 border border-blue-200 rounded-md px-4 py-3 text-sm font-black text-blue-700">
                           {editingRecord?.consecutiveNumber || nextConsecutiveNumber}
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">N° de Oficio</label>
-                        <input disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all uppercase" placeholder="Ej. 135/2023" value={formData.internalDocumentNumber} onChange={e => setFormData({...formData, internalDocumentNumber: e.target.value})} />
+                        <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">N° de Oficio</label>
+                        <input disabled={isSaving} className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all uppercase" placeholder="Ej. 135/2023" value={formData.internalDocumentNumber} onChange={e => setFormData({...formData, internalDocumentNumber: e.target.value})} />
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Vehículo</label>
-                        <select required disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all" value={formData.vehicleId} onChange={e => setFormData({...formData, vehicleId: e.target.value})}>
+                        <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Vehículo</label>
+                        <select required disabled={isSaving} className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all" value={formData.vehicleId} onChange={e => setFormData({...formData, vehicleId: e.target.value})}>
                           <option value="">Seleccionar...</option>
                           {vehicles.map(v => (<option key={v.id} value={v.id}>{v.plate} - {v.model}</option>))}
                         </select>
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Kilometraje (Km)</label>
-                        <input type="number" required disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all" value={formData.odometer} onChange={e => setFormData({...formData, odometer: e.target.value})} />
+                        <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Kilometraje (Km)</label>
+                        <input type="number" required disabled={isSaving} className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all" value={formData.odometer} onChange={e => setFormData({...formData, odometer: e.target.value})} />
                       </div>
                     </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Tipo de Servicio</label>
+                        <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Tipo de Servicio</label>
                         <div className="flex gap-2 items-start min-w-0">
-                          <select required disabled={isSaving} className="w-full min-w-0 flex-1 bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all truncate" value={formData.serviceType} onChange={e => setFormData({...formData, serviceType: e.target.value})}>
+                          <select required disabled={isSaving} className="w-full min-w-0 flex-1 bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all truncate" value={formData.serviceType} onChange={e => setFormData({...formData, serviceType: e.target.value})}>
                               <option value="">Seleccionar tipo...</option>
                               {maintenanceTypes.map(t => (
                                   <option key={t.id} value={t.name}>{t.name}</option>
@@ -668,7 +668,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                       {isAddingType && (
                         <div className="animate-in slide-in-from-top-2 pt-2 flex flex-col sm:flex-row gap-2">
                             <input 
-                                className="flex-1 bg-slate-50 border border-slate-200 rounded-md px-4 py-2 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all uppercase" 
+                                className="flex-1 bg-surface-subtle border border-border rounded-md px-4 py-2 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all uppercase" 
                                 placeholder="NOMBRE DEL NUEVO TIPO"
                                 value={newTypeName}
                                 onChange={e => setNewTypeName(e.target.value)}
@@ -684,8 +684,8 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                       )}
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Descripción del Problema</label>
-                      <textarea rows={4} disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none resize-none focus:bg-white focus:border-primary transition-all" placeholder="Describe el problema o servicio requerido..." value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
+                      <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Descripción del Problema</label>
+                      <textarea rows={4} disabled={isSaving} className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none resize-none focus:bg-surface focus:border-primary transition-all" placeholder="Describe el problema o servicio requerido..." value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
                     </div>
                   </div>
 
@@ -694,17 +694,17 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                     <div className="size-8 bg-amber-100 rounded-lg flex items-center justify-center">
                       <span className="material-symbols-outlined text-amber-600 text-lg" aria-hidden="true">build</span>
                     </div>
-                    <h4 className="text-sm font-black text-slate-900 uppercase tracking-wider">Control de Taller</h4>
+                    <h4 className="text-sm font-black text-text uppercase tracking-wider">Control de Taller</h4>
                   </div>
 
-                  <div className="bg-white p-6 rounded-2xl border border-slate-200 space-y-4">
+                  <div className="bg-surface p-6 rounded-2xl border border-border space-y-4">
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Proveedor / Taller</label>
+                      <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Proveedor / Taller</label>
                       <div className="flex flex-col sm:flex-row gap-2 min-w-0">
                         <select 
                           required 
                           disabled={isSaving} 
-                          className="w-full min-w-0 flex-1 bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all truncate" 
+                          className="w-full min-w-0 flex-1 bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all truncate" 
                           value={formData.provider} 
                           onChange={e => {
                             const selectedSupplier = suppliers.find(s => s.name === e.target.value);
@@ -732,15 +732,15 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                       </div>
                       
                       {isAddingSupplier && (
-                        <div className="animate-in slide-in-from-top-2 pt-2 space-y-2 p-3 bg-slate-50 rounded-md border border-slate-200">
+                        <div className="animate-in slide-in-from-top-2 pt-2 space-y-2 p-3 bg-surface-subtle rounded-md border border-border">
                           <input 
-                            className="w-full bg-white border border-slate-200 rounded-md px-4 py-2 text-sm font-bold outline-none focus:border-primary transition-all uppercase" 
+                            className="w-full bg-surface border border-border rounded-md px-4 py-2 text-sm font-bold outline-none focus:border-primary transition-all uppercase" 
                             placeholder="NOMBRE DEL PROVEEDOR"
                             value={newSupplierName}
                             onChange={e => setNewSupplierName(e.target.value)}
                           />
                           <input 
-                            className="w-full bg-white border border-slate-200 rounded-md px-4 py-2 text-sm font-bold outline-none focus:border-primary transition-all" 
+                            className="w-full bg-surface border border-border rounded-md px-4 py-2 text-sm font-bold outline-none focus:border-primary transition-all" 
                             placeholder="Nombre del encargado"
                             value={newSupplierContact}
                             onChange={e => setNewSupplierContact(e.target.value)}
@@ -756,16 +756,16 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                       )}
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">
+                      <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">
                         Encargado 
                         {formData.provider && formData.providerContact && <span className="ml-1 text-green-600">(auto-completado)</span>}
                       </label>
-                      <input disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all" placeholder="Nombre del contacto" value={formData.providerContact} onChange={e => setFormData({...formData, providerContact: e.target.value})} />
+                      <input disabled={isSaving} className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all" placeholder="Nombre del contacto" value={formData.providerContact} onChange={e => setFormData({...formData, providerContact: e.target.value})} />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Estado</label>
-                        <select required disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value as any})}>
+                        <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Estado</label>
+                        <select required disabled={isSaving} className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value as any})}>
                           <option value="scheduled">Programado</option>
                           <option value="in-progress">En Proveedor</option>
                           <option value="completed">Completado</option>
@@ -773,13 +773,13 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                         </select>
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Fecha de Ingreso</label>
-                        <input type="datetime-local" required disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all" value={formData.entryDate} onChange={e => setFormData({...formData, entryDate: e.target.value})} />
+                        <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Fecha de Ingreso</label>
+                        <input type="datetime-local" required disabled={isSaving} className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all" value={formData.entryDate} onChange={e => setFormData({...formData, entryDate: e.target.value})} />
                       </div>
                     </div>
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Fecha de Entrega Estimada</label>
-                        <input type="date" disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all" value={formData.estimatedDeliveryDate} onChange={e => setFormData({...formData, estimatedDeliveryDate: e.target.value})} />
+                        <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Fecha de Entrega Estimada</label>
+                        <input type="date" disabled={isSaving} className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all" value={formData.estimatedDeliveryDate} onChange={e => setFormData({...formData, estimatedDeliveryDate: e.target.value})} />
                     </div>
                   </div>
                 </div>
@@ -791,46 +791,46 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                     <div className="size-8 bg-green-100 rounded-lg flex items-center justify-center">
                       <span className="material-symbols-outlined text-green-600 text-lg" aria-hidden="true">request_quote</span>
                     </div>
-                    <h4 className="text-sm font-black text-slate-900 uppercase tracking-wider">Control Financiero</h4>
+                    <h4 className="text-sm font-black text-text uppercase tracking-wider">Control Financiero</h4>
                   </div>
 
-                  <div className="bg-white p-6 rounded-2xl border border-slate-200 space-y-4">
+                  <div className="bg-surface p-6 rounded-2xl border border-border space-y-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Presupuesto (Cotización)</span>
+                      <span className="text-[10px] font-black text-text-muted uppercase tracking-widest">Presupuesto (Cotización)</span>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">N° de Cotización</label>
-                        <input disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all" value={formData.quoteNumber} onChange={e => setFormData({...formData, quoteNumber: e.target.value})} />
+                        <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">N° de Cotización</label>
+                        <input disabled={isSaving} className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all" value={formData.quoteNumber} onChange={e => setFormData({...formData, quoteNumber: e.target.value})} />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Monto ($)</label>
-                        <input type="number" required disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-black outline-none focus:bg-white focus:border-primary transition-all" value={formData.quoteCost} onChange={e => setFormData({...formData, quoteCost: e.target.value})} />
+                        <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Monto ($)</label>
+                        <input type="number" required disabled={isSaving} className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-black outline-none focus:bg-surface focus:border-primary transition-all" value={formData.quoteCost} onChange={e => setFormData({...formData, quoteCost: e.target.value})} />
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-white p-6 rounded-2xl border border-slate-200 space-y-4">
+                  <div className="bg-surface p-6 rounded-2xl border border-border space-y-4">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Facturación (Liquidación)</span>
+                      <span className="text-[10px] font-black text-text-muted uppercase tracking-widest">Facturación (Liquidación)</span>
                       <span className="bg-green-100 text-green-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">Obligatorio al completar</span>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">N° de Factura</label>
-                        <input disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all" value={formData.invoiceNumber} onChange={e => setFormData({...formData, invoiceNumber: e.target.value})} />
+                        <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">N° de Factura</label>
+                        <input disabled={isSaving} className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all" value={formData.invoiceNumber} onChange={e => setFormData({...formData, invoiceNumber: e.target.value})} />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Monto ($)</label>
-                        <input type="number" disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-black outline-none focus:bg-white focus:border-primary transition-all" value={formData.invoiceAmount} onChange={e => setFormData({...formData, invoiceAmount: e.target.value})} />
+                        <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Monto ($)</label>
+                        <input type="number" disabled={isSaving} className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-black outline-none focus:bg-surface focus:border-primary transition-all" value={formData.invoiceAmount} onChange={e => setFormData({...formData, invoiceAmount: e.target.value})} />
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Método de Pago</label>
+                        <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Método de Pago</label>
                         <select
                           disabled={isSaving}
-                          className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all"
+                          className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all"
                           value={formData.paymentMethod}
                           onChange={e => setFormData({ ...formData, paymentMethod: e.target.value })}
                         >
@@ -840,8 +840,8 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                         </select>
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Fecha de Salida Real</label>
-                        <input type="date" disabled={isSaving} className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all" value={formData.exitDate} onChange={e => setFormData({...formData, exitDate: e.target.value})} />
+                        <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Fecha de Salida Real</label>
+                        <input type="date" disabled={isSaving} className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all" value={formData.exitDate} onChange={e => setFormData({...formData, exitDate: e.target.value})} />
                       </div>
                     </div>
                   </div>
@@ -876,7 +876,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                 <button 
                   type="button" disabled={isSaving}
                   onClick={() => setShowModal(false)}
-                  className="flex-1 py-4 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-100 rounded-md transition-all disabled:opacity-50"
+                  className="flex-1 py-4 text-[11px] font-black uppercase tracking-widest text-text-muted hover:bg-surface-subtle rounded-md transition-all disabled:opacity-50"
                 >
                   Cancelar
                 </button>
@@ -901,73 +901,73 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
 
       {/* VISTA DE IMPRESIÓN (FORMATO DE SERVICIO) */}
       {showPrintPreview && selectedRecord && (
-        <div className="fixed inset-0 z-[200] bg-white flex flex-col overflow-y-auto">
-           <div className="sticky top-0 bg-slate-900 p-4 flex justify-between items-center text-white shadow-lg no-print">
-             <button onClick={() => setShowPrintPreview(false)} className="bg-white/10 px-4 py-2 rounded-lg font-bold text-xs hover:bg-white/20 transition-all">Cerrar</button>
+        <div className="fixed inset-0 z-[200] bg-surface flex flex-col overflow-y-auto">
+           <div className="sticky top-0 bg-secondary p-4 flex justify-between items-center text-white shadow-lg no-print">
+             <button onClick={() => setShowPrintPreview(false)} className="bg-surface/10 px-4 py-2 rounded-lg font-bold text-xs hover:bg-surface/20 transition-all">Cerrar</button>
              <button onClick={() => window.print()} className="bg-primary px-8 py-2.5 rounded-md font-black text-[11px] uppercase tracking-widest flex items-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-blue-500/20">
                <span className="material-symbols-outlined text-lg">picture_as_pdf</span> Imprimir Formato PDF
              </button>
            </div>
-           <div className="flex-1 bg-slate-100 p-10 flex justify-center">
-              <div id="maintenance-printable" className="bg-white w-[21.59cm] min-h-[27.94cm] p-[1.5cm] shadow-2xl relative text-slate-900">
+           <div className="flex-1 bg-surface-subtle p-10 flex justify-center">
+              <div id="maintenance-printable" className="bg-surface w-[21.59cm] min-h-[27.94cm] p-[1.5cm] shadow-2xl relative text-text">
                 
                 {/* Header Institucional - Formal Design */}
                 <div className="print-header flex justify-between items-center mb-8 border-b-4 border-slate-900 pb-6">
                   <div className="flex items-center gap-6">
                     <img src="/images/logo-dif.png" alt="Logo" className="w-24 object-contain" />
                     <div className="flex flex-col">
-                      <span className="text-lg font-black text-slate-900 uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
-                      <span className="text-lg font-black text-slate-900 uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>
-                      <span className="text-[8pt] font-bold uppercase text-slate-400 mt-2 tracking-[0.2em]">Coordinación de Parque Vehicular • Solicitud de Servicio</span>
+                      <span className="text-lg font-black text-text uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
+                      <span className="text-lg font-black text-text uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>
+                      <span className="text-[8pt] font-bold uppercase text-text-muted mt-2 tracking-[0.2em]">Coordinación de Parque Vehicular • Solicitud de Servicio</span>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="inline-block bg-slate-900 text-white px-4 py-1.5 font-black text-[10pt] uppercase tracking-widest rounded-sm mb-2">
+                    <div className="inline-block bg-secondary text-white px-4 py-1.5 font-black text-[10pt] uppercase tracking-widest rounded-sm mb-2">
                         Autorización de Cotización
                     </div>
-                    <p className="text-xs font-bold text-slate-600">No. <span className="font-black text-blue-600 text-lg ml-1">{(selectedRecord.consecutiveNumber || '---')}</span></p>
-                    <p className="text-xs font-bold text-slate-600">FOLIO INTERNO: <span className="font-black text-slate-900 text-lg ml-1">{(selectedRecord.internalDocumentNumber || 'S/N').toUpperCase()}</span></p>
-                    <p className="text-[9pt] text-slate-400 font-bold mt-1">Fecha: {new Date(selectedRecord.date).toLocaleDateString('es-ES', {year: 'numeric', month: 'long', day: 'numeric'})}</p>
+                    <p className="text-xs font-bold text-text-muted">No. <span className="font-black text-blue-600 text-lg ml-1">{(selectedRecord.consecutiveNumber || '---')}</span></p>
+                    <p className="text-xs font-bold text-text-muted">FOLIO INTERNO: <span className="font-black text-text text-lg ml-1">{(selectedRecord.internalDocumentNumber || 'S/N').toUpperCase()}</span></p>
+                    <p className="text-[9pt] text-text-muted font-bold mt-1">Fecha: {new Date(selectedRecord.date).toLocaleDateString('es-ES', {year: 'numeric', month: 'long', day: 'numeric'})}</p>
                     <p className="text-[8pt] text-slate-300 font-bold mt-1">Generado: {new Date().toLocaleDateString('es-ES', {day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'})}</p>
                   </div>
                 </div>
 
                 {/* Datos del Vehículo - Formal Table */}
                 <div className="mb-8 mt-6 break-inside-avoid">
-                    <div className="bg-slate-900 text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">
+                    <div className="bg-secondary text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">
                         Datos de Identificación del Vehículo
                     </div>
                     <table className="w-full border-collapse">
                         <tbody>
-                            <tr className="border-b border-slate-200">
-                                <td className="py-3 text-[9pt] font-black text-slate-400 uppercase w-48">Unidad / Marca</td>
-                                <td className="py-3 text-[11pt] font-bold text-slate-900 overflow-wrap" style={{maxWidth: '200px', wordWrap: 'break-word'}}>{vehicles.find(v => v.id === selectedRecord.vehicleId)?.model || '---'}</td>
-                                <td className="py-3 text-[9pt] font-black text-slate-400 uppercase w-32 text-right pr-4">Placas</td>
-                                <td className="py-3 text-[14pt] font-black text-slate-900 tracking-widest">{vehicles.find(v => v.id === selectedRecord.vehicleId)?.plate || '---'}</td>
+                            <tr className="border-b border-border">
+                                <td className="py-3 text-[9pt] font-black text-text-muted uppercase w-48">Unidad / Marca</td>
+                                <td className="py-3 text-[11pt] font-bold text-text overflow-wrap" style={{maxWidth: '200px', wordWrap: 'break-word'}}>{vehicles.find(v => v.id === selectedRecord.vehicleId)?.model || '---'}</td>
+                                <td className="py-3 text-[9pt] font-black text-text-muted uppercase w-32 text-right pr-4">Placas</td>
+                                <td className="py-3 text-[14pt] font-black text-text tracking-widest">{vehicles.find(v => v.id === selectedRecord.vehicleId)?.plate || '---'}</td>
                             </tr>
-                            <tr className="border-b border-slate-200">
-                                <td className="py-3 text-[9pt] font-black text-slate-400 uppercase">Kilometraje</td>
-                                <td className="py-3 text-[11pt] font-bold text-slate-900">{(Number(selectedRecord.odometer) || 0).toLocaleString()} km</td>
-                                <td className="py-3 text-[9pt] font-black text-slate-400 uppercase text-right pr-4">Fecha Ingreso</td>
-                                <td className="py-3 text-[11pt] font-bold text-slate-900">{selectedRecord.entryDate ? new Date(selectedRecord.entryDate).toLocaleDateString('es-ES', {day: '2-digit', month: 'short', year: 'numeric'}) : '---'}</td>
+                            <tr className="border-b border-border">
+                                <td className="py-3 text-[9pt] font-black text-text-muted uppercase">Kilometraje</td>
+                                <td className="py-3 text-[11pt] font-bold text-text">{(Number(selectedRecord.odometer) || 0).toLocaleString()} km</td>
+                                <td className="py-3 text-[9pt] font-black text-text-muted uppercase text-right pr-4">Fecha Ingreso</td>
+                                <td className="py-3 text-[11pt] font-bold text-text">{selectedRecord.entryDate ? new Date(selectedRecord.entryDate).toLocaleDateString('es-ES', {day: '2-digit', month: 'short', year: 'numeric'}) : '---'}</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
 
                 {/* Datos del Proveedor y Cotización - Info Box */}
-                <div className="mb-8 info-box bg-slate-50 border border-slate-200 rounded-lg p-6 break-inside-avoid">
+                <div className="mb-8 info-box bg-surface-subtle border border-border rounded-lg p-6 break-inside-avoid">
                    <div className="grid grid-cols-2 gap-8">
                       <div>
-                         <p className="text-[8pt] font-black text-slate-400 uppercase tracking-widest mb-1">Taller / Proveedor</p>
-                         <p className="text-[12pt] font-black text-slate-900 uppercase overflow-wrap" style={{maxWidth: '250px', wordWrap: 'break-word'}}>{selectedRecord.provider}</p>
-                         <p className="text-[9pt] font-bold text-slate-500 uppercase mt-1">Contacto: {selectedRecord.providerContact || 'Gerencia'}</p>
+                         <p className="text-[8pt] font-black text-text-muted uppercase tracking-widest mb-1">Taller / Proveedor</p>
+                         <p className="text-[12pt] font-black text-text uppercase overflow-wrap" style={{maxWidth: '250px', wordWrap: 'break-word'}}>{selectedRecord.provider}</p>
+                         <p className="text-[9pt] font-bold text-text-muted uppercase mt-1">Contacto: {selectedRecord.providerContact || 'Gerencia'}</p>
                       </div>
-                      <div className="text-right border-l border-slate-200 pl-8">
-                         <p className="text-[8pt] font-black text-slate-400 uppercase tracking-widest mb-1">Monto de Cotización</p>
+                      <div className="text-right border-l border-border pl-8">
+                         <p className="text-[8pt] font-black text-text-muted uppercase tracking-widest mb-1">Monto de Cotización</p>
                          <p className="text-[20pt] font-black text-primary tracking-tighter">${(Number(selectedRecord.quoteCost) || 0).toLocaleString('es-MX', {minimumFractionDigits: 2})}</p>
-                         <p className="text-[9pt] font-bold text-slate-500 uppercase mt-1">Ref. Cotización: {selectedRecord.quoteNumber || 'S/N'}</p>
-                         <p className="text-[9pt] font-bold text-slate-500 uppercase mt-1">
+                         <p className="text-[9pt] font-bold text-text-muted uppercase mt-1">Ref. Cotización: {selectedRecord.quoteNumber || 'S/N'}</p>
+                         <p className="text-[9pt] font-bold text-text-muted uppercase mt-1">
                            Método de Pago: {selectedRecord.paymentMethod ? (selectedRecord.paymentMethod === 'transferencia' ? 'Transferencia' : 'Efectivo') : 'No especificado'}
                          </p>
                       </div>
@@ -976,12 +976,12 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
 
                 {/* Descripción del Servicio - With Overflow Handling */}
                 <div className="space-y-2 mb-12 break-inside-avoid">
-                   <div className="bg-slate-900 text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">
+                   <div className="bg-secondary text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">
                        Descripción / Servicio Solicitado
                    </div>
-                   <div className="bg-white p-4 rounded-lg border border-slate-200">
-                     <p className="text-[10pt] font-bold text-slate-900 uppercase mb-2 block">{selectedRecord.serviceType}</p>
-                     <p className="text-[10pt] text-slate-700 leading-relaxed" style={{wordWrap: 'break-word', overflowWrap: 'break-word'}}>
+                   <div className="bg-surface p-4 rounded-lg border border-border">
+                     <p className="text-[10pt] font-bold text-text uppercase mb-2 block">{selectedRecord.serviceType}</p>
+                     <p className="text-[10pt] text-text leading-relaxed" style={{wordWrap: 'break-word', overflowWrap: 'break-word'}}>
                         {selectedRecord.description || 'Sin descripción detallada.'}
                      </p>
                    </div>
@@ -991,22 +991,22 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                   <div className="signature-section">
                       <div className="grid grid-cols-3 gap-12 text-center">
                          <div className="signature-line border-t-2 border-slate-900 pt-4">
-                             <p className="text-[9pt] font-black uppercase text-slate-900">{administrativeCoordinatorName}</p>
-                             <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">{administrativeCoordinatorPos}</p>
-                             <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Vo. Bo.</p>
+                             <p className="text-[9pt] font-black uppercase text-text">{administrativeCoordinatorName}</p>
+                             <p className="text-[7pt] font-bold text-text-muted mt-1 uppercase tracking-widest">{administrativeCoordinatorPos}</p>
+                             <p className="text-[7pt] font-bold text-text-muted uppercase tracking-widest">Vo. Bo.</p>
                          </div>
                         <div className="signature-line border-t-2 border-slate-900 pt-4">
-                            <p className="text-[9pt] font-black uppercase text-slate-900">{directorName}</p>
-                            <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Director General</p>
-                            <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Autorización</p>
+                            <p className="text-[9pt] font-black uppercase text-text">{directorName}</p>
+                            <p className="text-[7pt] font-bold text-text-muted mt-1 uppercase tracking-widest">Director General</p>
+                            <p className="text-[7pt] font-bold text-text-muted uppercase tracking-widest">Autorización</p>
                         </div>
                         <div className="signature-line border-t-2 border-slate-900 pt-4">
-                            <p className="text-[9pt] font-black uppercase text-slate-900">Nombre y Firma</p>
-                            <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Recibido</p>
-                            <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Sello</p>
+                            <p className="text-[9pt] font-black uppercase text-text">Nombre y Firma</p>
+                            <p className="text-[7pt] font-bold text-text-muted mt-1 uppercase tracking-widest">Recibido</p>
+                            <p className="text-[7pt] font-bold text-text-muted uppercase tracking-widest">Sello</p>
                         </div>
                       </div>
-                           <div className="text-center mt-8 border-t border-slate-200 pt-2">
+                           <div className="text-center mt-8 border-t border-border pt-2">
                         <p className="text-[7pt] font-black text-slate-300 uppercase tracking-[0.3em]">Sistema de Gestion de Parque Vehicular • DIF Municipal La Paz</p>
                     </div>
                   </div>
@@ -1026,12 +1026,12 @@ const MaintStat: React.FC<{ label: string, value: string, icon: string, color: s
     green: 'bg-green-50 text-green-600 border-green-100'
   };
   return (
-    <div className={`bg-white p-6 rounded-3xl border shadow-sm group hover:scale-[1.02] transition-all duration-300 ${colorMap[color]}`}>
+    <div className={`bg-surface p-6 rounded-3xl border shadow-sm group hover:scale-[1.02] transition-all duration-300 ${colorMap[color]}`}>
       <div className="flex items-center justify-between mb-4">
-        <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">{label}</p>
+        <p className="text-text-muted text-[10px] font-black uppercase tracking-widest">{label}</p>
         <span className="material-symbols-outlined text-xl">{icon}</span>
       </div>
-      <p className="text-slate-900 text-2xl font-black tracking-tighter">{value}</p>
+      <p className="text-text text-2xl font-black tracking-tighter">{value}</p>
     </div>
   );
 };
