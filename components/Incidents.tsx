@@ -642,23 +642,25 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, incidentTypes = [], se
 
                {/* Firmas - Formal Signature Section */}
                <div className="signature-section absolute bottom-[1.5cm] left-[1.5cm] right-[1.5cm]">
-                   <div className={`grid gap-8 text-center ${coordName ? 'grid-cols-3' : 'grid-cols-2 gap-24'}`}>
+                   <div className="grid gap-8 text-center grid-cols-3">
                        <div className="signature-line border-t-2 border-slate-900 pt-4">
-                           <p className="text-[9pt] font-black uppercase text-slate-900">{reportDriver?.name || 'OPERADOR RESPONSABLE'}</p>
-                           <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Operador</p>
-                           <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Aviso de Incidencia</p>
+                           <p className="text-[9pt] font-black uppercase text-slate-900 h-4"></p>
+                           <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">Nombre y Firma</p>
+                           <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Reporta Incidencia</p>
                        </div>
-                       {coordName && (
-                         <div className="signature-line border-t-2 border-slate-900 pt-4">
-                             <p className="text-[9pt] font-black uppercase text-slate-900">{coordName}</p>
-                             <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">{coordPos}</p>
-                             <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Vo. Bo.</p>
-                         </div>
-                       )}
                        <div className="signature-line border-t-2 border-slate-900 pt-4">
                            <p className="text-[9pt] font-black uppercase text-slate-900">{managerName}</p>
                            <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">{managerPos}</p>
                            <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Validación</p>
+                       </div>
+                       <div className="signature-line border-t-2 border-slate-900 pt-4">
+                           {coordName ? (
+                               <p className="text-[9pt] font-black uppercase text-slate-900">{coordName}</p>
+                           ) : (
+                               <p className="text-[9pt] font-black uppercase text-slate-900 h-4"></p>
+                           )}
+                           <p className="text-[7pt] font-bold text-slate-400 mt-1 uppercase tracking-widest">{coordPos}</p>
+                           <p className="text-[7pt] font-bold text-slate-400 uppercase tracking-widest">Enterado</p>
                        </div>
                    </div>
                    <div className="text-center mt-8 border-t border-slate-200 pt-2">
