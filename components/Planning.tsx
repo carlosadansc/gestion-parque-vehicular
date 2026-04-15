@@ -124,8 +124,8 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
 
     return {
       date: formData.date ? '' : 'La fecha es obligatoria.',
-      areaId: formData.areaId ? '' : 'Selecciona un area.',
-      vehicleId: formData.vehicleId ? '' : 'Selecciona un vehiculo.',
+      areaId: formData.areaId ? '' : 'Selecciona un área.',
+      vehicleId: formData.vehicleId ? '' : 'Selecciona un vehículo.',
       driverId: formData.driverId ? '' : 'Selecciona un chofer.',
       departureTime: hasArrivalWithoutDeparture ? 'Captura hora de salida antes de la llegada.' : '',
       arrivalTime: hasInvalidTimeRange ? 'La hora de llegada no puede ser menor a la de salida.' : '',
@@ -138,11 +138,11 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
     const alreadyExists = normalizedAreaName && areas.some(a => normalizeName(a.name || '') === normalizedAreaName);
     return {
       name: !areaFormData.name.trim()
-        ? 'El nombre del area es obligatorio.'
+        ? 'El nombre del área es obligatorio.'
         : areaFormData.name.trim().length < 2
           ? 'Captura al menos 2 caracteres.'
           : alreadyExists
-            ? 'Esa area ya existe.'
+            ? 'Esa área ya existe.'
             : '',
     };
   }, [areaFormData, areas]);
@@ -276,7 +276,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
       setFormError('');
       setTouched({});
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Error al guardar planeacion";
+      const message = err instanceof Error ? err.message : "Error al guardar planeación";
       setFormError(message);
     } finally {
       setIsSaving(false);
@@ -328,7 +328,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
     setAreaFormError('');
     setAreaTouched({ name: true });
     if (!isAreaFormValid) {
-      const firstError = Object.values(areaFieldErrors).find(Boolean) || 'Revisa el nombre del area.';
+      const firstError = Object.values(areaFieldErrors).find(Boolean) || 'Revisa el nombre del área.';
       setAreaFormError(firstError);
       return;
     }
@@ -340,7 +340,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
       setAreaFormError('');
       setAreaTouched({});
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Error al guardar area";
+      const message = err instanceof Error ? err.message : "Error al guardar área";
       setAreaFormError(message);
     } finally {
       setIsSavingArea(false);
@@ -352,7 +352,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
     try {
       await onDeleteArea(id);
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Error al eliminar area";
+      const message = err instanceof Error ? err.message : "Error al eliminar área";
       setAreaFormError(message);
     }
   };
@@ -1132,7 +1132,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
               <div className="pt-4 flex gap-3">
                 <button type="button" disabled={isSaving} onClick={() => { setFormError(''); setTouched({}); setShowModal(false); }} className="flex-1 py-3 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-100 rounded-md transition-all disabled:opacity-50">Cancelar</button>
                 <button type="submit" disabled={isSaving} className="flex-[2] py-3 bg-primary text-white text-[11px] font-black uppercase tracking-widest rounded-md hover:opacity-90 transition-all disabled:opacity-80 flex items-center justify-center gap-2">
-                  {isSaving ? <><span className="material-symbols-outlined ui-icon animate-spin">sync</span> {editingPlanning ? 'Actualizando asignacion...' : 'Guardando asignacion...'}</> : (editingPlanning ? 'Actualizar Asignación' : 'Confirmar Planeación')}
+                  {isSaving ? <><span className="material-symbols-outlined ui-icon animate-spin">sync</span> {editingPlanning ? 'Actualizando asignación...' : 'Guardando asignación...'}</> : (editingPlanning ? 'Actualizar Asignación' : 'Confirmar Planeación')}
                 </button>
               </div>
             </form>

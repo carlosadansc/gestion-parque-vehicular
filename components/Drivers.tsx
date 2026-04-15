@@ -1,6 +1,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { Driver, Vehicle, AppSetting } from '../types';
+import { SortableTh, useSortableData } from '../utils/tableSort';
 
 interface DriversProps {
   drivers: Driver[];
@@ -41,8 +42,8 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
     const phoneDigits = (formData.phone || '').replace(/\D/g, '');
     return {
       name: !formData.name.trim() ? 'El nombre es obligatorio.' : formData.name.trim().length < 3 ? 'Captura al menos 3 caracteres.' : '',
-      phone: !formData.phone.trim() ? 'El telefono es obligatorio.' : phoneDigits.length < 7 ? 'Captura un telefono valido.' : '',
-      licenseNumber: formData.licenseNumber.trim() && formData.licenseNumber.trim().length < 4 ? 'El numero de licencia es demasiado corto.' : '',
+      phone: !formData.phone.trim() ? 'El teléfono es obligatorio.' : phoneDigits.length < 7 ? 'Captura un teléfono válido.' : '',
+      licenseNumber: formData.licenseNumber.trim() && formData.licenseNumber.trim().length < 4 ? 'El número de licencia es demasiado corto.' : '',
     };
   }, [formData]);
 
@@ -76,6 +77,23 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
       return matchesSearch && matchesStatus;
     });
   }, [drivers, vehicles, searchQuery, statusFilter]);
+
+  type DriverSortKey = 'driver' | 'license' | 'contact' | 'vehicle' | 'status';
+  const driverSortAccessors = useMemo<Record<DriverSortKey, (driver: Driver) => unknown>>(() => ({
+    driver: driver => driver.name,
+    license: driver => `${driver.licenseType || ''} ${driver.licenseNumber || ''}`,
+    contact: driver => driver.phone,
+    vehicle: driver => {
+      const assignedVehicle = vehicles.find(v => v.assignedDriverId === driver.id) || vehicles.find(v => v.id === driver.assignedVehicleId);
+      return `${assignedVehicle?.model || ''} ${assignedVehicle?.plate || ''}`;
+    },
+    status: driver => driver.status
+  }), [vehicles]);
+  const {
+    sortedItems: sortedDrivers,
+    sortConfig,
+    requestSort
+  } = useSortableData(filteredDrivers, driverSortAccessors, { key: 'driver', direction: 'asc' });
 
   const handleEdit = (driver: Driver) => {
     setFormError('');
@@ -219,16 +237,16 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
           <table className="table-professional table-sticky-header table-density-compact">
             <thead>
               <tr>
-                <th>Chofer</th>
-                <th>Licencia</th>
-                <th>Contacto</th>
-                <th>Vehículo</th>
-                <th>Estado</th>
+                <SortableTh label="Chofer" sortKey="driver" sortConfig={sortConfig} onSort={requestSort} />
+                <SortableTh label="Licencia" sortKey="license" sortConfig={sortConfig} onSort={requestSort} />
+                <SortableTh label="Contacto" sortKey="contact" sortConfig={sortConfig} onSort={requestSort} />
+                <SortableTh label="Vehículo" sortKey="vehicle" sortConfig={sortConfig} onSort={requestSort} />
+                <SortableTh label="Estado" sortKey="status" sortConfig={sortConfig} onSort={requestSort} />
                 <th className="text-right">Acciones</th>
               </tr>
             </thead>
             <tbody>
-              {filteredDrivers.map((driver) => {
+              {sortedDrivers.map((driver) => {
                 const assignedVehicle = vehicles.find(v => v.assignedDriverId === driver.id) || vehicles.find(v => v.id === driver.assignedVehicleId);
                 return (
                   <tr key={driver.id}>

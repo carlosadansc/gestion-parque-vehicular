@@ -6,6 +6,7 @@ import {
 } from 'recharts';
 import { Vehicle, FuelEntry, MaintenanceRecord, Incident, AppSetting } from '../types';
 import { usePDF } from 'react-to-pdf';
+import { SortableTh, useSortableData } from '../utils/tableSort';
 
 interface ReportsProps {
   vehicles: Vehicle[];
@@ -16,6 +17,8 @@ interface ReportsProps {
 }
 
 type ReportType = 'financial' | 'operations' | 'incidents';
+type CostByVehicleRow = { name: string; fuel: number; maintenance: number };
+type CostByVehicleSortKey = 'vehicle' | 'fuel' | 'maintenance' | 'total';
 
 const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRecords, incidents, settings = [] }) => {
   // Filtros
@@ -146,7 +149,7 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
 
   // 1. Costos por Vehículo (Bar Chart)
   const costByVehicleData = useMemo(() => {
-    const data: Record<string, { name: string, fuel: number, maintenance: number }> = {};
+    const data: Record<string, CostByVehicleRow> = {};
     
     // Inicializar con vehículos filtrados
     const targetVehicles = selectedVehicleId === 'all' ? vehicles : vehicles.filter(v => v.id === selectedVehicleId);
@@ -165,6 +168,17 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
 
     return Object.values(data).sort((a, b) => (b.fuel + b.maintenance) - (a.fuel + a.maintenance)).slice(0, 10);
   }, [filteredData, vehicles, selectedVehicleId]);
+  const costByVehicleSortAccessors = useMemo<Record<CostByVehicleSortKey, (item: CostByVehicleRow) => unknown>>(() => ({
+    vehicle: item => item.name,
+    fuel: item => item.fuel,
+    maintenance: item => item.maintenance,
+    total: item => item.fuel + item.maintenance
+  }), []);
+  const {
+    sortedItems: sortedCostByVehicleData,
+    sortConfig: costByVehicleSortConfig,
+    requestSort: requestCostByVehicleSort
+  } = useSortableData(costByVehicleData, costByVehicleSortAccessors, { key: 'total', direction: 'desc' });
 
   // 2. Rendimiento Combustible (Line Chart simple)
   const efficiencyData = useMemo(() => {
@@ -189,16 +203,18 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
 
   // 3. Distribución de Incidencias (Pie Chart)
   const incidentTypeData = useMemo(() => {
-    const counts: Record<string, number> = { mechanical: 0, traffic: 0, accident: 0, theft: 0 };
+    const counts: Record<string, number> = {};
     filteredData.incidents.forEach(i => {
-      if (counts[i.type] !== undefined) counts[i.type]++;
+      const typeKey = String(i.type || '').trim() || 'Sin tipo';
+      counts[typeKey] = (counts[typeKey] || 0) + 1;
     });
     const mapLabels: any = { mechanical: 'Mecánica', traffic: 'Tráfico', accident: 'Accidente', theft: 'Robo' };
     const colors: any = { mechanical: '#3b82f6', traffic: '#f59e0b', accident: '#ef4444', theft: '#8b5cf6' };
+    const fallbackColors = ['#64748b', '#0f766e', '#7c3aed', '#be123c', '#0369a1'];
 
     return Object.entries(counts)
       .filter(([_, val]) => val > 0)
-      .map(([key, val]) => ({ name: mapLabels[key], value: val, color: colors[key] }));
+      .map(([key, val], index) => ({ name: mapLabels[key] || key, value: val, color: colors[key] || fallbackColors[index % fallbackColors.length] }));
   }, [filteredData]);
 
 
@@ -758,14 +774,14 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
                <table className="w-full text-left border-collapse data-table">
                    <thead>
                        <tr className="bg-slate-100 text-slate-600">
-                           <th className="p-3 text-[9px] font-black uppercase border border-slate-200">Vehículo</th>
-                           <th className="p-3 text-[9px] font-black uppercase text-right border border-slate-200">Combustible</th>
-                           <th className="p-3 text-[9px] font-black uppercase text-right border border-slate-200">Mantenimiento</th>
-                           <th className="p-3 text-[9px] font-black uppercase text-right border border-slate-200">Total</th>
+                           <SortableTh label="Vehículo" sortKey="vehicle" sortConfig={costByVehicleSortConfig} onSort={requestCostByVehicleSort} className="p-3 text-[9px] font-black uppercase border border-slate-200" />
+                           <SortableTh label="Combustible" sortKey="fuel" sortConfig={costByVehicleSortConfig} onSort={requestCostByVehicleSort} align="right" className="p-3 text-[9px] font-black uppercase text-right border border-slate-200" />
+                           <SortableTh label="Mantenimiento" sortKey="maintenance" sortConfig={costByVehicleSortConfig} onSort={requestCostByVehicleSort} align="right" className="p-3 text-[9px] font-black uppercase text-right border border-slate-200" />
+                           <SortableTh label="Total" sortKey="total" sortConfig={costByVehicleSortConfig} onSort={requestCostByVehicleSort} align="right" className="p-3 text-[9px] font-black uppercase text-right border border-slate-200" />
                        </tr>
                    </thead>
                    <tbody>
-                       {costByVehicleData.map((item, idx) => (
+                       {sortedCostByVehicleData.map((item, idx) => (
                            <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
                                <td className="p-3 text-[10px] font-bold border border-slate-200 print-truncate max-w-[150px]">{item.name}</td>
                                <td className="p-3 text-[10px] text-right font-mono border border-slate-200">${item.fuel.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
@@ -929,14 +945,14 @@ const Reports: React.FC<ReportsProps> = ({ vehicles, fuelEntries, maintenanceRec
                   <table className="w-full text-left border-collapse data-table">
                     <thead>
                       <tr className="bg-slate-100 text-slate-600">
-                        <th className="p-2 text-[8px] font-black uppercase border border-slate-200">Vehículo</th>
-                        <th className="p-2 text-[8px] font-black uppercase text-right border border-slate-200">Combustible</th>
-                        <th className="p-2 text-[8px] font-black uppercase text-right border border-slate-200">Mantenimiento</th>
-                        <th className="p-2 text-[8px] font-black uppercase text-right border border-slate-200">Total</th>
+                        <SortableTh label="Vehículo" sortKey="vehicle" sortConfig={costByVehicleSortConfig} onSort={requestCostByVehicleSort} className="p-2 text-[8px] font-black uppercase border border-slate-200" />
+                        <SortableTh label="Combustible" sortKey="fuel" sortConfig={costByVehicleSortConfig} onSort={requestCostByVehicleSort} align="right" className="p-2 text-[8px] font-black uppercase text-right border border-slate-200" />
+                        <SortableTh label="Mantenimiento" sortKey="maintenance" sortConfig={costByVehicleSortConfig} onSort={requestCostByVehicleSort} align="right" className="p-2 text-[8px] font-black uppercase text-right border border-slate-200" />
+                        <SortableTh label="Total" sortKey="total" sortConfig={costByVehicleSortConfig} onSort={requestCostByVehicleSort} align="right" className="p-2 text-[8px] font-black uppercase text-right border border-slate-200" />
                       </tr>
                     </thead>
                     <tbody>
-                      {costByVehicleData.map((item, idx) => (
+                      {sortedCostByVehicleData.map((item, idx) => (
                         <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
                           <td className="p-2 text-[9px] font-bold border border-slate-200 print-truncate max-w-[100px]">{item.name}</td>
                           <td className="p-2 text-[9px] text-right font-mono border border-slate-200">${item.fuel.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>

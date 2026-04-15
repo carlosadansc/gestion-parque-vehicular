@@ -2,6 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { FuelEntry, FuelAcquisition, FuelDelivery, Vehicle, Driver, AppSetting, Area, Supplier } from '../types';
+import { SortableTh, useSortableData } from '../utils/tableSort';
 
 interface FuelProps {
   fuelHistory: FuelEntry[];
@@ -20,6 +21,11 @@ interface FuelProps {
   onSync: () => void;
   settings?: AppSetting[];
 }
+
+type ProcessedFuelEntry = FuelEntry & { performance?: number };
+type FuelLoadSortKey = 'date' | 'vehicle' | 'odometer' | 'liters' | 'performance' | 'cost';
+type FuelAcquisitionSortKey = 'consecutive' | 'folio' | 'type' | 'validity' | 'description' | 'area' | 'supplier' | 'amount';
+type FuelDeliverySortKey = 'consecutive' | 'date' | 'acquisition' | 'type' | 'area' | 'purpose' | 'recipient' | 'amount';
 
 const toDateInputValue = (value: unknown, fallback = ''): string => {
   if (!value) return fallback;
@@ -156,7 +162,7 @@ const Fuel: React.FC<FuelProps> = ({
       entriesByVehicle[entry.vehicleId].push(entry);
     });
 
-    const historyWithPerformance: (FuelEntry & { performance?: number })[] = [];
+    const historyWithPerformance: ProcessedFuelEntry[] = [];
     let totalPerformanceSum = 0;
     let performanceCount = 0;
 
@@ -190,6 +196,24 @@ const Fuel: React.FC<FuelProps> = ({
 
   const totalCost = useMemo(() => fuelHistory.reduce((acc, curr) => acc + (Number(curr.cost) || 0), 0), [fuelHistory]);
   const totalLiters = useMemo(() => fuelHistory.reduce((acc, curr) => acc + (Number(curr.liters) || 0), 0), [fuelHistory]);
+  const fuelLoadSortAccessors = useMemo<Record<FuelLoadSortKey, (entry: ProcessedFuelEntry) => unknown>>(() => ({
+    date: entry => entry.date,
+    vehicle: entry => {
+      const vehicle = vehicles.find(v => v.id === entry.vehicleId);
+      const driver = drivers.find(d => d.id === entry.driverId);
+      return `${vehicle?.plate || entry.vehicleId || ''} ${driver?.name || entry.driverId || ''}`;
+    },
+    odometer: entry => Number(entry.odometer) || 0,
+    liters: entry => Number(entry.liters) || 0,
+    performance: entry => entry.performance ?? null,
+    cost: entry => Number(entry.cost) || 0
+  }), [drivers, vehicles]);
+  const {
+    sortedItems: sortedFuelHistory,
+    sortConfig: fuelLoadSortConfig,
+    requestSort: requestFuelLoadSort
+  } = useSortableData(processedHistory, fuelLoadSortAccessors, { key: 'date', direction: 'desc' });
+
   const filteredAcquisitions = useMemo(() => {
     const startMs = acquisitionFilters.startDate
       ? new Date(`${acquisitionFilters.startDate}T00:00:00`).getTime()
@@ -281,6 +305,44 @@ const Fuel: React.FC<FuelProps> = ({
       })
       .sort((a, b) => new Date(String(b.date || '')).getTime() - new Date(String(a.date || '')).getTime());
   }, [fuelDeliveries, fuelAcquisitions, deliveryFilters]);
+
+  const acquisitionSortAccessors = useMemo<Record<FuelAcquisitionSortKey, (entry: FuelAcquisition) => unknown>>(() => ({
+    consecutive: entry => Number(entry.consecutiveNumber) || 0,
+    folio: entry => entry.internalFolio || '',
+    type: entry => entry.isQr ? 'QR' : 'VALES',
+    validity: entry => entry.validFrom || entry.validTo || '',
+    description: entry => entry.description || '',
+    area: entry => entry.area || '',
+    supplier: entry => entry.supplier || '',
+    amount: entry => Number(entry.amount) || 0
+  }), []);
+  const {
+    sortedItems: sortedAcquisitions,
+    sortConfig: acquisitionSortConfig,
+    requestSort: requestAcquisitionSort
+  } = useSortableData(filteredAcquisitions, acquisitionSortAccessors, { key: 'consecutive', direction: 'desc' });
+
+  const deliverySortAccessors = useMemo<Record<FuelDeliverySortKey, (entry: FuelDelivery) => unknown>>(() => ({
+    consecutive: entry => Number(entry.consecutiveNumber) || 0,
+    date: entry => entry.date,
+    acquisition: entry => {
+      const acquisition = fuelAcquisitions.find(item => item.id === entry.acquisitionId);
+      return Number(entry.acquisitionConsecutiveNumber || acquisition?.consecutiveNumber) || 0;
+    },
+    type: entry => {
+      const acquisition = fuelAcquisitions.find(item => item.id === entry.acquisitionId);
+      return entry.acquisitionType || (acquisition?.isQr ? 'qr' : 'voucher');
+    },
+    area: entry => entry.area || '',
+    purpose: entry => entry.purpose || '',
+    recipient: entry => `${entry.recipientName || ''} ${entry.recipientPosition || ''}`,
+    amount: entry => Number(entry.amount) || 0
+  }), [fuelAcquisitions]);
+  const {
+    sortedItems: sortedDeliveries,
+    sortConfig: deliverySortConfig,
+    requestSort: requestDeliverySort
+  } = useSortableData(filteredDeliveries, deliverySortAccessors, { key: 'date', direction: 'desc' });
 
   const deliveryTotals = useMemo(() => {
     const totalAmount = filteredDeliveries.reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
@@ -392,7 +454,7 @@ const Fuel: React.FC<FuelProps> = ({
 
     setAcquisitionError('');
     if (!acquisitionForm.description.trim() || !acquisitionForm.amount || !acquisitionForm.area.trim() || !acquisitionForm.supplier.trim()) {
-      setAcquisitionError('Debes completar descripcion, monto, area y proveedor.');
+      setAcquisitionError('Debes completar descripción, monto, área y proveedor.');
       return;
     }
     if (!acquisitionForm.validFrom || !acquisitionForm.validTo) {
@@ -428,7 +490,7 @@ const Fuel: React.FC<FuelProps> = ({
       setShowAcquisitionModal(false);
       resetAcquisitionForm();
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Error al guardar adquisicion de combustible';
+      const message = err instanceof Error ? err.message : 'Error al guardar adquisición de combustible';
       setAcquisitionError(message);
     } finally {
       setIsSavingAcquisition(false);
@@ -477,13 +539,13 @@ const Fuel: React.FC<FuelProps> = ({
 
     setDeliveryError('');
     if (!deliveryForm.acquisitionId || !deliveryForm.area.trim() || !deliveryForm.amount || !deliveryForm.purpose.trim() || !deliveryForm.recipientName.trim()) {
-      setDeliveryError('Debes completar adquisicion, area, monto, motivo y quien recibe.');
+      setDeliveryError('Debes completar adquisición, área, monto, motivo y quien recibe.');
       return;
     }
 
     const selectedAcquisitionForDelivery = fuelAcquisitions.find(item => item.id === deliveryForm.acquisitionId);
     if (!selectedAcquisitionForDelivery) {
-      setDeliveryError('La adquisicion seleccionada no existe.');
+      setDeliveryError('La adquisición seleccionada no existe.');
       return;
     }
 
@@ -495,7 +557,7 @@ const Fuel: React.FC<FuelProps> = ({
 
     const availableAmount = getAvailableForAcquisition(deliveryForm.acquisitionId, editingDelivery?.id);
     if (parsedAmount > availableAmount + 0.0001) {
-      setDeliveryError(`El monto excede el saldo disponible de la adquisicion (${Math.max(availableAmount, 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}).`);
+      setDeliveryError(`El monto excede el saldo disponible de la adquisición (${Math.max(availableAmount, 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}).`);
       return;
     }
 
@@ -771,7 +833,7 @@ const Fuel: React.FC<FuelProps> = ({
               ? 'Control de gastos y rendimiento por unidad'
               : activeTab === 'acquisitions'
                 ? 'Adquisiciones de vales y combustible QR'
-                : 'Entregas de combustible por area y justificacion'}
+                : 'Entregas de combustible por área y justificación'}
           </p>
         </div>
         <div className="flex gap-2">
@@ -819,7 +881,7 @@ const Fuel: React.FC<FuelProps> = ({
             <span className="material-symbols-outlined ui-icon">
               {activeTab === 'loads' ? 'local_gas_station' : activeTab === 'acquisitions' ? 'receipt_long' : 'handshake'}
             </span>
-            {activeTab === 'loads' ? 'Agregar Carga' : activeTab === 'acquisitions' ? 'Nueva Adquisicion' : 'Nueva Entrega'}
+            {activeTab === 'loads' ? 'Agregar Carga' : activeTab === 'acquisitions' ? 'Nueva Adquisición' : 'Nueva Entrega'}
             </button>
         </div>
       </div>
@@ -856,7 +918,7 @@ const Fuel: React.FC<FuelProps> = ({
 
       {activeTab === 'loads' ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 no-print">
-          <FuelStat label="Rendimiento Promedio" value={globalAveragePerformance > 0 ? globalAveragePerformance.toFixed(2) : "---"} unit="KM/L" icon="analytics" desc="Basado en historial de odometro" />
+          <FuelStat label="Rendimiento Promedio" value={globalAveragePerformance > 0 ? globalAveragePerformance.toFixed(2) : "---"} unit="KM/L" icon="analytics" desc="Basado en historial de odómetro" />
           <FuelStat label="Gasto Total" value={`$${(totalCost || 0).toLocaleString()}`} icon="attach_money" trend="+12%" isNegativeTrend />
           <FuelStat label="Litros Totales" value={(totalLiters || 0).toLocaleString()} unit="L" icon="water_drop" desc={`${(fuelHistory?.length || 0)} cargas registradas`} />
         </div>
@@ -889,7 +951,7 @@ const Fuel: React.FC<FuelProps> = ({
                 ? 'Listado completo de cargas'
                 : activeTab === 'acquisitions'
                   ? 'Registros de vales y combustible QR'
-                  : 'Distribucion por areas y motivo de entrega'}
+                  : 'Distribución por áreas y motivo de entrega'}
             </p>
             {activeTab === 'acquisitions' && (
               <p className="text-[11px] font-bold text-slate-500 mt-2">
@@ -996,17 +1058,17 @@ const Fuel: React.FC<FuelProps> = ({
           <table className="table-professional table-density-compact">
             <thead>
               <tr>
-                <th>Fecha</th>
-                <th>Vehículo</th>
-                <th className="text-right">Odómetro</th>
-                <th className="text-right">Litros</th>
-                <th className="text-right">Rendimiento</th>
-                <th className="text-right">Costo</th>
+                <SortableTh label="Fecha" sortKey="date" sortConfig={fuelLoadSortConfig} onSort={requestFuelLoadSort} />
+                <SortableTh label="Vehículo" sortKey="vehicle" sortConfig={fuelLoadSortConfig} onSort={requestFuelLoadSort} />
+                <SortableTh label="Odómetro" sortKey="odometer" sortConfig={fuelLoadSortConfig} onSort={requestFuelLoadSort} align="right" className="text-right" />
+                <SortableTh label="Litros" sortKey="liters" sortConfig={fuelLoadSortConfig} onSort={requestFuelLoadSort} align="right" className="text-right" />
+                <SortableTh label="Rendimiento" sortKey="performance" sortConfig={fuelLoadSortConfig} onSort={requestFuelLoadSort} align="right" className="text-right" />
+                <SortableTh label="Costo" sortKey="cost" sortConfig={fuelLoadSortConfig} onSort={requestFuelLoadSort} align="right" className="text-right" />
                 <th className="text-center">Acciones</th>
               </tr>
             </thead>
             <tbody>
-              {processedHistory.map((entry) => {
+              {sortedFuelHistory.map((entry) => {
                 const vehicle = vehicles.find(v => v.id === entry.vehicleId);
                 const driver = drivers.find(d => d.id === entry.driverId);
                 return (
@@ -1044,7 +1106,7 @@ const Fuel: React.FC<FuelProps> = ({
                   </tr>
                 );
               })}
-              {processedHistory.length === 0 && (
+              {sortedFuelHistory.length === 0 && (
                 <tr>
                   <td colSpan={7} className="px-6 py-10 text-center text-slate-400 text-sm font-bold">Sin registros de cargas.</td>
                 </tr>
@@ -1055,19 +1117,19 @@ const Fuel: React.FC<FuelProps> = ({
           <table className="table-professional table-density-compact">
             <thead>
               <tr>
-                <th>Consec.</th>
-                <th>Folio Interno</th>
-                <th>Modalidad</th>
-                <th>Vigencia</th>
-                <th>Descripcion</th>
-                <th>Area</th>
-                <th>Proveedor</th>
-                <th className="text-right">Monto</th>
+                <SortableTh label="Consec." sortKey="consecutive" sortConfig={acquisitionSortConfig} onSort={requestAcquisitionSort} />
+                <SortableTh label="Folio Interno" sortKey="folio" sortConfig={acquisitionSortConfig} onSort={requestAcquisitionSort} />
+                <SortableTh label="Modalidad" sortKey="type" sortConfig={acquisitionSortConfig} onSort={requestAcquisitionSort} />
+                <SortableTh label="Vigencia" sortKey="validity" sortConfig={acquisitionSortConfig} onSort={requestAcquisitionSort} />
+                <SortableTh label="Descripción" sortKey="description" sortConfig={acquisitionSortConfig} onSort={requestAcquisitionSort} />
+                <SortableTh label="Área" sortKey="area" sortConfig={acquisitionSortConfig} onSort={requestAcquisitionSort} />
+                <SortableTh label="Proveedor" sortKey="supplier" sortConfig={acquisitionSortConfig} onSort={requestAcquisitionSort} />
+                <SortableTh label="Monto" sortKey="amount" sortConfig={acquisitionSortConfig} onSort={requestAcquisitionSort} align="right" className="text-right" />
                 <th className="text-center">Acciones</th>
               </tr>
             </thead>
             <tbody>
-              {filteredAcquisitions.map((entry) => (
+              {sortedAcquisitions.map((entry) => (
                 <tr key={entry.id}>
                   <td className="font-black text-blue-700">{entry.consecutiveNumber || '---'}</td>
                   <td className="font-medium">{entry.internalFolio || 'S/N'}</td>
@@ -1088,14 +1150,14 @@ const Fuel: React.FC<FuelProps> = ({
                       <button
                         onClick={() => handlePrintAcquisition(entry)}
                         className="btn-icon btn-icon-success"
-                        aria-label="Imprimir ticket de adquisicion"
+                        aria-label="Imprimir ticket de adquisición"
                       >
                         <span className="material-symbols-outlined ui-icon">print</span>
                       </button>
                       <button
                         onClick={() => handleEditAcquisition(entry)}
                         className="btn-icon btn-icon-primary"
-                        aria-label="Editar adquisicion"
+                        aria-label="Editar adquisición"
                       >
                         <span className="material-symbols-outlined ui-icon">edit</span>
                       </button>
@@ -1103,7 +1165,7 @@ const Fuel: React.FC<FuelProps> = ({
                   </td>
                 </tr>
               ))}
-              {filteredAcquisitions.length === 0 && (
+              {sortedAcquisitions.length === 0 && (
                 <tr>
                   <td colSpan={9} className="px-6 py-10 text-center text-slate-400 text-sm font-bold">Sin registros para el filtro seleccionado.</td>
                 </tr>
@@ -1114,19 +1176,19 @@ const Fuel: React.FC<FuelProps> = ({
           <table className="table-professional table-density-compact">
             <thead>
               <tr>
-                <th>Consec.</th>
-                <th>Fecha</th>
-                <th>Adquisicion</th>
-                <th>Tipo</th>
-                <th>Area</th>
-                <th>Motivo</th>
-                <th>Recibe</th>
-                <th className="text-right">Monto</th>
+                <SortableTh label="Consec." sortKey="consecutive" sortConfig={deliverySortConfig} onSort={requestDeliverySort} />
+                <SortableTh label="Fecha" sortKey="date" sortConfig={deliverySortConfig} onSort={requestDeliverySort} />
+                <SortableTh label="Adquisición" sortKey="acquisition" sortConfig={deliverySortConfig} onSort={requestDeliverySort} />
+                <SortableTh label="Tipo" sortKey="type" sortConfig={deliverySortConfig} onSort={requestDeliverySort} />
+                <SortableTh label="Área" sortKey="area" sortConfig={deliverySortConfig} onSort={requestDeliverySort} />
+                <SortableTh label="Motivo" sortKey="purpose" sortConfig={deliverySortConfig} onSort={requestDeliverySort} />
+                <SortableTh label="Recibe" sortKey="recipient" sortConfig={deliverySortConfig} onSort={requestDeliverySort} />
+                <SortableTh label="Monto" sortKey="amount" sortConfig={deliverySortConfig} onSort={requestDeliverySort} align="right" className="text-right" />
                 <th className="text-center">Acciones</th>
               </tr>
             </thead>
             <tbody>
-              {filteredDeliveries.map((entry) => {
+              {sortedDeliveries.map((entry) => {
                 const acquisition = fuelAcquisitions.find(item => item.id === entry.acquisitionId);
                 const availableAfterDistribution = Number(acquisition?.amount || 0) - (deliveredByAcquisitionId[entry.acquisitionId] || 0);
                 return (
@@ -1173,7 +1235,7 @@ const Fuel: React.FC<FuelProps> = ({
                 </tr>
               );
               })}
-              {filteredDeliveries.length === 0 && (
+              {sortedDeliveries.length === 0 && (
                 <tr>
                   <td colSpan={9} className="px-6 py-10 text-center text-slate-400 text-sm font-bold">Sin entregas para el filtro seleccionado.</td>
                 </tr>
@@ -1335,7 +1397,7 @@ const Fuel: React.FC<FuelProps> = ({
                   <span className="material-symbols-outlined text-emerald-600" aria-hidden="true">receipt_long</span>
                 </div>
                 <div>
-                  <h3 className="text-lg font-black text-slate-900">{editingAcquisition ? 'Editar Adquisicion' : 'Nueva Adquisicion'}</h3>
+                  <h3 className="text-lg font-black text-slate-900">{editingAcquisition ? 'Editar Adquisición' : 'Nueva Adquisición'}</h3>
                 </div>
               </div>
               <button
@@ -1519,7 +1581,7 @@ const Fuel: React.FC<FuelProps> = ({
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Adquisicion Origen</label>
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Adquisición Origen</label>
                 <select
                   required
                   disabled={isSavingDelivery}
@@ -1545,7 +1607,7 @@ const Fuel: React.FC<FuelProps> = ({
               {selectedAcquisitionForDelivery && (
                 <div className="bg-slate-50 border border-slate-200 rounded-md p-3 text-xs">
                   <p className="font-black text-slate-700 uppercase tracking-wider">
-                    Adquisicion: #{selectedAcquisitionForDelivery.consecutiveNumber || '---'} - {selectedAcquisitionForDelivery.isQr ? 'QR' : 'VALE'}
+                    Adquisición: #{selectedAcquisitionForDelivery.consecutiveNumber || '---'} - {selectedAcquisitionForDelivery.isQr ? 'QR' : 'VALE'}
                   </p>
                   <p className="font-bold text-slate-500 mt-1">
                     Saldo disponible: ${Math.max(deliveryAvailableAmount, 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
@@ -1856,7 +1918,7 @@ const Fuel: React.FC<FuelProps> = ({
                     <tr>
                       <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-slate-600">Consec.</th>
                       <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-slate-600">Fecha</th>
-                      <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-slate-600">Adquisicion</th>
+                      <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-slate-600">Adquisición</th>
                       <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-slate-600">Tipo</th>
                       <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-slate-600">Area</th>
                       <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-slate-600">Recibe</th>
@@ -1956,9 +2018,9 @@ const Fuel: React.FC<FuelProps> = ({
 
               <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 mb-6">
                 <div className="grid grid-cols-2 gap-3 text-[9pt]">
-                  <p><span className="font-black text-slate-500 uppercase tracking-wider">Adquisicion:</span> <span className="font-bold text-slate-900">#{selectedDelivery.acquisitionConsecutiveNumber || '---'} {`(${(selectedDelivery.acquisitionType || (fuelAcquisitions.find(item => item.id === selectedDelivery.acquisitionId)?.isQr ? 'qr' : 'voucher')) === 'qr' ? 'QR' : 'VALE'})`}</span></p>
+                  <p><span className="font-black text-slate-500 uppercase tracking-wider">Adquisición:</span> <span className="font-bold text-slate-900">#{selectedDelivery.acquisitionConsecutiveNumber || '---'} {`(${(selectedDelivery.acquisitionType || (fuelAcquisitions.find(item => item.id === selectedDelivery.acquisitionId)?.isQr ? 'qr' : 'voucher')) === 'qr' ? 'QR' : 'VALE'})`}</span></p>
                   <p><span className="font-black text-slate-500 uppercase tracking-wider">Folio:</span> <span className="font-bold text-slate-900">{(selectedDelivery.acquisitionInternalFolio || 'S/N').toUpperCase()}</span></p>
-                  <p><span className="font-black text-slate-500 uppercase tracking-wider">Area Destino:</span> <span className="font-bold text-slate-900">{selectedDelivery.area}</span></p>
+                  <p><span className="font-black text-slate-500 uppercase tracking-wider">Área Destino:</span> <span className="font-bold text-slate-900">{selectedDelivery.area}</span></p>
                   <p><span className="font-black text-slate-500 uppercase tracking-wider">Monto Entregado:</span> <span className="font-black text-primary text-lg">${(Number(selectedDelivery.amount) || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</span></p>
                 </div>
               </div>
@@ -2009,7 +2071,7 @@ const Fuel: React.FC<FuelProps> = ({
               >
                 Cerrar
               </button>
-              <h3 className="font-black uppercase tracking-widest text-sm">Vista Previa Ticket Adquisicion</h3>
+              <h3 className="font-black uppercase tracking-widest text-sm">Vista Previa Ticket Adquisición</h3>
             </div>
             <button onClick={() => window.print()} className="bg-primary px-8 py-2.5 rounded-md font-black text-[11px] uppercase tracking-widest flex items-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-blue-500/20">
               <span className="material-symbols-outlined text-lg">picture_as_pdf</span> Imprimir Ticket PDF
@@ -2033,7 +2095,7 @@ const Fuel: React.FC<FuelProps> = ({
                   <div className="flex flex-col">
                     <span className="text-lg font-black text-slate-900 uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
                     <span className="text-lg font-black text-slate-900 uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>
-                    <span className="text-[8pt] font-bold uppercase text-slate-400 mt-2 tracking-[0.2em]">Ticket de Adquisicion de Combustible</span>
+                    <span className="text-[8pt] font-bold uppercase text-slate-400 mt-2 tracking-[0.2em]">Ticket de Adquisición de Combustible</span>
                   </div>
                 </div>
                 <div className="text-right">
@@ -2058,9 +2120,9 @@ const Fuel: React.FC<FuelProps> = ({
               <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 mb-6">
                 <div className="grid grid-cols-2 gap-3 text-[9pt]">
                   <p><span className="font-black text-slate-500 uppercase tracking-wider">Fecha Registro:</span> <span className="font-bold text-slate-900">{selectedAcquisition.date ? new Date(selectedAcquisition.date).toLocaleDateString('es-ES') : '---'}</span></p>
-                  <p><span className="font-black text-slate-500 uppercase tracking-wider">Area:</span> <span className="font-bold text-slate-900">{selectedAcquisition.area}</span></p>
+                  <p><span className="font-black text-slate-500 uppercase tracking-wider">Área:</span> <span className="font-bold text-slate-900">{selectedAcquisition.area}</span></p>
                   <p><span className="font-black text-slate-500 uppercase tracking-wider">Rango Vigencia:</span> <span className="font-bold text-slate-900">{selectedAcquisition.validFrom ? new Date(selectedAcquisition.validFrom).toLocaleDateString('es-ES') : '---'} - {selectedAcquisition.validTo ? new Date(selectedAcquisition.validTo).toLocaleDateString('es-ES') : '---'}</span></p>
-                  <p><span className="font-black text-slate-500 uppercase tracking-wider">Modalidad:</span> <span className="font-bold text-slate-900">{selectedAcquisition.isQr ? 'CODIGO QR' : 'VALES'}</span></p>
+                  <p><span className="font-black text-slate-500 uppercase tracking-wider">Modalidad:</span> <span className="font-bold text-slate-900">{selectedAcquisition.isQr ? 'CÓDIGO QR' : 'VALES'}</span></p>
                 </div>
               </div>
 
@@ -2071,7 +2133,7 @@ const Fuel: React.FC<FuelProps> = ({
                     <p className="text-[12pt] font-black text-slate-900 uppercase break-words">{selectedAcquisition.supplier}</p>
                   </div>
                   <div className="text-right border-l border-slate-200 pl-8">
-                    <p className="text-[8pt] font-black text-slate-400 uppercase tracking-widest mb-1">Monto de Adquisicion</p>
+                    <p className="text-[8pt] font-black text-slate-400 uppercase tracking-widest mb-1">Monto de Adquisición</p>
                     <p className="text-[20pt] font-black text-primary tracking-tighter">${(Number(selectedAcquisition.amount) || 0).toLocaleString('es-MX', {minimumFractionDigits: 2})}</p>
                   </div>
                 </div>
@@ -2083,7 +2145,7 @@ const Fuel: React.FC<FuelProps> = ({
                 </div>
                 <div className="bg-white p-4 rounded-lg border border-slate-200">
                   <p className="text-[10pt] text-slate-700 leading-relaxed break-words">
-                    {selectedAcquisition.description || 'Sin descripcion.'}
+                    {selectedAcquisition.description || 'Sin descripción.'}
                   </p>
                 </div>
               </div>

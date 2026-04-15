@@ -1,6 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { User, UserRole } from '../types';
+import { SortableTh, useSortableData } from '../utils/tableSort';
 
 interface UsersProps {
   users: User[];
@@ -107,6 +108,19 @@ const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUs
     }
   };
 
+  type UserSortKey = 'name' | 'username' | 'role' | 'lastLogin';
+  const userSortAccessors = useMemo<Record<UserSortKey, (user: User) => unknown>>(() => ({
+    name: user => user.name,
+    username: user => user.username,
+    role: user => getRoleLabel(user.role),
+    lastLogin: user => user.lastLogin || ''
+  }), []);
+  const {
+    sortedItems: sortedUsers,
+    sortConfig,
+    requestSort
+  } = useSortableData(users, userSortAccessors, { key: 'name', direction: 'asc' });
+
   return (
     <div className="space-y-8 animate-in slide-in-from-bottom-6 duration-700">
       <div className="page-header">
@@ -135,15 +149,15 @@ const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUs
           <table className="table-professional table-density-compact">
             <thead>
               <tr>
-                <th>Personal</th>
-                <th>ID de Acceso</th>
-                <th>Rol</th>
-                <th>Último Acceso</th>
+                <SortableTh label="Personal" sortKey="name" sortConfig={sortConfig} onSort={requestSort} />
+                <SortableTh label="ID de Acceso" sortKey="username" sortConfig={sortConfig} onSort={requestSort} />
+                <SortableTh label="Rol" sortKey="role" sortConfig={sortConfig} onSort={requestSort} />
+                <SortableTh label="Último Acceso" sortKey="lastLogin" sortConfig={sortConfig} onSort={requestSort} />
                 <th className="text-right">Gestión</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {users.map((user) => (
+              {sortedUsers.map((user) => (
                 <tr key={user.id} className="hover:bg-slate-50/80 transition-all group">
                   <td>
                     <div className="flex items-center gap-4">

@@ -1,6 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { VehicleInspection, Vehicle, User, AppSetting } from '../types';
+import { SortableTh, useSortableData } from '../utils/tableSort';
 
 interface InspectionsProps {
   inspections: VehicleInspection[];
@@ -107,16 +108,28 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
       setFormData({ ...initialFormState, date: new Date().toISOString().slice(0, 16), inspectorName: currentUser?.name || '' });
       setFormError('');
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Error al guardar la revision";
+      const message = err instanceof Error ? err.message : "Error al guardar la revisión";
       setFormError(message);
     } finally {
       setIsSaving(false);
     }
   };
 
-  const sortedInspections = useMemo(() => {
-    return [...inspections].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [inspections]);
+  type InspectionSortKey = 'date' | 'unit' | 'inspector' | 'odometer';
+  const inspectionSortAccessors = useMemo<Record<InspectionSortKey, (inspection: VehicleInspection) => unknown>>(() => ({
+    date: inspection => inspection.date,
+    unit: inspection => {
+      const vehicle = vehicles.find(v => v.id === inspection.vehicleId);
+      return `${vehicle?.plate || ''} ${vehicle?.model || ''}`;
+    },
+    inspector: inspection => inspection.inspectorName,
+    odometer: inspection => inspection.odometer
+  }), [vehicles]);
+  const {
+    sortedItems: sortedInspections,
+    sortConfig,
+    requestSort
+  } = useSortableData(inspections, inspectionSortAccessors, { key: 'date', direction: 'desc' });
 
   // Helper para formato de hora
   const formatDateTime = (isoDate: string) => {
@@ -424,10 +437,10 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
           <table className="table-professional">
             <thead>
               <tr>
-                <th>Fecha / Hora</th>
-                <th>Unidad</th>
-                <th>Inspector</th>
-                <th className="text-right">Odómetro</th>
+                <SortableTh label="Fecha / Hora" sortKey="date" sortConfig={sortConfig} onSort={requestSort} />
+                <SortableTh label="Unidad" sortKey="unit" sortConfig={sortConfig} onSort={requestSort} />
+                <SortableTh label="Inspector" sortKey="inspector" sortConfig={sortConfig} onSort={requestSort} />
+                <SortableTh label="Odómetro" sortKey="odometer" sortConfig={sortConfig} onSort={requestSort} className="text-right" align="right" />
                 <th className="text-center">Detalle</th>
               </tr>
             </thead>
@@ -586,14 +599,14 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
                   value={dailyRevisionVehicleId}
                   onChange={e => setDailyRevisionVehicleId(e.target.value)}
                 >
-                  <option value="">Seleccionar vehiculo...</option>
+                  <option value="">Seleccionar vehículo...</option>
                   {availableDailyRevisionVehicles.map(v => (
                     <option key={v.id} value={v.id}>{v.plate} - {v.model}</option>
                   ))}
                 </select>
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Fecha de revision</label>
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Fecha de revisión</label>
                 <input
                   type="date"
                   className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold outline-none focus:ring-4 focus:ring-blue-500/10"
@@ -739,7 +752,7 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
                       <span className="font-bold text-slate-900 border-b border-slate-300 flex-1 pb-0.5">{[row.vehicle.brand, row.vehicle.model, row.vehicle.year].filter(Boolean).join(' ') || row.vehicle.model || '---'}</span>
                     </div>
                     <div className="flex items-center gap-1 col-span-6">
-                      <span className="font-black text-slate-500 uppercase whitespace-nowrap">Fecha de revision:</span>
+                      <span className="font-black text-slate-500 uppercase whitespace-nowrap">Fecha de revisión:</span>
                       <span className="font-bold text-slate-900 border-b border-slate-300 flex-1 pb-0.5">{dailyRevisionDateLabel}</span>
                     </div>
                     <div className="flex items-center gap-1 col-span-6">
@@ -801,8 +814,8 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
 
                   <div className="mt-2 flex justify-between items-end">
                     <div className="text-[7pt] text-slate-400">
-                      <p className="font-bold">* Formato diario: una hoja por vehiculo.</p>
-                      <p className="font-bold">* Reportar de inmediato cualquier condicion marcada como MAL o MUY MAL.</p>
+                      <p className="font-bold">* Formato diario: una hoja por vehículo.</p>
+                      <p className="font-bold">* Reportar de inmediato cualquier condición marcada como MAL o MUY MAL.</p>
                     </div>
                   </div>
 

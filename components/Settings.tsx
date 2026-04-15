@@ -47,7 +47,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onUpdateSetting, onUrlCha
 
 const appsScriptCode = `
 /** 
- * API FLOTA PRO v9.0 - Folio consecutivo en Incidencias
+ * API FLOTA PRO v9.1 - Catálogo de tipos de incidencia
  */
 
 const CONFIG = {
@@ -74,6 +74,7 @@ const CONFIG = {
     "BitacorasViaje": ["id", "date", "departureTime", "arrivalTime", "driverId", "vehicleId", "initialOdometer", "finalOdometer", "destination", "areaId", "notes", "initialFuelLevel", "finalFuelLevel"],
     "Mantenimiento": ["id", "consecutiveNumber", "date", "vehicleId", "serviceType", "description", "quoteNumber", "quoteCost", "paymentMethod", "invoiceNumber", "invoiceAmount", "odometer", "provider", "entryDate", "exitDate", "status", "estimatedDeliveryDate", "internalDocumentNumber", "providerContact"],
     "TiposMantenimiento": ["id", "name"],
+    "TiposIncidencia": ["id", "name", "value"],
     "Proveedores": ["id", "name", "contact", "phone", "email", "address", "notes"],
     "Ajustes": ["key", "value"],
     "Usuarios": ["id", "name", "username", "password", "role", "status", "lastLogin"]
@@ -102,6 +103,7 @@ function doGet(e) {
     travelLogs: data.bitacorasviaje,
     maintenanceRecords: data.mantenimiento,
     maintenanceTypes: data.tiposmantenimiento,
+    incidentTypes: data.tiposincidencia,
     suppliers: data.proveedores,
     settings: data.ajustes,
     users: data.usuarios
@@ -136,6 +138,7 @@ function doPost(e) {
     else if (action === 'travel-log' || action === 'update-travel-log') sheetName = "BitacorasViaje";
     else if (action === 'maintenance' || action === 'update-maintenance') sheetName = "Mantenimiento";
     else if (action === 'maintenance-type' || action === 'update-maintenance-type') sheetName = "TiposMantenimiento";
+    else if (action === 'incident-type' || action === 'update-incident-type') sheetName = "TiposIncidencia";
     else if (action === 'supplier' || action === 'update-supplier') sheetName = "Proveedores";
     else if (action === 'user' || action === 'update-user') {
       sheetName = "Usuarios";
@@ -146,7 +149,7 @@ function doPost(e) {
       throw new Error("Accion no soportada: " + action);
     }
     if (!d || typeof d !== 'object') {
-      throw new Error("Carga de datos invalida.");
+      throw new Error("Carga de datos inválida.");
     }
 
     const sheet = getOrCreateSheet(ss, sheetName);
@@ -154,6 +157,8 @@ function doPost(e) {
 
     const requiresUniqueName = action === 'maintenance-type' ||
       action === 'update-maintenance-type' ||
+      action === 'incident-type' ||
+      action === 'update-incident-type' ||
       action === 'supplier' ||
       action === 'update-supplier';
     if (requiresUniqueName && hasDuplicateName(sheet, headersInSheet, d.name, action.startsWith('update-') ? d.id : "")) {
@@ -161,7 +166,7 @@ function doPost(e) {
     }
     
     if (action === 'delete-area') {
-      if (!d.id) throw new Error("El id es obligatorio para eliminar un area.");
+      if (!d.id) throw new Error("El id es obligatorio para eliminar un área.");
       deleteRowById(sheet, d.id, headersInSheet);
     } else if (action.startsWith('update-')) {
       updateRowDynamic(sheet, d.id, d, headersInSheet);
@@ -262,11 +267,23 @@ function getOrCreateSheet(ss, name) {
     const headers = CONFIG.sheets[name];
     sheet.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight("bold").setBackground("#f1f5f9");
     sheet.setFrozenRows(1);
+    if (name === "TiposIncidencia") seedDefaultIncidentTypes(sheet);
   } else {
     // Agregar columnas nuevas que no existian en versiones anteriores
     ensureColumns(sheet, name);
+    if (name === "TiposIncidencia" && sheet.getLastRow() < 2) seedDefaultIncidentTypes(sheet);
   }
   return sheet;
+}
+
+function seedDefaultIncidentTypes(sheet) {
+  const defaults = [
+    ["IT-1", "MECÁNICA", "mechanical"],
+    ["IT-2", "TRÁNSITO / MULTA", "traffic"],
+    ["IT-3", "ACCIDENTE", "accident"],
+    ["IT-4", "ROBO", "theft"]
+  ];
+  sheet.getRange(2, 1, defaults.length, defaults[0].length).setValues(defaults);
 }
 
 function ensureColumns(sheet, name) {
@@ -380,7 +397,7 @@ function getSheetData(ss, name) {
               </div>
               <div className="bg-slate-900 rounded-xl p-6 shadow-inner">
                 <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-[10pt] font-black text-primary uppercase tracking-[0.2em] mb-4">Apps Script (v9.0 - Folio consecutivo en Incidencias)</h4>
+                  <h4 className="text-[10pt] font-black text-primary uppercase tracking-[0.2em] mb-4">Apps Script (v9.1 - Catálogo de tipos de incidencia)</h4>
                   <button onClick={async () => {
                     try {
                       await navigator.clipboard.writeText(appsScriptCode);
@@ -412,15 +429,15 @@ function getSheetData(ss, name) {
               </li>
               <li className="flex gap-4">
                 <span className="size-6 bg-primary text-white text-[10px] font-black flex items-center justify-center rounded-full shrink-0">3</span>
-                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Nueva columna en Incidencias</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">La hoja "Incidencias" ahora incluye la columna "consecutiveNumber". Actualiza el código en Apps Script.</p></div>
+                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Nuevo catálogo de incidencias</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">La hoja "TiposIncidencia" alimenta el dropdown y permite guardar nuevos tipos desde el formulario.</p></div>
               </li>
               <li className="flex gap-4">
                 <span className="size-6 bg-primary text-white text-[10px] font-black flex items-center justify-center rounded-full shrink-0">4</span>
-                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Adquisiciones de Combustible</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Nueva hoja "CombustibleAdquisiciones" para vales y compras por codigo QR.</p></div>
+                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Adquisiciones de Combustible</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Nueva hoja "CombustibleAdquisiciones" para vales y compras por código QR.</p></div>
               </li>
               <li className="flex gap-4">
                 <span className="size-6 bg-primary text-white text-[10px] font-black flex items-center justify-center rounded-full shrink-0">5</span>
-                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Importante</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Debes actualizar el codigo en Apps Script para crear o reconocer las nuevas columnas.</p></div>
+                <div><p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Importante</p><p className="text-[11px] font-bold text-slate-400 leading-relaxed">Debes actualizar el código en Apps Script para crear o reconocer las nuevas columnas.</p></div>
               </li>
             </ul>
           </div>

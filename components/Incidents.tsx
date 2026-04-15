@@ -1,24 +1,44 @@
 
 import React, { useMemo, useState } from 'react';
-import { Incident, Vehicle, Driver, AppSetting } from '../types';
+import { Incident, Vehicle, Driver, AppSetting, IncidentType } from '../types';
+import { SortableTh, useSortableData } from '../utils/tableSort';
+
+const CUSTOM_INCIDENT_TYPE_VALUE = '__custom_incident_type__';
+const DEFAULT_INCIDENT_TYPES = [
+  { value: 'mechanical', label: 'Mecánica' },
+  { value: 'traffic', label: 'Tránsito / Multa' },
+  { value: 'accident', label: 'Accidente' },
+  { value: 'theft', label: 'Robo' }
+];
+const DEFAULT_INCIDENT_TYPE_VALUES = new Set(DEFAULT_INCIDENT_TYPES.map(item => item.value));
+const normalizeIncidentTypeName = (value: string) =>
+  value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .replace(/\s+/g, ' ')
+    .toLowerCase();
 
 interface IncidentsProps {
   incidents: Incident[];
+  incidentTypes?: IncidentType[];
   searchQuery: string;
   onAddIncident: (newIncident: Omit<Incident, 'id'>) => Promise<void>;
   onUpdateIncident: (incident: Incident) => Promise<void>;
+  onAddIncidentType?: (name: string) => Promise<void>;
   vehicles?: Vehicle[];
   drivers?: Driver[];
   settings?: AppSetting[];
 }
 
-const Incidents: React.FC<IncidentsProps> = ({ incidents, searchQuery, onAddIncident, onUpdateIncident, vehicles = [], drivers = [], settings = [] }) => {
+const Incidents: React.FC<IncidentsProps> = ({ incidents, incidentTypes = [], searchQuery, onAddIncident, onUpdateIncident, onAddIncidentType, vehicles = [], drivers = [], settings = [] }) => {
   const [showModal, setShowModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showPrintPreview, setShowPrintPreview] = useState(false);
   const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
   const [editingIncident, setEditingIncident] = useState<Incident | null>(null);
   const [formError, setFormError] = useState('');
+  const [customIncidentType, setCustomIncidentType] = useState('');
 
   const settingsMap = useMemo(() => {
     const map: Record<string, string> = {};
@@ -27,7 +47,7 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, searchQuery, onAddInci
   }, [settings]);
 
   const [formData, setFormData] = useState({
-    type: 'mechanical' as 'mechanical' | 'traffic' | 'accident' | 'theft',
+    type: 'mechanical',
     title: '',
     description: '',
     vehicleId: '',
@@ -50,12 +70,14 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, searchQuery, onAddInci
   const resetForm = () => {
     setFormError('');
     setEditingIncident(null);
+    setCustomIncidentType('');
     setFormData({ type: 'mechanical', title: '', description: '', vehicleId: '', driverId: '', status: 'pending' });
   };
 
   const handleEdit = (incident: Incident) => {
     setFormError('');
     setEditingIncident(incident);
+    setCustomIncidentType(DEFAULT_INCIDENT_TYPE_VALUES.has(incident.type) ? '' : incident.type);
     setFormData({
         type: incident.type,
         title: incident.title,
@@ -70,18 +92,38 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, searchQuery, onAddInci
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError('');
+    const isNewIncidentType = formData.type === CUSTOM_INCIDENT_TYPE_VALUE;
+    const resolvedType = isNewIncidentType
+      ? customIncidentType.trim().toUpperCase()
+      : String(formData.type || '').trim();
+    if (!resolvedType) {
+      setFormError('Debes seleccionar o escribir un tipo de incidencia.');
+      return;
+    }
     if (!formData.title || !formData.vehicleId || !formData.driverId) return;
+
+    const payload = {
+      ...formData,
+      type: resolvedType
+    };
 
     setIsSaving(true);
     try {
+      if (isNewIncidentType && onAddIncidentType) {
+        const normalizedType = normalizeIncidentTypeName(resolvedType);
+        const existsInCatalog = incidentTypeOptions.some(option => normalizeIncidentTypeName(option.value) === normalizedType);
+        if (!existsInCatalog) {
+          await onAddIncidentType(resolvedType);
+        }
+      }
       if (editingIncident) {
         await onUpdateIncident({
             ...editingIncident,
-            ...formData
+            ...payload
         });
       } else {
         await onAddIncident({
-            ...formData,
+            ...payload,
             date: new Date().toISOString()
         });
       }
@@ -120,6 +162,48 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, searchQuery, onAddInci
     theft: 'Robo / Asalto'
   };
 
+  const incidentTypeOptions = useMemo(() => {
+    const seen = new Set<string>();
+    const options = [
+      ...DEFAULT_INCIDENT_TYPES,
+      ...incidentTypes.map(type => ({
+        value: String(type.value || type.name || '').trim(),
+        label: String(type.name || type.value || '').trim()
+      }))
+    ];
+
+    return options
+      .filter(option => {
+        if (!option.value || !option.label) return false;
+        const normalized = normalizeIncidentTypeName(option.value);
+        if (seen.has(normalized)) return false;
+        seen.add(normalized);
+        return true;
+      })
+      .sort((a, b) => a.label.localeCompare(b.label, 'es-MX', { sensitivity: 'base' }));
+  }, [incidentTypes]);
+  const catalogIncidentTypeValues = useMemo(() => new Set(incidentTypeOptions.map(option => option.value)), [incidentTypeOptions]);
+  const legacyIncidentTypeOptions = useMemo(() => {
+    const seen = new Set(catalogIncidentTypeValues);
+    return incidents
+      .map(incident => String(incident.type || '').trim())
+      .filter(type => {
+        if (!type || seen.has(type)) return false;
+        seen.add(type);
+        return true;
+      })
+      .map(type => ({ value: type, label: typeMap[type] || type }))
+      .sort((a, b) => a.label.localeCompare(b.label, 'es-MX', { sensitivity: 'base' }));
+  }, [catalogIncidentTypeValues, incidents]);
+  const allIncidentTypeOptions = useMemo(
+    () => [...incidentTypeOptions, ...legacyIncidentTypeOptions],
+    [incidentTypeOptions, legacyIncidentTypeOptions]
+  );
+  const selectedTypeIsCustom = formData.type === CUSTOM_INCIDENT_TYPE_VALUE || !allIncidentTypeOptions.some(option => option.value === formData.type);
+  const incidentTypeSelectValue = selectedTypeIsCustom
+    ? CUSTOM_INCIDENT_TYPE_VALUE
+    : formData.type;
+
   const statusMap: Record<string, string> = {
     'critical': 'Crítica / Urgente',
     'pending': 'Pendiente',
@@ -127,6 +211,36 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, searchQuery, onAddInci
     'in-workshop': 'En Taller',
     'in-resolution': 'En Resolución'
   };
+
+  const typeBadgeClasses: Record<string, string> = {
+    mechanical: 'bg-blue-50 text-blue-700 border-blue-100',
+    traffic: 'bg-amber-50 text-amber-700 border-amber-100',
+    accident: 'bg-rose-50 text-rose-700 border-rose-100',
+    theft: 'bg-purple-50 text-purple-700 border-purple-100'
+  };
+
+  const statusBadgeClasses: Record<string, string> = {
+    critical: 'bg-rose-50 text-rose-700 border-rose-100',
+    pending: 'bg-amber-50 text-amber-700 border-amber-100',
+    resolved: 'bg-emerald-50 text-emerald-700 border-emerald-100',
+    'in-workshop': 'bg-blue-50 text-blue-700 border-blue-100',
+    'in-resolution': 'bg-indigo-50 text-indigo-700 border-indigo-100'
+  };
+
+  type IncidentSortKey = 'folio' | 'date' | 'type' | 'title' | 'driver' | 'status';
+  const incidentSortAccessors = useMemo<Record<IncidentSortKey, (incident: Incident) => unknown>>(() => ({
+    folio: incident => incident.consecutiveNumber ?? incident.id,
+    date: incident => incident.date,
+    type: incident => typeMap[incident.type] || incident.type,
+    title: incident => incident.title,
+    driver: incident => drivers.find(d => d.id === incident.driverId)?.name || incident.driverId,
+    status: incident => statusMap[incident.status] || incident.status
+  }), [drivers]);
+  const {
+    sortedItems: sortedIncidents,
+    sortConfig,
+    requestSort
+  } = useSortableData(filteredIncidents, incidentSortAccessors, { key: 'date', direction: 'desc' });
 
   return (
     <div className="space-y-8 animate-in slide-in-from-top-4 duration-500">
@@ -151,7 +265,7 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, searchQuery, onAddInci
              font-family: 'Inter', sans-serif;
            }
            .no-print { display: none !important; }
-           @page { margin: 0.5cm; size: letter; }
+            @page { margin: 0.5cm; size: letter portrait; }
            
             /* ========================================
                SIGNATURE SECTION - FLOWING WITH CONTENT
@@ -191,69 +305,99 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, searchQuery, onAddInci
         <SummaryCard label="Robos" value={incidents.filter(i => i.type === 'theft').length.toString()} icon="local_police" color="purple" />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 no-print">
-        {filteredIncidents.map((incident) => {
-          const vehicle = vehicles.find(v => v.id === incident.vehicleId);
-          const driver = drivers.find(d => d.id === incident.driverId);
-          const typeLabel = typeMap[incident.type] || incident.type;
-          
-          return (
-            <div key={incident.id} className={`bg-white rounded-[2rem] border overflow-hidden transition-all ${incident.status === 'critical' ? 'border-2 border-blue-500' : 'border-slate-200'}`}>
-              <div className="p-6">
-                <div className="flex justify-between mb-5">
-                  <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-[0.2em] border ${
-                    incident.type === 'mechanical' ? 'bg-blue-50 text-blue-700 border-blue-100' :
-                    incident.type === 'accident' ? 'bg-rose-50 text-rose-700 border-rose-100' :
-                    incident.type === 'theft' ? 'bg-purple-50 text-purple-700 border-purple-100' :
-                    'bg-slate-100 text-slate-700 border-slate-200'
-                  }`}>
-                    {typeLabel}
-                  </span>
-                  <span className="text-slate-400 text-[10px] font-black uppercase tracking-widest">
-                    {new Date(incident.date).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}
-                  </span>
-                </div>
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    {incident.consecutiveNumber != null && (
-                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-0.5">
-                        FOLIO INC-{String(incident.consecutiveNumber).padStart(4, '0')}
+      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden no-print">
+        <div className="px-6 py-4 border-b border-slate-100 bg-slate-50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <div>
+            <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">Listado de incidencias</h2>
+            <p className="text-xs font-bold text-slate-400 mt-1">
+              Mostrando {filteredIncidents.length} de {incidents.length} reportes.
+            </p>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[1080px] text-left">
+            <thead className="bg-white border-b border-slate-200">
+              <tr>
+                <SortableTh label="Folio" sortKey="folio" sortConfig={sortConfig} onSort={requestSort} className="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400" />
+                <SortableTh label="Fecha" sortKey="date" sortConfig={sortConfig} onSort={requestSort} className="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400" />
+                <SortableTh label="Tipo" sortKey="type" sortConfig={sortConfig} onSort={requestSort} className="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400" />
+                <SortableTh label="Incidencia" sortKey="title" sortConfig={sortConfig} onSort={requestSort} className="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400" />
+                <SortableTh label="Conductor" sortKey="driver" sortConfig={sortConfig} onSort={requestSort} className="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400" />
+                <SortableTh label="Estado" sortKey="status" sortConfig={sortConfig} onSort={requestSort} className="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400" />
+                <th className="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {sortedIncidents.map((incident) => {
+                const driver = drivers.find(d => d.id === incident.driverId);
+                const typeLabel = typeMap[incident.type] || incident.type;
+                const statusLabel = statusMap[incident.status] || incident.status;
+                const folio = incident.consecutiveNumber != null
+                  ? `INC-${String(incident.consecutiveNumber).padStart(4, '0')}`
+                  : incident.id;
+
+                return (
+                  <tr key={incident.id} className="hover:bg-slate-50/80 transition-colors">
+                    <td className="px-5 py-4 align-top">
+                      <p className="text-xs font-black text-slate-900 tracking-tight whitespace-nowrap">{folio}</p>
+                    </td>
+                    <td className="px-5 py-4 align-top">
+                      <p className="text-xs font-bold text-slate-600 whitespace-nowrap">
+                        {new Date(incident.date).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}
                       </p>
-                    )}
-                    <h3 className="font-black text-slate-900 text-lg tracking-tight leading-tight">{incident.title}</h3>
-                  </div>
-                  <div className="flex items-center gap-1 ml-2">
-                    <button 
-                        onClick={() => handleEdit(incident)}
-                        className="btn-icon btn-icon-primary shrink-0"
-                        title="Editar Incidencia"
-                    >
-                        <span className="material-symbols-outlined ui-icon">edit</span>
-                    </button>
-                    <button 
-                        onClick={() => handlePrintRequest(incident)}
-                        className="btn-icon btn-icon-success shrink-0"
-                        title="Imprimir Reporte"
-                    >
-                        <span className="material-symbols-outlined ui-icon">description</span>
-                    </button>
-                  </div>
-                </div>
-                <p className="text-sm font-medium text-slate-500 mt-3 leading-relaxed line-clamp-2">{incident.description}</p>
-                <div className="mt-6 grid grid-cols-2 gap-4 pt-5 border-t border-slate-100">
-                  <div>
-                    <p className="text-[9px] uppercase font-black text-slate-400 tracking-widest mb-1">Placa</p>
-                    <p className="text-sm font-black text-slate-800 tracking-tight">{vehicle?.plate || incident.vehicleId}</p>
-                  </div>
-                  <div>
-                    <p className="text-[9px] uppercase font-black text-slate-400 tracking-widest mb-1">Conductor</p>
-                    <p className="text-sm font-black text-slate-800 tracking-tight">{driver?.name || incident.driverId}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          );
-        })}
+                    </td>
+                    <td className="px-5 py-4 align-top">
+                      <span className={`inline-flex items-center rounded-md border px-2.5 py-1 text-[10px] font-black uppercase tracking-widest whitespace-nowrap ${typeBadgeClasses[incident.type] || 'bg-slate-100 text-slate-700 border-slate-200'}`}>
+                        {typeLabel}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4 align-top max-w-[320px]">
+                      <p className="text-sm font-black text-slate-900 leading-snug">{incident.title}</p>
+                      <p className="text-xs font-medium text-slate-500 leading-relaxed mt-1 line-clamp-2">{incident.description}</p>
+                    </td>
+                    <td className="px-5 py-4 align-top">
+                      <p className="text-xs font-bold text-slate-700 max-w-[180px] truncate">{driver?.name || incident.driverId || '---'}</p>
+                    </td>
+                    <td className="px-5 py-4 align-top">
+                      <span className={`inline-flex items-center rounded-md border px-2.5 py-1 text-[10px] font-black uppercase tracking-widest whitespace-nowrap ${statusBadgeClasses[incident.status] || 'bg-slate-100 text-slate-700 border-slate-200'}`}>
+                        {statusLabel}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4 align-top">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => handleEdit(incident)}
+                          className="btn-icon btn-icon-primary shrink-0"
+                          title="Editar Incidencia"
+                          aria-label="Editar incidencia"
+                        >
+                          <span className="material-symbols-outlined ui-icon">edit</span>
+                        </button>
+                        <button
+                          onClick={() => handlePrintRequest(incident)}
+                          className="btn-icon btn-icon-success shrink-0"
+                          title="Imprimir Reporte"
+                          aria-label="Imprimir reporte"
+                        >
+                          <span className="material-symbols-outlined ui-icon">description</span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+              {filteredIncidents.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="px-6 py-14 text-center">
+                    <span className="material-symbols-outlined text-slate-300 text-5xl mb-3">find_in_page</span>
+                    <p className="text-sm font-black text-slate-500 uppercase tracking-widest">No hay incidencias para mostrar</p>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {showModal && (
@@ -285,14 +429,34 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, searchQuery, onAddInci
                   <select 
                     disabled={isSaving}
                     className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all disabled:opacity-50"
-                    value={formData.type}
-                    onChange={e => setFormData({...formData, type: e.target.value as any})}
+                    value={incidentTypeSelectValue}
+                    onChange={e => {
+                      const nextType = e.target.value;
+                      if (nextType === CUSTOM_INCIDENT_TYPE_VALUE) {
+                        setFormData({...formData, type: CUSTOM_INCIDENT_TYPE_VALUE});
+                        setCustomIncidentType('');
+                      } else {
+                        setFormData({...formData, type: nextType});
+                        setCustomIncidentType('');
+                      }
+                    }}
                   >
-                    <option value="mechanical">Mecánica</option>
-                    <option value="traffic">Tránsito / Multa</option>
-                    <option value="accident">Accidente</option>
-                    <option value="theft">Robo</option>
+                    {allIncidentTypeOptions.map(option => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
+                    <option value={CUSTOM_INCIDENT_TYPE_VALUE}>Otro tipo...</option>
                   </select>
+                  {incidentTypeSelectValue === CUSTOM_INCIDENT_TYPE_VALUE && (
+                    <input
+                      required
+                      disabled={isSaving}
+                      maxLength={80}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-white focus:border-primary transition-all disabled:opacity-50"
+                      placeholder="Escribe el nuevo tipo"
+                      value={customIncidentType}
+                      onChange={e => setCustomIncidentType(e.target.value)}
+                    />
+                  )}
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Prioridad / Estado</label>
@@ -498,7 +662,7 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, searchQuery, onAddInci
                        </div>
                    </div>
                    <div className="text-center mt-8 border-t border-slate-200 pt-2">
-                       <p className="text-[7pt] font-black text-slate-300 uppercase tracking-[0.3em]">Sistema de Gestion de Parque Vehicular • DIF Municipal La Paz</p>
+                        <p className="text-[7pt] font-black text-slate-300 uppercase tracking-[0.3em]">Sistema de Gestión de Parque Vehicular • DIF Municipal La Paz</p>
                    </div>
                </div>
 

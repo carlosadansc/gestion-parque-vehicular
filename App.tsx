@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { View, Vehicle, Driver, FuelEntry, FuelAcquisition, FuelDelivery, Incident, Planning, Area, TravelLog, MaintenanceRecord, AppSetting, User, VehicleInspection, MaintenanceType, Supplier } from './types';
+import { View, Vehicle, Driver, FuelEntry, FuelAcquisition, FuelDelivery, Incident, Planning, Area, TravelLog, MaintenanceRecord, AppSetting, User, VehicleInspection, MaintenanceType, IncidentType, Supplier } from './types';
 import { VEHICLES as initialVehicles, DRIVERS as initialDrivers, INCIDENTS as initialIncidents, FUEL_HISTORY as initialFuel } from './constants';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
@@ -46,9 +46,15 @@ const DEFAULT_MAINTENANCE_TYPES: MaintenanceType[] = [
   { id: 'MT-8', name: 'Reparación Mayor' },
 ];
 
+const DEFAULT_INCIDENT_TYPES: IncidentType[] = [
+  { id: 'IT-1', name: 'MECÁNICA', value: 'mechanical' },
+  { id: 'IT-2', name: 'TRÁNSITO / MULTA', value: 'traffic' },
+  { id: 'IT-3', name: 'ACCIDENTE', value: 'accident' },
+  { id: 'IT-4', name: 'ROBO', value: 'theft' },
+];
+
 const VEHICLE_STATUS_SET = new Set<Vehicle['status']>(['active', 'workshop', 'inactive']);
 const DRIVER_STATUS_SET = new Set<Driver['status']>(['available', 'en-route', 'on-break']);
-const INCIDENT_TYPE_SET = new Set<Incident['type']>(['mechanical', 'traffic', 'accident', 'theft']);
 const INCIDENT_STATUS_SET = new Set<Incident['status']>(['critical', 'pending', 'resolved', 'in-workshop', 'in-resolution']);
 const PLANNING_STATUS_SET = new Set<NonNullable<Planning['status']>>(['scheduled', 'completed', 'cancelled']);
 const MAINTENANCE_STATUS_SET = new Set<MaintenanceRecord['status']>(['scheduled', 'in-progress', 'completed', 'cancelled']);
@@ -85,15 +91,15 @@ const isValidTimeValue = (value?: string): boolean => {
 const validateVehiclePayload = (vehicle: Omit<Vehicle, 'id'> | Vehicle, driverList: Driver[]) => {
   ensure(hasText(vehicle.plate), 'La placa es obligatoria.');
   ensure(hasText(vehicle.model), 'El modelo es obligatorio.');
-  ensure(VEHICLE_STATUS_SET.has(vehicle.status), 'El estado del vehiculo no es valido.');
+  ensure(VEHICLE_STATUS_SET.has(vehicle.status), 'El estado del vehículo no es válido.');
 
   if (hasText(vehicle.assignedDriverId)) {
     ensure(driverList.some(d => d.id === vehicle.assignedDriverId), 'El chofer asignado no existe.');
   }
 
   if (hasValue(vehicle.odometer)) {
-    ensure(isFiniteNumber(vehicle.odometer), 'El odometro debe ser un numero valido.');
-    ensure(Number(vehicle.odometer) >= 0, 'El odometro no puede ser negativo.');
+    ensure(isFiniteNumber(vehicle.odometer), 'El odómetro debe ser un número válido.');
+    ensure(Number(vehicle.odometer) >= 0, 'El odómetro no puede ser negativo.');
   }
 
   if (hasValue(vehicle.year) && Number(vehicle.year) > 0) {
@@ -105,33 +111,33 @@ const validateVehiclePayload = (vehicle: Omit<Vehicle, 'id'> | Vehicle, driverLi
 
 const validateDriverPayload = (driver: Omit<Driver, 'id'> | Driver, vehicleList: Vehicle[]) => {
   ensure(hasText(driver.name), 'El nombre del chofer es obligatorio.');
-  ensure(hasText(driver.phone), 'El telefono del chofer es obligatorio.');
-  ensure(DRIVER_STATUS_SET.has(driver.status), 'El estado del chofer no es valido.');
+  ensure(hasText(driver.phone), 'El teléfono del chofer es obligatorio.');
+  ensure(DRIVER_STATUS_SET.has(driver.status), 'El estado del chofer no es válido.');
 
   const phoneDigits = (driver.phone || '').replace(/\D/g, '');
-  ensure(phoneDigits.length >= 7, 'El telefono del chofer no es valido.');
+  ensure(phoneDigits.length >= 7, 'El teléfono del chofer no es válido.');
 
   if (hasText(driver.assignedVehicleId)) {
-    ensure(vehicleList.some(v => v.id === driver.assignedVehicleId), 'El vehiculo asignado no existe.');
+    ensure(vehicleList.some(v => v.id === driver.assignedVehicleId), 'El vehículo asignado no existe.');
   }
 };
 
 const validateFuelPayload = (entry: Omit<FuelEntry, 'id'> | FuelEntry, vehicleList: Vehicle[], driverList: Driver[]) => {
-  ensure(isValidDateValue(entry.date), 'La fecha de combustible no es valida.');
-  ensure(hasText(entry.vehicleId) && vehicleList.some(v => v.id === entry.vehicleId), 'Debes seleccionar un vehiculo valido.');
-  ensure(hasText(entry.driverId) && driverList.some(d => d.id === entry.driverId), 'Debes seleccionar un chofer valido.');
+  ensure(isValidDateValue(entry.date), 'La fecha de combustible no es válida.');
+  ensure(hasText(entry.vehicleId) && vehicleList.some(v => v.id === entry.vehicleId), 'Debes seleccionar un vehículo válido.');
+  ensure(hasText(entry.driverId) && driverList.some(d => d.id === entry.driverId), 'Debes seleccionar un chofer válido.');
   ensure(isFiniteNumber(entry.liters) && Number(entry.liters) > 0, 'Los litros deben ser mayores a 0.');
-  ensure(isFiniteNumber(entry.cost) && Number(entry.cost) >= 0, 'El costo debe ser un numero valido.');
-  ensure(isFiniteNumber(entry.odometer) && Number(entry.odometer) >= 0, 'El odometro debe ser un numero valido.');
+  ensure(isFiniteNumber(entry.cost) && Number(entry.cost) >= 0, 'El costo debe ser un número válido.');
+  ensure(isFiniteNumber(entry.odometer) && Number(entry.odometer) >= 0, 'El odómetro debe ser un número válido.');
 };
 
 const validateFuelAcquisitionPayload = (entry: Omit<FuelAcquisition, 'id'> | FuelAcquisition) => {
-  ensure(isValidDateValue(entry.date), 'La fecha de adquisicion no es valida.');
-  ensure(isValidDateValue(entry.validFrom), 'La fecha inicial de vigencia no es valida.');
-  ensure(isValidDateValue(entry.validTo), 'La fecha final de vigencia no es valida.');
+  ensure(isValidDateValue(entry.date), 'La fecha de adquisición no es válida.');
+  ensure(isValidDateValue(entry.validFrom), 'La fecha inicial de vigencia no es válida.');
+  ensure(isValidDateValue(entry.validTo), 'La fecha final de vigencia no es válida.');
   ensure(new Date(entry.validFrom).getTime() <= new Date(entry.validTo).getTime(), 'La fecha final no puede ser menor a la inicial.');
-  ensure(hasText(entry.description), 'La descripcion de la adquisicion es obligatoria.');
-  ensure(hasText(entry.area), 'El area destino es obligatoria.');
+  ensure(hasText(entry.description), 'La descripción de la adquisición es obligatoria.');
+  ensure(hasText(entry.area), 'El área destino es obligatoria.');
   ensure(hasText(entry.supplier), 'El proveedor es obligatorio.');
   ensure(isFiniteNumber(entry.amount) && Number(entry.amount) > 0, 'El monto debe ser mayor a 0.');
   if (hasValue(entry.consecutiveNumber)) {
@@ -145,19 +151,19 @@ const validateFuelDeliveryPayload = (
   deliveryList: FuelDelivery[],
   currentId?: string
 ) => {
-  ensure(isValidDateValue(entry.date), 'La fecha de entrega no es valida.');
-  ensure(hasText(entry.acquisitionId), 'Debes seleccionar una adquisicion valida.');
-  ensure(hasText(entry.area), 'El area destino es obligatoria.');
+  ensure(isValidDateValue(entry.date), 'La fecha de entrega no es válida.');
+  ensure(hasText(entry.acquisitionId), 'Debes seleccionar una adquisición válida.');
+  ensure(hasText(entry.area), 'El área destino es obligatoria.');
   ensure(hasText(entry.purpose), 'El motivo de entrega es obligatorio.');
   ensure(hasText(entry.recipientName), 'El nombre de quien recibe es obligatorio.');
   ensure(isFiniteNumber(entry.amount) && Number(entry.amount) > 0, 'El monto entregado debe ser mayor a 0.');
-  ensure(entry.acquisitionType === 'qr' || entry.acquisitionType === 'voucher', 'El tipo de adquisicion de la entrega no es valido.');
+  ensure(entry.acquisitionType === 'qr' || entry.acquisitionType === 'voucher', 'El tipo de adquisición de la entrega no es válido.');
 
   const acquisition = acquisitionList.find(a => a.id === entry.acquisitionId);
-  ensure(Boolean(acquisition), 'La adquisicion seleccionada no existe.');
+  ensure(Boolean(acquisition), 'La adquisición seleccionada no existe.');
 
   const expectedType: FuelDelivery['acquisitionType'] = acquisition?.isQr ? 'qr' : 'voucher';
-  ensure(entry.acquisitionType === expectedType, 'El tipo de entrega no coincide con la adquisicion seleccionada.');
+  ensure(entry.acquisitionType === expectedType, 'El tipo de entrega no coincide con la adquisición seleccionada.');
 
   const alreadyDelivered = deliveryList
     .filter(d => d.acquisitionId === entry.acquisitionId && (!currentId || d.id !== currentId))
@@ -168,50 +174,51 @@ const validateFuelDeliveryPayload = (
   const requestedAmount = Number(entry.amount);
   ensure(
     requestedAmount <= availableAmount + 0.0001,
-    `El monto entregado excede el saldo disponible de la adquisicion (${Math.max(availableAmount, 0).toFixed(2)}).`
+    `El monto entregado excede el saldo disponible de la adquisición (${Math.max(availableAmount, 0).toFixed(2)}).`
   );
 };
 
 const validateIncidentPayload = (incident: Omit<Incident, 'id'> | Incident, vehicleList: Vehicle[], driverList: Driver[]) => {
-  ensure(INCIDENT_TYPE_SET.has(incident.type), 'El tipo de incidencia no es valido.');
-  ensure(INCIDENT_STATUS_SET.has(incident.status), 'El estado de la incidencia no es valido.');
-  ensure(hasText(incident.title), 'El titulo de la incidencia es obligatorio.');
-  ensure(hasText(incident.description), 'La descripcion de la incidencia es obligatoria.');
-  ensure(isValidDateValue(incident.date), 'La fecha de incidencia no es valida.');
-  ensure(hasText(incident.vehicleId) && vehicleList.some(v => v.id === incident.vehicleId), 'Debes seleccionar un vehiculo valido.');
-  ensure(hasText(incident.driverId) && driverList.some(d => d.id === incident.driverId), 'Debes seleccionar un chofer valido.');
+  ensure(hasText(incident.type), 'El tipo de incidencia es obligatorio.');
+  ensure(String(incident.type).trim().length <= 80, 'El tipo de incidencia no puede exceder 80 caracteres.');
+  ensure(INCIDENT_STATUS_SET.has(incident.status), 'El estado de la incidencia no es válido.');
+  ensure(hasText(incident.title), 'El título de la incidencia es obligatorio.');
+  ensure(hasText(incident.description), 'La descripción de la incidencia es obligatoria.');
+  ensure(isValidDateValue(incident.date), 'La fecha de incidencia no es válida.');
+  ensure(hasText(incident.vehicleId) && vehicleList.some(v => v.id === incident.vehicleId), 'Debes seleccionar un vehículo válido.');
+  ensure(hasText(incident.driverId) && driverList.some(d => d.id === incident.driverId), 'Debes seleccionar un chofer válido.');
 };
 
 const validatePlanningPayload = (planning: Omit<Planning, 'id'> | Planning, vehicleList: Vehicle[], driverList: Driver[], areaList: Area[]) => {
-  ensure(isValidDateValue(planning.date), 'La fecha de planeacion no es valida.');
-  ensure(hasText(planning.vehicleId) && vehicleList.some(v => v.id === planning.vehicleId), 'Debes seleccionar un vehiculo valido.');
-  ensure(hasText(planning.driverId) && driverList.some(d => d.id === planning.driverId), 'Debes seleccionar un chofer valido.');
-  ensure(hasText(planning.areaId) && areaList.some(a => a.id === planning.areaId), 'Debes seleccionar un area valida.');
+  ensure(isValidDateValue(planning.date), 'La fecha de planeación no es válida.');
+  ensure(hasText(planning.vehicleId) && vehicleList.some(v => v.id === planning.vehicleId), 'Debes seleccionar un vehículo válido.');
+  ensure(hasText(planning.driverId) && driverList.some(d => d.id === planning.driverId), 'Debes seleccionar un chofer válido.');
+  ensure(hasText(planning.areaId) && areaList.some(a => a.id === planning.areaId), 'Debes seleccionar un área válida.');
 
-  if (hasText(planning.departureTime)) ensure(isValidTimeValue(planning.departureTime), 'La hora de salida no es valida.');
-  if (hasText(planning.arrivalTime)) ensure(isValidTimeValue(planning.arrivalTime), 'La hora de llegada no es valida.');
-  if (planning.status) ensure(PLANNING_STATUS_SET.has(planning.status), 'El estado de la planeacion no es valido.');
+  if (hasText(planning.departureTime)) ensure(isValidTimeValue(planning.departureTime), 'La hora de salida no es válida.');
+  if (hasText(planning.arrivalTime)) ensure(isValidTimeValue(planning.arrivalTime), 'La hora de llegada no es válida.');
+  if (planning.status) ensure(PLANNING_STATUS_SET.has(planning.status), 'El estado de la planeación no es válido.');
 };
 
 const validateAreaPayload = (area: Omit<Area, 'id'> | Area) => {
-  ensure(hasText(area.name), 'El nombre del area es obligatorio.');
+  ensure(hasText(area.name), 'El nombre del área es obligatorio.');
 };
 
 const validateTravelLogPayload = (log: Omit<TravelLog, 'id'> | TravelLog, vehicleList: Vehicle[], driverList: Driver[], areaList: Area[]) => {
-  ensure(isValidDateValue(log.date), 'La fecha de bitacora no es valida.');
-  ensure(hasText(log.departureTime) && isValidTimeValue(log.departureTime), 'La hora de salida es obligatoria y debe ser valida.');
-  if (hasText(log.arrivalTime)) ensure(isValidTimeValue(log.arrivalTime), 'La hora de llegada no es valida.');
-  ensure(hasText(log.vehicleId) && vehicleList.some(v => v.id === log.vehicleId), 'Debes seleccionar un vehiculo valido.');
-  ensure(hasText(log.driverId) && driverList.some(d => d.id === log.driverId), 'Debes seleccionar un chofer valido.');
-  ensure(hasText(log.areaId) && areaList.some(a => a.id === log.areaId), 'Debes seleccionar un area valida.');
+  ensure(isValidDateValue(log.date), 'La fecha de bitácora no es válida.');
+  ensure(hasText(log.departureTime) && isValidTimeValue(log.departureTime), 'La hora de salida es obligatoria y debe ser válida.');
+  if (hasText(log.arrivalTime)) ensure(isValidTimeValue(log.arrivalTime), 'La hora de llegada no es válida.');
+  ensure(hasText(log.vehicleId) && vehicleList.some(v => v.id === log.vehicleId), 'Debes seleccionar un vehículo válido.');
+  ensure(hasText(log.driverId) && driverList.some(d => d.id === log.driverId), 'Debes seleccionar un chofer válido.');
+  ensure(hasText(log.areaId) && areaList.some(a => a.id === log.areaId), 'Debes seleccionar un área válida.');
   ensure(hasText(log.destination), 'El destino es obligatorio.');
-  ensure(isFiniteNumber(log.initialOdometer) && Number(log.initialOdometer) >= 0, 'El odometro inicial no es valido.');
-  ensure(isFiniteNumber(log.finalOdometer) && Number(log.finalOdometer) >= 0, 'El odometro final no es valido.');
+  ensure(isFiniteNumber(log.initialOdometer) && Number(log.initialOdometer) >= 0, 'El odómetro inicial no es válido.');
+  ensure(isFiniteNumber(log.finalOdometer) && Number(log.finalOdometer) >= 0, 'El odómetro final no es válido.');
 
   const initialOdometer = Number(log.initialOdometer);
   const finalOdometer = Number(log.finalOdometer);
   if (finalOdometer > 0) {
-    ensure(finalOdometer >= initialOdometer, 'El odometro final no puede ser menor al inicial.');
+    ensure(finalOdometer >= initialOdometer, 'El odómetro final no puede ser menor al inicial.');
   }
 
   if (hasValue(log.initialFuelLevel)) {
@@ -225,25 +232,25 @@ const validateTravelLogPayload = (log: Omit<TravelLog, 'id'> | TravelLog, vehicl
 };
 
 const validateMaintenancePayload = (record: Omit<MaintenanceRecord, 'id'> | MaintenanceRecord, vehicleList: Vehicle[]) => {
-  ensure(isValidDateValue(record.date), 'La fecha del mantenimiento no es valida.');
+  ensure(isValidDateValue(record.date), 'La fecha del mantenimiento no es válida.');
   ensure(hasText(record.provider), 'El proveedor es obligatorio.');
-  ensure(hasText(record.description), 'La descripcion del mantenimiento es obligatoria.');
-  ensure(isFiniteNumber(record.quoteCost) && Number(record.quoteCost) >= 0, 'El costo cotizado debe ser un numero valido.');
-  ensure(MAINTENANCE_STATUS_SET.has(record.status), 'El estado del mantenimiento no es valido.');
-  ensure(isValidDateValue(record.entryDate), 'La fecha/hora de ingreso no es valida.');
-  if (hasText(record.exitDate)) ensure(isValidDateValue(record.exitDate), 'La fecha/hora de salida no es valida.');
-  if (hasText(record.estimatedDeliveryDate)) ensure(isValidDateValue(record.estimatedDeliveryDate), 'La fecha estimada de entrega no es valida.');
-  ensure(hasText(record.vehicleId) && vehicleList.some(v => v.id === record.vehicleId), 'Debes seleccionar un vehiculo valido.');
-  ensure(isFiniteNumber(record.odometer) && Number(record.odometer) >= 0, 'El odometro debe ser un numero valido.');
+  ensure(hasText(record.description), 'La descripción del mantenimiento es obligatoria.');
+  ensure(isFiniteNumber(record.quoteCost) && Number(record.quoteCost) >= 0, 'El costo cotizado debe ser un número válido.');
+  ensure(MAINTENANCE_STATUS_SET.has(record.status), 'El estado del mantenimiento no es válido.');
+  ensure(isValidDateValue(record.entryDate), 'La fecha/hora de ingreso no es válida.');
+  if (hasText(record.exitDate)) ensure(isValidDateValue(record.exitDate), 'La fecha/hora de salida no es válida.');
+  if (hasText(record.estimatedDeliveryDate)) ensure(isValidDateValue(record.estimatedDeliveryDate), 'La fecha estimada de entrega no es válida.');
+  ensure(hasText(record.vehicleId) && vehicleList.some(v => v.id === record.vehicleId), 'Debes seleccionar un vehículo válido.');
+  ensure(isFiniteNumber(record.odometer) && Number(record.odometer) >= 0, 'El odómetro debe ser un número válido.');
   if (hasText(record.paymentMethod)) {
     ensure(
       MAINTENANCE_PAYMENT_METHOD_SET.has(record.paymentMethod as NonNullable<MaintenanceRecord['paymentMethod']>),
-      'El metodo de pago del mantenimiento no es valido.'
+      'El método de pago del mantenimiento no es válido.'
     );
   }
 
   if (hasValue(record.invoiceAmount)) {
-    ensure(isFiniteNumber(record.invoiceAmount), 'El monto de factura debe ser un numero valido.');
+    ensure(isFiniteNumber(record.invoiceAmount), 'El monto de factura debe ser un número válido.');
     ensure(Number(record.invoiceAmount) >= 0, 'El monto de factura no puede ser negativo.');
   }
 };
@@ -252,25 +259,25 @@ const validateSupplierPayload = (supplier: Omit<Supplier, 'id'> | Supplier) => {
   ensure(hasText(supplier.name), 'El nombre del proveedor es obligatorio.');
   if (hasText(supplier.email)) {
     const email = (supplier.email || '').trim();
-    ensure(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email), 'El correo del proveedor no es valido.');
+    ensure(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email), 'El correo del proveedor no es válido.');
   }
   if (hasText(supplier.phone)) {
     const phoneDigits = (supplier.phone || '').replace(/\D/g, '');
-    ensure(phoneDigits.length >= 7, 'El telefono del proveedor no es valido.');
+    ensure(phoneDigits.length >= 7, 'El teléfono del proveedor no es válido.');
   }
 };
 
 const validateUserPayload = (user: Omit<User, 'id'> | User, currentUsers: User[], currentUserId?: string) => {
   ensure(hasText(user.name), 'El nombre del usuario es obligatorio.');
   ensure(hasText(user.username), 'El nombre de usuario es obligatorio.');
-  ensure(USER_ROLE_SET.has(user.role), 'El rol del usuario no es valido.');
-  ensure(USER_STATUS_SET.has(user.status), 'El estado del usuario no es valido.');
+  ensure(USER_ROLE_SET.has(user.role), 'El rol del usuario no es válido.');
+  ensure(USER_STATUS_SET.has(user.status), 'El estado del usuario no es válido.');
 
   if (!currentUserId) {
-    ensure(hasText(user.password), 'La contrasena es obligatoria para nuevos usuarios.');
+    ensure(hasText(user.password), 'La contraseña es obligatoria para nuevos usuarios.');
   }
   if (hasText(user.password)) {
-    ensure((user.password as string).trim().length >= 8, 'La contrasena debe tener al menos 8 caracteres.');
+    ensure((user.password as string).trim().length >= 8, 'La contraseña debe tener al menos 8 caracteres.');
   }
 
   const normalizedUsername = (user.username || '').trim().toLowerCase();
@@ -282,10 +289,10 @@ const validateUserPayload = (user: Omit<User, 'id'> | User, currentUsers: User[]
 };
 
 const validateInspectionPayload = (inspection: Omit<VehicleInspection, 'id'> | VehicleInspection, vehicleList: Vehicle[]) => {
-  ensure(isValidDateValue(inspection.date), 'La fecha de revision no es valida.');
-  ensure(hasText(inspection.vehicleId) && vehicleList.some(v => v.id === inspection.vehicleId), 'Debes seleccionar un vehiculo valido.');
+  ensure(isValidDateValue(inspection.date), 'La fecha de revisión no es válida.');
+  ensure(hasText(inspection.vehicleId) && vehicleList.some(v => v.id === inspection.vehicleId), 'Debes seleccionar un vehículo válido.');
   ensure(hasText(inspection.inspectorName), 'El nombre del inspector es obligatorio.');
-  ensure(isFiniteNumber(inspection.odometer) && Number(inspection.odometer) >= 0, 'El odometro de revision debe ser un numero valido.');
+  ensure(isFiniteNumber(inspection.odometer) && Number(inspection.odometer) >= 0, 'El odómetro de revisión debe ser un número válido.');
 };
 
 const stripPasswordFromUser = (user: User): User => {
@@ -330,6 +337,7 @@ const App: React.FC = () => {
   const [travelLogs, setTravelLogs] = useState<TravelLog[]>([]);
   const [maintenanceRecords, setMaintenanceRecords] = useState<MaintenanceRecord[]>([]);
   const [maintenanceTypes, setMaintenanceTypes] = useState<MaintenanceType[]>(DEFAULT_MAINTENANCE_TYPES);
+  const [incidentTypes, setIncidentTypes] = useState<IncidentType[]>(DEFAULT_INCIDENT_TYPES);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [inspections, setInspections] = useState<VehicleInspection[]>([]);
   const [appSettings, setAppSettings] = useState<AppSetting[]>(DEFAULT_SETTINGS);
@@ -415,6 +423,7 @@ const App: React.FC = () => {
         if (data.travelLogs) setTravelLogs(data.travelLogs);
         if (data.maintenanceRecords) setMaintenanceRecords(data.maintenanceRecords);
         if (data.maintenanceTypes && data.maintenanceTypes.length > 0) setMaintenanceTypes(data.maintenanceTypes);
+        if (data.incidentTypes && data.incidentTypes.length > 0) setIncidentTypes(data.incidentTypes);
         if (data.suppliers && data.suppliers.length > 0) setSuppliers(data.suppliers);
         if (data.settings && data.settings.length > 0) setAppSettings(data.settings);
         if (data.users) setAppUsers(data.users);
@@ -433,7 +442,7 @@ const App: React.FC = () => {
   const handleSyncWithToast = useCallback(async () => {
     const synced = await handleSync();
     pushToast(
-      synced ? 'Sincronizacion completada.' : 'No se pudo sincronizar con Google Sheets.',
+      synced ? 'Sincronización completada.' : 'No se pudo sincronizar con Google Sheets.',
       synced ? 'success' : 'error'
     );
   }, [pushToast, handleSync]);
@@ -472,15 +481,15 @@ const App: React.FC = () => {
     const confirmPassword = bootstrapForm.confirmPassword;
 
     if (!name || !username || !password) {
-      setSetupError('Nombre, usuario y contrasena son obligatorios.');
+      setSetupError('Nombre, usuario y contraseña son obligatorios.');
       return;
     }
     if (password.length < 8) {
-      setSetupError('La contrasena debe tener al menos 8 caracteres.');
+      setSetupError('La contraseña debe tener al menos 8 caracteres.');
       return;
     }
     if (password !== confirmPassword) {
-      setSetupError('La confirmacion de contrasena no coincide.');
+      setSetupError('La confirmación de contraseña no coincide.');
       return;
     }
 
@@ -527,7 +536,7 @@ const App: React.FC = () => {
     setSetupError('');
 
     if (!loginUsername.trim() || !loginPass.trim()) {
-      setLoginError('Por favor ingrese usuario y contrasena.');
+      setLoginError('Por favor ingrese usuario y contraseña.');
       return;
     }
 
@@ -578,11 +587,11 @@ const App: React.FC = () => {
       if (inactiveUser) {
         setLoginError('El usuario esta inactivo. Contacta al administrador.');
       } else {
-        setLoginError('Usuario o contrasena incorrectos.');
+        setLoginError('Usuario o contraseña incorrectos.');
       }
       setIsSyncing(false);
     } catch (err: any) {
-      setLoginError('Error de conexion o validacion.');
+      setLoginError('Error de conexión o validación.');
       setIsSyncing(false);
     }
   };
@@ -594,7 +603,7 @@ const App: React.FC = () => {
   };
 
   const handleUpdateSetting = async (key: string, value: string) => {
-    ensure(hasText(key), 'La clave de configuracion es obligatoria.');
+    ensure(hasText(key), 'La clave de configuración es obligatoria.');
     if (key === 'PRIMARY_COLOR' || key === 'SECONDARY_COLOR') {
       ensure(/^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$/.test(value.trim()), 'El color debe estar en formato HEX, por ejemplo #135bec.');
     }
@@ -662,12 +671,12 @@ const App: React.FC = () => {
       plate: updatedVehicle.plate.toUpperCase(), 
       model: updatedVehicle.model.toUpperCase() 
     };
-    ensure(hasText(formatted.id), 'No se pudo identificar el vehiculo a actualizar.');
+    ensure(hasText(formatted.id), 'No se pudo identificar el vehículo a actualizar.');
     validateVehiclePayload(formatted, drivers);
 
     // Obtenemos el estado anterior para comparar
     const oldVehicle = vehicles.find(v => v.id === formatted.id);
-    ensure(Boolean(oldVehicle), 'El vehiculo que intentas actualizar no existe.');
+    ensure(Boolean(oldVehicle), 'El vehículo que intentas actualizar no existe.');
     const oldDriverId = oldVehicle?.assignedDriverId;
     const newDriverId = formatted.assignedDriverId;
 
@@ -858,8 +867,8 @@ const App: React.FC = () => {
       supplier: (updatedAcquisition.supplier || '').toUpperCase(),
       internalFolio: updatedAcquisition.internalFolio?.toUpperCase()
     };
-    ensure(hasText(formatted.id), 'No se pudo identificar la adquisicion de combustible.');
-    ensure(fuelAcquisitions.some(f => f.id === formatted.id), 'La adquisicion que intentas actualizar no existe.');
+    ensure(hasText(formatted.id), 'No se pudo identificar la adquisición de combustible.');
+    ensure(fuelAcquisitions.some(f => f.id === formatted.id), 'La adquisición que intentas actualizar no existe.');
     validateFuelAcquisitionPayload(formatted);
     setFuelAcquisitions(fuelAcquisitions.map(f => f.id === formatted.id ? formatted : f));
     await persistOrThrow('update-fuel-acquisition', formatted, 'actualizar');
@@ -979,8 +988,8 @@ const App: React.FC = () => {
       notes: updatedPlanning.notes?.toUpperCase(),
       destination: updatedPlanning.destination?.toUpperCase()
     };
-    ensure(hasText(formatted.id), 'No se pudo identificar la planeacion a actualizar.');
-    ensure(plannings.some(p => p.id === formatted.id), 'La planeacion que intentas actualizar no existe.');
+    ensure(hasText(formatted.id), 'No se pudo identificar la planeación a actualizar.');
+    ensure(plannings.some(p => p.id === formatted.id), 'La planeación que intentas actualizar no existe.');
     validatePlanningPayload(formatted, vehicles, drivers, areas);
     setPlannings(plannings.map(p => p.id === formatted.id ? formatted : p));
     await persistOrThrow('update-planning', formatted, 'actualizar');
@@ -1011,8 +1020,8 @@ const App: React.FC = () => {
   const handleDeleteArea = async (id: string) => {
     const previousAreas = areas;
     try {
-    ensure(hasText(id), 'No se pudo identificar el area a eliminar.');
-    ensure(areas.some(a => a.id === id), 'El area que intentas eliminar no existe.');
+    ensure(hasText(id), 'No se pudo identificar el área a eliminar.');
+    ensure(areas.some(a => a.id === id), 'El área que intentas eliminar no existe.');
     setAreas(areas.filter(a => a.id !== id));
     await persistOrThrow('delete-area', { id }, 'eliminar');
     } catch (error) {
@@ -1047,8 +1056,8 @@ const App: React.FC = () => {
       destination: updatedLog.destination.toUpperCase(), 
       notes: updatedLog.notes?.toUpperCase() 
     };
-    ensure(hasText(formatted.id), 'No se pudo identificar la bitacora a actualizar.');
-    ensure(travelLogs.some(t => t.id === formatted.id), 'La bitacora que intentas actualizar no existe.');
+    ensure(hasText(formatted.id), 'No se pudo identificar la bitácora a actualizar.');
+    ensure(travelLogs.some(t => t.id === formatted.id), 'La bitácora que intentas actualizar no existe.');
     validateTravelLogPayload(formatted, vehicles, drivers, areas);
     setTravelLogs(travelLogs.map(t => t.id === formatted.id ? formatted : t));
     await persistOrThrow('update-travel-log', formatted, 'actualizar');
@@ -1105,7 +1114,7 @@ const App: React.FC = () => {
     ensure(hasText(name), 'El nombre del tipo de mantenimiento es obligatorio.');
     const normalizedName = normalizeCatalogName(name);
     const alreadyExists = maintenanceTypes.some(type => normalizeCatalogName(type.name || '') === normalizedName);
-    ensure(!alreadyExists, 'Ese tipo de mantenimiento ya existe en el catalogo.');
+    ensure(!alreadyExists, 'Ese tipo de mantenimiento ya existe en el catálogo.');
 
     const newType = { id: `MT-${Date.now()}`, name: name.trim().toUpperCase() };
     setMaintenanceTypes([...maintenanceTypes, newType]);
@@ -1116,13 +1125,34 @@ const App: React.FC = () => {
     }
   };
 
+  const handleAddIncidentType = async (name: string) => {
+    const previousIncidentTypes = incidentTypes;
+    try {
+    ensure(hasText(name), 'El nombre del tipo de incidencia es obligatorio.');
+    const normalizedName = normalizeCatalogName(name);
+    const alreadyExists = incidentTypes.some(type => {
+      const candidate = type.value || type.name || '';
+      return normalizeCatalogName(candidate) === normalizedName || normalizeCatalogName(type.name || '') === normalizedName;
+    });
+    ensure(!alreadyExists, 'Ese tipo de incidencia ya existe en el catálogo.');
+
+    const cleanName = name.trim().toUpperCase();
+    const newType = { id: `IT-${Date.now()}`, name: cleanName, value: cleanName };
+    setIncidentTypes([...incidentTypes, newType]);
+    await persistOrThrow('incident-type', newType, 'guardar');
+    } catch (error) {
+      setIncidentTypes(previousIncidentTypes);
+      throw error;
+    }
+  };
+
   const handleAddSupplier = async (supplier: Omit<Supplier, 'id'>) => {
     const previousSuppliers = suppliers;
     try {
     validateSupplierPayload(supplier);
     const normalizedName = normalizeCatalogName(supplier.name || '');
     const alreadyExists = suppliers.some(existing => normalizeCatalogName(existing.name || '') === normalizedName);
-    ensure(!alreadyExists, 'Ese proveedor ya existe en el catalogo.');
+    ensure(!alreadyExists, 'Ese proveedor ya existe en el catálogo.');
 
     const newSupplier = { ...supplier, id: `SUP-${Date.now()}`, name: (supplier.name || '').trim().toUpperCase() };
     setSuppliers([...suppliers, newSupplier]);
@@ -1186,8 +1216,8 @@ const App: React.FC = () => {
   const handleUpdateInspection = async (updatedInspection: VehicleInspection) => {
     const previousInspections = inspections;
     try {
-    ensure(hasText(updatedInspection.id), 'No se pudo identificar la revision a actualizar.');
-    ensure(inspections.some(i => i.id === updatedInspection.id), 'La revision que intentas actualizar no existe.');
+    ensure(hasText(updatedInspection.id), 'No se pudo identificar la revisión a actualizar.');
+    ensure(inspections.some(i => i.id === updatedInspection.id), 'La revisión que intentas actualizar no existe.');
     validateInspectionPayload(updatedInspection, vehicles);
     setInspections(inspections.map(i => i.id === updatedInspection.id ? updatedInspection : i));
     await persistOrThrow('update-inspection' as any, updatedInspection, 'actualizar'); 
@@ -1211,12 +1241,12 @@ const App: React.FC = () => {
             onAddVehicle={async (payload) => executeWithToast(
               () => handleAddVehicle(payload),
               'Vehiculo registrado correctamente.',
-              'No se pudo registrar el vehiculo.'
+              'No se pudo registrar el vehículo.'
             )}
             onUpdateVehicle={async (payload) => executeWithToast(
               () => handleUpdateVehicle(payload),
               'Vehiculo actualizado correctamente.',
-              'No se pudo actualizar el vehiculo.'
+              'No se pudo actualizar el vehículo.'
             )}
           />
         );
@@ -1262,13 +1292,13 @@ const App: React.FC = () => {
             )}
             onAddFuelAcquisition={async (payload) => executeWithToast(
               () => handleAddFuelAcquisition(payload),
-              'Adquisicion de combustible registrada.',
-              'No se pudo registrar la adquisicion de combustible.'
+              'Adquisición de combustible registrada.',
+              'No se pudo registrar la adquisición de combustible.'
             )}
             onUpdateFuelAcquisition={async (payload) => executeWithToast(
               () => handleUpdateFuelAcquisition(payload),
-              'Adquisicion de combustible actualizada.',
-              'No se pudo actualizar la adquisicion de combustible.'
+              'Adquisición de combustible actualizada.',
+              'No se pudo actualizar la adquisición de combustible.'
             )}
             onAddFuelDelivery={async (payload) => executeWithToast(
               () => handleAddFuelDelivery(payload),
@@ -1287,6 +1317,7 @@ const App: React.FC = () => {
         return (
           <Incidents
             incidents={incidents}
+            incidentTypes={incidentTypes}
             searchQuery={searchQuery}
             vehicles={vehicles}
             drivers={drivers}
@@ -1300,6 +1331,11 @@ const App: React.FC = () => {
               () => handleUpdateIncident(payload),
               'Incidencia actualizada correctamente.',
               'No se pudo actualizar la incidencia.'
+            )}
+            onAddIncidentType={async (payload) => executeWithToast(
+              () => handleAddIncidentType(payload),
+              'Tipo de incidencia agregado.',
+              'No se pudo agregar el tipo de incidencia.'
             )}
           />
         );
@@ -1346,12 +1382,12 @@ const App: React.FC = () => {
             onAddTravelLog={async (payload) => executeWithToast(
               () => handleAddTravelLog(payload),
               'Bitacora registrada correctamente.',
-              'No se pudo registrar la bitacora.'
+              'No se pudo registrar la bitácora.'
             )}
             onUpdateTravelLog={async (payload) => executeWithToast(
               () => handleUpdateTravelLog(payload),
               'Bitacora actualizada correctamente.',
-              'No se pudo actualizar la bitacora.'
+              'No se pudo actualizar la bitácora.'
             )}
             onSync={handleSyncWithToast}
           />
@@ -1367,22 +1403,22 @@ const App: React.FC = () => {
             onAddPlanning={async (payload) => executeWithToast(
               () => handleAddPlanning(payload),
               'Asignacion registrada correctamente.',
-              'No se pudo registrar la asignacion.'
+              'No se pudo registrar la asignación.'
             )}
             onUpdatePlanning={async (payload) => executeWithToast(
               () => handleUpdatePlanning(payload),
               'Asignacion actualizada correctamente.',
-              'No se pudo actualizar la asignacion.'
+              'No se pudo actualizar la asignación.'
             )}
             onAddArea={async (payload) => executeWithToast(
               () => handleAddArea(payload),
               'Area agregada correctamente.',
-              'No se pudo agregar el area.'
+              'No se pudo agregar el área.'
             )}
             onDeleteArea={async (payload) => executeWithToast(
               () => handleDeleteArea(payload),
               'Area eliminada correctamente.',
-              'No se pudo eliminar el area.'
+              'No se pudo eliminar el área.'
             )}
           />
         );
@@ -1396,12 +1432,12 @@ const App: React.FC = () => {
             onAddInspection={async (payload) => executeWithToast(
               () => handleAddInspection(payload),
               'Revision registrada correctamente.',
-              'No se pudo registrar la revision.'
+              'No se pudo registrar la revisión.'
             )}
             onUpdateInspection={async (payload) => executeWithToast(
               () => handleUpdateInspection(payload),
               'Revision actualizada correctamente.',
-              'No se pudo actualizar la revision.'
+              'No se pudo actualizar la revisión.'
             )}
           />
         );
@@ -1558,7 +1594,7 @@ const App: React.FC = () => {
                 type="password"
                 required
                 minLength={8}
-                placeholder="Confirmar contrasena"
+                placeholder="Confirmar contraseña"
                 value={bootstrapForm.confirmPassword}
                 onChange={e => setBootstrapForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
                 className="w-full px-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"

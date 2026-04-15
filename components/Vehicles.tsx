@@ -1,6 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { Vehicle, Driver, AppSetting } from '../types';
+import { SortableTh, useSortableData } from '../utils/tableSort';
 
 interface VehiclesProps {
   vehicles: Vehicle[];
@@ -56,6 +57,18 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
       return matchesSearch && matchesStatus;
     });
   }, [vehicles, drivers, searchQuery, statusFilter]);
+
+  type VehicleSortKey = 'unit' | 'plate' | 'driver';
+  const vehicleSortAccessors = useMemo<Record<VehicleSortKey, (vehicle: Vehicle) => unknown>>(() => ({
+    unit: vehicle => `${vehicle.model || ''} ${vehicle.brand || ''} ${vehicle.line || ''}`,
+    plate: vehicle => vehicle.plate,
+    driver: vehicle => drivers.find(d => d.id === vehicle.assignedDriverId)?.name || ''
+  }), [drivers]);
+  const {
+    sortedItems: sortedVehicles,
+    sortConfig,
+    requestSort
+  } = useSortableData(filteredVehicles, vehicleSortAccessors, { key: 'unit', direction: 'asc' });
 
   const handleEdit = (vehicle: Vehicle) => {
     setFormError('');
@@ -133,7 +146,7 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
       setFormError('');
       setShowModal(false);
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Error al guardar el vehiculo";
+      const message = err instanceof Error ? err.message : "Error al guardar el vehículo";
       setFormError(message);
     } finally {
       setIsSaving(false);
@@ -245,14 +258,14 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
           <table className="table-professional table-density-compact">
             <thead>
               <tr>
-                <th>Unidad</th>
-                <th>Placa</th>
-                <th className="text-center">Chofer</th>
+                <SortableTh label="Unidad" sortKey="unit" sortConfig={sortConfig} onSort={requestSort} />
+                <SortableTh label="Placa" sortKey="plate" sortConfig={sortConfig} onSort={requestSort} />
+                <SortableTh label="Chofer" sortKey="driver" sortConfig={sortConfig} onSort={requestSort} className="text-center" align="center" />
                 <th className="text-right">Acciones</th>
               </tr>
             </thead>
             <tbody>
-              {filteredVehicles.map((vehicle) => {
+              {sortedVehicles.map((vehicle) => {
                 const driver = drivers.find(d => d.id === vehicle.assignedDriverId);
                 return (
                   <tr key={vehicle.id}>

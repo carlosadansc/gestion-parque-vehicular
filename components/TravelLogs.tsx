@@ -1,6 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { TravelLog, Vehicle, Driver, Area, AppSetting } from '../types';
+import { SortableTh, useSortableData } from '../utils/tableSort';
 
 interface TravelLogsProps {
   travelLogs: TravelLog[];
@@ -141,13 +142,25 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
     finalFuelLevel: 100
   });
 
-  const sortedLogs = useMemo(() => {
-    return [...travelLogs].sort((a, b) => {
-      const dateA = a.date ? new Date(a.date).getTime() : 0;
-      const dateB = b.date ? new Date(b.date).getTime() : 0;
-      return dateB - dateA;
-    });
-  }, [travelLogs]);
+  type TravelLogSortKey = 'date' | 'unit' | 'destination' | 'odometer';
+  const travelLogSortAccessors = useMemo<Record<TravelLogSortKey, (log: TravelLog) => unknown>>(() => ({
+    date: log => log.date,
+    unit: log => {
+      const vehicle = vehicles.find(v => v.id === log.vehicleId);
+      const driver = drivers.find(d => d.id === log.driverId);
+      return `${vehicle?.plate || ''} ${driver?.name || ''}`;
+    },
+    destination: log => {
+      const area = areas.find(a => a.id === log.areaId);
+      return `${log.destination || ''} ${area?.name || ''}`;
+    },
+    odometer: log => Number(log.finalOdometer) || Number(log.initialOdometer) || 0
+  }), [areas, drivers, vehicles]);
+  const {
+    sortedItems: sortedLogs,
+    sortConfig,
+    requestSort
+  } = useSortableData(travelLogs, travelLogSortAccessors, { key: 'date', direction: 'desc' });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -183,7 +196,7 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
       setShowModal(false);
       resetForm();
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Error al guardar bitacora de viaje";
+      const message = err instanceof Error ? err.message : "Error al guardar bitácora de viaje";
       setFormError(message);
     } finally {
       setIsSaving(false);
@@ -340,10 +353,10 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
           <table className="table-professional table-density-compact">
             <thead>
               <tr>
-                <th>Fecha / Horario</th>
-                <th>Unidad / Chofer</th>
-                <th>Destino</th>
-                <th className="text-right">Odómetro</th>
+                <SortableTh label="Fecha / Horario" sortKey="date" sortConfig={sortConfig} onSort={requestSort} />
+                <SortableTh label="Unidad / Chofer" sortKey="unit" sortConfig={sortConfig} onSort={requestSort} />
+                <SortableTh label="Destino" sortKey="destination" sortConfig={sortConfig} onSort={requestSort} />
+                <SortableTh label="Odómetro" sortKey="odometer" sortConfig={sortConfig} onSort={requestSort} align="right" className="text-right" />
                 <th className="text-center">Gestión</th>
               </tr>
             </thead>

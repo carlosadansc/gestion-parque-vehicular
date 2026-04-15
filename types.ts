@@ -44,7 +44,7 @@ export interface Vehicle {
   assignedDriverId?: string;
   status: "active" | "workshop" | "inactive";
   image: string;
-  // Datos TÃ©cnicos (JSON Request)
+  // Datos Técnicos (JSON Request)
   economicNumber?: string;
   inventory?: string;
   condition?: string;
@@ -58,7 +58,7 @@ export interface Vehicle {
   color?: string;
   cylinders?: number;
   fuelType?: string;
-  // Condiciones MecÃ¡nicas (JSON Request)
+  // Condiciones Mecánicas (JSON Request)
   engineStatus?: string;
   clutchStatus?: string;
   transmissionStatus?: string;
@@ -189,6 +189,12 @@ export interface MaintenanceType {
   name: string;
 }
 
+export interface IncidentType {
+  id: string;
+  name: string;
+  value?: string;
+}
+
 export interface Supplier {
   id: string;
   name: string;
@@ -201,7 +207,7 @@ export interface Supplier {
 
 export interface MaintenanceRecord {
   id: string;
-  consecutiveNumber?: number; // NÃºmero consecutivo automÃ¡tico
+  consecutiveNumber?: number; // Número consecutivo automático
   date: string;
   vehicleId: string;
   serviceType: string; // Changed from enum to string to support dynamic types
@@ -224,7 +230,7 @@ export interface MaintenanceRecord {
 export interface Incident {
   id: string;
   consecutiveNumber?: number; // Folio consecutivo automático
-  type: "mechanical" | "traffic" | "accident" | "theft";
+  type: string;
   title: string;
   description: string;
   date: string;

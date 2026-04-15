@@ -1,6 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { MaintenanceRecord, Vehicle, AppSetting, MaintenanceType, Supplier } from '../types';
+import { SortableTh, useSortableData } from '../utils/tableSort';
 
 interface MaintenanceProps {
   records: MaintenanceRecord[];
@@ -98,9 +99,25 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
 
   const filteredRecords = useMemo(() => {
     return records
-      .filter(r => filterStatus === 'todos' || r.status === filterStatus)
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      .filter(r => filterStatus === 'todos' || r.status === filterStatus);
   }, [records, filterStatus]);
+
+  type MaintenanceSortKey = 'service' | 'vehicle' | 'status' | 'quote' | 'invoice';
+  const maintenanceSortAccessors = useMemo<Record<MaintenanceSortKey, (record: MaintenanceRecord) => unknown>>(() => ({
+    service: record => `${record.date || ''} ${record.serviceType || ''} ${record.consecutiveNumber || ''}`,
+    vehicle: record => {
+      const vehicle = vehicles.find(v => v.id === record.vehicleId);
+      return `${vehicle?.plate || ''} ${vehicle?.model || ''}`;
+    },
+    status: record => record.status,
+    quote: record => record.quoteCost,
+    invoice: record => record.invoiceAmount || 0
+  }), [vehicles]);
+  const {
+    sortedItems: sortedRecords,
+    sortConfig,
+    requestSort
+  } = useSortableData(filteredRecords, maintenanceSortAccessors, { key: 'service', direction: 'desc' });
 
   const nextConsecutiveNumber = useMemo(() => {
     if (!records || records.length === 0) return 1;
@@ -486,16 +503,16 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
           <table className="table-professional table-density-compact">
             <thead>
               <tr>
-                <th className="px-5">Servicio</th>
-                <th className="px-5">Vehículo</th>
-                <th className="px-5">Estado</th>
-                <th className="px-5 text-right">Cotización</th>
-                <th className="px-5 text-right">Factura</th>
+                <SortableTh label="Servicio" sortKey="service" sortConfig={sortConfig} onSort={requestSort} className="px-5" />
+                <SortableTh label="Vehículo" sortKey="vehicle" sortConfig={sortConfig} onSort={requestSort} className="px-5" />
+                <SortableTh label="Estado" sortKey="status" sortConfig={sortConfig} onSort={requestSort} className="px-5" />
+                <SortableTh label="Cotización" sortKey="quote" sortConfig={sortConfig} onSort={requestSort} className="px-5 text-right" align="right" />
+                <SortableTh label="Factura" sortKey="invoice" sortConfig={sortConfig} onSort={requestSort} className="px-5 text-right" align="right" />
                 <th className="px-5 text-right"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {filteredRecords.map((record) => {
+              {sortedRecords.map((record) => {
                 const vehicle = vehicles.find(v => v.id === record.vehicleId);
                 const serviceLabel = record.serviceType || 'OTRO';
                 const statusLabel = statusMap[record.status] || (record.status || 'PENDIENTE').toUpperCase();
