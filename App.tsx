@@ -1463,7 +1463,21 @@ const App: React.FC = () => {
           />
         );
       case View.REPORTS:
-        return <Reports vehicles={vehicles} fuelEntries={fuelEntries} maintenanceRecords={maintenanceRecords} incidents={incidents} settings={appSettings} />;
+        return (
+          <Reports
+            vehicles={vehicles}
+            fuelEntries={fuelEntries}
+            maintenanceRecords={maintenanceRecords}
+            incidents={incidents}
+            travelLogs={travelLogs}
+            inspections={inspections}
+            plannings={plannings}
+            fuelAcquisitions={fuelAcquisitions}
+            fuelDeliveries={fuelDeliveries}
+            areas={areas}
+            settings={appSettings}
+          />
+        );
       case View.USERS:
         return (
           <Users

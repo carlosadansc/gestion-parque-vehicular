@@ -660,7 +660,7 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, incidentTypes = [], se
                                <p className="text-[9pt] font-black uppercase text-text h-4"></p>
                            )}
                            <p className="text-[7pt] font-bold text-text-muted mt-1 uppercase tracking-widest">{coordPos}</p>
-                           <p className="text-[7pt] font-bold text-text-muted uppercase tracking-widest">Enterado</p>
+                           <p className="text-[7pt] font-bold text-text-muted uppercase tracking-widest">Vo.Bo.</p>
                        </div>
                    </div>
                    <div className="text-center mt-8 border-t border-border pt-2">

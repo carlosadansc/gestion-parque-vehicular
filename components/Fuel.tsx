@@ -628,7 +628,7 @@ const Fuel: React.FC<FuelProps> = ({
          @media print {
             @page {
               margin: 0.5cm;
-              size: letter landscape;
+              size: letter ${(showAcquisitionReportPreview || showAcquisitionPrintPreview || showDeliveryReceiptPreview) ? 'portrait' : 'landscape'};
             }
             html, body {
               overflow: visible !important;
@@ -1743,7 +1743,7 @@ const Fuel: React.FC<FuelProps> = ({
             </button>
           </div>
           <div className="print-page-host flex-1 bg-surface-subtle p-10 flex justify-center">
-            <div id="fuel-acquisitions-report-printable" className="bg-surface w-[27.94cm] min-h-[21.59cm] p-[1.5cm] shadow-2xl relative text-text">
+            <div id="fuel-acquisitions-report-printable" className="bg-surface w-[21.59cm] min-h-[27.94cm] p-[1.5cm] shadow-2xl relative text-text">
               <div className="flex justify-between items-center mb-8 border-b-4 border-slate-900 pb-6">
                 <div className="flex items-center gap-6">
                   <img
