@@ -46,8 +46,8 @@ const Settings: React.FC<SettingsProps> = ({ settings, onUpdateSetting, onUrlCha
   };
 
 const appsScriptCode = `
-/** 
- * API FLOTA PRO v9.1 - Catálogo de tipos de incidencia
+/**
+ * API FLOTA PRO v9.2 - Fix guardado incidencias y catalogo de tipos
  */
 
 const CONFIG = {
@@ -81,16 +81,51 @@ const CONFIG = {
   }
 };
 
-function doGet(e) {
+const ACTION_TO_SHEET = {
+  "fuel": "Combustible",
+  "update-fuel": "Combustible",
+  "fuel-acquisition": "CombustibleAdquisiciones",
+  "update-fuel-acquisition": "CombustibleAdquisiciones",
+  "fuel-delivery": "CombustibleEntregas",
+  "update-fuel-delivery": "CombustibleEntregas",
+  "incident": "Incidencias",
+  "update-incident": "Incidencias",
+  "vehicle": "Vehiculos",
+  "update-vehicle": "Vehiculos",
+  "inspection": "Revisiones",
+  "update-inspection": "Revisiones",
+  "driver": "Choferes",
+  "update-driver": "Choferes",
+  "planning": "Planeacion",
+  "update-planning": "Planeacion",
+  "area": "Areas",
+  "delete-area": "Areas",
+  "travel-log": "BitacorasViaje",
+  "update-travel-log": "BitacorasViaje",
+  "maintenance": "Mantenimiento",
+  "update-maintenance": "Mantenimiento",
+  "maintenance-type": "TiposMantenimiento",
+  "update-maintenance-type": "TiposMantenimiento",
+  "incident-type": "TiposIncidencia",
+  "update-incident-type": "TiposIncidencia",
+  "supplier": "Proveedores",
+  "update-supplier": "Proveedores",
+  "user": "Usuarios",
+  "update-user": "Usuarios"
+};
+
+function doGet() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  Object.keys(CONFIG.sheets).forEach(name => getOrCreateSheet(ss, name));
+  Object.keys(CONFIG.sheets).forEach(function(name) {
+    getOrCreateSheet(ss, name);
+  });
 
   const data = {};
-  Object.keys(CONFIG.sheets).forEach(name => {
+  Object.keys(CONFIG.sheets).forEach(function(name) {
     data[name.toLowerCase()] = getSheetData(ss, name);
   });
-  
-  const response = {
+
+  return jsonResponse({
     vehicles: data.vehiculos,
     inspections: data.revisiones,
     drivers: data.choferes,
@@ -107,82 +142,115 @@ function doGet(e) {
     suppliers: data.proveedores,
     settings: data.ajustes,
     users: data.usuarios
-  };
-
-  return ContentService.createTextOutput(JSON.stringify(response)).setMimeType(ContentService.MimeType.JSON);
+  });
 }
 
 function doPost(e) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   try {
-    const contents = JSON.parse(e.postData.contents);
-    const action = contents.action;
-    const d = contents.data;
-    
-    if (action === 'update-setting') {
-      const sheet = getOrCreateSheet(ss, "Ajustes");
-      updateSettingValue(sheet, d.key, d.value);
-      return ContentService.createTextOutput(JSON.stringify({status: "success"})).setMimeType(ContentService.MimeType.JSON);
+    const body = parsePostBody(e);
+    const action = String(body.action || "").trim();
+    const d = body.data;
+
+    if (!action) throw new Error("Accion vacia.");
+    if (action === "update-setting") {
+      if (!d || typeof d !== "object") throw new Error("Carga de datos invalida.");
+      const settingsSheet = getOrCreateSheet(ss, "Ajustes");
+      updateSettingValue(settingsSheet, d.key, d.value);
+      return jsonResponse({ status: "success" });
     }
-    
-    let sheetName = "";
-     if (action === 'fuel' || action === 'update-fuel') sheetName = "Combustible";
-    else if (action === 'fuel-acquisition' || action === 'update-fuel-acquisition') sheetName = "CombustibleAdquisiciones";
-    else if (action === 'fuel-delivery' || action === 'update-fuel-delivery') sheetName = "CombustibleEntregas";
-    else if (action === 'incident' || action === 'update-incident') sheetName = "Incidencias";
-    else if (action === 'vehicle' || action === 'update-vehicle') sheetName = "Vehiculos";
-     else if (action === 'inspection' || action === 'update-inspection') sheetName = "Revisiones";
-    else if (action === 'driver' || action === 'update-driver') sheetName = "Choferes";
-    else if (action === 'planning' || action === 'update-planning') sheetName = "Planeacion";
-    else if (action === 'area' || action === 'delete-area') sheetName = "Areas";
-    else if (action === 'travel-log' || action === 'update-travel-log') sheetName = "BitacorasViaje";
-    else if (action === 'maintenance' || action === 'update-maintenance') sheetName = "Mantenimiento";
-    else if (action === 'maintenance-type' || action === 'update-maintenance-type') sheetName = "TiposMantenimiento";
-    else if (action === 'incident-type' || action === 'update-incident-type') sheetName = "TiposIncidencia";
-    else if (action === 'supplier' || action === 'update-supplier') sheetName = "Proveedores";
-    else if (action === 'user' || action === 'update-user') {
-      sheetName = "Usuarios";
-      if (d.password) d.password = Utilities.base64Encode(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, d.password));
-    }
-    
-    if (!sheetName) {
-      throw new Error("Accion no soportada: " + action);
-    }
-    if (!d || typeof d !== 'object') {
-      throw new Error("Carga de datos inválida.");
+
+    if (!d || typeof d !== "object") throw new Error("Carga de datos invalida.");
+    const sheetName = ACTION_TO_SHEET[action];
+    if (!sheetName) throw new Error("Accion no soportada: " + action);
+
+    const payload = sanitizePayloadByAction(action, d);
+    if ((action === "user" || action === "update-user") && payload.password) {
+      payload.password = Utilities.base64Encode(
+        Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, String(payload.password))
+      );
     }
 
     const sheet = getOrCreateSheet(ss, sheetName);
-    const headersInSheet = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(h => String(h).trim());
+    const headersInSheet = getSheetHeaders(sheet);
 
-    const requiresUniqueName = action === 'maintenance-type' ||
-      action === 'update-maintenance-type' ||
-      action === 'incident-type' ||
-      action === 'update-incident-type' ||
-      action === 'supplier' ||
-      action === 'update-supplier';
-    if (requiresUniqueName && hasDuplicateName(sheet, headersInSheet, d.name, action.startsWith('update-') ? d.id : "")) {
+    const requiresUniqueName =
+      action === "maintenance-type" ||
+      action === "update-maintenance-type" ||
+      action === "incident-type" ||
+      action === "update-incident-type" ||
+      action === "supplier" ||
+      action === "update-supplier";
+
+    if (requiresUniqueName && hasDuplicateName(sheet, headersInSheet, payload.name, action.indexOf("update-") === 0 ? payload.id : "")) {
       throw new Error("Ya existe un registro con ese nombre.");
     }
-    
-    if (action === 'delete-area') {
-      if (!d.id) throw new Error("El id es obligatorio para eliminar un área.");
-      deleteRowById(sheet, d.id, headersInSheet);
-    } else if (action.startsWith('update-')) {
-      updateRowDynamic(sheet, d.id, d, headersInSheet);
-    } else {
-      appendRowDynamic(sheet, d, headersInSheet);
+
+    if (action === "delete-area") {
+      if (!payload.id) throw new Error("El id es obligatorio para eliminar un area.");
+      deleteRowById(sheet, payload.id, headersInSheet);
+      return jsonResponse({ status: "success" });
     }
-    
-    return ContentService.createTextOutput(JSON.stringify({status: "success"})).setMimeType(ContentService.MimeType.JSON);
-  } catch(err) {
-    return ContentService.createTextOutput(JSON.stringify({status: "error", message: err.toString()})).setMimeType(ContentService.MimeType.JSON);
+
+    if (action.indexOf("update-") === 0) {
+      if (!payload.id) throw new Error("El id es obligatorio para actualizar.");
+      const updated = updateRowDynamic(sheet, payload.id, payload, headersInSheet);
+      if (!updated) throw new Error("No se encontro el registro a actualizar.");
+      return jsonResponse({ status: "success" });
+    }
+
+    appendRowDynamic(sheet, payload, headersInSheet);
+    return jsonResponse({ status: "success" });
+  } catch (err) {
+    return jsonResponse({ status: "error", message: String(err && err.message ? err.message : err) });
   }
 }
 
+function parsePostBody(e) {
+  if (!e || !e.postData || !e.postData.contents) return {};
+  try {
+    return JSON.parse(e.postData.contents);
+  } catch (error) {
+    throw new Error("JSON invalido en postData.contents");
+  }
+}
+
+function jsonResponse(obj) {
+  return ContentService
+    .createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function sanitizePayloadByAction(action, dataObj) {
+  const clean = dataObj || {};
+
+  if (action === "incident" || action === "update-incident") {
+    if (!clean.status) clean.status = "pending";
+    if (clean.type !== undefined) clean.type = String(clean.type).trim();
+    if (clean.title !== undefined) clean.title = String(clean.title).trim();
+    if (clean.description !== undefined) clean.description = String(clean.description).trim();
+  }
+
+  if (action === "incident-type" || action === "update-incident-type") {
+    if (!clean.name && clean.value) clean.name = String(clean.value).trim().toUpperCase();
+    if (!clean.value && clean.name) clean.value = normalizeIncidentTypeValue(clean.name);
+  }
+
+  return clean;
+}
+
+function normalizeIncidentTypeValue(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, "_")
+    .trim()
+    .toLowerCase();
+}
+
 function appendRowDynamic(sheet, dataObj, headers) {
-  const row = headers.map(h => {
-    if (h === 'date_registered') return new Date();
+  const row = headers.map(function(h) {
+    if (h === "date_registered") return new Date();
     return dataObj[h] !== undefined ? dataObj[h] : "";
   });
   sheet.appendRow(row);
@@ -191,10 +259,11 @@ function appendRowDynamic(sheet, dataObj, headers) {
 function updateRowDynamic(sheet, id, dataObj, headers) {
   const data = sheet.getDataRange().getValues();
   const idColIndex = headers.indexOf("id");
-  
+  if (idColIndex === -1) return false;
+
   for (let i = 1; i < data.length; i++) {
-    if (data[i][idColIndex] === id) {
-      headers.forEach((h, j) => {
+    if (String(data[i][idColIndex]) === String(id)) {
+      headers.forEach(function(h, j) {
         if (dataObj[h] !== undefined) {
           sheet.getRange(i + 1, j + 1).setValue(dataObj[h]);
         }
@@ -239,10 +308,7 @@ function hasDuplicateName(sheet, headers, candidateName, excludeId) {
   for (let i = 1; i < data.length; i++) {
     const existingName = normalizeForCompare(data[i][nameColIndex]);
     if (existingName !== normalizedCandidate) continue;
-
-    if (excludeId && idColIndex !== -1 && String(data[i][idColIndex]) === String(excludeId)) {
-      continue;
-    }
+    if (excludeId && idColIndex !== -1 && String(data[i][idColIndex]) === String(excludeId)) continue;
     return true;
   }
   return false;
@@ -251,7 +317,7 @@ function hasDuplicateName(sheet, headers, candidateName, excludeId) {
 function updateSettingValue(sheet, key, value) {
   const data = sheet.getDataRange().getValues();
   for (let i = 1; i < data.length; i++) {
-    if (data[i][0] === key) {
+    if (String(data[i][0]) === String(key)) {
       sheet.getRange(i + 1, 2).setValue(value);
       return true;
     }
@@ -268,18 +334,20 @@ function getOrCreateSheet(ss, name) {
     sheet.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight("bold").setBackground("#f1f5f9");
     sheet.setFrozenRows(1);
     if (name === "TiposIncidencia") seedDefaultIncidentTypes(sheet);
-  } else {
-    // Agregar columnas nuevas que no existian en versiones anteriores
-    ensureColumns(sheet, name);
-    if (name === "TiposIncidencia" && sheet.getLastRow() < 2) seedDefaultIncidentTypes(sheet);
+    return sheet;
+  }
+
+  ensureColumns(sheet, name);
+  if (name === "TiposIncidencia" && sheet.getLastRow() < 2) {
+    seedDefaultIncidentTypes(sheet);
   }
   return sheet;
 }
 
 function seedDefaultIncidentTypes(sheet) {
   const defaults = [
-    ["IT-1", "MECÁNICA", "mechanical"],
-    ["IT-2", "TRÁNSITO / MULTA", "traffic"],
+    ["IT-1", "MECANICA", "mechanical"],
+    ["IT-2", "TRANSITO / MULTA", "traffic"],
     ["IT-3", "ACCIDENTE", "accident"],
     ["IT-4", "ROBO", "theft"]
   ];
@@ -289,12 +357,10 @@ function seedDefaultIncidentTypes(sheet) {
 function ensureColumns(sheet, name) {
   const expected = CONFIG.sheets[name];
   if (!expected) return;
-  const lastCol = sheet.getLastColumn();
-  const existing = lastCol > 0
-    ? sheet.getRange(1, 1, 1, lastCol).getValues()[0].map(h => h.toString().trim())
-    : [];
-  expected.forEach(col => {
-    if (!existing.includes(col)) {
+
+  const existing = getSheetHeaders(sheet);
+  expected.forEach(function(col) {
+    if (existing.indexOf(col) === -1) {
       const newCol = existing.length + 1;
       sheet.getRange(1, newCol).setValue(col).setFontWeight("bold").setBackground("#f1f5f9");
       existing.push(col);
@@ -302,19 +368,30 @@ function ensureColumns(sheet, name) {
   });
 }
 
+function getSheetHeaders(sheet) {
+  const lastCol = sheet.getLastColumn();
+  if (lastCol <= 0) return [];
+  return sheet.getRange(1, 1, 1, lastCol).getValues()[0].map(function(h) {
+    return String(h).trim();
+  });
+}
+
 function getSheetData(ss, name) {
   const sheet = ss.getSheetByName(name);
   if (!sheet) return [];
-  const range = sheet.getDataRange();
-  const values = range.getValues();
+  const values = sheet.getDataRange().getValues();
   if (values.length < 2) return [];
-  const headers = values.shift().map(h => h.toString().trim());
-  return values.map((row) => {
+  const headers = values.shift().map(function(h) { return String(h).trim(); });
+  return values.map(function(row) {
     const obj = {};
-    headers.forEach((h, i) => { if (h) obj[h] = row[i]; });
+    headers.forEach(function(h, i) {
+      if (h) obj[h] = row[i];
+    });
     return obj;
   });
-}`.trim();
+}
+`.trim();
+
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-20">

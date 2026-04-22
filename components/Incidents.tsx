@@ -113,7 +113,11 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, incidentTypes = [], se
         const normalizedType = normalizeIncidentTypeName(resolvedType);
         const existsInCatalog = incidentTypeOptions.some(option => normalizeIncidentTypeName(option.value) === normalizedType);
         if (!existsInCatalog) {
-          await onAddIncidentType(resolvedType);
+          try {
+            await onAddIncidentType(resolvedType);
+          } catch (catalogError) {
+            console.warn('[Incidents] No se pudo guardar el tipo en catalogo, se continua con el guardado de la incidencia.', catalogError);
+          }
         }
       }
       if (editingIncident) {
