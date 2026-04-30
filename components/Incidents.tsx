@@ -152,6 +152,8 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, incidentTypes = [], se
   const managerPos = settingsMap['VEHICLE_MANAGER_POS'] || 'ENCARGADO DE PARQUE VEHICULAR';
   const coordName = settingsMap['ADMINISTRATIVE_COORDINATOR_NAME'] || '';
   const coordPos = settingsMap['ADMINISTRATIVE_COORDINATOR_POS'] || 'COORDINADOR ADMINISTRATIVO';
+  const directorName = settingsMap['INSTITUTION_HEAD_NAME'] || 'Director General';
+  const directorPos = settingsMap['INSTITUTION_HEAD_POS'] || 'DIRECTOR GENERAL';
   // Normalizar la ruta del logo (convertir rutas relativas a absolutas)
   const rawLogo = settingsMap['APP_LOGO'] || '/images/logo-dif.png';
   const appLogo = rawLogo.startsWith('./') ? rawLogo.replace('./', '/') : rawLogo;
@@ -274,16 +276,24 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, incidentTypes = [], se
             /* ========================================
                SIGNATURE SECTION - FLOWING WITH CONTENT
                ======================================== */
-            #incident-printable .signature-section {
-              page-break-inside: avoid;
-              margin-top: 2rem;
-            }
-            
-            #incident-printable .signature-line {
-              border-top: 2px solid #1e293b;
-              padding-top: 0.5rem;
-              min-width: 200px;
-            }
+             #incident-printable .signature-section {
+               page-break-inside: avoid;
+               margin-top: 2rem;
+             }
+
+             #incident-printable .signature-grid {
+               display: flex;
+               align-items: flex-start;
+               justify-content: space-between;
+               gap: 1rem;
+             }
+             
+             #incident-printable .signature-line {
+               border-top: 2px solid #1e293b;
+               padding-top: 0.5rem;
+               min-width: 0;
+               width: calc(25% - 0.75rem);
+             }
          }
        `}</style>
 
@@ -596,7 +606,6 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, incidentTypes = [], se
                       Reporte de Incidencia Vehicular
                   </div>
                   <p className="text-xs font-bold text-text-muted">FOLIO: <span className="font-black text-text text-lg ml-1">INC-{String(selectedIncident.consecutiveNumber ?? 0).padStart(4, '0')}</span></p>
-                  <p className="text-[9pt] text-text-muted font-bold mt-1">Fecha de Emisión: {new Date().toLocaleDateString('es-ES', {year: 'numeric', month: 'long', day: 'numeric'})}</p>
                 </div>
               </div>
 
@@ -632,39 +641,44 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, incidentTypes = [], se
               </div>
 
               {/* Descripción */}
-              <div className="mb-12">
+              <div className="mb-10">
                  <h4 className="text-[9pt] font-black uppercase border-b-2 border-border pb-1 text-primary mb-4">Descripción de los Hechos</h4>
-                 <div className="bg-surface-subtle p-6 rounded-lg min-h-[200px] border border-border">
-                   <p className="text-[10pt] text-text leading-relaxed italic whitespace-pre-wrap text-justify">
+                 <div className="bg-white px-5 py-4 rounded-lg min-h-[170px] border border-slate-200">
+                   <p className="text-[8.5pt] text-slate-700 leading-7 whitespace-pre-wrap text-justify max-w-[17.2cm] mx-auto">
                       {selectedIncident.description || 'Sin descripción detallada disponible.'}
                    </p>
                  </div>
-                 <p className="text-[8pt] text-text-muted mt-2 text-justify">
+                 <p className="text-[7.5pt] text-text-muted mt-2 text-justify">
                     * El presente reporte describe los hechos acontecidos y sirve como constancia administrativa para el seguimiento correspondiente.
                  </p>
               </div>
 
                {/* Firmas - Formal Signature Section */}
-               <div className="signature-section absolute bottom-[1.5cm] left-[1.5cm] right-[1.5cm]">
-                   <div className="grid gap-8 text-center grid-cols-3">
+               <div className="signature-section mt-12">
+                   <div className="signature-grid grid gap-4 text-center grid-cols-4">
                        <div className="signature-line border-t-2 border-slate-900 pt-4">
-                           <p className="text-[9pt] font-black uppercase text-text h-4"></p>
-                           <p className="text-[7pt] font-bold text-text-muted mt-1 uppercase tracking-widest">Nombre y Firma</p>
-                           <p className="text-[7pt] font-bold text-text-muted uppercase tracking-widest">Reporta Incidencia</p>
+                           <p className="text-[7pt] font-black uppercase text-text h-4"></p>
+                           <p className="text-[6pt] font-bold text-text-muted mt-1 uppercase tracking-[0.16em]">Nombre y Firma</p>
+                           <p className="text-[6pt] font-bold text-text-muted uppercase tracking-[0.16em]">Reporta Incidencia</p>
                        </div>
                        <div className="signature-line border-t-2 border-slate-900 pt-4">
-                           <p className="text-[9pt] font-black uppercase text-text">{managerName}</p>
-                           <p className="text-[7pt] font-bold text-text-muted mt-1 uppercase tracking-widest">{managerPos}</p>
-                           <p className="text-[7pt] font-bold text-text-muted uppercase tracking-widest">Validación</p>
+                           <p className="text-[7pt] font-black uppercase text-text">{managerName}</p>
+                           <p className="text-[6pt] font-bold text-text-muted mt-1 uppercase tracking-[0.16em]">{managerPos}</p>
+                           <p className="text-[6pt] font-bold text-text-muted uppercase tracking-[0.16em]">Validación</p>
                        </div>
                        <div className="signature-line border-t-2 border-slate-900 pt-4">
                            {coordName ? (
-                               <p className="text-[9pt] font-black uppercase text-text">{coordName}</p>
+                            <p className="text-[7pt] font-black uppercase text-text">{coordName}</p>
                            ) : (
-                               <p className="text-[9pt] font-black uppercase text-text h-4"></p>
+                                <p className="text-[7pt] font-black uppercase text-text h-4"></p>
                            )}
-                           <p className="text-[7pt] font-bold text-text-muted mt-1 uppercase tracking-widest">{coordPos}</p>
-                           <p className="text-[7pt] font-bold text-text-muted uppercase tracking-widest">Vo.Bo.</p>
+                           <p className="text-[6pt] font-bold text-text-muted mt-1 uppercase tracking-[0.16em]">{coordPos}</p>
+                           <p className="text-[6pt] font-bold text-text-muted uppercase tracking-[0.16em]">Vo.Bo.</p>
+                       </div>
+                       <div className="signature-line border-t-2 border-slate-900 pt-4">
+                           <p className="text-[7pt] font-black uppercase text-text">{directorName}</p>
+                           <p className="text-[6pt] font-bold text-text-muted mt-1 uppercase tracking-[0.16em]">{directorPos}</p>
+                           <p className="text-[6pt] font-bold text-text-muted uppercase tracking-[0.16em]">Vo.Bo.</p>
                        </div>
                    </div>
                    <div className="text-center mt-8 border-t border-border pt-2">
