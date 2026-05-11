@@ -389,6 +389,40 @@ body {
   max-height: calc(1.35em * 3);
 }
 
+.fuel-acquisitions-table {
+  table-layout: fixed;
+  min-width: 0;
+}
+
+.fuel-acquisitions-table th,
+.fuel-acquisitions-table td {
+  padding-left: 0.55rem;
+  padding-right: 0.55rem;
+  vertical-align: top;
+  overflow: hidden;
+}
+
+.fuel-acquisitions-table .col-consecutive { width: 5%; }
+.fuel-acquisitions-table .col-folio { width: 10%; }
+.fuel-acquisitions-table .col-invoice { width: 8%; }
+.fuel-acquisitions-table .col-type { width: 7%; }
+.fuel-acquisitions-table .col-validity { width: 10%; }
+.fuel-acquisitions-table .col-description { width: 15%; }
+.fuel-acquisitions-table .col-area { width: 12%; }
+.fuel-acquisitions-table .col-supplier { width: 13%; }
+.fuel-acquisitions-table .col-amount { width: 10%; }
+.fuel-acquisitions-table .col-actions { width: 10%; }
+
+.fuel-acquisitions-table .badge {
+  padding-left: 0.55rem;
+  padding-right: 0.55rem;
+}
+
+.fuel-acquisitions-table .table-actions {
+  justify-content: center;
+  flex-wrap: nowrap;
+}
+
 .table-professional .table-actions {
   display: inline-flex;
   align-items: center;

@@ -1119,44 +1119,48 @@ const Fuel: React.FC<FuelProps> = ({
             </tbody>
           </table>
           ) : activeTab === 'acquisitions' ? (
-          <table className="table-professional table-density-compact">
+          <table className="table-professional table-density-compact fuel-acquisitions-table">
             <thead>
               <tr>
-                <SortableTh label="Consec." sortKey="consecutive" sortConfig={acquisitionSortConfig} onSort={requestAcquisitionSort} />
-                <SortableTh label="Folio Interno" sortKey="folio" sortConfig={acquisitionSortConfig} onSort={requestAcquisitionSort} />
-                <SortableTh label="Factura" sortKey="invoice" sortConfig={acquisitionSortConfig} onSort={requestAcquisitionSort} />
-                <SortableTh label="Modalidad" sortKey="type" sortConfig={acquisitionSortConfig} onSort={requestAcquisitionSort} />
-                <SortableTh label="Vigencia" sortKey="validity" sortConfig={acquisitionSortConfig} onSort={requestAcquisitionSort} />
-                <SortableTh label="Descripción" sortKey="description" sortConfig={acquisitionSortConfig} onSort={requestAcquisitionSort} />
-                <SortableTh label="Área" sortKey="area" sortConfig={acquisitionSortConfig} onSort={requestAcquisitionSort} />
-                <SortableTh label="Proveedor" sortKey="supplier" sortConfig={acquisitionSortConfig} onSort={requestAcquisitionSort} />
-                <SortableTh label="Monto" sortKey="amount" sortConfig={acquisitionSortConfig} onSort={requestAcquisitionSort} align="right" className="text-right" />
-                <th className="text-center">Acciones</th>
+                <SortableTh label="Consec." sortKey="consecutive" sortConfig={acquisitionSortConfig} onSort={requestAcquisitionSort} className="col-consecutive" />
+                <SortableTh label="Folio" sortKey="folio" sortConfig={acquisitionSortConfig} onSort={requestAcquisitionSort} className="col-folio" />
+                <SortableTh label="Factura" sortKey="invoice" sortConfig={acquisitionSortConfig} onSort={requestAcquisitionSort} className="col-invoice" />
+                <SortableTh label="Tipo" sortKey="type" sortConfig={acquisitionSortConfig} onSort={requestAcquisitionSort} className="col-type" />
+                <SortableTh label="Vigencia" sortKey="validity" sortConfig={acquisitionSortConfig} onSort={requestAcquisitionSort} className="col-validity" />
+                <SortableTh label="Descripción" sortKey="description" sortConfig={acquisitionSortConfig} onSort={requestAcquisitionSort} className="col-description" />
+                <SortableTh label="Área" sortKey="area" sortConfig={acquisitionSortConfig} onSort={requestAcquisitionSort} className="col-area" />
+                <SortableTh label="Proveedor" sortKey="supplier" sortConfig={acquisitionSortConfig} onSort={requestAcquisitionSort} className="col-supplier" />
+                <SortableTh label="Monto" sortKey="amount" sortConfig={acquisitionSortConfig} onSort={requestAcquisitionSort} align="right" className="col-amount text-right" />
+                <th className="col-actions text-center">Acciones</th>
               </tr>
             </thead>
             <tbody>
               {sortedAcquisitions.map((entry) => (
                 <tr key={entry.id}>
-                  <td className="font-black text-blue-700">{entry.consecutiveNumber || '---'}</td>
-                  <td className="font-medium">{entry.internalFolio || 'S/N'}</td>
-                  <td className="font-medium">{entry.invoiceNumber || 'S/N'}</td>
-                  <td>
+                  <td className="col-consecutive font-black text-blue-700">{entry.consecutiveNumber || '---'}</td>
+                  <td className="col-folio font-medium truncate" title={entry.internalFolio || 'S/N'}>{entry.internalFolio || 'S/N'}</td>
+                  <td className="col-invoice font-medium truncate" title={entry.invoiceNumber || 'S/N'}>{entry.invoiceNumber || 'S/N'}</td>
+                  <td className="col-type">
                     <span className={`badge ${entry.isQr ? 'badge-success' : 'badge-warning'}`}>
                       {entry.isQr ? 'QR' : 'VALES'}
                     </span>
                   </td>
-                  <td className="text-xs font-bold text-text-muted">
+                  <td className="col-validity text-xs font-bold text-text-muted">
                     {entry.validFrom ? new Date(entry.validFrom).toLocaleDateString() : '---'} - {entry.validTo ? new Date(entry.validTo).toLocaleDateString() : '---'}
                   </td>
-                  <td className="font-medium max-w-xs">
+                  <td className="col-description font-medium">
                     <span className="table-description-clamp" title={entry.description}>
                       {entry.description}
                     </span>
                   </td>
-                  <td className="font-medium">{entry.area}</td>
-                  <td className="font-medium">{entry.supplier}</td>
-                  <td className="text-right font-black">${(Number(entry.amount) || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td>
-                  <td className="text-center">
+                  <td className="col-area font-medium">
+                    <span className="table-description-clamp" title={entry.area}>{entry.area}</span>
+                  </td>
+                  <td className="col-supplier font-medium">
+                    <span className="table-description-clamp" title={entry.supplier}>{entry.supplier}</span>
+                  </td>
+                  <td className="col-amount text-right font-black">${(Number(entry.amount) || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td>
+                  <td className="col-actions text-center">
                     <div className="table-actions">
                       <button
                         onClick={() => handlePrintAcquisition(entry)}
