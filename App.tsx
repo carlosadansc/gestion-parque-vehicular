@@ -866,7 +866,8 @@ const App: React.FC = () => {
       description: (newAcquisition.description || '').toUpperCase(),
       area: (newAcquisition.area || '').toUpperCase(),
       supplier: (newAcquisition.supplier || '').toUpperCase(),
-      internalFolio: newAcquisition.internalFolio?.toUpperCase()
+      internalFolio: newAcquisition.internalFolio?.toUpperCase(),
+      invoiceNumber: newAcquisition.invoiceNumber?.toUpperCase()
     };
     validateFuelAcquisitionPayload(formatted);
     const acquisitionWithId = { ...formatted, id: `FA-${Date.now()}` };
@@ -886,7 +887,8 @@ const App: React.FC = () => {
       description: (updatedAcquisition.description || '').toUpperCase(),
       area: (updatedAcquisition.area || '').toUpperCase(),
       supplier: (updatedAcquisition.supplier || '').toUpperCase(),
-      internalFolio: updatedAcquisition.internalFolio?.toUpperCase()
+      internalFolio: updatedAcquisition.internalFolio?.toUpperCase(),
+      invoiceNumber: updatedAcquisition.invoiceNumber?.toUpperCase()
     };
     ensure(hasText(formatted.id), 'No se pudo identificar la adquisición de combustible.');
     ensure(fuelAcquisitions.some(f => f.id === formatted.id), 'La adquisición que intentas actualizar no existe.');

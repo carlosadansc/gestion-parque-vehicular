@@ -378,6 +378,17 @@ body {
 .table-professional tbody tr:last-child td { 
   border-bottom: 0; 
 }
+
+.table-description-clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.35;
+  max-height: calc(1.35em * 3);
+}
+
 .table-professional .table-actions {
   display: inline-flex;
   align-items: center;

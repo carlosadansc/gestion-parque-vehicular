@@ -24,7 +24,7 @@ interface FuelProps {
 
 type ProcessedFuelEntry = FuelEntry & { performance?: number };
 type FuelLoadSortKey = 'date' | 'vehicle' | 'odometer' | 'liters' | 'performance' | 'cost';
-type FuelAcquisitionSortKey = 'consecutive' | 'folio' | 'type' | 'validity' | 'description' | 'area' | 'supplier' | 'amount';
+type FuelAcquisitionSortKey = 'consecutive' | 'folio' | 'invoice' | 'type' | 'validity' | 'description' | 'area' | 'supplier' | 'amount';
 type FuelDeliverySortKey = 'consecutive' | 'date' | 'acquisition' | 'type' | 'area' | 'purpose' | 'recipient' | 'amount';
 
 const toDateInputValue = (value: unknown, fallback = ''): string => {
@@ -79,6 +79,7 @@ const Fuel: React.FC<FuelProps> = ({
   const [acquisitionForm, setAcquisitionForm] = useState({
     date: today,
     internalFolio: '',
+    invoiceNumber: '',
     isQr: false,
     validFrom: today,
     validTo: today,
@@ -309,6 +310,7 @@ const Fuel: React.FC<FuelProps> = ({
   const acquisitionSortAccessors = useMemo<Record<FuelAcquisitionSortKey, (entry: FuelAcquisition) => unknown>>(() => ({
     consecutive: entry => Number(entry.consecutiveNumber) || 0,
     folio: entry => entry.internalFolio || '',
+    invoice: entry => entry.invoiceNumber || '',
     type: entry => entry.isQr ? 'QR' : 'VALES',
     validity: entry => entry.validFrom || entry.validTo || '',
     description: entry => entry.description || '',
@@ -421,6 +423,7 @@ const Fuel: React.FC<FuelProps> = ({
     setAcquisitionForm({
       date: today,
       internalFolio: '',
+      invoiceNumber: '',
       isQr: false,
       validFrom: today,
       validTo: today,
@@ -437,6 +440,7 @@ const Fuel: React.FC<FuelProps> = ({
     setAcquisitionForm({
       date: toDateInputValue(entry.date, new Date().toISOString().split('T')[0]),
       internalFolio: String(entry.internalFolio || ''),
+      invoiceNumber: String(entry.invoiceNumber || ''),
       isQr: Boolean(entry.isQr),
       validFrom: toDateInputValue(entry.validFrom, new Date().toISOString().split('T')[0]),
       validTo: toDateInputValue(entry.validTo, new Date().toISOString().split('T')[0]),
@@ -471,6 +475,7 @@ const Fuel: React.FC<FuelProps> = ({
       const payload = {
         consecutiveNumber: editingAcquisition?.consecutiveNumber || nextAcquisitionConsecutive,
         internalFolio: acquisitionForm.internalFolio || undefined,
+        invoiceNumber: acquisitionForm.invoiceNumber || undefined,
         date: acquisitionForm.date,
         isQr: acquisitionForm.isQr,
         validFrom: acquisitionForm.validFrom,
@@ -1119,6 +1124,7 @@ const Fuel: React.FC<FuelProps> = ({
               <tr>
                 <SortableTh label="Consec." sortKey="consecutive" sortConfig={acquisitionSortConfig} onSort={requestAcquisitionSort} />
                 <SortableTh label="Folio Interno" sortKey="folio" sortConfig={acquisitionSortConfig} onSort={requestAcquisitionSort} />
+                <SortableTh label="Factura" sortKey="invoice" sortConfig={acquisitionSortConfig} onSort={requestAcquisitionSort} />
                 <SortableTh label="Modalidad" sortKey="type" sortConfig={acquisitionSortConfig} onSort={requestAcquisitionSort} />
                 <SortableTh label="Vigencia" sortKey="validity" sortConfig={acquisitionSortConfig} onSort={requestAcquisitionSort} />
                 <SortableTh label="Descripción" sortKey="description" sortConfig={acquisitionSortConfig} onSort={requestAcquisitionSort} />
@@ -1133,6 +1139,7 @@ const Fuel: React.FC<FuelProps> = ({
                 <tr key={entry.id}>
                   <td className="font-black text-blue-700">{entry.consecutiveNumber || '---'}</td>
                   <td className="font-medium">{entry.internalFolio || 'S/N'}</td>
+                  <td className="font-medium">{entry.invoiceNumber || 'S/N'}</td>
                   <td>
                     <span className={`badge ${entry.isQr ? 'badge-success' : 'badge-warning'}`}>
                       {entry.isQr ? 'QR' : 'VALES'}
@@ -1141,7 +1148,11 @@ const Fuel: React.FC<FuelProps> = ({
                   <td className="text-xs font-bold text-text-muted">
                     {entry.validFrom ? new Date(entry.validFrom).toLocaleDateString() : '---'} - {entry.validTo ? new Date(entry.validTo).toLocaleDateString() : '---'}
                   </td>
-                  <td className="font-medium">{entry.description}</td>
+                  <td className="font-medium max-w-xs">
+                    <span className="table-description-clamp" title={entry.description}>
+                      {entry.description}
+                    </span>
+                  </td>
                   <td className="font-medium">{entry.area}</td>
                   <td className="font-medium">{entry.supplier}</td>
                   <td className="text-right font-black">${(Number(entry.amount) || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td>
@@ -1421,6 +1432,10 @@ const Fuel: React.FC<FuelProps> = ({
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Folio Interno</label>
                   <input disabled={isSavingAcquisition} className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all uppercase" value={acquisitionForm.internalFolio} onChange={e => setAcquisitionForm({...acquisitionForm, internalFolio: e.target.value})} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">No. Factura</label>
+                  <input disabled={isSavingAcquisition} className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all uppercase" value={acquisitionForm.invoiceNumber} onChange={e => setAcquisitionForm({...acquisitionForm, invoiceNumber: e.target.value})} />
                 </div>
               </div>
 
@@ -1805,6 +1820,7 @@ const Fuel: React.FC<FuelProps> = ({
                       <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-text-muted">Consec.</th>
                       <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-text-muted">Fecha</th>
                       <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-text-muted">Folio</th>
+                      <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-text-muted">Factura</th>
                       <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-text-muted">Tipo</th>
                       <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-text-muted">Vigencia</th>
                       <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-text-muted">Area</th>
@@ -1820,6 +1836,7 @@ const Fuel: React.FC<FuelProps> = ({
                           {entry.date ? new Date(entry.date).toLocaleDateString('es-ES') : '---'}
                         </td>
                         <td className="px-2 py-2 text-[8pt] font-bold text-text uppercase">{entry.internalFolio || 'S/N'}</td>
+                        <td className="px-2 py-2 text-[8pt] font-bold text-text uppercase">{entry.invoiceNumber || 'S/N'}</td>
                         <td className="px-2 py-2 text-[8pt] font-black uppercase text-center">{entry.isQr ? 'QR' : 'VALE'}</td>
                         <td className="px-2 py-2 text-[8pt] font-bold text-text-muted">
                           {(entry.validFrom ? new Date(entry.validFrom).toLocaleDateString('es-ES') : '---')} - {(entry.validTo ? new Date(entry.validTo).toLocaleDateString('es-ES') : '---')}
@@ -1831,7 +1848,7 @@ const Fuel: React.FC<FuelProps> = ({
                     ))}
                     {filteredAcquisitions.length === 0 && (
                       <tr>
-                        <td colSpan={8} className="px-2 py-6 text-[9pt] text-center font-bold text-text-muted">
+                        <td colSpan={9} className="px-2 py-6 text-[9pt] text-center font-bold text-text-muted">
                           Sin adquisiciones para el filtro seleccionado.
                         </td>
                       </tr>
@@ -2107,6 +2124,9 @@ const Fuel: React.FC<FuelProps> = ({
                   </p>
                   <p className="text-xs font-bold text-text-muted">
                     FOLIO INTERNO: <span className="font-black text-text text-lg ml-1">{(selectedAcquisition.internalFolio || 'S/N').toUpperCase()}</span>
+                  </p>
+                  <p className="text-xs font-bold text-text-muted">
+                    FACTURA: <span className="font-black text-text text-lg ml-1">{(selectedAcquisition.invoiceNumber || 'S/N').toUpperCase()}</span>
                   </p>
                   <p className="text-[9pt] text-text-muted font-bold mt-1">
                     Fecha: {selectedAcquisition.date ? new Date(selectedAcquisition.date).toLocaleDateString('es-ES', {year: 'numeric', month: 'long', day: 'numeric'}) : '---'}

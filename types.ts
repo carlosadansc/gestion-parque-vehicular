@@ -142,6 +142,7 @@ export interface FuelAcquisition {
   id: string;
   consecutiveNumber?: number;
   internalFolio?: string;
+  invoiceNumber?: string;
   date: string;
   isQr: boolean;
   validFrom: string;
