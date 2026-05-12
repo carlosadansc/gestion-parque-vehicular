@@ -19,6 +19,27 @@ const normalizeIncidentTypeName = (value: string) =>
     .replace(/\s+/g, ' ')
     .toLowerCase();
 
+const splitIncidentDescription = (description: string) => {
+  const fallback = 'Sin descripcion detallada disponible.';
+  let remaining = (description || fallback).trim();
+  const pages: string[] = [];
+  let limit = 1350;
+
+  while (remaining.length > limit) {
+    let splitAt = remaining.lastIndexOf('\n\n', limit);
+    if (splitAt < limit * 0.55) splitAt = remaining.lastIndexOf('. ', limit);
+    if (splitAt < limit * 0.55) splitAt = remaining.lastIndexOf(' ', limit);
+    if (splitAt < 1) splitAt = limit;
+
+    pages.push(remaining.slice(0, splitAt + 1).trim());
+    remaining = remaining.slice(splitAt + 1).trim();
+    limit = 1750;
+  }
+
+  pages.push(remaining || fallback);
+  return pages;
+};
+
 interface IncidentsProps {
   incidents: Incident[];
   incidentTypes?: IncidentType[];
@@ -160,6 +181,10 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, incidentTypes = [], se
 
   const reportVehicle = selectedIncident ? vehicles.find(v => v.id === selectedIncident.vehicleId) : null;
   const reportDriver = selectedIncident ? drivers.find(d => d.id === selectedIncident.driverId) : null;
+  const reportDescriptionPages = useMemo(
+    () => splitIncidentDescription(selectedIncident?.description || ''),
+    [selectedIncident]
+  );
 
   const typeMap: Record<string, string> = {
     mechanical: 'Mecánica',
@@ -252,34 +277,103 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, incidentTypes = [], se
     <div className="space-y-8 animate-in slide-in-from-top-4 duration-500">
        <style>{`
          @media print {
-           body * { 
-             visibility: hidden; 
-           }
-           #incident-printable, #incident-printable * { 
-             visibility: visible; 
-             -webkit-print-color-adjust: exact !important;
-             print-color-adjust: exact !important;
-           }
-           #incident-printable { 
-             position: absolute; 
-             left: 0; 
-             top: 0; 
-             width: 100%; 
-             padding: 0; 
-             margin: 0;
-             background: white !important; 
-             font-family: 'Inter', sans-serif;
-           }
-           .no-print { display: none !important; }
-            @page { margin: 0.5cm; size: letter portrait; }
+            html,
+            body,
+            #root {
+              height: auto !important;
+              min-height: auto !important;
+              overflow: visible !important;
+            }
+
+            body * { 
+              visibility: hidden; 
+            }
+
+            .incident-print-root,
+            .incident-print-shell {
+              position: static !important;
+              display: block !important;
+              height: auto !important;
+              min-height: auto !important;
+              overflow: visible !important;
+              padding: 0 !important;
+              margin: 0 !important;
+              background: white !important;
+            }
+
+            #incident-printable, #incident-printable * { 
+              visibility: visible; 
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
+            #incident-printable { 
+              position: absolute !important;
+              left: 0 !important;
+              top: 0 !important;
+              display: block !important;
+              width: 21.59cm !important;
+              padding: 0 !important;
+              margin: 0 !important;
+              background: white !important;
+              font-family: 'Inter', sans-serif;
+              box-shadow: none !important;
+              overflow: visible !important;
+            }
+            .no-print { display: none !important; }
+             @page { margin: 0; size: letter portrait; }
+
+             #incident-printable .incident-print-page {
+               width: 21.59cm !important;
+               min-height: 27.94cm !important;
+               height: 27.94cm !important;
+               padding: 1.5cm !important;
+               box-sizing: border-box !important;
+               page-break-after: always;
+               break-after: page;
+               position: relative !important;
+               overflow: hidden !important;
+               background: white !important;
+               box-shadow: none !important;
+             }
+
+             #incident-printable .incident-print-page:last-child {
+               page-break-after: auto;
+               break-after: auto;
+             }
+
+             #incident-printable .incident-description-box {
+               min-height: 0 !important;
+               break-inside: auto;
+               page-break-inside: auto;
+             }
+
+             #incident-printable .incident-description-text {
+               max-width: none !important;
+               overflow-wrap: anywhere;
+             }
+
+             #incident-printable .incident-page-footer {
+               display: block !important;
+               position: absolute;
+               bottom: 0.65cm;
+               left: 1.5cm;
+               right: 1.5cm;
+               text-align: center;
+               font-size: 7pt;
+               font-weight: 800;
+               color: #94a3b8;
+               text-transform: uppercase;
+               letter-spacing: 0.18em;
+             }
            
             /* ========================================
                SIGNATURE SECTION - FLOWING WITH CONTENT
                ======================================== */
-             #incident-printable .signature-section {
-               page-break-inside: avoid;
-               margin-top: 2rem;
-             }
+              #incident-printable .signature-section {
+                break-inside: avoid;
+                page-break-inside: avoid;
+                margin-top: 2rem;
+              }
 
              #incident-printable .signature-grid {
                display: flex;
@@ -577,7 +671,7 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, incidentTypes = [], se
 
       {/* VISTA PREVIA DE REPORTE FORMAL (ESTILO FICHA VEHICULO) */}
       {showPrintPreview && selectedIncident && (
-        <div className="fixed inset-0 z-[200] bg-surface flex flex-col overflow-y-auto">
+        <div className="incident-print-root fixed inset-0 z-[200] bg-surface flex flex-col overflow-y-auto">
            <div className="sticky top-0 bg-secondary p-4 flex justify-between items-center text-white shadow-lg no-print">
              <div className="flex items-center gap-4">
                 <button onClick={() => setShowPrintPreview(false)} className="bg-surface/10 px-4 py-2 rounded-lg font-bold text-xs hover:bg-surface/20 transition-all">Cerrar</button>
@@ -588,8 +682,10 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, incidentTypes = [], se
              </button>
           </div>
           
-          <div className="flex-1 bg-surface-subtle p-10 flex justify-center">
-            <div id="incident-printable" className="bg-surface w-[21.59cm] min-h-[27.94cm] p-[1.5cm] shadow-2xl relative text-text">
+          <div className="incident-print-shell flex-1 bg-surface-subtle p-10 flex justify-center">
+            <div id="incident-printable" className="bg-surface w-[21.59cm] text-text">
+              <div className="incident-print-page bg-surface w-[21.59cm] min-h-[27.94cm] p-[1.5cm] shadow-2xl relative text-text mb-8">
+              <div className="incident-page-footer hidden" aria-hidden="true">Pagina 1 de {reportDescriptionPages.length}</div>
               
               {/* Header Institucional */}
               <div className="flex justify-between items-center mb-8 border-b-4 border-slate-900 pb-6">
@@ -643,16 +739,20 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, incidentTypes = [], se
               {/* Descripción */}
               <div className="mb-10">
                  <h4 className="text-[9pt] font-black uppercase border-b-2 border-border pb-1 text-primary mb-4">Descripción de los Hechos</h4>
-                 <div className="bg-white px-5 py-4 rounded-lg min-h-[170px] border border-slate-200">
-                   <p className="text-[8.5pt] text-slate-700 leading-7 whitespace-pre-wrap text-justify max-w-[17.2cm] mx-auto">
-                      {selectedIncident.description || 'Sin descripción detallada disponible.'}
+                  <div className="incident-description-box bg-white px-5 py-4 rounded-lg min-h-[170px] border border-slate-200">
+                   <p className="incident-description-text text-[8.5pt] text-slate-700 leading-7 whitespace-pre-wrap text-justify max-w-[17.2cm] mx-auto">
+                     {reportDescriptionPages[0]}
                    </p>
                  </div>
+                 {reportDescriptionPages.length === 1 && (
                  <p className="text-[7.5pt] text-text-muted mt-2 text-justify">
-                    * El presente reporte describe los hechos acontecidos y sirve como constancia administrativa para el seguimiento correspondiente.
+                     * El presente reporte describe los hechos acontecidos y sirve como constancia administrativa para el seguimiento correspondiente.
                  </p>
-              </div>
+                 )}
+               </div>
 
+               {reportDescriptionPages.length === 1 && (
+               <>
                {/* Firmas - Formal Signature Section */}
                <div className="signature-section mt-12">
                    <div className="signature-grid grid gap-4 text-center grid-cols-4">
@@ -675,16 +775,76 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, incidentTypes = [], se
                            <p className="text-[6pt] font-bold text-text-muted mt-1 uppercase tracking-[0.16em]">{coordPos}</p>
                            <p className="text-[6pt] font-bold text-text-muted uppercase tracking-[0.16em]">Vo.Bo.</p>
                        </div>
-                       <div className="signature-line border-t-2 border-slate-900 pt-4">
-                           <p className="text-[7pt] font-black uppercase text-text">{directorName}</p>
-                           <p className="text-[6pt] font-bold text-text-muted mt-1 uppercase tracking-[0.16em]">{directorPos}</p>
-                           <p className="text-[6pt] font-bold text-text-muted uppercase tracking-[0.16em]">Vo.Bo.</p>
-                       </div>
+                        <div className="signature-line border-t-2 border-slate-900 pt-4">
+                            <p className="text-[7pt] font-black uppercase text-text">{directorName}</p>
+                            <p className="text-[6pt] font-bold text-text-muted mt-1 uppercase tracking-[0.16em]">{directorPos}</p>
+                        </div>
                    </div>
                    <div className="text-center mt-8 border-t border-border pt-2">
                         <p className="text-[7pt] font-black text-slate-300 uppercase tracking-[0.3em]">Sistema de Gestión de Parque Vehicular • DIF Municipal La Paz</p>
                    </div>
                </div>
+               </>
+               )}
+
+              </div>
+
+              {reportDescriptionPages.slice(1).map((pageText, pageIndex) => {
+                const pageNumber = pageIndex + 2;
+                const isLastPage = pageNumber === reportDescriptionPages.length;
+                return (
+                  <div key={pageNumber} className="incident-print-page bg-surface w-[21.59cm] min-h-[27.94cm] p-[1.5cm] shadow-2xl relative text-text mb-8">
+                    <div className="incident-page-footer hidden" aria-hidden="true">Pagina {pageNumber} de {reportDescriptionPages.length}</div>
+                    <div className="mb-8 border-b-4 border-slate-900 pb-4">
+                      <p className="text-[8pt] font-bold uppercase text-text-muted tracking-[0.2em]">Parque Vehicular - Incidencias</p>
+                      <h4 className="text-[9pt] font-black uppercase text-primary mt-4">Descripcion de los Hechos</h4>
+                    </div>
+                    <div className="incident-description-box bg-white px-5 py-4 rounded-lg border border-slate-200">
+                      <p className="incident-description-text text-[8.5pt] text-slate-700 leading-7 whitespace-pre-wrap text-justify">
+                        {pageText}
+                      </p>
+                    </div>
+
+                    {isLastPage && (
+                      <>
+                        <p className="text-[7.5pt] text-text-muted mt-4 text-justify">
+                           * El presente reporte describe los hechos acontecidos y sirve como constancia administrativa para el seguimiento correspondiente.
+                        </p>
+                        <div className="signature-section mt-12">
+                            <div className="signature-grid grid gap-4 text-center grid-cols-4">
+                                <div className="signature-line border-t-2 border-slate-900 pt-4">
+                                    <p className="text-[7pt] font-black uppercase text-text h-4"></p>
+                                    <p className="text-[6pt] font-bold text-text-muted mt-1 uppercase tracking-[0.16em]">Nombre y Firma</p>
+                                    <p className="text-[6pt] font-bold text-text-muted uppercase tracking-[0.16em]">Reporta Incidencia</p>
+                                </div>
+                                <div className="signature-line border-t-2 border-slate-900 pt-4">
+                                    <p className="text-[7pt] font-black uppercase text-text">{managerName}</p>
+                                    <p className="text-[6pt] font-bold text-text-muted mt-1 uppercase tracking-[0.16em]">{managerPos}</p>
+                                    <p className="text-[6pt] font-bold text-text-muted uppercase tracking-[0.16em]">Validacion</p>
+                                </div>
+                                <div className="signature-line border-t-2 border-slate-900 pt-4">
+                                    {coordName ? (
+                                     <p className="text-[7pt] font-black uppercase text-text">{coordName}</p>
+                                    ) : (
+                                        <p className="text-[7pt] font-black uppercase text-text h-4"></p>
+                                    )}
+                                    <p className="text-[6pt] font-bold text-text-muted mt-1 uppercase tracking-[0.16em]">{coordPos}</p>
+                                    <p className="text-[6pt] font-bold text-text-muted uppercase tracking-[0.16em]">Vo.Bo.</p>
+                                </div>
+                                <div className="signature-line border-t-2 border-slate-900 pt-4">
+                                    <p className="text-[7pt] font-black uppercase text-text">{directorName}</p>
+                                    <p className="text-[6pt] font-bold text-text-muted mt-1 uppercase tracking-[0.16em]">{directorPos}</p>
+                                </div>
+                            </div>
+                            <div className="text-center mt-8 border-t border-border pt-2">
+                                 <p className="text-[7pt] font-black text-slate-300 uppercase tracking-[0.3em]">Sistema de Gestion de Parque Vehicular - DIF Municipal La Paz</p>
+                            </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                );
+              })}
 
             </div>
           </div>
