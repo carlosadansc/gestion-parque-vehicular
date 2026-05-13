@@ -1,5 +1,5 @@
 /**
- * API FLOTA PRO v9.3 - Numero de factura en adquisiciones de combustible
+ * API FLOTA PRO v9.5 - Cancelacion de adquisiciones de combustible
  */
 
 const CONFIG = {
@@ -18,7 +18,7 @@ const CONFIG = {
     ],
     "Choferes": ["id", "name", "licenseType", "licenseNumber", "phone", "status", "assignedVehicleId", "image", "notes"],
     "Combustible": ["id", "date", "vehicleId", "driverId", "liters", "cost", "odometer"],
-    "CombustibleAdquisiciones": ["id", "consecutiveNumber", "internalFolio", "invoiceNumber", "date", "isQr", "validFrom", "validTo", "description", "amount", "area", "supplier"],
+    "CombustibleAdquisiciones": ["id", "consecutiveNumber", "internalFolio", "invoiceNumber", "invoiceDate", "date", "isQr", "validFrom", "validTo", "description", "amount", "area", "supplier", "status"],
     "CombustibleEntregas": ["id", "consecutiveNumber", "date", "acquisitionId", "acquisitionConsecutiveNumber", "acquisitionInternalFolio", "acquisitionType", "area", "amount", "purpose", "recipientName", "recipientPosition", "notes"],
     "Incidencias": ["id", "consecutiveNumber", "date", "type", "title", "description", "vehicleId", "driverId", "status"],
     "Planeacion": ["id", "date", "vehicleId", "driverId", "areaId", "notes", "departureTime", "arrivalTime", "destination", "status"],

@@ -403,13 +403,14 @@ body {
 }
 
 .fuel-acquisitions-table .col-consecutive { width: 5%; }
-.fuel-acquisitions-table .col-folio { width: 10%; }
+.fuel-acquisitions-table .col-folio { width: 8%; }
 .fuel-acquisitions-table .col-invoice { width: 8%; }
+.fuel-acquisitions-table .col-invoice-date { width: 8%; }
 .fuel-acquisitions-table .col-type { width: 7%; }
 .fuel-acquisitions-table .col-validity { width: 10%; }
-.fuel-acquisitions-table .col-description { width: 15%; }
-.fuel-acquisitions-table .col-area { width: 12%; }
-.fuel-acquisitions-table .col-supplier { width: 13%; }
+.fuel-acquisitions-table .col-description { width: 14%; }
+.fuel-acquisitions-table .col-area { width: 10%; }
+.fuel-acquisitions-table .col-supplier { width: 11%; }
 .fuel-acquisitions-table .col-amount { width: 10%; }
 .fuel-acquisitions-table .col-actions { width: 10%; }
 

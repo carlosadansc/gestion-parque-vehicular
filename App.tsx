@@ -58,6 +58,7 @@ const DRIVER_STATUS_SET = new Set<Driver['status']>(['available', 'en-route', 'o
 const INCIDENT_STATUS_SET = new Set<Incident['status']>(['critical', 'pending', 'resolved', 'in-workshop', 'in-resolution']);
 const PLANNING_STATUS_SET = new Set<NonNullable<Planning['status']>>(['scheduled', 'completed', 'cancelled']);
 const MAINTENANCE_STATUS_SET = new Set<MaintenanceRecord['status']>(['scheduled', 'in-progress', 'completed', 'cancelled']);
+const FUEL_ACQUISITION_STATUS_SET = new Set<NonNullable<FuelAcquisition['status']>>(['active', 'cancelled']);
 const MAINTENANCE_PAYMENT_METHOD_SET = new Set<NonNullable<MaintenanceRecord['paymentMethod']>>(['transferencia', 'efectivo']);
 const USER_ROLE_SET = new Set<User['role']>(['admin', 'operator', 'viewer']);
 const USER_STATUS_SET = new Set<User['status']>(['active', 'inactive']);
@@ -133,6 +134,9 @@ const validateFuelPayload = (entry: Omit<FuelEntry, 'id'> | FuelEntry, vehicleLi
 
 const validateFuelAcquisitionPayload = (entry: Omit<FuelAcquisition, 'id'> | FuelAcquisition) => {
   ensure(isValidDateValue(entry.date), 'La fecha de adquisición no es válida.');
+  if (hasValue(entry.invoiceDate)) {
+    ensure(isValidDateValue(entry.invoiceDate), 'La fecha de factura no es válida.');
+  }
   ensure(isValidDateValue(entry.validFrom), 'La fecha inicial de vigencia no es válida.');
   ensure(isValidDateValue(entry.validTo), 'La fecha final de vigencia no es válida.');
   ensure(new Date(entry.validFrom).getTime() <= new Date(entry.validTo).getTime(), 'La fecha final no puede ser menor a la inicial.');
@@ -140,6 +144,9 @@ const validateFuelAcquisitionPayload = (entry: Omit<FuelAcquisition, 'id'> | Fue
   ensure(hasText(entry.area), 'El área destino es obligatoria.');
   ensure(hasText(entry.supplier), 'El proveedor es obligatorio.');
   ensure(isFiniteNumber(entry.amount) && Number(entry.amount) > 0, 'El monto debe ser mayor a 0.');
+  if (hasValue(entry.status)) {
+    ensure(FUEL_ACQUISITION_STATUS_SET.has(entry.status as NonNullable<FuelAcquisition['status']>), 'El estatus de la adquisición no es válido.');
+  }
   if (hasValue(entry.consecutiveNumber)) {
     ensure(Number.isInteger(Number(entry.consecutiveNumber)) && Number(entry.consecutiveNumber) > 0, 'El consecutivo debe ser un entero positivo.');
   }
@@ -161,6 +168,8 @@ const validateFuelDeliveryPayload = (
 
   const acquisition = acquisitionList.find(a => a.id === entry.acquisitionId);
   ensure(Boolean(acquisition), 'La adquisición seleccionada no existe.');
+
+  ensure(acquisition?.status !== 'cancelled', 'No se puede entregar combustible de una adquisición cancelada.');
 
   const expectedType: FuelDelivery['acquisitionType'] = acquisition?.isQr ? 'qr' : 'voucher';
   ensure(entry.acquisitionType === expectedType, 'El tipo de entrega no coincide con la adquisición seleccionada.');
@@ -867,7 +876,9 @@ const App: React.FC = () => {
       area: (newAcquisition.area || '').toUpperCase(),
       supplier: (newAcquisition.supplier || '').toUpperCase(),
       internalFolio: newAcquisition.internalFolio?.toUpperCase(),
-      invoiceNumber: newAcquisition.invoiceNumber?.toUpperCase()
+      invoiceNumber: newAcquisition.invoiceNumber?.toUpperCase(),
+      invoiceDate: newAcquisition.invoiceDate,
+      status: newAcquisition.status || 'active'
     };
     validateFuelAcquisitionPayload(formatted);
     const acquisitionWithId = { ...formatted, id: `FA-${Date.now()}` };
@@ -888,7 +899,9 @@ const App: React.FC = () => {
       area: (updatedAcquisition.area || '').toUpperCase(),
       supplier: (updatedAcquisition.supplier || '').toUpperCase(),
       internalFolio: updatedAcquisition.internalFolio?.toUpperCase(),
-      invoiceNumber: updatedAcquisition.invoiceNumber?.toUpperCase()
+      invoiceNumber: updatedAcquisition.invoiceNumber?.toUpperCase(),
+      invoiceDate: updatedAcquisition.invoiceDate,
+      status: updatedAcquisition.status || 'active'
     };
     ensure(hasText(formatted.id), 'No se pudo identificar la adquisición de combustible.');
     ensure(fuelAcquisitions.some(f => f.id === formatted.id), 'La adquisición que intentas actualizar no existe.');

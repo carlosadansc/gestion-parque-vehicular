@@ -404,6 +404,7 @@ const Reports: React.FC<ReportsProps> = ({
     const map: Record<string, { acquired: number; delivered: number }> = {};
 
     filtered.acquisitions.forEach(item => {
+      if (item.status === 'cancelled') return;
       const key = toMonthKey(item.date);
       if (!key) return;
       if (!map[key]) map[key] = { acquired: 0, delivered: 0 };

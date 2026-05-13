@@ -39,6 +39,34 @@ const toDateTimeLocalValue = (value: unknown, fallback = ''): string => {
   return localDate.toISOString().slice(0, 16);
 };
 
+const normalizeDateKey = (value: unknown): string => {
+    const raw = String(value ?? '').trim();
+    const isoMatch = raw.match(/(\d{4})-(\d{2})-(\d{2})/);
+    if (isoMatch) return `${isoMatch[1]}-${isoMatch[2]}-${isoMatch[3]}`;
+
+    const match = raw.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/);
+    if (match) {
+      const day = match[1].padStart(2, '0');
+      const month = match[2].padStart(2, '0');
+      return `${match[3]}-${month}-${day}`;
+    }
+
+    if (value instanceof Date && !Number.isNaN(value.getTime())) {
+      const year = value.getFullYear();
+      const month = String(value.getMonth() + 1).padStart(2, '0');
+      const day = String(value.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    return toDateInputValue(value);
+};
+
+const getMaintenanceDateKeys = (record: MaintenanceRecord): string[] => {
+  return [record.date, record.entryDate, record.exitDate, record.estimatedDeliveryDate]
+    .map(normalizeDateKey)
+    .filter(Boolean);
+};
+
 const normalizePaymentMethodValue = (value: unknown): '' | 'transferencia' | 'efectivo' => {
   const raw = String(value ?? '').trim().toLowerCase();
   if (!raw) return '';
@@ -52,6 +80,8 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
   const [isSaving, setIsSaving] = useState(false);
   const [editingRecord, setEditingRecord] = useState<MaintenanceRecord | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('todos');
+  const [filterStartDate, setFilterStartDate] = useState('');
+  const [filterEndDate, setFilterEndDate] = useState('');
   const [isAddingType, setIsAddingType] = useState(false);
   const [newTypeName, setNewTypeName] = useState('');
   const [isAddingSupplier, setIsAddingSupplier] = useState(false);
@@ -60,6 +90,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
   
   // Print States
   const [showPrintPreview, setShowPrintPreview] = useState(false);
+  const [showReportPreview, setShowReportPreview] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<MaintenanceRecord | null>(null);
   const [formError, setFormError] = useState('');
 
@@ -68,14 +99,6 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
     (settings || []).forEach(s => { map[s.key] = s.value; });
     return map;
   }, [settings]);
-
-  const stats = useMemo(() => {
-    const totalInvoiced = records.reduce((acc, curr) => acc + (Number(curr.invoiceAmount) || 0), 0);
-    const totalQuoted = records.reduce((acc, curr) => acc + (Number(curr.quoteCost) || 0), 0);
-    const inWorkshop = records.filter(r => r.status === 'in-progress').length;
-    const completed = records.filter(r => r.status === 'completed').length;
-    return { totalInvoiced, totalQuoted, inWorkshop, completed, balance: totalQuoted - totalInvoiced };
-  }, [records]);
 
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
@@ -99,8 +122,20 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
 
   const filteredRecords = useMemo(() => {
     return records
-      .filter(r => filterStatus === 'todos' || r.status === filterStatus);
-  }, [records, filterStatus]);
+      .filter(r => {
+        const matchesStatus = filterStatus === 'todos' || r.status === filterStatus;
+        const dateKeys = getMaintenanceDateKeys(r);
+        const matchesDate =
+          !filterStartDate && !filterEndDate
+            ? true
+            : dateKeys.some(dateKey => {
+                const withinStart = !filterStartDate || dateKey >= filterStartDate;
+                const withinEnd = !filterEndDate || dateKey <= filterEndDate;
+                return withinStart && withinEnd;
+              });
+        return matchesStatus && matchesDate;
+      });
+  }, [records, filterStatus, filterStartDate, filterEndDate]);
 
   type MaintenanceSortKey = 'service' | 'vehicle' | 'status' | 'quote' | 'invoice';
   const maintenanceSortAccessors = useMemo<Record<MaintenanceSortKey, (record: MaintenanceRecord) => unknown>>(() => ({
@@ -118,6 +153,20 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
     sortConfig,
     requestSort
   } = useSortableData(filteredRecords, maintenanceSortAccessors, { key: 'service', direction: 'desc' });
+
+  const stats = useMemo(() => {
+    const totalInvoiced = filteredRecords.reduce((acc, curr) => acc + (Number(curr.invoiceAmount) || 0), 0);
+    const totalQuoted = filteredRecords.reduce((acc, curr) => acc + (Number(curr.quoteCost) || 0), 0);
+    const inWorkshop = filteredRecords.filter(r => r.status === 'in-progress').length;
+    const completed = filteredRecords.filter(r => r.status === 'completed').length;
+    return { totalInvoiced, totalQuoted, inWorkshop, completed, balance: totalQuoted - totalInvoiced };
+  }, [filteredRecords]);
+
+  const filteredTotals = useMemo(() => {
+    const quoted = sortedRecords.reduce((acc, item) => acc + (Number(item.quoteCost) || 0), 0);
+    const invoiced = sortedRecords.reduce((acc, item) => acc + (Number(item.invoiceAmount) || 0), 0);
+    return { quoted, invoiced, balance: quoted - invoiced };
+  }, [sortedRecords]);
 
   const nextConsecutiveNumber = useMemo(() => {
     if (!records || records.length === 0) return 1;
@@ -287,14 +336,16 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
             visibility: hidden;
           }
           
-          #maintenance-printable, #maintenance-printable * {
+          #maintenance-printable, #maintenance-printable *,
+          #maintenance-report-printable, #maintenance-report-printable * {
             visibility: visible;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
             color-adjust: exact !important;
           }
           
-          #maintenance-printable {
+          #maintenance-printable,
+          #maintenance-report-printable {
             position: absolute;
             left: 0;
             top: 0;
@@ -315,13 +366,18 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
           #maintenance-printable h1,
           #maintenance-printable h2,
           #maintenance-printable h3,
-          #maintenance-printable h4 {
+          #maintenance-printable h4,
+          #maintenance-report-printable h1,
+          #maintenance-report-printable h2,
+          #maintenance-report-printable h3,
+          #maintenance-report-printable h4 {
             page-break-after: avoid;
             orphans: 3;
             widows: 3;
           }
           
-          #maintenance-printable p {
+          #maintenance-printable p,
+          #maintenance-report-printable p {
             orphans: 3;
             widows: 3;
           }
@@ -329,7 +385,8 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
           /* ========================================
              PAGE BREAK CONTROLS
              ======================================== */
-          #maintenance-printable .break-inside-avoid {
+          #maintenance-printable .break-inside-avoid,
+          #maintenance-report-printable .break-inside-avoid {
             page-break-inside: avoid;
             break-inside: avoid;
           }
@@ -362,20 +419,24 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
           /* ========================================
              TABLE STYLING - FORMAL DOCUMENT
              ======================================== */
-          #maintenance-printable table {
+          #maintenance-printable table,
+          #maintenance-report-printable table {
             width: 100% !important;
             border-collapse: collapse;
             page-break-inside: avoid;
           }
           
           #maintenance-printable th,
-          #maintenance-printable td {
+          #maintenance-printable td,
+          #maintenance-report-printable th,
+          #maintenance-report-printable td {
             padding: 8px 12px !important;
             border: 1px solid #e2e8f0 !important;
             vertical-align: middle;
           }
           
-          #maintenance-printable th {
+          #maintenance-printable th,
+          #maintenance-report-printable th {
             background-color: #f8fafc !important;
             font-weight: 800;
             text-transform: uppercase;
@@ -387,7 +448,8 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
              FORMAL DOCUMENT ELEMENTS
              ======================================== */
           /* Header styling */
-          #maintenance-printable .print-header {
+          #maintenance-printable .print-header,
+          #maintenance-report-printable .print-header {
             border-bottom: 3px solid #1e293b;
             padding-bottom: 1rem;
             margin-bottom: 1.5rem;
@@ -487,17 +549,48 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
       </div>
 
       <div className="card no-print">
-        <div className="px-4 py-3 border-b border-border bg-surface-subtle flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
+        <div className="px-4 py-3 border-b border-border bg-surface-subtle flex flex-col xl:flex-row xl:items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2">
             <button onClick={() => setFilterStatus('todos')} className={`filter-pill ${filterStatus === 'todos' ? 'filter-pill-active' : 'filter-pill-inactive'}`}>Todos</button>
             <button onClick={() => setFilterStatus('in-progress')} className={`filter-pill ${filterStatus === 'in-progress' ? 'filter-pill-warning' : 'filter-pill-inactive'}`}>En Taller</button>
             <button onClick={() => setFilterStatus('scheduled')} className={`filter-pill ${filterStatus === 'scheduled' ? 'filter-pill-info' : 'filter-pill-inactive'}`}>Programados</button>
             <button onClick={() => setFilterStatus('completed')} className={`filter-pill ${filterStatus === 'completed' ? 'filter-pill-success' : 'filter-pill-inactive'}`}>Completados</button>
           </div>
-          <button onClick={onSync} className="btn btn-ghost text-xs">
-            <span className="material-symbols-outlined ui-icon">sync</span> Actualizar
-          </button>
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <span className="text-[10px] font-black uppercase tracking-widest text-text-muted">Desde</span>
+            <input
+              type="date"
+              value={filterStartDate}
+              onChange={e => setFilterStartDate(e.target.value)}
+              className="bg-surface border border-border rounded-md px-3 py-2 text-xs font-bold outline-none focus:border-primary"
+              aria-label="Fecha inicial"
+            />
+            <span className="text-[10px] font-black uppercase tracking-widest text-text-muted">Hasta</span>
+            <input
+              type="date"
+              value={filterEndDate}
+              onChange={e => setFilterEndDate(e.target.value)}
+              className="bg-surface border border-border rounded-md px-3 py-2 text-xs font-bold outline-none focus:border-primary"
+              aria-label="Fecha final"
+            />
+            {(filterStartDate || filterEndDate) && (
+              <button onClick={() => { setFilterStartDate(''); setFilterEndDate(''); }} className="btn btn-ghost text-xs">
+                <span className="material-symbols-outlined ui-icon">backspace</span> Limpiar
+              </button>
+            )}
+            <button onClick={() => setShowReportPreview(true)} className="btn btn-ghost text-xs">
+              <span className="material-symbols-outlined ui-icon">print</span> Imprimir reporte
+            </button>
+            <button onClick={onSync} className="btn btn-ghost text-xs">
+              <span className="material-symbols-outlined ui-icon">sync</span> Actualizar
+            </button>
+          </div>
         </div>
+        {(filterStartDate || filterEndDate) && (
+          <div className="px-6 py-2 bg-surface border-b border-border text-[11px] font-bold text-text-muted">
+            Rango aplicado: {filterStartDate || 'inicio'} a {filterEndDate || 'hoy'} · {sortedRecords.length} registros
+          </div>
+        )}
 
         <div className="overflow-x-auto">
           <table className="table-professional table-density-compact">
@@ -584,6 +677,11 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                   <td colSpan={6} className="px-8 py-20 text-center opacity-40">
                     <span className="material-symbols-outlined text-4xl block mb-2">inventory_2</span>
                     <p className="text-xs font-black uppercase tracking-widest">No hay registros de mantenimiento</p>
+                    {(filterStartDate || filterEndDate) && (
+                      <p className="text-[10px] font-bold uppercase tracking-widest mt-2">
+                        Cambia el rango o usa Limpiar para ver todos.
+                      </p>
+                    )}
                   </td>
                 </tr>
               )}
@@ -900,6 +998,100 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
       )}
 
       {/* VISTA DE IMPRESIÓN (FORMATO DE SERVICIO) */}
+      {showReportPreview && (
+        <div className="fixed inset-0 z-[190] bg-surface flex flex-col overflow-y-auto">
+          <div className="sticky top-0 bg-secondary p-4 flex justify-between items-center text-white shadow-lg no-print">
+            <button onClick={() => setShowReportPreview(false)} className="bg-surface/10 px-4 py-2 rounded-lg font-bold text-xs hover:bg-surface/20 transition-all">Cerrar</button>
+            <button onClick={() => window.print()} className="bg-primary px-8 py-2.5 rounded-md font-black text-[11px] uppercase tracking-widest flex items-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-blue-500/20">
+              <span className="material-symbols-outlined text-lg">print</span> Imprimir Reporte
+            </button>
+          </div>
+          <div className="flex-1 bg-surface-subtle p-10 flex justify-center">
+            <div id="maintenance-report-printable" className="bg-surface w-[27.94cm] min-h-[21.59cm] p-[1.2cm] shadow-2xl relative text-text">
+              <div className="print-header flex justify-between items-center mb-6 border-b-4 border-slate-900 pb-5">
+                <div className="flex items-center gap-5">
+                  <img src={appLogo} alt="Logo" className="w-20 object-contain" />
+                  <div className="flex flex-col">
+                    <span className="text-base font-black text-text uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
+                    <span className="text-base font-black text-text uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>
+                    <span className="text-[8pt] font-bold uppercase text-text-muted mt-2 tracking-[0.2em]">Reporte filtrado de mantenimientos</span>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="inline-block bg-secondary text-white px-4 py-1.5 font-black text-[10pt] uppercase tracking-widest rounded-sm mb-2">
+                    {filterStatus === 'todos' ? 'Todos' : statusMap[filterStatus] || filterStatus}
+                  </div>
+                  <p className="text-[8pt] font-black text-text-muted uppercase tracking-widest">Registros: {sortedRecords.length}</p>
+                  <p className="text-[8pt] font-black text-text-muted uppercase tracking-widest mt-1">
+                    Rango: {filterStartDate || filterEndDate
+                      ? `${filterStartDate ? new Date(`${filterStartDate}T00:00:00`).toLocaleDateString('es-ES') : 'Inicio'} - ${filterEndDate ? new Date(`${filterEndDate}T00:00:00`).toLocaleDateString('es-ES') : 'Hoy'}`
+                      : 'Todas las fechas'}
+                  </p>
+                  <p className="text-[8pt] text-text-muted font-bold mt-1">Emision: {new Date().toLocaleDateString('es-ES', {year: 'numeric', month: 'long', day: 'numeric'})}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="bg-blue-50 border border-blue-100 p-3 rounded-lg">
+                  <p className="text-[8pt] font-black text-blue-600 uppercase tracking-widest mb-1">Cotizado</p>
+                  <p className="text-xl font-black text-text">${filteredTotals.quoted.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</p>
+                </div>
+                <div className="bg-emerald-50 border border-emerald-100 p-3 rounded-lg">
+                  <p className="text-[8pt] font-black text-emerald-600 uppercase tracking-widest mb-1">Facturado</p>
+                  <p className="text-xl font-black text-text">${filteredTotals.invoiced.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</p>
+                </div>
+                <div className="bg-slate-50 border border-slate-200 p-3 rounded-lg">
+                  <p className="text-[8pt] font-black text-slate-600 uppercase tracking-widest mb-1">Diferencia</p>
+                  <p className="text-xl font-black text-text">${filteredTotals.balance.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</p>
+                </div>
+              </div>
+
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr>
+                    <th>No.</th>
+                    <th>Fecha</th>
+                    <th>Vehiculo</th>
+                    <th>Servicio</th>
+                    <th>Proveedor</th>
+                    <th>Estado</th>
+                    <th>Cotizacion</th>
+                    <th>Factura</th>
+                    <th>Pago</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedRecords.map((record) => {
+                    const vehicle = vehicles.find(v => v.id === record.vehicleId);
+                    return (
+                      <tr key={record.id}>
+                        <td className="text-center font-black text-blue-700">{record.consecutiveNumber || '---'}</td>
+                        <td className="text-center font-bold text-text-muted">{record.date ? new Date(record.date).toLocaleDateString('es-ES') : '---'}</td>
+                        <td className="font-bold uppercase">{vehicle ? `${vehicle.plate} - ${vehicle.model}` : '---'}</td>
+                        <td className="font-bold uppercase">{record.serviceType || '---'}</td>
+                        <td className="font-bold uppercase">{record.provider || '---'}</td>
+                        <td className="font-black uppercase">{statusMap[record.status] || record.status}</td>
+                        <td className="text-right font-black">${(Number(record.quoteCost) || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td>
+                        <td className="text-right font-black">
+                          {(Number(record.invoiceAmount) || 0) > 0 ? `$${(Number(record.invoiceAmount) || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}` : 'PENDIENTE'}
+                          {record.invoiceNumber && <p className="text-[7pt] font-bold text-text-muted uppercase">#{record.invoiceNumber}</p>}
+                        </td>
+                        <td className="font-bold uppercase">{record.paymentMethod || '---'}</td>
+                      </tr>
+                    );
+                  })}
+                  {sortedRecords.length === 0 && (
+                    <tr>
+                      <td colSpan={9} className="text-center font-bold text-text-muted py-8">Sin registros para el filtro seleccionado.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showPrintPreview && selectedRecord && (
         <div className="fixed inset-0 z-[200] bg-surface flex flex-col overflow-y-auto">
            <div className="sticky top-0 bg-secondary p-4 flex justify-between items-center text-white shadow-lg no-print">

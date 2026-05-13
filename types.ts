@@ -143,6 +143,7 @@ export interface FuelAcquisition {
   consecutiveNumber?: number;
   internalFolio?: string;
   invoiceNumber?: string;
+  invoiceDate?: string;
   date: string;
   isQr: boolean;
   validFrom: string;
@@ -151,6 +152,7 @@ export interface FuelAcquisition {
   amount: number;
   area: string;
   supplier: string;
+  status?: "active" | "cancelled";
 }
 
 export interface FuelDelivery {

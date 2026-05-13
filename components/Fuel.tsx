@@ -24,7 +24,7 @@ interface FuelProps {
 
 type ProcessedFuelEntry = FuelEntry & { performance?: number };
 type FuelLoadSortKey = 'date' | 'vehicle' | 'odometer' | 'liters' | 'performance' | 'cost';
-type FuelAcquisitionSortKey = 'consecutive' | 'folio' | 'invoice' | 'type' | 'validity' | 'description' | 'area' | 'supplier' | 'amount';
+type FuelAcquisitionSortKey = 'consecutive' | 'folio' | 'invoice' | 'invoiceDate' | 'type' | 'validity' | 'description' | 'area' | 'supplier' | 'amount';
 type FuelDeliverySortKey = 'consecutive' | 'date' | 'acquisition' | 'type' | 'area' | 'purpose' | 'recipient' | 'amount';
 
 const toDateInputValue = (value: unknown, fallback = ''): string => {
@@ -80,13 +80,15 @@ const Fuel: React.FC<FuelProps> = ({
     date: today,
     internalFolio: '',
     invoiceNumber: '',
+    invoiceDate: '',
     isQr: false,
     validFrom: today,
     validTo: today,
     description: '',
     amount: '',
     area: '',
-    supplier: ''
+    supplier: '',
+    status: 'active' as const
   });
   const [acquisitionFilters, setAcquisitionFilters] = useState<{
     startDate: string;
@@ -243,9 +245,10 @@ const Fuel: React.FC<FuelProps> = ({
       });
   }, [fuelAcquisitions, acquisitionFilters]);
   const acquisitionTotals = useMemo(() => {
-    const totalAmount = filteredAcquisitions.reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
-    const qrItems = filteredAcquisitions.filter(item => item.isQr);
-    const voucherItems = filteredAcquisitions.filter(item => !item.isQr);
+    const activeAcquisitions = filteredAcquisitions.filter(item => item.status !== 'cancelled');
+    const totalAmount = activeAcquisitions.reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
+    const qrItems = activeAcquisitions.filter(item => item.isQr);
+    const voucherItems = activeAcquisitions.filter(item => !item.isQr);
     const qrCount = qrItems.length;
     const vouchersCount = voucherItems.length;
     const qrAmount = qrItems.reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
@@ -277,6 +280,7 @@ const Fuel: React.FC<FuelProps> = ({
   const getAvailableForAcquisition = (acquisitionId: string, excludeDeliveryId?: string): number => {
     const acquisition = fuelAcquisitions.find(item => item.id === acquisitionId);
     if (!acquisition) return 0;
+    if (acquisition.status === 'cancelled') return 0;
     const acquiredAmount = Number(acquisition.amount) || 0;
     const delivered = fuelDeliveries
       .filter(item => item.acquisitionId === acquisitionId && (!excludeDeliveryId || item.id !== excludeDeliveryId))
@@ -311,6 +315,7 @@ const Fuel: React.FC<FuelProps> = ({
     consecutive: entry => Number(entry.consecutiveNumber) || 0,
     folio: entry => entry.internalFolio || '',
     invoice: entry => entry.invoiceNumber || '',
+    invoiceDate: entry => entry.invoiceDate || '',
     type: entry => entry.isQr ? 'QR' : 'VALES',
     validity: entry => entry.validFrom || entry.validTo || '',
     description: entry => entry.description || '',
@@ -424,13 +429,15 @@ const Fuel: React.FC<FuelProps> = ({
       date: today,
       internalFolio: '',
       invoiceNumber: '',
+      invoiceDate: '',
       isQr: false,
       validFrom: today,
       validTo: today,
       description: '',
       amount: '',
       area: '',
-      supplier: ''
+      supplier: '',
+      status: 'active' as const
     });
   };
 
@@ -441,13 +448,15 @@ const Fuel: React.FC<FuelProps> = ({
       date: toDateInputValue(entry.date, new Date().toISOString().split('T')[0]),
       internalFolio: String(entry.internalFolio || ''),
       invoiceNumber: String(entry.invoiceNumber || ''),
+      invoiceDate: toDateInputValue(entry.invoiceDate),
       isQr: Boolean(entry.isQr),
       validFrom: toDateInputValue(entry.validFrom, new Date().toISOString().split('T')[0]),
       validTo: toDateInputValue(entry.validTo, new Date().toISOString().split('T')[0]),
       description: String(entry.description || ''),
       amount: Number(entry.amount) ? String(entry.amount) : '',
       area: String(entry.area || ''),
-      supplier: String(entry.supplier || '')
+      supplier: String(entry.supplier || ''),
+      status: entry.status || 'active'
     });
     setShowAcquisitionModal(true);
   };
@@ -476,6 +485,7 @@ const Fuel: React.FC<FuelProps> = ({
         consecutiveNumber: editingAcquisition?.consecutiveNumber || nextAcquisitionConsecutive,
         internalFolio: acquisitionForm.internalFolio || undefined,
         invoiceNumber: acquisitionForm.invoiceNumber || undefined,
+        invoiceDate: acquisitionForm.invoiceDate || undefined,
         date: acquisitionForm.date,
         isQr: acquisitionForm.isQr,
         validFrom: acquisitionForm.validFrom,
@@ -483,7 +493,8 @@ const Fuel: React.FC<FuelProps> = ({
         description: acquisitionForm.description,
         amount: Number(acquisitionForm.amount),
         area: acquisitionForm.area,
-        supplier: acquisitionForm.supplier
+        supplier: acquisitionForm.supplier,
+        status: acquisitionForm.status
       };
 
       if (editingAcquisition) {
@@ -505,6 +516,22 @@ const Fuel: React.FC<FuelProps> = ({
   const handlePrintAcquisition = (entry: FuelAcquisition) => {
     setSelectedAcquisition(entry);
     setShowAcquisitionPrintPreview(true);
+  };
+
+  const handleCancelAcquisition = async (entry: FuelAcquisition) => {
+    if (!onUpdateFuelAcquisition || entry.status === 'cancelled') return;
+    const delivered = deliveredByAcquisitionId[entry.id] || 0;
+    if (delivered > 0) {
+      window.alert('No se puede cancelar una adquisición con entregas registradas.');
+      return;
+    }
+    if (!window.confirm(`Cancelar adquisición #${entry.consecutiveNumber || '---'}?`)) return;
+
+    try {
+      await onUpdateFuelAcquisition({ ...entry, status: 'cancelled' });
+    } catch (err) {
+      window.alert(err instanceof Error ? err.message : 'Error al cancelar adquisición de combustible');
+    }
   };
 
   const resetDeliveryForm = () => {
@@ -551,6 +578,11 @@ const Fuel: React.FC<FuelProps> = ({
     const selectedAcquisitionForDelivery = fuelAcquisitions.find(item => item.id === deliveryForm.acquisitionId);
     if (!selectedAcquisitionForDelivery) {
       setDeliveryError('La adquisición seleccionada no existe.');
+      return;
+    }
+
+    if (selectedAcquisitionForDelivery.status === 'cancelled') {
+      setDeliveryError('La adquisición seleccionada está cancelada.');
       return;
     }
 
@@ -796,22 +828,26 @@ const Fuel: React.FC<FuelProps> = ({
                line-height: 1.2 !important;
              }
 
-             #fuel-acquisitions-report-printable .print-report-table-acq th:nth-child(1),
-             #fuel-acquisitions-report-printable .print-report-table-acq td:nth-child(1) { width: 6%; }
-             #fuel-acquisitions-report-printable .print-report-table-acq th:nth-child(2),
-             #fuel-acquisitions-report-printable .print-report-table-acq td:nth-child(2) { width: 8%; }
-             #fuel-acquisitions-report-printable .print-report-table-acq th:nth-child(3),
-             #fuel-acquisitions-report-printable .print-report-table-acq td:nth-child(3) { width: 10%; }
-             #fuel-acquisitions-report-printable .print-report-table-acq th:nth-child(4),
-             #fuel-acquisitions-report-printable .print-report-table-acq td:nth-child(4) { width: 7%; }
-             #fuel-acquisitions-report-printable .print-report-table-acq th:nth-child(5),
-             #fuel-acquisitions-report-printable .print-report-table-acq td:nth-child(5) { width: 18%; }
-             #fuel-acquisitions-report-printable .print-report-table-acq th:nth-child(6),
-             #fuel-acquisitions-report-printable .print-report-table-acq td:nth-child(6) { width: 14%; }
-             #fuel-acquisitions-report-printable .print-report-table-acq th:nth-child(7),
-             #fuel-acquisitions-report-printable .print-report-table-acq td:nth-child(7) { width: 19%; }
-             #fuel-acquisitions-report-printable .print-report-table-acq th:nth-child(8),
-             #fuel-acquisitions-report-printable .print-report-table-acq td:nth-child(8) { width: 12%; }
+              #fuel-acquisitions-report-printable .print-report-table-acq th:nth-child(1),
+              #fuel-acquisitions-report-printable .print-report-table-acq td:nth-child(1) { width: 6%; }
+              #fuel-acquisitions-report-printable .print-report-table-acq th:nth-child(2),
+              #fuel-acquisitions-report-printable .print-report-table-acq td:nth-child(2) { width: 8%; }
+              #fuel-acquisitions-report-printable .print-report-table-acq th:nth-child(3),
+              #fuel-acquisitions-report-printable .print-report-table-acq td:nth-child(3) { width: 8%; }
+              #fuel-acquisitions-report-printable .print-report-table-acq th:nth-child(4),
+              #fuel-acquisitions-report-printable .print-report-table-acq td:nth-child(4) { width: 8%; }
+              #fuel-acquisitions-report-printable .print-report-table-acq th:nth-child(5),
+              #fuel-acquisitions-report-printable .print-report-table-acq td:nth-child(5) { width: 6%; }
+              #fuel-acquisitions-report-printable .print-report-table-acq th:nth-child(6),
+              #fuel-acquisitions-report-printable .print-report-table-acq td:nth-child(6) { width: 14%; }
+              #fuel-acquisitions-report-printable .print-report-table-acq th:nth-child(7),
+              #fuel-acquisitions-report-printable .print-report-table-acq td:nth-child(7) { width: 11%; }
+              #fuel-acquisitions-report-printable .print-report-table-acq th:nth-child(8),
+              #fuel-acquisitions-report-printable .print-report-table-acq td:nth-child(8) { width: 16%; }
+              #fuel-acquisitions-report-printable .print-report-table-acq th:nth-child(9),
+              #fuel-acquisitions-report-printable .print-report-table-acq td:nth-child(9) { width: 12%; }
+              #fuel-acquisitions-report-printable .print-report-table-acq th:nth-child(10),
+              #fuel-acquisitions-report-printable .print-report-table-acq td:nth-child(10) { width: 11%; }
 
              #fuel-deliveries-report-printable .print-report-table-del th:nth-child(1),
              #fuel-deliveries-report-printable .print-report-table-del td:nth-child(1) { width: 7%; }
@@ -1125,6 +1161,7 @@ const Fuel: React.FC<FuelProps> = ({
                 <SortableTh label="Consec." sortKey="consecutive" sortConfig={acquisitionSortConfig} onSort={requestAcquisitionSort} className="col-consecutive" />
                 <SortableTh label="Folio" sortKey="folio" sortConfig={acquisitionSortConfig} onSort={requestAcquisitionSort} className="col-folio" />
                 <SortableTh label="Factura" sortKey="invoice" sortConfig={acquisitionSortConfig} onSort={requestAcquisitionSort} className="col-invoice" />
+                <SortableTh label="Fecha Fact." sortKey="invoiceDate" sortConfig={acquisitionSortConfig} onSort={requestAcquisitionSort} className="col-invoice-date" />
                 <SortableTh label="Tipo" sortKey="type" sortConfig={acquisitionSortConfig} onSort={requestAcquisitionSort} className="col-type" />
                 <SortableTh label="Vigencia" sortKey="validity" sortConfig={acquisitionSortConfig} onSort={requestAcquisitionSort} className="col-validity" />
                 <SortableTh label="Descripción" sortKey="description" sortConfig={acquisitionSortConfig} onSort={requestAcquisitionSort} className="col-description" />
@@ -1140,9 +1177,10 @@ const Fuel: React.FC<FuelProps> = ({
                   <td className="col-consecutive font-black text-blue-700">{entry.consecutiveNumber || '---'}</td>
                   <td className="col-folio font-medium truncate" title={entry.internalFolio || 'S/N'}>{entry.internalFolio || 'S/N'}</td>
                   <td className="col-invoice font-medium truncate" title={entry.invoiceNumber || 'S/N'}>{entry.invoiceNumber || 'S/N'}</td>
+                  <td className="col-invoice-date text-xs font-bold text-text-muted">{entry.invoiceDate ? new Date(entry.invoiceDate).toLocaleDateString() : '---'}</td>
                   <td className="col-type">
-                    <span className={`badge ${entry.isQr ? 'badge-success' : 'badge-warning'}`}>
-                      {entry.isQr ? 'QR' : 'VALES'}
+                    <span className={`badge ${entry.status === 'cancelled' ? 'badge-error' : entry.isQr ? 'badge-success' : 'badge-warning'}`}>
+                      {entry.status === 'cancelled' ? 'CANCELADA' : entry.isQr ? 'QR' : 'VALES'}
                     </span>
                   </td>
                   <td className="col-validity text-xs font-bold text-text-muted">
@@ -1176,13 +1214,21 @@ const Fuel: React.FC<FuelProps> = ({
                       >
                         <span className="material-symbols-outlined ui-icon">edit</span>
                       </button>
+                      <button
+                        onClick={() => handleCancelAcquisition(entry)}
+                        disabled={entry.status === 'cancelled' || (deliveredByAcquisitionId[entry.id] || 0) > 0}
+                        className="btn-icon btn-icon-danger disabled:opacity-40 disabled:cursor-not-allowed"
+                        aria-label="Cancelar adquisición"
+                      >
+                        <span className="material-symbols-outlined ui-icon">block</span>
+                      </button>
                     </div>
                   </td>
                 </tr>
               ))}
               {sortedAcquisitions.length === 0 && (
                 <tr>
-                  <td colSpan={9} className="px-6 py-10 text-center text-text-muted text-sm font-bold">Sin registros para el filtro seleccionado.</td>
+                  <td colSpan={11} className="px-6 py-10 text-center text-text-muted text-sm font-bold">Sin registros para el filtro seleccionado.</td>
                 </tr>
               )}
             </tbody>
@@ -1441,6 +1487,10 @@ const Fuel: React.FC<FuelProps> = ({
                   <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">No. Factura</label>
                   <input disabled={isSavingAcquisition} className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all uppercase" value={acquisitionForm.invoiceNumber} onChange={e => setAcquisitionForm({...acquisitionForm, invoiceNumber: e.target.value})} />
                 </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Fecha Factura</label>
+                  <input type="date" disabled={isSavingAcquisition} className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all" value={acquisitionForm.invoiceDate} onChange={e => setAcquisitionForm({...acquisitionForm, invoiceDate: e.target.value})} />
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -1610,7 +1660,7 @@ const Fuel: React.FC<FuelProps> = ({
                 >
                   <option value="">Seleccionar...</option>
                   {fuelAcquisitions
-                    .filter(item => getAvailableForAcquisition(item.id, editingDelivery?.id) > 0 || item.id === editingDelivery?.acquisitionId)
+                    .filter(item => item.status !== 'cancelled' && (getAvailableForAcquisition(item.id, editingDelivery?.id) > 0 || item.id === editingDelivery?.acquisitionId))
                     .sort((a, b) => Number(b.consecutiveNumber || 0) - Number(a.consecutiveNumber || 0))
                     .map(item => {
                       const available = getAvailableForAcquisition(item.id, editingDelivery?.id);
@@ -1825,6 +1875,7 @@ const Fuel: React.FC<FuelProps> = ({
                       <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-text-muted">Fecha</th>
                       <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-text-muted">Folio</th>
                       <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-text-muted">Factura</th>
+                      <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-text-muted">Fecha Fact.</th>
                       <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-text-muted">Tipo</th>
                       <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-text-muted">Vigencia</th>
                       <th className="border border-slate-300 px-2 py-2 text-[8pt] font-black uppercase text-text-muted">Area</th>
@@ -1841,7 +1892,8 @@ const Fuel: React.FC<FuelProps> = ({
                         </td>
                         <td className="px-2 py-2 text-[8pt] font-bold text-text uppercase">{entry.internalFolio || 'S/N'}</td>
                         <td className="px-2 py-2 text-[8pt] font-bold text-text uppercase">{entry.invoiceNumber || 'S/N'}</td>
-                        <td className="px-2 py-2 text-[8pt] font-black uppercase text-center">{entry.isQr ? 'QR' : 'VALE'}</td>
+                        <td className="px-2 py-2 text-[8pt] font-bold text-text-muted text-center">{entry.invoiceDate ? new Date(entry.invoiceDate).toLocaleDateString('es-ES') : '---'}</td>
+                        <td className="px-2 py-2 text-[8pt] font-black uppercase text-center">{entry.status === 'cancelled' ? 'CANCELADA' : entry.isQr ? 'QR' : 'VALE'}</td>
                         <td className="px-2 py-2 text-[8pt] font-bold text-text-muted">
                           {(entry.validFrom ? new Date(entry.validFrom).toLocaleDateString('es-ES') : '---')} - {(entry.validTo ? new Date(entry.validTo).toLocaleDateString('es-ES') : '---')}
                         </td>
@@ -2121,7 +2173,7 @@ const Fuel: React.FC<FuelProps> = ({
                 </div>
                 <div className="text-right">
                   <div className="inline-block bg-secondary text-white px-4 py-1.5 font-black text-[10pt] uppercase tracking-widest rounded-sm mb-2">
-                    {selectedAcquisition.isQr ? 'Compra QR' : 'Vales de Gasolina'}
+                    {selectedAcquisition.status === 'cancelled' ? 'Cancelada' : selectedAcquisition.isQr ? 'Compra QR' : 'Vales de Gasolina'}
                   </div>
                   <p className="text-xs font-bold text-text-muted">
                     No. <span className="font-black text-blue-600 text-lg ml-1">{selectedAcquisition.consecutiveNumber || '---'}</span>
@@ -2131,6 +2183,9 @@ const Fuel: React.FC<FuelProps> = ({
                   </p>
                   <p className="text-xs font-bold text-text-muted">
                     FACTURA: <span className="font-black text-text text-lg ml-1">{(selectedAcquisition.invoiceNumber || 'S/N').toUpperCase()}</span>
+                  </p>
+                  <p className="text-xs font-bold text-text-muted">
+                    FECHA FACTURA: <span className="font-black text-text text-lg ml-1">{selectedAcquisition.invoiceDate ? new Date(selectedAcquisition.invoiceDate).toLocaleDateString('es-ES') : '---'}</span>
                   </p>
                   <p className="text-[9pt] text-text-muted font-bold mt-1">
                     Fecha: {selectedAcquisition.date ? new Date(selectedAcquisition.date).toLocaleDateString('es-ES', {year: 'numeric', month: 'long', day: 'numeric'}) : '---'}
