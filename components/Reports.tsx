@@ -204,7 +204,9 @@ const Reports: React.FC<ReportsProps> = ({
 
   const metrics = useMemo(() => {
     const fuelCost = filtered.fuel.reduce((acc, item) => acc + (Number(item.cost) || 0), 0);
-    const maintenanceCost = filtered.maintenance.reduce((acc, item) => acc + (Number(item.invoiceAmount || item.quoteCost) || 0), 0);
+    const maintenanceCost = filtered.maintenance.reduce((acc, item) => (
+      item.status === 'cancelled' ? acc : acc + (Number(item.invoiceAmount || item.quoteCost) || 0)
+    ), 0);
     const totalCost = fuelCost + maintenanceCost;
     const liters = filtered.fuel.reduce((acc, item) => acc + (Number(item.liters) || 0), 0);
 
@@ -228,7 +230,9 @@ const Reports: React.FC<ReportsProps> = ({
 
     const previousTotalCost = previousWindow
       ? previousWindow.fuel.reduce((acc, item) => acc + (Number(item.cost) || 0), 0)
-        + previousWindow.maintenance.reduce((acc, item) => acc + (Number(item.invoiceAmount || item.quoteCost) || 0), 0)
+        + previousWindow.maintenance.reduce((acc, item) => (
+          item.status === 'cancelled' ? acc : acc + (Number(item.invoiceAmount || item.quoteCost) || 0)
+        ), 0)
       : 0;
 
     const previousKm = previousWindow
@@ -275,6 +279,7 @@ const Reports: React.FC<ReportsProps> = ({
     });
 
     filtered.maintenance.forEach(item => {
+      if (item.status === 'cancelled') return;
       const key = toMonthKey(item.date);
       if (!key) return;
       ensureMonth(key);
@@ -316,6 +321,7 @@ const Reports: React.FC<ReportsProps> = ({
     });
 
     filtered.maintenance.forEach(item => {
+      if (item.status === 'cancelled') return;
       if (!grouped[item.vehicleId]) return;
       grouped[item.vehicleId].maintenance += Number(item.invoiceAmount || item.quoteCost) || 0;
     });

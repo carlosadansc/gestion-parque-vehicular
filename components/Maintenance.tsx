@@ -80,6 +80,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
   const [isSaving, setIsSaving] = useState(false);
   const [editingRecord, setEditingRecord] = useState<MaintenanceRecord | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('todos');
+  const [filterVehicleId, setFilterVehicleId] = useState<string>('todos');
   const [filterStartDate, setFilterStartDate] = useState('');
   const [filterEndDate, setFilterEndDate] = useState('');
   const [isAddingType, setIsAddingType] = useState(false);
@@ -124,6 +125,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
     return records
       .filter(r => {
         const matchesStatus = filterStatus === 'todos' || r.status === filterStatus;
+        const matchesVehicle = filterVehicleId === 'todos' || r.vehicleId === filterVehicleId;
         const dateKeys = getMaintenanceDateKeys(r);
         const matchesDate =
           !filterStartDate && !filterEndDate
@@ -133,9 +135,18 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                 const withinEnd = !filterEndDate || dateKey <= filterEndDate;
                 return withinStart && withinEnd;
               });
-        return matchesStatus && matchesDate;
+        return matchesStatus && matchesVehicle && matchesDate;
       });
-  }, [records, filterStatus, filterStartDate, filterEndDate]);
+  }, [records, filterStatus, filterVehicleId, filterStartDate, filterEndDate]);
+
+  const selectedFilterVehicle = useMemo(() => (
+    filterVehicleId === 'todos' ? null : vehicles.find(vehicle => vehicle.id === filterVehicleId) || null
+  ), [filterVehicleId, vehicles]);
+
+  const selectedFilterVehicleLabel = selectedFilterVehicle
+    ? selectedFilterVehicle.model
+    : 'Todos los vehiculos';
+  const showReportVehicleColumn = filterVehicleId === 'todos';
 
   type MaintenanceSortKey = 'service' | 'vehicle' | 'status' | 'quote' | 'invoice';
   const maintenanceSortAccessors = useMemo<Record<MaintenanceSortKey, (record: MaintenanceRecord) => unknown>>(() => ({
@@ -155,17 +166,21 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
   } = useSortableData(filteredRecords, maintenanceSortAccessors, { key: 'service', direction: 'desc' });
 
   const stats = useMemo(() => {
-    const totalInvoiced = filteredRecords.reduce((acc, curr) => acc + (Number(curr.invoiceAmount) || 0), 0);
-    const totalQuoted = filteredRecords.reduce((acc, curr) => acc + (Number(curr.quoteCost) || 0), 0);
+    const billableRecords = filteredRecords.filter(r => r.status !== 'cancelled');
+    const totalInvoiced = billableRecords.reduce((acc, curr) => acc + (Number(curr.invoiceAmount) || 0), 0);
+    const totalQuoted = billableRecords.reduce((acc, curr) => acc + (Number(curr.quoteCost) || 0), 0);
     const inWorkshop = filteredRecords.filter(r => r.status === 'in-progress').length;
     const completed = filteredRecords.filter(r => r.status === 'completed').length;
-    return { totalInvoiced, totalQuoted, inWorkshop, completed, balance: totalQuoted - totalInvoiced };
+    const cancelled = filteredRecords.filter(r => r.status === 'cancelled').length;
+    return { totalInvoiced, totalQuoted, inWorkshop, completed, cancelled, balance: totalQuoted - totalInvoiced };
   }, [filteredRecords]);
 
   const filteredTotals = useMemo(() => {
-    const quoted = sortedRecords.reduce((acc, item) => acc + (Number(item.quoteCost) || 0), 0);
-    const invoiced = sortedRecords.reduce((acc, item) => acc + (Number(item.invoiceAmount) || 0), 0);
-    return { quoted, invoiced, balance: quoted - invoiced };
+    const billableRecords = sortedRecords.filter(item => item.status !== 'cancelled');
+    const quoted = billableRecords.reduce((acc, item) => acc + (Number(item.quoteCost) || 0), 0);
+    const invoiced = billableRecords.reduce((acc, item) => acc + (Number(item.invoiceAmount) || 0), 0);
+    const cancelled = sortedRecords.length - billableRecords.length;
+    return { quoted, invoiced, cancelled, balance: quoted - invoiced };
   }, [sortedRecords]);
 
   const nextConsecutiveNumber = useMemo(() => {
@@ -311,8 +326,16 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
 
   // Variables institucionales para impresión
   // Normalizar la ruta del logo (convertir rutas relativas a absolutas)
-  const rawLogo = settingsMap['APP_LOGO'] || '/images/logo-dif.png';
-  const appLogo = rawLogo.startsWith('./') ? rawLogo.replace('./', '/') : rawLogo;
+  const defaultLogo = '/images/logo-dif.png';
+  const rawLogo = String(settingsMap['APP_LOGO'] || defaultLogo).trim();
+  const appLogo = (() => {
+    if (!rawLogo) return defaultLogo;
+    if (/^(https?:|data:|blob:)/i.test(rawLogo)) return rawLogo;
+    if (rawLogo.startsWith('./')) return `/${rawLogo.slice(2)}`;
+    if (rawLogo.startsWith('/')) return rawLogo;
+    if (/^[a-zA-Z]:\\/.test(rawLogo) || rawLogo.startsWith('\\\\')) return defaultLogo;
+    return `/${rawLogo.replace(/^\/+/, '')}`;
+  })();
   const directorName = settingsMap['INSTITUTION_HEAD_NAME'] || 'Director General';
   const administrativeCoordinatorName = settingsMap['ADMINISTRATIVE_COORDINATOR_NAME'] || 'Coordinador Administrativo';
   const administrativeCoordinatorPos = settingsMap['ADMINISTRATIVE_COORDINATOR_POS'] || 'Coordinador Administrativo';
@@ -329,6 +352,11 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
           @page {
             size: letter portrait;
             margin: 1.5cm 1.5cm 2.5cm 1.5cm;
+          }
+
+          @page maintenance-report {
+            size: letter landscape;
+            margin: 1cm;
           }
           
           /* Hide everything except printable area */
@@ -443,6 +471,43 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
             font-size: 8pt;
             letter-spacing: 0.05em;
           }
+
+          #maintenance-report-printable {
+            page: maintenance-report;
+            font-size: 8.5pt;
+            line-height: 1.25;
+          }
+
+          #maintenance-report-printable table {
+            table-layout: fixed;
+            page-break-inside: auto;
+          }
+
+          #maintenance-report-printable th,
+          #maintenance-report-printable td {
+            padding: 5px 6px !important;
+            font-size: 7.8pt;
+            line-height: 1.25;
+            vertical-align: top;
+            word-break: normal;
+            overflow-wrap: anywhere;
+          }
+
+          #maintenance-report-printable th {
+            font-size: 7.2pt;
+            white-space: nowrap;
+          }
+
+          #maintenance-report-printable .report-status-cell {
+            font-size: 6.6pt !important;
+            line-height: 1.05;
+            overflow-wrap: normal;
+            word-break: normal;
+          }
+
+          #maintenance-report-printable tr {
+            page-break-inside: avoid;
+          }
           
           /* ========================================
              FORMAL DOCUMENT ELEMENTS
@@ -517,7 +582,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
         </button>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6 no-print">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6 no-print">
         <div className="card p-4">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600"><span className="material-symbols-outlined text-lg">payments</span></div>
@@ -546,49 +611,79 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
           </div>
           <p className="text-xl font-bold text-text">{stats.completed || 0}</p>
         </div>
+        <div className="card p-4">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="size-9 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600"><span className="material-symbols-outlined text-lg">block</span></div>
+            <span className="text-xs font-medium text-text-muted">Cancelados</span>
+          </div>
+          <p className="text-xl font-bold text-text">{stats.cancelled || 0}</p>
+        </div>
       </div>
 
       <div className="card no-print">
-        <div className="px-4 py-3 border-b border-border bg-surface-subtle flex flex-col xl:flex-row xl:items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-2">
+        <div className="px-4 py-3 border-b border-border bg-surface-subtle grid grid-cols-1 2xl:grid-cols-[auto_1fr] gap-3">
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2">
             <button onClick={() => setFilterStatus('todos')} className={`filter-pill ${filterStatus === 'todos' ? 'filter-pill-active' : 'filter-pill-inactive'}`}>Todos</button>
             <button onClick={() => setFilterStatus('in-progress')} className={`filter-pill ${filterStatus === 'in-progress' ? 'filter-pill-warning' : 'filter-pill-inactive'}`}>En Taller</button>
             <button onClick={() => setFilterStatus('scheduled')} className={`filter-pill ${filterStatus === 'scheduled' ? 'filter-pill-info' : 'filter-pill-inactive'}`}>Programados</button>
             <button onClick={() => setFilterStatus('completed')} className={`filter-pill ${filterStatus === 'completed' ? 'filter-pill-success' : 'filter-pill-inactive'}`}>Completados</button>
+            <button onClick={() => setFilterStatus('cancelled')} className={`filter-pill ${filterStatus === 'cancelled' ? 'filter-pill-active' : 'filter-pill-inactive'}`}>Cancelados</button>
           </div>
-          <div className="flex flex-wrap items-center justify-end gap-2">
-            <span className="text-[10px] font-black uppercase tracking-widest text-text-muted">Desde</span>
-            <input
-              type="date"
-              value={filterStartDate}
-              onChange={e => setFilterStartDate(e.target.value)}
-              className="bg-surface border border-border rounded-md px-3 py-2 text-xs font-bold outline-none focus:border-primary"
-              aria-label="Fecha inicial"
-            />
-            <span className="text-[10px] font-black uppercase tracking-widest text-text-muted">Hasta</span>
-            <input
-              type="date"
-              value={filterEndDate}
-              onChange={e => setFilterEndDate(e.target.value)}
-              className="bg-surface border border-border rounded-md px-3 py-2 text-xs font-bold outline-none focus:border-primary"
-              aria-label="Fecha final"
-            />
-            {(filterStartDate || filterEndDate) && (
-              <button onClick={() => { setFilterStartDate(''); setFilterEndDate(''); }} className="btn btn-ghost text-xs">
+          <div className="grid grid-cols-1 lg:grid-cols-[minmax(260px,1fr)_auto_auto_auto] items-center gap-3 2xl:justify-self-end">
+            <select
+              value={filterVehicleId}
+              onChange={e => setFilterVehicleId(e.target.value)}
+              className="bg-surface border border-border rounded-md px-3 py-2 text-xs font-bold outline-none focus:border-primary w-full lg:max-w-[520px]"
+              aria-label="Filtrar por vehiculo"
+            >
+              <option value="todos">Todos los vehiculos</option>
+              {vehicles.map(vehicle => (
+                <option key={vehicle.id} value={vehicle.id}>
+                  {vehicle.model}
+                </option>
+              ))}
+            </select>
+            <label className="grid grid-cols-[auto_minmax(150px,1fr)] items-center gap-2">
+              <span className="text-[10px] font-black uppercase tracking-widest text-text-muted">Desde</span>
+              <input
+                type="date"
+                value={filterStartDate}
+                onChange={e => setFilterStartDate(e.target.value)}
+                className="bg-surface border border-border rounded-md px-3 py-2 text-xs font-bold outline-none focus:border-primary"
+                aria-label="Fecha inicial"
+              />
+            </label>
+            <label className="grid grid-cols-[auto_minmax(150px,1fr)] items-center gap-2">
+              <span className="text-[10px] font-black uppercase tracking-widest text-text-muted">Hasta</span>
+              <input
+                type="date"
+                value={filterEndDate}
+                onChange={e => setFilterEndDate(e.target.value)}
+                className="bg-surface border border-border rounded-md px-3 py-2 text-xs font-bold outline-none focus:border-primary"
+                aria-label="Fecha final"
+              />
+            </label>
+            <div className="flex items-center justify-end gap-2">
+            {(filterVehicleId !== 'todos' || filterStartDate || filterEndDate) && (
+              <button onClick={() => { setFilterVehicleId('todos'); setFilterStartDate(''); setFilterEndDate(''); }} className="btn btn-ghost text-xs">
                 <span className="material-symbols-outlined ui-icon">backspace</span> Limpiar
               </button>
             )}
             <button onClick={() => setShowReportPreview(true)} className="btn btn-ghost text-xs">
               <span className="material-symbols-outlined ui-icon">print</span> Imprimir reporte
             </button>
-            <button onClick={onSync} className="btn btn-ghost text-xs">
-              <span className="material-symbols-outlined ui-icon">sync</span> Actualizar
-            </button>
+            </div>
           </div>
         </div>
-        {(filterStartDate || filterEndDate) && (
+        {(filterVehicleId !== 'todos' || filterStartDate || filterEndDate) && (
           <div className="px-6 py-2 bg-surface border-b border-border text-[11px] font-bold text-text-muted">
             Rango aplicado: {filterStartDate || 'inicio'} a {filterEndDate || 'hoy'} · {sortedRecords.length} registros
+          </div>
+        )}
+
+        {(filterVehicleId !== 'todos' || filterStartDate || filterEndDate) && (
+          <div className="px-6 py-2 bg-surface border-b border-border text-[11px] font-bold text-text-muted">
+            Vehiculo: {selectedFilterVehicleLabel}
           </div>
         )}
 
@@ -677,7 +772,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                   <td colSpan={6} className="px-8 py-20 text-center opacity-40">
                     <span className="material-symbols-outlined text-4xl block mb-2">inventory_2</span>
                     <p className="text-xs font-black uppercase tracking-widest">No hay registros de mantenimiento</p>
-                    {(filterStartDate || filterEndDate) && (
+                    {(filterVehicleId !== 'todos' || filterStartDate || filterEndDate) && (
                       <p className="text-[10px] font-bold uppercase tracking-widest mt-2">
                         Cambia el rango o usa Limpiar para ver todos.
                       </p>
@@ -1010,7 +1105,16 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
             <div id="maintenance-report-printable" className="bg-surface w-[27.94cm] min-h-[21.59cm] p-[1.2cm] shadow-2xl relative text-text">
               <div className="print-header flex justify-between items-center mb-6 border-b-4 border-slate-900 pb-5">
                 <div className="flex items-center gap-5">
-                  <img src={appLogo} alt="Logo" className="w-20 object-contain" />
+                  <img
+                    src={appLogo}
+                    alt="Logo"
+                    className="w-20 object-contain"
+                    onError={(event) => {
+                      const img = event.currentTarget;
+                      if (img.src.endsWith(defaultLogo)) return;
+                      img.src = defaultLogo;
+                    }}
+                  />
                   <div className="flex flex-col">
                     <span className="text-base font-black text-text uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
                     <span className="text-base font-black text-text uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>
@@ -1022,6 +1126,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                     {filterStatus === 'todos' ? 'Todos' : statusMap[filterStatus] || filterStatus}
                   </div>
                   <p className="text-[8pt] font-black text-text-muted uppercase tracking-widest">Registros: {sortedRecords.length}</p>
+                  <p className="text-[8pt] font-black text-text-muted uppercase tracking-widest mt-1">Vehiculo: {selectedFilterVehicleLabel}</p>
                   <p className="text-[8pt] font-black text-text-muted uppercase tracking-widest mt-1">
                     Rango: {filterStartDate || filterEndDate
                       ? `${filterStartDate ? new Date(`${filterStartDate}T00:00:00`).toLocaleDateString('es-ES') : 'Inicio'} - ${filterEndDate ? new Date(`${filterEndDate}T00:00:00`).toLocaleDateString('es-ES') : 'Hoy'}`
@@ -1031,7 +1136,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4 mb-6">
+              <div className="grid grid-cols-4 gap-4 mb-6">
                 <div className="bg-blue-50 border border-blue-100 p-3 rounded-lg">
                   <p className="text-[8pt] font-black text-blue-600 uppercase tracking-widest mb-1">Cotizado</p>
                   <p className="text-xl font-black text-text">${filteredTotals.quoted.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</p>
@@ -1044,20 +1149,35 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                   <p className="text-[8pt] font-black text-slate-600 uppercase tracking-widest mb-1">Diferencia</p>
                   <p className="text-xl font-black text-text">${filteredTotals.balance.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</p>
                 </div>
+                <div className="bg-rose-50 border border-rose-100 p-3 rounded-lg">
+                  <p className="text-[8pt] font-black text-rose-600 uppercase tracking-widest mb-1">Cancelados</p>
+                  <p className="text-xl font-black text-text">{filteredTotals.cancelled}</p>
+                </div>
               </div>
 
-              <table className="w-full border-collapse">
+              <table className="w-full border-collapse table-fixed text-[8.5pt] leading-tight">
+                <colgroup>
+                  <col className="w-[5%]" />
+                  <col className="w-[8%]" />
+                  {showReportVehicleColumn && <col className="w-[17%]" />}
+                  <col className={showReportVehicleColumn ? 'w-[20%]' : 'w-[28%]'} />
+                  <col className={showReportVehicleColumn ? 'w-[17%]' : 'w-[21%]'} />
+                  <col className="w-[10%]" />
+                  <col className="w-[10%]" />
+                  <col className="w-[10%]" />
+                  <col className="w-[6%]" />
+                </colgroup>
                 <thead>
                   <tr>
-                    <th>No.</th>
-                    <th>Fecha</th>
-                    <th>Vehiculo</th>
-                    <th>Servicio</th>
-                    <th>Proveedor</th>
-                    <th>Estado</th>
-                    <th>Cotizacion</th>
-                    <th>Factura</th>
-                    <th>Pago</th>
+                    <th className="px-2 py-2 text-[8pt]">No.</th>
+                    <th className="px-2 py-2 text-[8pt]">Fecha</th>
+                    {showReportVehicleColumn && <th className="px-2 py-2 text-[8pt]">Vehiculo</th>}
+                    <th className="px-2 py-2 text-[8pt]">Servicio</th>
+                    <th className="px-2 py-2 text-[8pt]">Proveedor</th>
+                    <th className="px-2 py-2 text-[8pt]">Estado</th>
+                    <th className="px-2 py-2 text-[8pt]">Cotizacion</th>
+                    <th className="px-2 py-2 text-[8pt]">Factura</th>
+                    <th className="px-2 py-2 text-[8pt]">Pago</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1065,24 +1185,24 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                     const vehicle = vehicles.find(v => v.id === record.vehicleId);
                     return (
                       <tr key={record.id}>
-                        <td className="text-center font-black text-blue-700">{record.consecutiveNumber || '---'}</td>
-                        <td className="text-center font-bold text-text-muted">{record.date ? new Date(record.date).toLocaleDateString('es-ES') : '---'}</td>
-                        <td className="font-bold uppercase">{vehicle ? `${vehicle.plate} - ${vehicle.model}` : '---'}</td>
-                        <td className="font-bold uppercase">{record.serviceType || '---'}</td>
-                        <td className="font-bold uppercase">{record.provider || '---'}</td>
-                        <td className="font-black uppercase">{statusMap[record.status] || record.status}</td>
-                        <td className="text-right font-black">${(Number(record.quoteCost) || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td>
-                        <td className="text-right font-black">
+                        <td className="px-2 py-2 text-center font-black text-blue-700 align-top">{record.consecutiveNumber || '---'}</td>
+                        <td className="px-2 py-2 text-center font-bold text-text-muted align-top whitespace-nowrap">{record.date ? new Date(record.date).toLocaleDateString('es-ES') : '---'}</td>
+                        {showReportVehicleColumn && <td className="px-2 py-2 font-bold uppercase align-top break-words">{vehicle?.model || '---'}</td>}
+                        <td className="px-2 py-2 font-bold uppercase align-top break-words">{record.serviceType || '---'}</td>
+                        <td className="px-2 py-2 font-bold uppercase align-top break-words">{record.provider || '---'}</td>
+                        <td className="report-status-cell px-2 py-2 font-black uppercase align-top text-[9px] leading-tight whitespace-normal">{statusMap[record.status] || record.status}</td>
+                        <td className="px-2 py-2 text-right font-black align-top whitespace-nowrap">${(Number(record.quoteCost) || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td>
+                        <td className="px-2 py-2 text-right font-black align-top whitespace-nowrap">
                           {(Number(record.invoiceAmount) || 0) > 0 ? `$${(Number(record.invoiceAmount) || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}` : 'PENDIENTE'}
                           {record.invoiceNumber && <p className="text-[7pt] font-bold text-text-muted uppercase">#{record.invoiceNumber}</p>}
                         </td>
-                        <td className="font-bold uppercase">{record.paymentMethod || '---'}</td>
+                        <td className="px-2 py-2 font-bold uppercase align-top break-words">{record.paymentMethod || '---'}</td>
                       </tr>
                     );
                   })}
                   {sortedRecords.length === 0 && (
                     <tr>
-                      <td colSpan={9} className="text-center font-bold text-text-muted py-8">Sin registros para el filtro seleccionado.</td>
+                      <td colSpan={showReportVehicleColumn ? 9 : 8} className="text-center font-bold text-text-muted py-8">Sin registros para el filtro seleccionado.</td>
                     </tr>
                   )}
                 </tbody>
@@ -1106,7 +1226,16 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                 {/* Header Institucional - Formal Design */}
                 <div className="print-header flex justify-between items-center mb-8 border-b-4 border-slate-900 pb-6">
                   <div className="flex items-center gap-6">
-                    <img src="/images/logo-dif.png" alt="Logo" className="w-24 object-contain" />
+                    <img
+                      src={appLogo}
+                      alt="Logo"
+                      className="w-24 object-contain"
+                      onError={(event) => {
+                        const img = event.currentTarget;
+                        if (img.src.endsWith(defaultLogo)) return;
+                        img.src = defaultLogo;
+                      }}
+                    />
                     <div className="flex flex-col">
                       <span className="text-lg font-black text-text uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
                       <span className="text-lg font-black text-text uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>
