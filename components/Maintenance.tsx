@@ -81,6 +81,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
   const [editingRecord, setEditingRecord] = useState<MaintenanceRecord | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('todos');
   const [filterVehicleId, setFilterVehicleId] = useState<string>('todos');
+  const [filterProvider, setFilterProvider] = useState<string>('todos');
   const [filterStartDate, setFilterStartDate] = useState('');
   const [filterEndDate, setFilterEndDate] = useState('');
   const [isAddingType, setIsAddingType] = useState(false);
@@ -126,6 +127,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
       .filter(r => {
         const matchesStatus = filterStatus === 'todos' || r.status === filterStatus;
         const matchesVehicle = filterVehicleId === 'todos' || r.vehicleId === filterVehicleId;
+        const matchesProvider = filterProvider === 'todos' || String(r.provider || '').trim() === filterProvider;
         const dateKeys = getMaintenanceDateKeys(r);
         const matchesDate =
           !filterStartDate && !filterEndDate
@@ -135,9 +137,22 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                 const withinEnd = !filterEndDate || dateKey <= filterEndDate;
                 return withinStart && withinEnd;
               });
-        return matchesStatus && matchesVehicle && matchesDate;
+        return matchesStatus && matchesVehicle && matchesProvider && matchesDate;
       });
-  }, [records, filterStatus, filterVehicleId, filterStartDate, filterEndDate]);
+  }, [records, filterStatus, filterVehicleId, filterProvider, filterStartDate, filterEndDate]);
+
+  const providerOptions = useMemo(() => {
+    const providerSet = new Set<string>();
+    suppliers.forEach(supplier => {
+      const name = String(supplier.name || '').trim();
+      if (name) providerSet.add(name);
+    });
+    records.forEach(record => {
+      const provider = String(record.provider || '').trim();
+      if (provider) providerSet.add(provider);
+    });
+    return Array.from(providerSet).sort((a, b) => a.localeCompare(b, 'es'));
+  }, [records, suppliers]);
 
   const selectedFilterVehicle = useMemo(() => (
     filterVehicleId === 'todos' ? null : vehicles.find(vehicle => vehicle.id === filterVehicleId) || null
@@ -146,6 +161,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
   const selectedFilterVehicleLabel = selectedFilterVehicle
     ? selectedFilterVehicle.model
     : 'Todos los vehiculos';
+  const selectedFilterProviderLabel = filterProvider === 'todos' ? 'Todos los proveedores' : filterProvider;
   const showReportVehicleColumn = filterVehicleId === 'todos';
 
   type MaintenanceSortKey = 'service' | 'vehicle' | 'status' | 'quote' | 'invoice';
@@ -629,17 +645,30 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
             <button onClick={() => setFilterStatus('completed')} className={`filter-pill ${filterStatus === 'completed' ? 'filter-pill-success' : 'filter-pill-inactive'}`}>Completados</button>
             <button onClick={() => setFilterStatus('cancelled')} className={`filter-pill ${filterStatus === 'cancelled' ? 'filter-pill-active' : 'filter-pill-inactive'}`}>Cancelados</button>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-[minmax(260px,1fr)_auto_auto_auto] items-center gap-3 2xl:justify-self-end">
+          <div className="grid grid-cols-1 lg:grid-cols-[minmax(220px,1fr)_minmax(220px,1fr)_auto_auto_auto] items-center gap-3 2xl:justify-self-end">
             <select
               value={filterVehicleId}
               onChange={e => setFilterVehicleId(e.target.value)}
-              className="bg-surface border border-border rounded-md px-3 py-2 text-xs font-bold outline-none focus:border-primary w-full lg:max-w-[520px]"
+              className="bg-surface border border-border rounded-md px-3 py-2 text-xs font-bold outline-none focus:border-primary w-full lg:max-w-[420px]"
               aria-label="Filtrar por vehiculo"
             >
               <option value="todos">Todos los vehiculos</option>
               {vehicles.map(vehicle => (
                 <option key={vehicle.id} value={vehicle.id}>
                   {vehicle.model}
+                </option>
+              ))}
+            </select>
+            <select
+              value={filterProvider}
+              onChange={e => setFilterProvider(e.target.value)}
+              className="bg-surface border border-border rounded-md px-3 py-2 text-xs font-bold outline-none focus:border-primary w-full lg:max-w-[360px]"
+              aria-label="Filtrar por proveedor"
+            >
+              <option value="todos">Todos los proveedores</option>
+              {providerOptions.map(provider => (
+                <option key={provider} value={provider}>
+                  {provider}
                 </option>
               ))}
             </select>
@@ -664,8 +693,8 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
               />
             </label>
             <div className="flex items-center justify-end gap-2">
-            {(filterVehicleId !== 'todos' || filterStartDate || filterEndDate) && (
-              <button onClick={() => { setFilterVehicleId('todos'); setFilterStartDate(''); setFilterEndDate(''); }} className="btn btn-ghost text-xs">
+            {(filterVehicleId !== 'todos' || filterProvider !== 'todos' || filterStartDate || filterEndDate) && (
+              <button onClick={() => { setFilterVehicleId('todos'); setFilterProvider('todos'); setFilterStartDate(''); setFilterEndDate(''); }} className="btn btn-ghost text-xs">
                 <span className="material-symbols-outlined ui-icon">backspace</span> Limpiar
               </button>
             )}
@@ -675,15 +704,15 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
             </div>
           </div>
         </div>
-        {(filterVehicleId !== 'todos' || filterStartDate || filterEndDate) && (
+        {(filterVehicleId !== 'todos' || filterProvider !== 'todos' || filterStartDate || filterEndDate) && (
           <div className="px-6 py-2 bg-surface border-b border-border text-[11px] font-bold text-text-muted">
             Rango aplicado: {filterStartDate || 'inicio'} a {filterEndDate || 'hoy'} · {sortedRecords.length} registros
           </div>
         )}
 
-        {(filterVehicleId !== 'todos' || filterStartDate || filterEndDate) && (
+        {(filterVehicleId !== 'todos' || filterProvider !== 'todos' || filterStartDate || filterEndDate) && (
           <div className="px-6 py-2 bg-surface border-b border-border text-[11px] font-bold text-text-muted">
-            Vehiculo: {selectedFilterVehicleLabel}
+            Vehiculo: {selectedFilterVehicleLabel} · Proveedor: {selectedFilterProviderLabel}
           </div>
         )}
 
@@ -772,7 +801,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                   <td colSpan={6} className="px-8 py-20 text-center opacity-40">
                     <span className="material-symbols-outlined text-4xl block mb-2">inventory_2</span>
                     <p className="text-xs font-black uppercase tracking-widest">No hay registros de mantenimiento</p>
-                    {(filterVehicleId !== 'todos' || filterStartDate || filterEndDate) && (
+                    {(filterVehicleId !== 'todos' || filterProvider !== 'todos' || filterStartDate || filterEndDate) && (
                       <p className="text-[10px] font-bold uppercase tracking-widest mt-2">
                         Cambia el rango o usa Limpiar para ver todos.
                       </p>
@@ -1127,6 +1156,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                   </div>
                   <p className="text-[8pt] font-black text-text-muted uppercase tracking-widest">Registros: {sortedRecords.length}</p>
                   <p className="text-[8pt] font-black text-text-muted uppercase tracking-widest mt-1">Vehiculo: {selectedFilterVehicleLabel}</p>
+                  <p className="text-[8pt] font-black text-text-muted uppercase tracking-widest mt-1">Proveedor: {selectedFilterProviderLabel}</p>
                   <p className="text-[8pt] font-black text-text-muted uppercase tracking-widest mt-1">
                     Rango: {filterStartDate || filterEndDate
                       ? `${filterStartDate ? new Date(`${filterStartDate}T00:00:00`).toLocaleDateString('es-ES') : 'Inicio'} - ${filterEndDate ? new Date(`${filterEndDate}T00:00:00`).toLocaleDateString('es-ES') : 'Hoy'}`
