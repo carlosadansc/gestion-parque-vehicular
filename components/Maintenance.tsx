@@ -6,6 +6,7 @@ import { SortableTh, useSortableData } from '../utils/tableSort';
 interface MaintenanceProps {
   records: MaintenanceRecord[];
   vehicles: Vehicle[];
+  searchQuery?: string;
   maintenanceTypes?: MaintenanceType[];
   suppliers?: Supplier[];
   settings?: AppSetting[];
@@ -75,7 +76,7 @@ const normalizePaymentMethodValue = (value: unknown): '' | 'transferencia' | 'ef
   return '';
 };
 
-const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], maintenanceTypes = [], suppliers = [], settings = [], onAddRecord, onUpdateRecord, onAddMaintenanceType, onAddSupplier, onSync }) => {
+const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], searchQuery = '', maintenanceTypes = [], suppliers = [], settings = [], onAddRecord, onUpdateRecord, onAddMaintenanceType, onAddSupplier, onSync }) => {
   const [showModal, setShowModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [editingRecord, setEditingRecord] = useState<MaintenanceRecord | null>(null);
@@ -128,6 +129,27 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
         const matchesStatus = filterStatus === 'todos' || r.status === filterStatus;
         const matchesVehicle = filterVehicleId === 'todos' || r.vehicleId === filterVehicleId;
         const matchesProvider = filterProvider === 'todos' || String(r.provider || '').trim() === filterProvider;
+        const vehicle = vehicles.find(item => item.id === r.vehicleId);
+        const normalizedSearch = searchQuery.trim().toLocaleLowerCase('es');
+        const searchableText = [
+          r.consecutiveNumber,
+          r.serviceType,
+          r.description,
+          r.provider,
+          r.providerContact,
+          r.quoteNumber,
+          r.invoiceNumber,
+          r.internalDocumentNumber,
+          r.paymentMethod,
+          r.status === 'scheduled' ? 'programado' :
+            r.status === 'in-progress' ? 'en taller' :
+              r.status === 'completed' ? 'completado' :
+                r.status === 'cancelled' ? 'cancelado' : r.status,
+          vehicle?.plate,
+          vehicle?.brand,
+          vehicle?.model
+        ].map(value => String(value ?? '')).join(' ').toLocaleLowerCase('es');
+        const matchesSearch = !normalizedSearch || searchableText.includes(normalizedSearch);
         const dateKeys = getMaintenanceDateKeys(r);
         const matchesDate =
           !filterStartDate && !filterEndDate
@@ -137,9 +159,9 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                 const withinEnd = !filterEndDate || dateKey <= filterEndDate;
                 return withinStart && withinEnd;
               });
-        return matchesStatus && matchesVehicle && matchesProvider && matchesDate;
+        return matchesStatus && matchesVehicle && matchesProvider && matchesSearch && matchesDate;
       });
-  }, [records, filterStatus, filterVehicleId, filterProvider, filterStartDate, filterEndDate]);
+  }, [records, vehicles, searchQuery, filterStatus, filterVehicleId, filterProvider, filterStartDate, filterEndDate]);
 
   const providerOptions = useMemo(() => {
     const providerSet = new Set<string>();
