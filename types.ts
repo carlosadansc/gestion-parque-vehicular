@@ -7,6 +7,7 @@
   PLANNING = "planning",
   TRAVEL_LOGS = "travel_logs",
   MAINTENANCE = "maintenance",
+  CATALOGS = "catalogs",
   INSPECTIONS = "inspections",
   USERS = "users",
   SETTINGS = "settings",

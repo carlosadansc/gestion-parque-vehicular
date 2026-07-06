@@ -16,6 +16,7 @@ import Maintenance from './components/Maintenance';
 import Inspections from './components/Inspections';
 import Users from './components/Users';
 import Reports from './components/Reports';
+import Catalogs from './components/Catalogs';
 import { googleSheets } from './services/googleSheets';
 import { verifyPassword } from './utils/password';
 
@@ -1161,6 +1162,25 @@ const App: React.FC = () => {
     }
   };
 
+  const handleUpdateMaintenanceType = async (type: MaintenanceType) => {
+    const previousMaintenanceTypes = maintenanceTypes;
+    try {
+    ensure(hasText(type.id), 'No se pudo identificar el tipo de mantenimiento a actualizar.');
+    ensure(hasText(type.name), 'El nombre del tipo de mantenimiento es obligatorio.');
+    ensure(maintenanceTypes.some(existing => existing.id === type.id), 'El tipo de mantenimiento que intentas actualizar no existe.');
+    const normalizedName = normalizeCatalogName(type.name || '');
+    const alreadyExists = maintenanceTypes.some(existing => existing.id !== type.id && normalizeCatalogName(existing.name || '') === normalizedName);
+    ensure(!alreadyExists, 'Ese tipo de mantenimiento ya existe en el catálogo.');
+
+    const updatedType = { ...type, name: type.name.trim().toUpperCase() };
+    setMaintenanceTypes(maintenanceTypes.map(existing => existing.id === updatedType.id ? updatedType : existing));
+    await persistOrThrow('update-maintenance-type', updatedType, 'actualizar');
+    } catch (error) {
+      setMaintenanceTypes(previousMaintenanceTypes);
+      throw error;
+    }
+  };
+
   const handleAddIncidentType = async (name: string) => {
     const previousIncidentTypes = incidentTypes;
     try {
@@ -1193,6 +1213,33 @@ const App: React.FC = () => {
     const newSupplier = { ...supplier, id: `SUP-${Date.now()}`, name: (supplier.name || '').trim().toUpperCase() };
     setSuppliers([...suppliers, newSupplier]);
     await persistOrThrow('supplier', newSupplier, 'guardar');
+    } catch (error) {
+      setSuppliers(previousSuppliers);
+      throw error;
+    }
+  };
+
+  const handleUpdateSupplier = async (supplier: Supplier) => {
+    const previousSuppliers = suppliers;
+    try {
+    validateSupplierPayload(supplier);
+    ensure(hasText(supplier.id), 'No se pudo identificar el proveedor a actualizar.');
+    ensure(suppliers.some(existing => existing.id === supplier.id), 'El proveedor que intentas actualizar no existe.');
+    const normalizedName = normalizeCatalogName(supplier.name || '');
+    const alreadyExists = suppliers.some(existing => existing.id !== supplier.id && normalizeCatalogName(existing.name || '') === normalizedName);
+    ensure(!alreadyExists, 'Ese proveedor ya existe en el catalogo.');
+
+    const updatedSupplier = {
+      ...supplier,
+      name: (supplier.name || '').trim().toUpperCase(),
+      contact: (supplier.contact || '').trim().toUpperCase(),
+      phone: (supplier.phone || '').trim(),
+      email: (supplier.email || '').trim().toLowerCase(),
+      address: (supplier.address || '').trim().toUpperCase(),
+      notes: (supplier.notes || '').trim().toUpperCase()
+    };
+    setSuppliers(suppliers.map(existing => existing.id === updatedSupplier.id ? updatedSupplier : existing));
+    await persistOrThrow('update-supplier', updatedSupplier, 'actualizar');
     } catch (error) {
       setSuppliers(previousSuppliers);
       throw error;
@@ -1394,17 +1441,35 @@ const App: React.FC = () => {
               'Mantenimiento actualizado correctamente.',
               'No se pudo actualizar el mantenimiento.'
             )}
+            onSync={handleSyncWithToast}
+          />
+        );
+      case View.CATALOGS:
+        return (
+          <Catalogs
+            maintenanceTypes={maintenanceTypes}
+            suppliers={suppliers}
+            searchQuery={searchQuery}
             onAddMaintenanceType={async (payload) => executeWithToast(
               () => handleAddMaintenanceType(payload),
-              'Tipo de mantenimiento agregado.',
-              'No se pudo agregar el tipo de mantenimiento.'
+              'Tipo de servicio registrado correctamente.',
+              'No se pudo registrar el tipo de servicio.'
+            )}
+            onUpdateMaintenanceType={async (payload) => executeWithToast(
+              () => handleUpdateMaintenanceType(payload),
+              'Tipo de servicio actualizado correctamente.',
+              'No se pudo actualizar el tipo de servicio.'
             )}
             onAddSupplier={async (payload) => executeWithToast(
               () => handleAddSupplier(payload),
               'Proveedor registrado correctamente.',
               'No se pudo registrar el proveedor.'
             )}
-            onSync={handleSyncWithToast}
+            onUpdateSupplier={async (payload) => executeWithToast(
+              () => handleUpdateSupplier(payload),
+              'Proveedor actualizado correctamente.',
+              'No se pudo actualizar el proveedor.'
+            )}
           />
         );
       case View.TRAVEL_LOGS:

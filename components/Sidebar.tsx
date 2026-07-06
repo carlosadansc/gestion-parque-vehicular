@@ -22,6 +22,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange, appName, cu
     { id: View.TRAVEL_LOGS, label: 'Bitácora', icon: 'route' },
     { id: View.FUEL, label: 'Combustible', icon: 'local_gas_station' },
     { id: View.INCIDENTS, label: 'Incidencias', icon: 'report_problem' },
+    { id: View.CATALOGS, label: 'Catálogos', icon: 'category' },
   ];
 
   const navButtonClass = (isActive: boolean, extra = '') =>

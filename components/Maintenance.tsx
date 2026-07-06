@@ -12,8 +12,6 @@ interface MaintenanceProps {
   settings?: AppSetting[];
   onAddRecord: (record: Omit<MaintenanceRecord, 'id'>) => Promise<void>;
   onUpdateRecord: (record: MaintenanceRecord) => Promise<void>;
-  onAddMaintenanceType?: (name: string) => Promise<void>;
-  onAddSupplier?: (supplier: Omit<Supplier, 'id'>) => Promise<void>;
   onSync: () => void;
 }
 
@@ -76,7 +74,7 @@ const normalizePaymentMethodValue = (value: unknown): '' | 'transferencia' | 'ef
   return '';
 };
 
-const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], searchQuery = '', maintenanceTypes = [], suppliers = [], settings = [], onAddRecord, onUpdateRecord, onAddMaintenanceType, onAddSupplier, onSync }) => {
+const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], searchQuery = '', maintenanceTypes = [], suppliers = [], settings = [], onAddRecord, onUpdateRecord, onSync }) => {
   const [showModal, setShowModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [editingRecord, setEditingRecord] = useState<MaintenanceRecord | null>(null);
@@ -85,11 +83,6 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
   const [filterProvider, setFilterProvider] = useState<string>('todos');
   const [filterStartDate, setFilterStartDate] = useState('');
   const [filterEndDate, setFilterEndDate] = useState('');
-  const [isAddingType, setIsAddingType] = useState(false);
-  const [newTypeName, setNewTypeName] = useState('');
-  const [isAddingSupplier, setIsAddingSupplier] = useState(false);
-  const [newSupplierName, setNewSupplierName] = useState('');
-  const [newSupplierContact, setNewSupplierContact] = useState('');
   
   // Print States
   const [showPrintPreview, setShowPrintPreview] = useState(false);
@@ -298,36 +291,6 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
       setFormError(message);
     } finally {
       setIsSaving(false);
-    }
-  };
-
-  const handleCreateType = async () => {
-    if (!newTypeName.trim() || !onAddMaintenanceType) return;
-    try {
-        await onAddMaintenanceType(newTypeName);
-        setFormData({ ...formData, serviceType: newTypeName.toUpperCase() }); // Auto select
-        setNewTypeName('');
-        setIsAddingType(false);
-    } catch (e) {
-        const message = e instanceof Error ? e.message : "Error al agregar tipo";
-        setFormError(message);
-    }
-  };
-
-  const handleCreateSupplier = async () => {
-    if (!newSupplierName.trim() || !onAddSupplier) return;
-    try {
-        await onAddSupplier({ 
-          name: newSupplierName.toUpperCase(), 
-          contact: newSupplierContact || undefined 
-        });
-        setFormData({ ...formData, provider: newSupplierName.toUpperCase() }); // Auto select
-        setNewSupplierName('');
-        setNewSupplierContact('');
-        setIsAddingSupplier(false);
-    } catch (e) {
-        const message = e instanceof Error ? e.message : "Error al agregar proveedor";
-        setFormError(message);
     }
   };
 
@@ -891,41 +854,15 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                     </div>
                       <div className="space-y-2">
                         <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Tipo de Servicio</label>
-                        <div className="flex gap-2 items-start min-w-0">
-                          <select required disabled={isSaving} className="w-full min-w-0 flex-1 bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all truncate" value={formData.serviceType} onChange={e => setFormData({...formData, serviceType: e.target.value})}>
-                              <option value="">Seleccionar tipo...</option>
-                              {maintenanceTypes.map(t => (
-                                  <option key={t.id} value={t.name}>{t.name}</option>
-                              ))}
-                          </select>
-                          <button 
-                              type="button" 
-                              disabled={isSaving}
-                              onClick={() => setIsAddingType(!isAddingType)}
-                              className="bg-primary text-white size-12 rounded-md flex items-center justify-center hover:opacity-90 transition-all shrink-0"
-                              title="Agregar nuevo tipo"
-                          >
-                              <span className="material-symbols-outlined ui-icon text-xl">{isAddingType ? 'close' : 'add'}</span>
-                          </button>
-                        </div>
-                      
-                      {isAddingType && (
-                        <div className="animate-in slide-in-from-top-2 pt-2 flex flex-col sm:flex-row gap-2">
-                            <input 
-                                className="flex-1 bg-surface-subtle border border-border rounded-md px-4 py-2 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all uppercase" 
-                                placeholder="NOMBRE DEL NUEVO TIPO"
-                                value={newTypeName}
-                                onChange={e => setNewTypeName(e.target.value)}
-                            />
-                            <button 
-                                type="button" 
-                                onClick={handleCreateType}
-                                className="bg-green-500 text-white px-4 py-2 rounded-md font-black text-[10px] uppercase tracking-widest hover:bg-green-600 transition-all"
-                            >
-                                Guardar
-                            </button>
-                        </div>
-                      )}
+                        <select required disabled={isSaving} className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all truncate" value={formData.serviceType} onChange={e => setFormData({...formData, serviceType: e.target.value})}>
+                            <option value="">Seleccionar tipo...</option>
+                            {formData.serviceType && !maintenanceTypes.some(t => t.name === formData.serviceType) && (
+                              <option value={formData.serviceType}>{formData.serviceType}</option>
+                            )}
+                            {maintenanceTypes.map(t => (
+                                <option key={t.id} value={t.name}>{t.name}</option>
+                            ))}
+                        </select>
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Descripción del Problema</label>
@@ -944,60 +881,28 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                   <div className="bg-surface p-6 rounded-2xl border border-border space-y-4">
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Proveedor / Taller</label>
-                      <div className="flex flex-col sm:flex-row gap-2 min-w-0">
-                        <select 
-                          required 
-                          disabled={isSaving} 
-                          className="w-full min-w-0 flex-1 bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all truncate" 
-                          value={formData.provider} 
-                          onChange={e => {
-                            const selectedSupplier = suppliers.find(s => s.name === e.target.value);
-                            setFormData({
-                              ...formData, 
-                              provider: e.target.value,
-                              providerContact: selectedSupplier?.contact || ''
-                            });
-                          }}
-                        >
-                          <option value="">Seleccionar proveedor...</option>
-                          {suppliers.map(s => (
-                            <option key={s.id} value={s.name}>{s.name}</option>
-                          ))}
-                        </select>
-                        <button 
-                          type="button" 
-                          disabled={isSaving}
-                          onClick={() => setIsAddingSupplier(!isAddingSupplier)}
-                          className="bg-primary text-white size-12 rounded-md flex items-center justify-center hover:opacity-90 transition-all shrink-0 self-start sm:self-auto"
-                          title="Agregar nuevo proveedor"
-                        >
-                          <span className="material-symbols-outlined ui-icon text-xl">{isAddingSupplier ? 'close' : 'add'}</span>
-                        </button>
-                      </div>
-                      
-                      {isAddingSupplier && (
-                        <div className="animate-in slide-in-from-top-2 pt-2 space-y-2 p-3 bg-surface-subtle rounded-md border border-border">
-                          <input 
-                            className="w-full bg-surface border border-border rounded-md px-4 py-2 text-sm font-bold outline-none focus:border-primary transition-all uppercase" 
-                            placeholder="NOMBRE DEL PROVEEDOR"
-                            value={newSupplierName}
-                            onChange={e => setNewSupplierName(e.target.value)}
-                          />
-                          <input 
-                            className="w-full bg-surface border border-border rounded-md px-4 py-2 text-sm font-bold outline-none focus:border-primary transition-all" 
-                            placeholder="Nombre del encargado"
-                            value={newSupplierContact}
-                            onChange={e => setNewSupplierContact(e.target.value)}
-                          />
-                          <button 
-                            type="button" 
-                            onClick={handleCreateSupplier}
-                            className="w-full bg-green-500 text-white px-4 py-2 rounded-md font-black text-[10px] uppercase tracking-widest hover:bg-green-600 transition-all"
-                          >
-                            Guardar Proveedor
-                          </button>
-                        </div>
-                      )}
+                      <select
+                        required
+                        disabled={isSaving}
+                        className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all truncate"
+                        value={formData.provider}
+                        onChange={e => {
+                          const selectedSupplier = suppliers.find(s => s.name === e.target.value);
+                          setFormData({
+                            ...formData,
+                            provider: e.target.value,
+                            providerContact: selectedSupplier?.contact || ''
+                          });
+                        }}
+                      >
+                        <option value="">Seleccionar proveedor...</option>
+                        {formData.provider && !suppliers.some(s => s.name === formData.provider) && (
+                          <option value={formData.provider}>{formData.provider}</option>
+                        )}
+                        {suppliers.map(s => (
+                          <option key={s.id} value={s.name}>{s.name}</option>
+                        ))}
+                      </select>
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">
