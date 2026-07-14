@@ -161,10 +161,14 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
   // Obtener la ruta del logo con base correcta
   const rawLogo = settingsMap['APP_LOGO'] || '/images/logo-dif.png';
   const appLogo = rawLogo.startsWith('./') ? rawLogo.replace('./', '/') : rawLogo;
-  const directorName = settingsMap['ADMINISTRATIVE_COORDINATOR_NAME']; 
-  const headOfMaterialsName = settingsMap['VEHICLE_MANAGER_NAME'];
-  const headOfMaterialsPosition = settingsMap['VEHICLE_MANAGER_POS'] || 'Encargado de Parque Vehicular';
-  const directorPosition = settingsMap['ADMINISTRATIVE_COORDINATOR_POS'] || 'Coordinador Administrativo';
+  const directorName = settingsMap['INSTITUTION_HEAD_NAME'] || 'Director General';
+  const directorPosition = settingsMap['INSTITUTION_HEAD_POS'] || 'Director General';
+  const vehicleManagerName = settingsMap['VEHICLE_MANAGER_NAME'] || 'Encargado de Parque Vehicular';
+  const vehicleManagerPosition = settingsMap['VEHICLE_MANAGER_POS'] || 'Encargado de Parque Vehicular';
+  const headOfMaterialsName = settingsMap['HEAD_OF_MATERIAL_RESOURCES'] || 'Jefe de Recursos Materiales';
+  const headOfMaterialsPosition = settingsMap['HEAD_OF_MATERIAL_RESOURCES_POS'] || 'Jefe de Recursos Materiales';
+  const administrativeCoordinatorName = settingsMap['ADMINISTRATIVE_COORDINATOR_NAME'] || 'Coordinador Administrativo';
+  const administrativeCoordinatorPosition = settingsMap['ADMINISTRATIVE_COORDINATOR_POS'] || 'Coordinador Administrativo';
 
   return (
     <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500 pb-20">
@@ -469,68 +473,72 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
                <div id="tech-sheet-printable" className="bg-surface w-[21.59cm] min-h-[27.94cm] p-[1.5cm] shadow-2xl relative text-text">
                 
                  {/* Header Institucional */}
-                 <div className="flex justify-between items-center mb-8 border-b-4 border-slate-900 pb-6">
-                   <div className="flex items-center gap-6">
-                     <img src="/images/logo-dif.png" alt="Logo" className="w-24 object-contain" />
+                 <div className="flex justify-between items-center gap-5 mb-4 border-b-2 border-slate-900 pb-3">
+                   <div className="flex min-w-0 items-center gap-4">
+                     <img src="/images/logo-dif.png" alt="Logo" className="w-16 shrink-0 object-contain" />
                      <div className="flex flex-col">
-                       <span className="text-lg font-black text-text uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia del Municipio de La Paz B.C.S.</span>
-                       <span className="text-[8pt] font-bold uppercase text-text-muted mt-2 tracking-[0.2em]">Parque Vehicular • Control Patrimonial</span>
+                       <span className="text-[13pt] font-black text-text uppercase leading-tight tracking-tight">Sistema para el Desarrollo Integral de la Familia del Municipio de La Paz B.C.S.</span>
+                       <span className="text-[7pt] font-bold uppercase text-text-muted mt-1 tracking-[0.16em]">Parque Vehicular</span>
                      </div>
                    </div>
-                  <div className="text-right">
-                    <div className="inline-block bg-secondary text-white px-4 py-1.5 font-black text-[10pt] uppercase tracking-widest rounded-sm mb-2">
+                  <div className="w-[3.7cm] shrink-0 text-right">
+                    <div className="inline-block bg-secondary text-white px-3 py-1 font-black text-[8pt] uppercase tracking-widest rounded-sm mb-1">
                         Ficha Técnica
                     </div>
-                    <p className="text-xs font-bold text-text-muted">N° INVENTARIO: <span className="font-black text-text text-lg ml-1">{selectedForPrint.inventory || 'SIN ASIGNAR'}</span></p>
-                    <p className="text-[9pt] text-text-muted font-bold mt-1">Fecha de Emisión: {new Date().toLocaleDateString('es-ES', {year: 'numeric', month: 'long', day: 'numeric'})}</p>
+                    <p className="text-[8pt] font-bold text-text-muted">N° INVENTARIO: <span className="font-black text-text text-[12pt] ml-1">{selectedForPrint.inventory || 'SIN ASIGNAR'}</span></p>
+                    <p className="text-[7pt] text-text-muted font-bold mt-0.5">Fecha de Emisión: {new Date().toLocaleDateString('es-ES', {year: 'numeric', month: 'long', day: 'numeric'})}</p>
                   </div>
                 </div>
                 
                 {/* Datos Principales */}
-                 <div className="mb-8 mt-6 break-inside-avoid">
-                     <div className="grid grid-cols-2 gap-x-8 gap-y-4">
-                          <div className="border-b border-border pb-2">
-                              <div className="text-[9pt] font-black text-text-muted uppercase">Número Económico</div>
-                              <div className="text-[16pt] font-black text-text tracking-widest">{selectedForPrint.economicNumber || '---'}</div>
+                 <div className="mb-5 mt-3 break-inside-avoid">
+                     <div className="grid grid-cols-2 gap-x-8 gap-y-2">
+                          <div className="border-b border-border pb-1">
+                              <div className="text-[8pt] font-black text-text-muted uppercase">Número Económico</div>
+                              <div className="text-[13pt] font-black text-text tracking-widest">{selectedForPrint.economicNumber || '---'}</div>
                           </div>
-                          <div className="border-b border-border pb-2">
-                              <div className="text-[9pt] font-black text-text-muted uppercase">Placas</div>
-                              <div className="text-[16pt] font-black text-text tracking-widest">{selectedForPrint.plate}</div>
+                          <div className="border-b border-border pb-1">
+                              <div className="text-[8pt] font-black text-text-muted uppercase">Placas</div>
+                              <div className="text-[13pt] font-black text-text tracking-widest">{selectedForPrint.plate}</div>
                           </div>
-                          <div className="border-b border-border pb-2">
-                              <div className="text-[9pt] font-black text-text-muted uppercase">Marca/Línea</div>
-                              <div className="text-[11pt] font-bold text-text">{selectedForPrint.brand} {selectedForPrint.line}</div>
+                          <div className="border-b border-border pb-1">
+                              <div className="text-[8pt] font-black text-text-muted uppercase">Marca/Línea</div>
+                              <div className="text-[10pt] font-bold text-text">{selectedForPrint.brand} {selectedForPrint.line}</div>
                           </div>
-                         <div className="border-b border-border pb-2">
-                             <div className="text-[9pt] font-black text-text-muted uppercase">Modelo (Año)</div>
-                             <div className="text-[11pt] font-bold text-text">{selectedForPrint.year}</div>
+                         <div className="border-b border-border pb-1">
+                             <div className="text-[8pt] font-black text-text-muted uppercase">Modelo (Año)</div>
+                             <div className="text-[10pt] font-bold text-text">{selectedForPrint.year}</div>
                          </div>
-                         <div className="border-b border-border pb-2">
-                             <div className="text-[9pt] font-black text-text-muted uppercase">Descripción</div>
-                             <div className="text-[11pt] font-bold text-text">{selectedForPrint.model}</div>
+                         <div className="border-b border-border pb-1">
+                             <div className="text-[8pt] font-black text-text-muted uppercase">Descripción</div>
+                             <div className="text-[10pt] font-bold text-text">{selectedForPrint.model}</div>
                          </div>
-                         <div className="border-b border-border pb-2">
-                             <div className="text-[9pt] font-black text-text-muted uppercase">Serie VIN</div>
-                             <div className="text-[11pt] font-bold text-text font-mono tracking-wider">{selectedForPrint.vin || '---'}</div>
+                         <div className="border-b border-border pb-1">
+                             <div className="text-[8pt] font-black text-text-muted uppercase">Serie VIN</div>
+                             <div className="text-[10pt] font-bold text-text font-mono tracking-wider">{selectedForPrint.vin || '---'}</div>
                          </div>
-                         <div className="border-b border-border pb-2">
-                             <div className="text-[9pt] font-black text-text-muted uppercase">Motor/Cilindros</div>
-                             <div className="text-[11pt] font-bold text-text">{selectedForPrint.cylinders} Cilindros / {selectedForPrint.fuelType}</div>
+                         <div className="border-b border-border pb-1">
+                             <div className="text-[8pt] font-black text-text-muted uppercase">Motor/Cilindros</div>
+                             <div className="text-[10pt] font-bold text-text">{selectedForPrint.cylinders} Cilindros / {selectedForPrint.fuelType}</div>
                          </div>
-                         <div className="border-b border-border pb-2">
-                             <div className="text-[9pt] font-black text-text-muted uppercase">Color</div>
-                             <div className="text-[11pt] font-bold text-text">{selectedForPrint.color}</div>
+                         <div className="border-b border-border pb-1">
+                             <div className="text-[8pt] font-black text-text-muted uppercase">Color</div>
+                             <div className="text-[10pt] font-bold text-text">{selectedForPrint.color}</div>
                          </div>
-                         <div className="border-b border-border pb-2">
-                             <div className="text-[9pt] font-black text-text-muted uppercase">Resguardo</div>
-                             <div className="text-[11pt] font-bold text-text">{drivers.find(d => d.id === selectedForPrint.assignedDriverId)?.name || 'SIN ASIGNAR'}</div>
+                         <div className="border-b border-border pb-1">
+                             <div className="text-[8pt] font-black text-text-muted uppercase">Kilometraje Actual</div>
+                             <div className="text-[10pt] font-bold text-text">{(Number(selectedForPrint.odometer) || 0).toLocaleString()} km</div>
+                         </div>
+                         <div className="border-b border-border pb-1">
+                             <div className="text-[8pt] font-black text-text-muted uppercase">Resguardo</div>
+                             <div className="text-[10pt] font-bold text-text">{drivers.find(d => d.id === selectedForPrint.assignedDriverId)?.name || 'SIN ASIGNAR'}</div>
                          </div>
                      </div>
                  </div>
 
                 {/* Diagnostico Mecanico */}
                 <div className="mb-8 break-inside-avoid">
-                   <h4 className="bg-secondary text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">Estado General (16 Puntos)</h4>
+                   <h4 className="bg-secondary text-white px-4 py-1.5 text-[9pt] font-black uppercase tracking-widest mb-4 inline-block rounded-sm">Estado General</h4>
                    <div className="grid grid-cols-4 gap-y-3 gap-x-6 border-2 border-border p-6 rounded-xl">
                       <ConditionPrint label="1. Motor" status={selectedForPrint.engineStatus} />
                       <ConditionPrint label="2. Transmisión" status={selectedForPrint.transmissionStatus} />
@@ -572,15 +580,24 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
                 </div>
 
                  <div className="signature-section">
-                     <div className="grid grid-cols-2 gap-24 text-center">
+                     <div className="grid grid-cols-4 gap-8 text-center">
                      <div className="border-t-2 border-slate-900 pt-4">
-                         <p className="text-[9pt] font-black uppercase text-text">{headOfMaterialsName || 'Jefe de Recursos Materiales'}</p>
-                         <p className="text-[7pt] font-bold text-text-muted mt-1 uppercase tracking-widest">{headOfMaterialsPosition}</p>
-                         <p className="text-[7pt] font-bold text-text-muted uppercase tracking-widest">Elaboró</p>
+                         <p className="text-[9pt] font-black uppercase text-text">{directorName}</p>
+                         <p className="text-[7pt] font-bold text-text-muted mt-1 uppercase tracking-widest">{directorPosition}</p>
                      </div>
                      <div className="border-t-2 border-slate-900 pt-4">
-                         <p className="text-[9pt] font-black uppercase text-text">{directorName || 'Director General'}</p>
-                         <p className="text-[7pt] font-bold text-text-muted mt-1 uppercase tracking-widest">{directorPosition}</p>
+                         <p className="text-[9pt] font-black uppercase text-text">{vehicleManagerName}</p>
+                         <p className="text-[7pt] font-bold text-text-muted mt-1 uppercase tracking-widest">{vehicleManagerPosition}</p>
+                         <p className="text-[7pt] font-bold text-text-muted uppercase tracking-widest">Entregó</p>
+                     </div>
+                     <div className="border-t-2 border-slate-900 pt-4">
+                         <p className="text-[9pt] font-black uppercase text-text">{headOfMaterialsName}</p>
+                         <p className="text-[7pt] font-bold text-text-muted mt-1 uppercase tracking-widest">{headOfMaterialsPosition}</p>
+                         <p className="text-[7pt] font-bold text-text-muted uppercase tracking-widest">Recibió</p>
+                     </div>
+                     <div className="border-t-2 border-slate-900 pt-4">
+                         <p className="text-[9pt] font-black uppercase text-text">{administrativeCoordinatorName}</p>
+                         <p className="text-[7pt] font-bold text-text-muted mt-1 uppercase tracking-widest">{administrativeCoordinatorPosition}</p>
                          <p className="text-[7pt] font-bold text-text-muted uppercase tracking-widest">Vo. Bo.</p>
                      </div>
                      </div>
