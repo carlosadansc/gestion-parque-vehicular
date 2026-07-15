@@ -10,6 +10,9 @@ interface CatalogsProps {
   onUpdateMaintenanceType: (type: MaintenanceType) => Promise<void>;
   onAddSupplier: (supplier: Omit<Supplier, 'id'>) => Promise<void>;
   onUpdateSupplier: (supplier: Supplier) => Promise<void>;
+  onDeleteMaintenanceType: (id: string) => Promise<void>;
+  onDeleteSupplier: (id: string) => Promise<void>;
+  canManageDeletions: boolean;
 }
 
 const emptySupplierForm = { name: '', contact: '', phone: '', email: '', address: '', notes: '' };
@@ -21,7 +24,10 @@ const Catalogs: React.FC<CatalogsProps> = ({
   onAddMaintenanceType,
   onUpdateMaintenanceType,
   onAddSupplier,
-  onUpdateSupplier
+  onUpdateSupplier,
+  onDeleteMaintenanceType,
+  onDeleteSupplier,
+  canManageDeletions
 }) => {
   const [activeTab, setActiveTab] = useState<'services' | 'suppliers'>('services');
   const [serviceModalOpen, setServiceModalOpen] = useState(false);
@@ -32,6 +38,9 @@ const Catalogs: React.FC<CatalogsProps> = ({
   const [serviceName, setServiceName] = useState('');
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [supplierForm, setSupplierForm] = useState(emptySupplierForm);
+  const [pendingDeletion, setPendingDeletion] = useState<{ kind: 'service' | 'supplier'; id: string; name: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
 
   const normalizedQuery = searchQuery.trim().toLowerCase();
   const filteredServices = useMemo(() => {
@@ -166,6 +175,29 @@ const Catalogs: React.FC<CatalogsProps> = ({
     setSupplierForm(prev => ({ ...prev, [field]: formatted }));
   };
 
+  const openDeleteModal = (kind: 'service' | 'supplier', id: string, name: string) => {
+    setDeleteError('');
+    setPendingDeletion({ kind, id, name });
+  };
+
+  const confirmDeletion = async () => {
+    if (!pendingDeletion) return;
+    setDeleteError('');
+    setIsDeleting(true);
+    try {
+      if (pendingDeletion.kind === 'service') {
+        await onDeleteMaintenanceType(pendingDeletion.id);
+      } else {
+        await onDeleteSupplier(pendingDeletion.id);
+      }
+      setPendingDeletion(null);
+    } catch (error) {
+      setDeleteError(error instanceof Error ? error.message : 'No se pudo dar de baja el registro.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div className="space-y-8 animate-in slide-in-from-bottom-6 duration-700">
       <div className="page-header">
@@ -198,9 +230,16 @@ const Catalogs: React.FC<CatalogsProps> = ({
                 <tr key={type.id} className="hover:bg-surface-subtle/80 transition-all">
                   <td className="font-black text-text text-sm">{type.name}</td>
                   <td className="text-right">
-                    <button onClick={() => openEditService(type)} className="btn-icon btn-icon-primary ml-auto" aria-label="Editar tipo de servicio">
-                      <span className="material-symbols-outlined ui-icon">edit_square</span>
-                    </button>
+                    <div className="table-actions">
+                      <button onClick={() => openEditService(type)} className="btn-icon btn-icon-primary" aria-label="Editar tipo de servicio">
+                        <span className="material-symbols-outlined ui-icon">edit_square</span>
+                      </button>
+                      {canManageDeletions && (
+                        <button onClick={() => openDeleteModal('service', type.id, type.name)} className="btn-icon btn-icon-danger" aria-label="Dar de baja tipo de servicio">
+                          <span className="material-symbols-outlined ui-icon">delete</span>
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -230,9 +269,16 @@ const Catalogs: React.FC<CatalogsProps> = ({
                   <td className="font-bold text-text-muted text-xs lowercase">{supplier.email || '---'}</td>
                   <td className="text-xs text-text-muted max-w-xs truncate">{supplier.address || '---'}</td>
                   <td className="text-right">
-                    <button onClick={() => openEditSupplier(supplier)} className="btn-icon btn-icon-primary ml-auto" aria-label="Editar proveedor">
-                      <span className="material-symbols-outlined ui-icon">edit_square</span>
-                    </button>
+                    <div className="table-actions">
+                      <button onClick={() => openEditSupplier(supplier)} className="btn-icon btn-icon-primary" aria-label="Editar proveedor">
+                        <span className="material-symbols-outlined ui-icon">edit_square</span>
+                      </button>
+                      {canManageDeletions && (
+                        <button onClick={() => openDeleteModal('supplier', supplier.id, supplier.name)} className="btn-icon btn-icon-danger" aria-label="Dar de baja proveedor">
+                          <span className="material-symbols-outlined ui-icon">delete</span>
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -240,6 +286,30 @@ const Catalogs: React.FC<CatalogsProps> = ({
             </tbody>
           </table>
         </CatalogCard>
+      )}
+
+      {pendingDeletion && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-secondary/60 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md overflow-hidden rounded-2xl bg-surface shadow-2xl">
+            <div className="flex items-center gap-3 border-b border-border bg-rose-50 px-6 py-5 text-rose-700">
+              <span className="material-symbols-outlined ui-icon text-2xl" aria-hidden="true">warning</span>
+              <h3 className="text-lg font-black">Dar de baja registro</h3>
+            </div>
+            <div className="space-y-4 p-6">
+              <p className="text-sm text-text">
+                {pendingDeletion.kind === 'service' ? 'El tipo de servicio' : 'El proveedor'} <strong>{pendingDeletion.name}</strong> se eliminará del catálogo.
+              </p>
+              <p className="text-xs font-bold text-text-muted">Esta acción no se puede deshacer.</p>
+              {deleteError && <p className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700">{deleteError}</p>}
+              <div className="flex gap-3 pt-2">
+                <button type="button" disabled={isDeleting} onClick={() => setPendingDeletion(null)} className="btn btn-secondary flex-1">Cancelar</button>
+                <button type="button" disabled={isDeleting} onClick={confirmDeletion} className="btn flex-1 bg-danger text-white hover:opacity-90">
+                  {isDeleting ? 'Dando de baja...' : 'Dar de baja'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       {serviceModalOpen && (

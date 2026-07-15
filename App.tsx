@@ -61,7 +61,7 @@ const PLANNING_STATUS_SET = new Set<NonNullable<Planning['status']>>(['scheduled
 const MAINTENANCE_STATUS_SET = new Set<MaintenanceRecord['status']>(['scheduled', 'in-progress', 'completed', 'cancelled']);
 const FUEL_ACQUISITION_STATUS_SET = new Set<NonNullable<FuelAcquisition['status']>>(['active', 'cancelled']);
 const MAINTENANCE_PAYMENT_METHOD_SET = new Set<NonNullable<MaintenanceRecord['paymentMethod']>>(['transferencia', 'efectivo']);
-const USER_ROLE_SET = new Set<User['role']>(['admin', 'operator', 'viewer']);
+const USER_ROLE_SET = new Set<User['role']>(['admin', 'fleet_manager', 'operator', 'viewer']);
 const USER_STATUS_SET = new Set<User['status']>(['active', 'inactive']);
 
 const hasText = (value?: string | null): boolean => typeof value === 'string' && value.trim().length > 0;
@@ -658,6 +658,8 @@ const App: React.FC = () => {
     }
   };
 
+  const canManageVehiclesAndCatalogs = () => currentUser?.role === 'admin' || currentUser?.role === 'fleet_manager';
+
   // --- VEHICLE HANDLERS WITH SYNC ---
 
   const handleAddVehicle = async (newVehicle: Omit<Vehicle, 'id'>) => {
@@ -736,6 +738,30 @@ const App: React.FC = () => {
         }
       }
     }
+    } catch (error) {
+      setVehicles(previousVehicles);
+      setDrivers(previousDrivers);
+      throw error;
+    }
+  };
+
+  const handleDeleteVehicle = async (id: string) => {
+    ensure(canManageVehiclesAndCatalogs(), 'No tienes permisos para eliminar vehículos.');
+    const vehicle = vehicles.find(item => item.id === id);
+    ensure(Boolean(vehicle), 'El vehículo que intentas eliminar no existe.');
+    const previousVehicles = vehicles;
+    const previousDrivers = drivers;
+    try {
+      if (vehicle!.assignedDriverId) {
+        const assignedDriver = drivers.find(driver => driver.id === vehicle!.assignedDriverId);
+        if (assignedDriver) {
+          const updatedDriver = { ...assignedDriver, assignedVehicleId: '' };
+          setDrivers(items => items.map(item => item.id === updatedDriver.id ? updatedDriver : item));
+          await persistOrThrow('update-driver', updatedDriver, 'actualizar');
+        }
+      }
+      setVehicles(items => items.filter(item => item.id !== id));
+      await persistOrThrow('delete-vehicle', { id }, 'eliminar');
     } catch (error) {
       setVehicles(previousVehicles);
       setDrivers(previousDrivers);
@@ -1181,6 +1207,20 @@ const App: React.FC = () => {
     }
   };
 
+  const handleDeleteMaintenanceType = async (id: string) => {
+    ensure(canManageVehiclesAndCatalogs(), 'No tienes permisos para eliminar registros del catálogo.');
+    ensure(maintenanceTypes.some(type => type.id === id), 'El tipo de servicio que intentas eliminar no existe.');
+    ensure(!maintenanceRecords.some(record => record.serviceType === maintenanceTypes.find(type => type.id === id)?.name), 'No se puede eliminar un tipo de servicio con mantenimientos registrados.');
+    const previousMaintenanceTypes = maintenanceTypes;
+    try {
+      setMaintenanceTypes(types => types.filter(type => type.id !== id));
+      await persistOrThrow('delete-maintenance-type', { id }, 'eliminar');
+    } catch (error) {
+      setMaintenanceTypes(previousMaintenanceTypes);
+      throw error;
+    }
+  };
+
   const handleAddIncidentType = async (name: string) => {
     const previousIncidentTypes = incidentTypes;
     try {
@@ -1240,6 +1280,21 @@ const App: React.FC = () => {
     };
     setSuppliers(suppliers.map(existing => existing.id === updatedSupplier.id ? updatedSupplier : existing));
     await persistOrThrow('update-supplier', updatedSupplier, 'actualizar');
+    } catch (error) {
+      setSuppliers(previousSuppliers);
+      throw error;
+    }
+  };
+
+  const handleDeleteSupplier = async (id: string) => {
+    ensure(canManageVehiclesAndCatalogs(), 'No tienes permisos para eliminar registros del catálogo.');
+    ensure(suppliers.some(supplier => supplier.id === id), 'El proveedor que intentas eliminar no existe.');
+    const supplier = suppliers.find(item => item.id === id);
+    ensure(!maintenanceRecords.some(record => normalizeCatalogName(record.provider || '') === normalizeCatalogName(supplier?.name || '')), 'No se puede eliminar un proveedor con mantenimientos registrados.');
+    const previousSuppliers = suppliers;
+    try {
+      setSuppliers(items => items.filter(item => item.id !== id));
+      await persistOrThrow('delete-supplier', { id }, 'eliminar');
     } catch (error) {
       setSuppliers(previousSuppliers);
       throw error;
@@ -1321,6 +1376,7 @@ const App: React.FC = () => {
             drivers={drivers}
             searchQuery={searchQuery}
             settings={appSettings}
+            canManageDeletions={canManageVehiclesAndCatalogs()}
             onAddVehicle={async (payload) => executeWithToast(
               () => handleAddVehicle(payload),
               'Vehiculo registrado correctamente.',
@@ -1330,6 +1386,11 @@ const App: React.FC = () => {
               () => handleUpdateVehicle(payload),
               'Vehiculo actualizado correctamente.',
               'No se pudo actualizar el vehículo.'
+            )}
+            onDeleteVehicle={async (id) => executeWithToast(
+              () => handleDeleteVehicle(id),
+              'Vehículo eliminado correctamente.',
+              'No se pudo eliminar el vehículo.'
             )}
           />
         );
@@ -1450,6 +1511,7 @@ const App: React.FC = () => {
             maintenanceTypes={maintenanceTypes}
             suppliers={suppliers}
             searchQuery={searchQuery}
+            canManageDeletions={canManageVehiclesAndCatalogs()}
             onAddMaintenanceType={async (payload) => executeWithToast(
               () => handleAddMaintenanceType(payload),
               'Tipo de servicio registrado correctamente.',
@@ -1460,6 +1522,11 @@ const App: React.FC = () => {
               'Tipo de servicio actualizado correctamente.',
               'No se pudo actualizar el tipo de servicio.'
             )}
+            onDeleteMaintenanceType={async (id) => executeWithToast(
+              () => handleDeleteMaintenanceType(id),
+              'Tipo de servicio eliminado correctamente.',
+              'No se pudo eliminar el tipo de servicio.'
+            )}
             onAddSupplier={async (payload) => executeWithToast(
               () => handleAddSupplier(payload),
               'Proveedor registrado correctamente.',
@@ -1469,6 +1536,11 @@ const App: React.FC = () => {
               () => handleUpdateSupplier(payload),
               'Proveedor actualizado correctamente.',
               'No se pudo actualizar el proveedor.'
+            )}
+            onDeleteSupplier={async (id) => executeWithToast(
+              () => handleDeleteSupplier(id),
+              'Proveedor eliminado correctamente.',
+              'No se pudo eliminar el proveedor.'
             )}
           />
         );

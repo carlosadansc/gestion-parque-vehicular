@@ -1,5 +1,5 @@
 /**
- * API FLOTA PRO v9.5 - Cancelacion de adquisiciones de combustible
+ * API FLOTA PRO v9.6 - Bajas de vehículos y catálogos
  */
 
 const CONFIG = {
@@ -44,6 +44,7 @@ const ACTION_TO_SHEET = {
   "update-incident": "Incidencias",
   "vehicle": "Vehiculos",
   "update-vehicle": "Vehiculos",
+  "delete-vehicle": "Vehiculos",
   "inspection": "Revisiones",
   "update-inspection": "Revisiones",
   "driver": "Choferes",
@@ -58,10 +59,12 @@ const ACTION_TO_SHEET = {
   "update-maintenance": "Mantenimiento",
   "maintenance-type": "TiposMantenimiento",
   "update-maintenance-type": "TiposMantenimiento",
+  "delete-maintenance-type": "TiposMantenimiento",
   "incident-type": "TiposIncidencia",
   "update-incident-type": "TiposIncidencia",
   "supplier": "Proveedores",
   "update-supplier": "Proveedores",
+  "delete-supplier": "Proveedores",
   "user": "Usuarios",
   "update-user": "Usuarios"
 };
@@ -138,8 +141,8 @@ function doPost(e) {
       throw new Error("Ya existe un registro con ese nombre.");
     }
 
-    if (action === "delete-area") {
-      if (!payload.id) throw new Error("El id es obligatorio para eliminar un area.");
+    if (action === "delete-vehicle" || action === "delete-area" || action === "delete-maintenance-type" || action === "delete-supplier") {
+      if (!payload.id) throw new Error("El id es obligatorio para eliminar.");
       deleteRowById(sheet, payload.id, headersInSheet);
       return jsonResponse({ status: "success" });
     }

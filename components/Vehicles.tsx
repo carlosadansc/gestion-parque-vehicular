@@ -9,10 +9,12 @@ interface VehiclesProps {
   searchQuery: string;
   onAddVehicle: (v: Omit<Vehicle, 'id'>) => Promise<void>;
   onUpdateVehicle: (v: Vehicle) => Promise<void>;
+  onDeleteVehicle: (id: string) => Promise<void>;
+  canManageDeletions: boolean;
   settings?: AppSetting[];
 }
 
-const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onAddVehicle, onUpdateVehicle, settings = [] }) => {
+const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onAddVehicle, onUpdateVehicle, onDeleteVehicle, canManageDeletions, settings = [] }) => {
   const [statusFilter, setStatusFilter] = useState<string>('todos');
   const [showModal, setShowModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -21,6 +23,9 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
   const [activeTab, setActiveTab] = useState<'general' | 'technical' | 'condition' | 'accessories'>('general');
   const [showPrintPreview, setShowPrintPreview] = useState(false);
   const [selectedForPrint, setSelectedForPrint] = useState<Vehicle | null>(null);
+  const [vehiclePendingDeletion, setVehiclePendingDeletion] = useState<Vehicle | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
 
   const [newAccessory, setNewAccessory] = useState('');
   const [accessoriesList, setAccessoriesList] = useState<string[]>([]);
@@ -156,6 +161,20 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
   const handlePrint = (v: Vehicle) => {
     setSelectedForPrint(v);
     setShowPrintPreview(true);
+  };
+
+  const handleConfirmDeletion = async () => {
+    if (!vehiclePendingDeletion) return;
+    setDeleteError('');
+    setIsDeleting(true);
+    try {
+      await onDeleteVehicle(vehiclePendingDeletion.id);
+      setVehiclePendingDeletion(null);
+    } catch (error) {
+      setDeleteError(error instanceof Error ? error.message : 'No se pudo dar de baja el vehículo.');
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   // Obtener la ruta del logo con base correcta
@@ -298,6 +317,16 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
                          <button onClick={() => handleEdit(vehicle)} className="btn-icon btn-icon-primary" aria-label="Editar">
                            <span className="material-symbols-outlined ui-icon" aria-hidden="true">edit</span>
                          </button>
+                         {canManageDeletions && (
+                           <button
+                             onClick={() => { setDeleteError(''); setVehiclePendingDeletion(vehicle); }}
+                             className="btn-icon btn-icon-danger"
+                             aria-label="Dar de baja vehículo"
+                             title="Dar de baja"
+                           >
+                             <span className="material-symbols-outlined ui-icon" aria-hidden="true">delete</span>
+                           </button>
+                         )}
                        </div>
                      </td>
                   </tr>
@@ -457,6 +486,28 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {vehiclePendingDeletion && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-secondary/60 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md overflow-hidden rounded-2xl bg-surface shadow-2xl">
+            <div className="flex items-center gap-3 border-b border-border bg-rose-50 px-6 py-5 text-rose-700">
+              <span className="material-symbols-outlined ui-icon text-2xl" aria-hidden="true">warning</span>
+              <h3 className="text-lg font-black">Dar de baja vehículo</h3>
+            </div>
+            <div className="space-y-4 p-6">
+              <p className="text-sm text-text">La unidad <strong>{vehiclePendingDeletion.model}</strong> se eliminará del inventario.</p>
+              <p className="text-xs font-bold text-text-muted">Esta acción no se puede deshacer.</p>
+              {deleteError && <p className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700">{deleteError}</p>}
+              <div className="flex gap-3 pt-2">
+                <button type="button" disabled={isDeleting} onClick={() => setVehiclePendingDeletion(null)} className="btn btn-secondary flex-1">Cancelar</button>
+                <button type="button" disabled={isDeleting} onClick={handleConfirmDeletion} className="btn flex-1 bg-danger text-white hover:opacity-90">
+                  {isDeleting ? 'Dando de baja...' : 'Dar de baja'}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

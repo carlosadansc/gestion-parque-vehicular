@@ -102,6 +102,7 @@ const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUs
   const getRoleLabel = (role: string) => {
     switch(role) {
       case 'admin': return 'ADMINISTRADOR';
+      case 'fleet_manager': return 'ENCARGADO DE PARQUE VEHICULAR';
       case 'operator': return 'OPERADOR';
       case 'viewer': return 'OBSERVADOR';
       default: return role.toUpperCase();
@@ -267,6 +268,7 @@ const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUs
                     onChange={e => handleInputChange('role', e.target.value)}
                   >
                     <option value="operator">OPERADOR (CAPTURA)</option>
+                    <option value="fleet_manager">ENCARGADO DE PARQUE VEHICULAR</option>
                     <option value="viewer">OBSERVADOR (LECTURA)</option>
                     <option value="admin">ADMINISTRADOR (TOTAL)</option>
                   </select>

@@ -15,7 +15,7 @@
   REPORTS = "reports",
 }
 
-export type UserRole = "admin" | "operator" | "viewer";
+export type UserRole = "admin" | "fleet_manager" | "operator" | "viewer";
 
 export interface User {
   id: string;
