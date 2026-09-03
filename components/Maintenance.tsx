@@ -1,5 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { MaintenanceRecord, Vehicle, AppSetting, MaintenanceType, Supplier } from '../types';
 import { SortableTh, useSortableData } from '../utils/tableSort';
 
@@ -1192,12 +1193,109 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
       )}
 
       {/* VISTA PREVIA DEL HISTORIAL DE MANTENIMIENTO */}
-      {showReportPreview && historyParams && historyVehicle && (
-        <div className="fixed inset-0 z-[190] bg-surface flex flex-col overflow-y-auto">
+      {showReportPreview && historyParams && historyVehicle && createPortal(
+        <div id="maintenance-report-preview" className="fixed inset-0 z-[190] bg-surface flex flex-col overflow-y-auto">
           <style>{`
             @media print {
               @page { size: letter landscape; margin: 1cm; }
-              #maintenance-report-printable { page: auto !important; }
+
+              html,
+              body,
+              #print-portal,
+              #maintenance-report-preview {
+                height: auto !important;
+                min-height: 0 !important;
+                overflow: visible !important;
+              }
+
+              body > #root {
+                display: none !important;
+              }
+
+              body > #print-portal {
+                position: static !important;
+                display: block !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+              }
+
+              #maintenance-report-preview {
+                position: static !important;
+                inset: auto !important;
+                display: block !important;
+                background: white !important;
+              }
+
+              #maintenance-report-preview > .flex-1 {
+                display: block !important;
+                padding: 0 !important;
+                overflow: visible !important;
+                background: white !important;
+              }
+
+              #maintenance-report-printable {
+                page: auto !important;
+                position: static !important;
+                display: block !important;
+                width: 100% !important;
+                max-width: none !important;
+                min-height: 0 !important;
+                height: auto !important;
+                overflow: visible !important;
+                box-shadow: none !important;
+                box-sizing: border-box !important;
+              }
+
+              #maintenance-report-printable .print-header,
+              #maintenance-report-printable .history-summary {
+                break-inside: avoid-page !important;
+                page-break-inside: avoid !important;
+              }
+
+              #maintenance-report-printable .print-header {
+                display: grid !important;
+                grid-template-columns: minmax(0, 1fr) 215px !important;
+                align-items: center !important;
+                gap: 16px !important;
+              }
+
+              #maintenance-report-printable .print-header > div {
+                min-width: 0 !important;
+              }
+
+              #maintenance-report-printable .print-header > div:first-child {
+                display: grid !important;
+                grid-template-columns: 80px minmax(0, 1fr) !important;
+                gap: 16px !important;
+              }
+
+              #maintenance-report-printable .print-header span,
+              #maintenance-report-printable .print-header p {
+                white-space: normal !important;
+                overflow-wrap: anywhere !important;
+              }
+
+              #maintenance-report-printable table {
+                display: table !important;
+                break-inside: auto !important;
+                page-break-inside: auto !important;
+              }
+
+              #maintenance-report-printable thead {
+                display: table-header-group !important;
+              }
+
+              #maintenance-report-printable tbody {
+                display: table-row-group !important;
+              }
+
+              #maintenance-report-printable tr,
+              #maintenance-report-printable td,
+              #maintenance-report-printable th {
+                break-inside: avoid-page !important;
+                page-break-inside: avoid !important;
+              }
             }
           `}</style>
           <div className="sticky top-0 bg-secondary p-4 flex justify-between items-center text-white shadow-lg no-print">
@@ -1240,7 +1338,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                 </div>
               </div>
 
-              <div className="grid grid-cols-4 gap-4 mb-6">
+              <div className="history-summary grid grid-cols-4 gap-4 mb-6">
                 <div className="bg-blue-50 border border-blue-100 p-3 rounded-lg">
                   <p className="text-[8pt] font-black text-blue-600 uppercase tracking-widest mb-1">Cotizado</p>
                   <p className="text-xl font-black text-text">${historyTotals.quoted.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</p>
@@ -1312,7 +1410,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
             </div>
           </div>
         </div>
-      )}
+      , document.getElementById('print-portal')!)}
 
       {showPrintPreview && selectedRecord && (
         <div className="fixed inset-0 z-[200] bg-surface flex flex-col overflow-y-auto">
