@@ -73,7 +73,7 @@ const toTimeInputValue = (value: unknown): string => {
   return '';
 };
 
-const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drivers, areas, settings = [], onAddPlanning, onUpdatePlanning, onAddArea, onDeleteArea }) => {
+const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drivers, areas, onAddPlanning, onUpdatePlanning, onAddArea, onDeleteArea }) => {
   const [viewMode, setViewMode] = useState<ViewMode>('week');
   const [statusFilter, setStatusFilter] = useState<'all' | 'scheduled' | 'completed' | 'cancelled'>('all');
   const [showModal, setShowModal] = useState(false);
@@ -88,12 +88,6 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [areaTouched, setAreaTouched] = useState<Record<string, boolean>>({});
   
-  const settingsMap = useMemo(() => {
-    const map: Record<string, string> = {};
-    (settings || []).forEach(s => { map[s.key] = s.value; });
-    return map;
-  }, [settings]);
-
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
     vehicleId: '',
@@ -356,14 +350,6 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
       setAreaFormError(message);
     }
   };
-
-  // --- Variables para Impresión ---
-  // Normalizar la ruta del logo (convertir rutas relativas a absolutas)
-  const rawLogo = settingsMap['APP_LOGO'] || '/images/logo-dif.png';
-  const appLogo = rawLogo.startsWith('./') ? rawLogo.replace('./', '/') : rawLogo;
-  const directorName = settingsMap['INSTITUTION_HEAD_NAME'] || 'Director General';
-  const vehicleManager = settingsMap['VEHICLE_MANAGER_NAME'] || 'Encargado del Parque Vehicular';
-  const adminCoordinator = settingsMap['ADMINISTRATIVE_COORDINATOR_NAME'] || 'Coordinador Administrativo';
 
   // --- Render Helpers ---
 
@@ -937,32 +923,6 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
                   </table>
                 </div>
 
-                  {/* Signature Section - Three Signatures */}
-                  {/* <div className="signature-section absolute bottom-[1.5cm] left-[1.5cm] right-[1.5cm]"> */}
-                      {/* <div className="grid grid-cols-3 gap-8 text-center">
-                        <div className="signature-line border-t-2 border-slate-900 pt-4">
-                            <p className="text-[9pt] font-black uppercase text-text">{vehicleManager}</p>
-                            <p className="text-[7pt] font-bold text-text-muted mt-1 uppercase tracking-widest">Encargado del Parque Vehicular</p>
-                            <p className="text-[7pt] font-bold text-text-muted uppercase tracking-widest">Realizó</p>
-                        </div>
-                        <div className="signature-line border-t-2 border-slate-900 pt-4">
-                            <p className="text-[9pt] font-black uppercase text-text">{adminCoordinator}</p>
-                            <p className="text-[7pt] font-bold text-text-muted mt-1 uppercase tracking-widest">Coordinador Administrativo</p>
-                            <p className="text-[7pt] font-bold text-text-muted uppercase tracking-widest">Vo. Bo.</p>
-                        </div>
-                        <div className="signature-line border-t-2 border-slate-900 pt-4">
-                            <p className="text-[9pt] font-black uppercase text-text">{directorName}</p>
-                            <p className="text-[7pt] font-bold text-text-muted mt-1 uppercase tracking-widest">Director General</p>
-                            <p className="text-[7pt] font-bold text-text-muted uppercase tracking-widest">Autorizó</p>
-                        </div>
-                      </div> */}
-                      {/* <div className="print-footer text-center mt-8 border-t border-border pt-3">
-                          <div className="flex justify-between items-center text-[7pt] text-text-muted">
-                              <span>Sistema de Gestion de Parque Vehicular</span>
-                              <span className="font-black uppercase tracking-[0.2em]">DIF Municipal La Paz B.C.S.</span>
-                          </div>
-                      </div> */}
-                  {/* </div> */}
               </div>
            </div>
         </div>

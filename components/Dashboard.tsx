@@ -2,7 +2,7 @@
 import React, { useMemo } from 'react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
-  BarChart, Bar, Cell, PieChart, Pie 
+  Cell, PieChart, Pie
 } from 'recharts';
 import { Vehicle, Driver, FuelEntry, Incident } from '../types';
 
@@ -13,7 +13,7 @@ interface DashboardProps {
   incidents: Incident[];
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ vehicles = [], drivers = [], fuelEntries = [], incidents = [] }) => {
+const Dashboard: React.FC<DashboardProps> = ({ vehicles = [], fuelEntries = [], incidents = [] }) => {
   
   // --- 1. METRICAS DE VALOR (Business Intelligence) ---
 
@@ -339,7 +339,7 @@ const Dashboard: React.FC<DashboardProps> = ({ vehicles = [], drivers = [], fuel
               {[
                 ...incidents.slice(0, 3).map(i => ({...i, metaType: 'incident'})),
                 ...fuelEntries.slice(0, 3).map(f => ({...f, metaType: 'fuel'}))
-              ].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 5).map((item: any, idx) => (
+              ].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 5).map((item: any) => (
                  <div key={`${item.metaType}-${item.id}`} className="flex gap-4 p-4 hover:bg-surface-subtle rounded-2xl transition-colors">
                      <div className={`size-10 rounded-full flex items-center justify-center shrink-0 ${item.metaType === 'incident' ? 'bg-rose-50 text-rose-500' : 'bg-blue-50 text-blue-500'}`}>
                        <span className="material-symbols-outlined ui-icon text-lg">{item.metaType === 'incident' ? 'warning' : 'local_gas_station'}</span>

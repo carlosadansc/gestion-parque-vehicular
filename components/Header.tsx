@@ -14,7 +14,7 @@ interface HeaderProps {
   onToggleDarkMode?: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ title, isSyncing, syncStatus, onSync, view, searchQuery, onSearchChange, darkMode, onToggleDarkMode }) => {
+const Header: React.FC<HeaderProps> = ({ isSyncing, syncStatus, onSync, searchQuery, onSearchChange, darkMode, onToggleDarkMode }) => {
   const statusColor = syncStatus === 'synced' ? 'text-emerald-600' : syncStatus === 'error' ? 'text-red-500' : 'text-amber-500';
   const statusBg = syncStatus === 'synced' ? 'bg-emerald-50' : syncStatus === 'error' ? 'bg-red-50' : 'bg-amber-50';
   const statusIcon = syncStatus === 'synced' ? 'cloud_done' : syncStatus === 'error' ? 'cloud_off' : 'cloud_queue';

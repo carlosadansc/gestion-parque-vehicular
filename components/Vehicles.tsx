@@ -177,9 +177,6 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
     }
   };
 
-  // Obtener la ruta del logo con base correcta
-  const rawLogo = settingsMap['APP_LOGO'] || '/images/logo-dif.png';
-  const appLogo = rawLogo.startsWith('./') ? rawLogo.replace('./', '/') : rawLogo;
   const directorName = settingsMap['INSTITUTION_HEAD_NAME'] || 'Director General';
   const directorPosition = settingsMap['INSTITUTION_HEAD_POS'] || 'Director General';
   const vehicleManagerName = settingsMap['VEHICLE_MANAGER_NAME'] || 'Encargado de Parque Vehicular';
@@ -663,14 +660,6 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
     </div>
   );
 };
-
-// Helper Components
-const StatusFilterBtn = ({ active, onClick, label, color }: any) => (
-  <button onClick={onClick} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${active ? 'bg-primary text-white' : 'bg-surface border border-border text-text-muted'}`}>
-    <div className={`size-2 rounded-full ${color}`}></div>
-    {label}
-  </button>
-);
 
 const TabBtn = ({ active, onClick, label, icon }: any) => (
   <button onClick={onClick} className={`flex items-center gap-2 px-6 py-4 text-[10px] font-black uppercase tracking-widest transition-all border-b-2 ${active ? 'border-primary text-primary' : 'border-transparent text-text-muted hover:text-text-muted'}`}>

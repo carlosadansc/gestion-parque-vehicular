@@ -168,17 +168,12 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, incidentTypes = [], se
   };
 
   // Variables institucionales
-  const instName = settingsMap['INSTITUTION_NAME'] || 'SISTEMA PARA EL DESARROLLO INTEGRAL DE LA FAMILIA';
   const managerName = settingsMap['VEHICLE_MANAGER_NAME'] || 'RESPONSABLE DE ÁREA';
   const managerPos = settingsMap['VEHICLE_MANAGER_POS'] || 'ENCARGADO DE PARQUE VEHICULAR';
   const coordName = settingsMap['ADMINISTRATIVE_COORDINATOR_NAME'] || '';
   const coordPos = settingsMap['ADMINISTRATIVE_COORDINATOR_POS'] || 'COORDINADOR ADMINISTRATIVO';
   const directorName = settingsMap['INSTITUTION_HEAD_NAME'] || 'Director General';
   const directorPos = settingsMap['INSTITUTION_HEAD_POS'] || 'DIRECTOR GENERAL';
-  // Normalizar la ruta del logo (convertir rutas relativas a absolutas)
-  const rawLogo = settingsMap['APP_LOGO'] || '/images/logo-dif.png';
-  const appLogo = rawLogo.startsWith('./') ? rawLogo.replace('./', '/') : rawLogo;
-
   const reportVehicle = selectedIncident ? vehicles.find(v => v.id === selectedIncident.vehicleId) : null;
   const reportDriver = selectedIncident ? drivers.find(d => d.id === selectedIncident.driverId) : null;
   const reportDescriptionPages = useMemo(

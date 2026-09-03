@@ -15,7 +15,7 @@ description: Mantenimiento y extension del sistema de Gestion de Parque Vehicula
    - Persistencia en `services/googleSheets.ts` (`pushData`, `fetchData`)
 3. Aplicar cambio en UI del componente objetivo (`components/*.tsx`).
 4. Validar compilacion con:
-   - `npm run build`
+   - `pnpm run build`
 
 ## Mapa Rapido del Proyecto
 
@@ -60,5 +60,5 @@ Si cambia la estructura de hojas/columnas en Google Sheets, tambien debe refleja
 
 1. Cambio funcional aplicado en modulo objetivo.
 2. Sincronizacion y tipos consistentes.
-3. `npm run build` exitoso.
+3. `pnpm run build` exitoso.
 4. Resumen final con archivos tocados y comportamiento resultante.

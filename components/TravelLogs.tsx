@@ -253,9 +253,6 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
   };
 
   // Variables institucionales
-  // Normalizar la ruta del logo (convertir rutas relativas a absolutas)
-  const rawLogo = settingsMap['APP_LOGO'] || '/images/logo-dif.png';
-  const appLogo = rawLogo.startsWith('./') ? rawLogo.replace('./', '/') : rawLogo;
   const managerName = settingsMap['VEHICLE_MANAGER_NAME'] || 'ENCARGADO DE PARQUE VEHICULAR';
   const managerPos = settingsMap['VEHICLE_MANAGER_POS'] || 'VALIDACIÓN';
 
@@ -882,11 +879,11 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
 
           <style>{`
             @media print {
-              @page { margin: 0.4cm; size: letter landscape; }
+              @page { margin: 0.4cm; size: 33.02cm 21.59cm; }
             }
           `}</style>
           <div className="flex-1 bg-surface-subtle p-6 flex justify-center overflow-auto">
-            <div id="blank-bitacora-printable" className="bg-surface shadow-2xl relative text-text" style={{ width: '27.94cm', minHeight: '21.59cm', padding: '0.8cm 1cm' }}>
+            <div id="blank-bitacora-printable" className="bg-surface shadow-2xl relative text-text" style={{ width: '33.02cm', minHeight: '21.59cm', padding: '0.8cm 1cm' }}>
               
               {/* Header Institucional */}
               <div className="flex justify-between items-center border-b-2 border-slate-900 pb-3 mb-3">
@@ -907,13 +904,13 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
               </div>
 
               {/* Datos del Vehículo y Semana */}
-              <div className="mb-3">
-                {/* Campo Semana - será llenado a mano */}
-                <div className="flex items-center gap-2 mb-2 pb-2 border-b border-slate-300">
-                  <span className="font-black text-text-muted uppercase whitespace-nowrap text-[8pt]">Semana del:</span>
-                  <span className="font-bold text-text border-b border-slate-300 flex-1 pb-0.5 text-[9pt]">___ al ___ de ____________ _______</span>
-                </div>
-                <div className="grid grid-cols-6 gap-x-4 gap-y-1 text-[8pt]">
+                    <div className="mb-2">
+                      {/* Campo Semana - será llenado a mano */}
+                      <div className="flex items-center gap-2 mb-1 pb-1 border-b border-slate-300">
+                        <span className="font-black text-text-muted uppercase whitespace-nowrap text-[9pt]">Semana del:</span>
+                        <span className="font-bold text-text border-b border-slate-300 flex-1 text-[10pt]">___ al ___ de ____________ _______</span>
+                      </div>
+                      <div className="grid grid-cols-6 gap-x-4 gap-y-0.5 text-[9pt]">
                   <div className="col-span-2 flex items-center gap-1">
                     <span className="font-black text-text-muted uppercase whitespace-nowrap">Vehículo:</span>
                     <span className="font-bold text-text border-b border-slate-300 flex-1 pb-0.5">{blankBitacoraVehicle.model || '---'}</span>
@@ -954,18 +951,18 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
                 <table className="w-full border-collapse" style={{ tableLayout: 'fixed' }}>
                   <thead>
                     <tr className="bg-[#9e1b32] text-white">
-                      <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide border-r border-slate-600 text-center" style={{ width: '6%' }}>Fecha</th>
-                      <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide border-r border-slate-600 text-center" style={{ width: '13%' }}>Destino / Comisión</th>
-                      <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide border-r border-slate-600 text-center" style={{ width: '5%' }}>Personal asignado</th>
-                      <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide border-r border-slate-600 text-center" style={{ width: '5.5%' }}>Hora Salida</th>
-                      <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide border-r border-slate-600 text-center" style={{ width: '5.5%' }}>Hora Llegada</th>
-                      <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide border-r border-slate-600 text-center" style={{ width: '7%' }}>Km Inicial</th>
-                      <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide border-r border-slate-600 text-center" style={{ width: '7%' }}>Km Final</th>
-                      <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide border-r border-slate-600 text-center" style={{ width: '7%' }}>Tanque Inicial</th>
-                      <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide border-r border-slate-600 text-center" style={{ width: '7%' }}>Tanque Final</th>
-                      <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide border-r border-slate-600 text-center" style={{ width: '12%' }}>Nombre del Chofer</th>
-                      <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide border-r border-slate-600 text-center" style={{ width: '8%' }}>Firma Salida</th>
-                      <th className="py-1.5 px-1 text-[6.5pt] font-black uppercase tracking-wide text-center" style={{ width: '8%' }}>Firma Entrada</th>
+                      <th className="py-1 px-0.5 text-[7.25pt] leading-[1.1] font-black uppercase tracking-normal border-r border-slate-600 text-center" style={{ width: '6%' }}>Fecha</th>
+                      <th className="py-1 px-0.5 text-[7.25pt] leading-[1.1] font-black uppercase tracking-normal border-r border-slate-600 text-center" style={{ width: '13%' }}>Destino / Comisión</th>
+                      <th className="py-1 px-0.5 text-[7.25pt] leading-[1.1] font-black uppercase tracking-normal border-r border-slate-600 text-center" style={{ width: '5%' }}>Personal asignado</th>
+                      <th className="py-1 px-0.5 text-[7.25pt] leading-[1.1] font-black uppercase tracking-normal border-r border-slate-600 text-center" style={{ width: '5.5%' }}>Hora Salida</th>
+                      <th className="py-1 px-0.5 text-[7.25pt] leading-[1.1] font-black uppercase tracking-normal border-r border-slate-600 text-center" style={{ width: '5.5%' }}>Hora Llegada</th>
+                      <th className="py-1 px-0.5 text-[7.25pt] leading-[1.1] font-black uppercase tracking-normal border-r border-slate-600 text-center" style={{ width: '7%' }}>Km Inicial</th>
+                      <th className="py-1 px-0.5 text-[7.25pt] leading-[1.1] font-black uppercase tracking-normal border-r border-slate-600 text-center" style={{ width: '7%' }}>Km Final</th>
+                      <th className="py-1 px-0.5 text-[7.25pt] leading-[1.1] font-black uppercase tracking-normal border-r border-slate-600 text-center" style={{ width: '7%' }}>Tanque Inicial</th>
+                      <th className="py-1 px-0.5 text-[7.25pt] leading-[1.1] font-black uppercase tracking-normal border-r border-slate-600 text-center" style={{ width: '7%' }}>Tanque Final</th>
+                      <th className="py-1 px-0.5 text-[7.25pt] leading-[1.1] font-black uppercase tracking-normal border-r border-slate-600 text-center" style={{ width: '12%' }}>Nombre del Chofer</th>
+                      <th className="py-1 px-0.5 text-[7.25pt] leading-[1.1] font-black uppercase tracking-normal border-r border-slate-600 text-center" style={{ width: '8%' }}>Firma Salida</th>
+                      <th className="py-1 px-0.5 text-[7.25pt] leading-[1.1] font-black uppercase tracking-normal text-center" style={{ width: '8%' }}>Firma Entrada</th>
                     </tr>
                   </thead>
                   <tbody>

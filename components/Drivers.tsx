@@ -167,9 +167,6 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
   };
 
   // Variables institucionales para impresión
-  // Normalizar la ruta del logo (convertir rutas relativas a absolutas)
-  const rawLogo = settingsMap['APP_LOGO'] || '/images/logo-dif.png';
-  const appLogo = rawLogo.startsWith('./') ? rawLogo.replace('./', '/') : rawLogo;
   const managerName = settingsMap['VEHICLE_MANAGER_NAME'] || 'Encargado del Parque Vehicular';
   const managerPosition = settingsMap['VEHICLE_MANAGER_POS'] || 'Encargado del Parque Vehicular';
   const assignedVehicleForPrint = selectedDriver ? (vehicles.find(v => v.assignedDriverId === selectedDriver.id) || vehicles.find(v => v.id === selectedDriver.assignedVehicleId)) : null;

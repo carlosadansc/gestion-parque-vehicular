@@ -15,6 +15,12 @@ interface MaintenanceProps {
   onSync: () => void;
 }
 
+interface MaintenanceHistoryParams {
+  vehicleId: string;
+  startDate: string;
+  endDate: string;
+}
+
 const toDateInputValue = (value: unknown, fallback = ''): string => {
   if (!value) return fallback;
   const raw = String(value).trim();
@@ -74,7 +80,7 @@ const normalizePaymentMethodValue = (value: unknown): '' | 'transferencia' | 'ef
   return '';
 };
 
-const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], searchQuery = '', maintenanceTypes = [], suppliers = [], settings = [], onAddRecord, onUpdateRecord, onSync }) => {
+const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], searchQuery = '', maintenanceTypes = [], suppliers = [], settings = [], onAddRecord, onUpdateRecord }) => {
   const [showModal, setShowModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [editingRecord, setEditingRecord] = useState<MaintenanceRecord | null>(null);
@@ -86,8 +92,14 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
   
   // Print States
   const [showPrintPreview, setShowPrintPreview] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [showReportPreview, setShowReportPreview] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<MaintenanceRecord | null>(null);
+  const [historyVehicleId, setHistoryVehicleId] = useState('');
+  const [historyStartDate, setHistoryStartDate] = useState('');
+  const [historyEndDate, setHistoryEndDate] = useState('');
+  const [historyParams, setHistoryParams] = useState<MaintenanceHistoryParams | null>(null);
+  const [historyError, setHistoryError] = useState('');
   const [formError, setFormError] = useState('');
 
   const settingsMap = useMemo(() => {
@@ -177,7 +189,6 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
     ? selectedFilterVehicle.model
     : 'Todos los vehiculos';
   const selectedFilterProviderLabel = filterProvider === 'todos' ? 'Todos los proveedores' : filterProvider;
-  const showReportVehicleColumn = filterVehicleId === 'todos';
 
   type MaintenanceSortKey = 'service' | 'vehicle' | 'status' | 'quote' | 'invoice';
   const maintenanceSortAccessors = useMemo<Record<MaintenanceSortKey, (record: MaintenanceRecord) => unknown>>(() => ({
@@ -206,13 +217,31 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
     return { totalInvoiced, totalQuoted, inWorkshop, completed, cancelled, balance: totalQuoted - totalInvoiced };
   }, [filteredRecords]);
 
-  const filteredTotals = useMemo(() => {
-    const billableRecords = sortedRecords.filter(item => item.status !== 'cancelled');
+  const historyVehicle = useMemo(() => (
+    historyParams ? vehicles.find(vehicle => vehicle.id === historyParams.vehicleId) || null : null
+  ), [historyParams, vehicles]);
+
+  const historyRecords = useMemo(() => {
+    if (!historyParams) return [];
+    return records
+      .filter(record => {
+        if (record.vehicleId !== historyParams.vehicleId) return false;
+        const recordDate = normalizeDateKey(record.date) || normalizeDateKey(record.entryDate);
+        return Boolean(recordDate && recordDate >= historyParams.startDate && recordDate <= historyParams.endDate);
+      })
+      .sort((a, b) => {
+        const dateComparison = normalizeDateKey(a.date).localeCompare(normalizeDateKey(b.date));
+        return dateComparison || (a.consecutiveNumber || 0) - (b.consecutiveNumber || 0);
+      });
+  }, [historyParams, records]);
+
+  const historyTotals = useMemo(() => {
+    const billableRecords = historyRecords.filter(item => item.status !== 'cancelled');
     const quoted = billableRecords.reduce((acc, item) => acc + (Number(item.quoteCost) || 0), 0);
     const invoiced = billableRecords.reduce((acc, item) => acc + (Number(item.invoiceAmount) || 0), 0);
-    const cancelled = sortedRecords.length - billableRecords.length;
+    const cancelled = historyRecords.length - billableRecords.length;
     return { quoted, invoiced, cancelled, balance: quoted - invoiced };
-  }, [sortedRecords]);
+  }, [historyRecords]);
 
   const nextConsecutiveNumber = useMemo(() => {
     if (!records || records.length === 0) return 1;
@@ -248,6 +277,40 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
   const handlePrintRequest = (record: MaintenanceRecord) => {
     setSelectedRecord(record);
     setShowPrintPreview(true);
+  };
+
+  const handleOpenHistoryModal = () => {
+    const today = new Date().toISOString().slice(0, 10);
+    setHistoryVehicleId(filterVehicleId !== 'todos' ? filterVehicleId : '');
+    setHistoryStartDate(filterStartDate || `${today.slice(0, 4)}-01-01`);
+    setHistoryEndDate(filterEndDate || today);
+    setHistoryError('');
+    setShowHistoryModal(true);
+  };
+
+  const handleGenerateHistory = () => {
+    if (!historyVehicleId || !historyStartDate || !historyEndDate) {
+      setHistoryError('Selecciona el vehículo y captura ambas fechas.');
+      return;
+    }
+    if (historyStartDate > historyEndDate) {
+      setHistoryError('La fecha inicial no puede ser posterior a la fecha final.');
+      return;
+    }
+
+    const hasRecords = records.some(record => {
+      const recordDate = normalizeDateKey(record.date) || normalizeDateKey(record.entryDate);
+      return record.vehicleId === historyVehicleId && recordDate >= historyStartDate && recordDate <= historyEndDate;
+    });
+    if (!hasRecords) {
+      setHistoryError('No hay mantenimientos registrados para ese vehículo en el rango indicado.');
+      return;
+    }
+
+    setHistoryParams({ vehicleId: historyVehicleId, startDate: historyStartDate, endDate: historyEndDate });
+    setHistoryError('');
+    setShowHistoryModal(false);
+    setShowReportPreview(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -683,8 +746,8 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                 <span className="material-symbols-outlined ui-icon">backspace</span> Limpiar
               </button>
             )}
-            <button onClick={() => setShowReportPreview(true)} className="btn btn-ghost text-xs">
-              <span className="material-symbols-outlined ui-icon">print</span> Imprimir reporte
+            <button onClick={handleOpenHistoryModal} className="btn btn-ghost text-xs">
+              <span className="material-symbols-outlined ui-icon">history</span> Historial del vehículo
             </button>
             </div>
           </div>
@@ -1048,13 +1111,99 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
         </div>
       )}
 
-      {/* VISTA DE IMPRESIÓN (FORMATO DE SERVICIO) */}
-      {showReportPreview && (
+      {showHistoryModal && (
+        <div className="fixed inset-0 z-[180] flex items-center justify-center bg-secondary/60 backdrop-blur-sm p-4 no-print">
+          <div className="bg-surface rounded-2xl w-full max-w-lg border border-border overflow-hidden shadow-2xl">
+            <div className="px-6 py-5 border-b border-border flex items-start justify-between bg-surface-subtle/50">
+              <div>
+                <h3 className="text-lg font-black text-text">Historial de mantenimiento</h3>
+                <p className="text-xs font-bold text-text-muted mt-1">Selecciona el vehículo y el rango que aparecerá en el PDF.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowHistoryModal(false)}
+                className="btn-icon"
+                aria-label="Cerrar"
+              >
+                <span className="material-symbols-outlined ui-icon" aria-hidden="true">close</span>
+              </button>
+            </div>
+
+            <div className="p-6 space-y-5">
+              <label className="block space-y-2">
+                <span className="text-[10px] font-black text-text-muted uppercase tracking-widest">Vehículo</span>
+                <select
+                  value={historyVehicleId}
+                  onChange={event => { setHistoryVehicleId(event.target.value); setHistoryError(''); }}
+                  className="w-full bg-surface border border-border rounded-md px-4 py-3 text-sm font-bold text-text outline-none focus:border-primary"
+                >
+                  <option value="">Seleccionar vehículo...</option>
+                  {[...vehicles]
+                    .sort((a, b) => `${a.model} ${a.plate}`.localeCompare(`${b.model} ${b.plate}`, 'es'))
+                    .map(vehicle => (
+                      <option key={vehicle.id} value={vehicle.id}>
+                        {vehicle.model || vehicle.brand || 'Vehículo'}{vehicle.plate ? ` · ${vehicle.plate}` : ''}{vehicle.economicNumber ? ` · Eco. ${vehicle.economicNumber}` : ''}
+                      </option>
+                    ))}
+                </select>
+              </label>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <label className="block space-y-2">
+                  <span className="text-[10px] font-black text-text-muted uppercase tracking-widest">Desde</span>
+                  <input
+                    type="date"
+                    value={historyStartDate}
+                    max={historyEndDate || undefined}
+                    onChange={event => { setHistoryStartDate(event.target.value); setHistoryError(''); }}
+                    className="w-full bg-surface border border-border rounded-md px-4 py-3 text-sm font-bold text-text outline-none focus:border-primary"
+                  />
+                </label>
+                <label className="block space-y-2">
+                  <span className="text-[10px] font-black text-text-muted uppercase tracking-widest">Hasta</span>
+                  <input
+                    type="date"
+                    value={historyEndDate}
+                    min={historyStartDate || undefined}
+                    onChange={event => { setHistoryEndDate(event.target.value); setHistoryError(''); }}
+                    className="w-full bg-surface border border-border rounded-md px-4 py-3 text-sm font-bold text-text outline-none focus:border-primary"
+                  />
+                </label>
+              </div>
+
+              {historyError && (
+                <p className="text-sm font-bold text-red-600 bg-red-50 border border-red-100 rounded-md px-4 py-3" role="alert">
+                  {historyError}
+                </p>
+              )}
+
+              <div className="flex justify-end gap-3 pt-1">
+                <button type="button" onClick={() => setShowHistoryModal(false)} className="btn btn-ghost">
+                  Cancelar
+                </button>
+                <button type="button" onClick={handleGenerateHistory} className="btn btn-primary">
+                  <span className="material-symbols-outlined ui-icon" aria-hidden="true">picture_as_pdf</span>
+                  Generar PDF
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* VISTA PREVIA DEL HISTORIAL DE MANTENIMIENTO */}
+      {showReportPreview && historyParams && historyVehicle && (
         <div className="fixed inset-0 z-[190] bg-surface flex flex-col overflow-y-auto">
+          <style>{`
+            @media print {
+              @page { size: letter landscape; margin: 1cm; }
+              #maintenance-report-printable { page: auto !important; }
+            }
+          `}</style>
           <div className="sticky top-0 bg-secondary p-4 flex justify-between items-center text-white shadow-lg no-print">
             <button onClick={() => setShowReportPreview(false)} className="bg-surface/10 px-4 py-2 rounded-lg font-bold text-xs hover:bg-surface/20 transition-all">Cerrar</button>
             <button onClick={() => window.print()} className="bg-primary px-8 py-2.5 rounded-md font-black text-[11px] uppercase tracking-widest flex items-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-blue-500/20">
-              <span className="material-symbols-outlined text-lg">print</span> Imprimir Reporte
+              <span className="material-symbols-outlined text-lg">picture_as_pdf</span> Imprimir PDF
             </button>
           </div>
           <div className="flex-1 bg-surface-subtle p-10 flex justify-center">
@@ -1074,20 +1223,18 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                   <div className="flex flex-col">
                     <span className="text-base font-black text-text uppercase leading-none tracking-tight">Sistema para el Desarrollo Integral de la Familia</span>
                     <span className="text-base font-black text-text uppercase leading-tight tracking-tight">del Municipio de La Paz B.C.S.</span>
-                    <span className="text-[8pt] font-bold uppercase text-text-muted mt-2 tracking-[0.2em]">Reporte filtrado de mantenimientos</span>
+                    <span className="text-[8pt] font-bold uppercase text-text-muted mt-2 tracking-[0.2em]">Historial de mantenimiento vehicular</span>
                   </div>
                 </div>
                 <div className="text-right">
                   <div className="inline-block bg-secondary text-white px-4 py-1.5 font-black text-[10pt] uppercase tracking-widest rounded-sm mb-2">
-                    {filterStatus === 'todos' ? 'Todos' : statusMap[filterStatus] || filterStatus}
+                    Historial de mantenimiento
                   </div>
-                  <p className="text-[8pt] font-black text-text-muted uppercase tracking-widest">Registros: {sortedRecords.length}</p>
-                  <p className="text-[8pt] font-black text-text-muted uppercase tracking-widest mt-1">Vehiculo: {selectedFilterVehicleLabel}</p>
-                  <p className="text-[8pt] font-black text-text-muted uppercase tracking-widest mt-1">Proveedor: {selectedFilterProviderLabel}</p>
+                  <p className="text-[8pt] font-black text-text-muted uppercase tracking-widest">Registros: {historyRecords.length}</p>
+                  <p className="text-[8pt] font-black text-text-muted uppercase tracking-widest mt-1">Vehículo: {historyVehicle.model || historyVehicle.brand || '---'}</p>
+                  <p className="text-[8pt] font-black text-text-muted uppercase tracking-widest mt-1">Placas: {historyVehicle.plate || '---'} · No. Eco: {historyVehicle.economicNumber || '---'}</p>
                   <p className="text-[8pt] font-black text-text-muted uppercase tracking-widest mt-1">
-                    Rango: {filterStartDate || filterEndDate
-                      ? `${filterStartDate ? new Date(`${filterStartDate}T00:00:00`).toLocaleDateString('es-ES') : 'Inicio'} - ${filterEndDate ? new Date(`${filterEndDate}T00:00:00`).toLocaleDateString('es-ES') : 'Hoy'}`
-                      : 'Todas las fechas'}
+                    Rango: {new Date(`${historyParams.startDate}T00:00:00`).toLocaleDateString('es-ES')} - {new Date(`${historyParams.endDate}T00:00:00`).toLocaleDateString('es-ES')}
                   </p>
                   <p className="text-[8pt] text-text-muted font-bold mt-1">Emision: {new Date().toLocaleDateString('es-ES', {year: 'numeric', month: 'long', day: 'numeric'})}</p>
                 </div>
@@ -1096,70 +1243,68 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
               <div className="grid grid-cols-4 gap-4 mb-6">
                 <div className="bg-blue-50 border border-blue-100 p-3 rounded-lg">
                   <p className="text-[8pt] font-black text-blue-600 uppercase tracking-widest mb-1">Cotizado</p>
-                  <p className="text-xl font-black text-text">${filteredTotals.quoted.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</p>
+                  <p className="text-xl font-black text-text">${historyTotals.quoted.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</p>
                 </div>
                 <div className="bg-emerald-50 border border-emerald-100 p-3 rounded-lg">
                   <p className="text-[8pt] font-black text-emerald-600 uppercase tracking-widest mb-1">Facturado</p>
-                  <p className="text-xl font-black text-text">${filteredTotals.invoiced.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</p>
+                  <p className="text-xl font-black text-text">${historyTotals.invoiced.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</p>
                 </div>
                 <div className="bg-slate-50 border border-slate-200 p-3 rounded-lg">
                   <p className="text-[8pt] font-black text-slate-600 uppercase tracking-widest mb-1">Diferencia</p>
-                  <p className="text-xl font-black text-text">${filteredTotals.balance.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</p>
+                  <p className="text-xl font-black text-text">${historyTotals.balance.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</p>
                 </div>
                 <div className="bg-rose-50 border border-rose-100 p-3 rounded-lg">
                   <p className="text-[8pt] font-black text-rose-600 uppercase tracking-widest mb-1">Cancelados</p>
-                  <p className="text-xl font-black text-text">{filteredTotals.cancelled}</p>
+                  <p className="text-xl font-black text-text">{historyTotals.cancelled}</p>
                 </div>
               </div>
 
               <table className="w-full border-collapse table-fixed text-[8.5pt] leading-tight">
                 <colgroup>
-                  <col className="w-[5%]" />
-                  <col className="w-[8%]" />
-                  {showReportVehicleColumn && <col className="w-[17%]" />}
-                  <col className={showReportVehicleColumn ? 'w-[20%]' : 'w-[28%]'} />
-                  <col className={showReportVehicleColumn ? 'w-[17%]' : 'w-[21%]'} />
-                  <col className="w-[10%]" />
-                  <col className="w-[10%]" />
-                  <col className="w-[10%]" />
                   <col className="w-[6%]" />
+                  <col className="w-[9%]" />
+                  <col className="w-[27%]" />
+                  <col className="w-[14%]" />
+                  <col className="w-[10%]" />
+                  <col className="w-[10%]" />
+                  <col className="w-[12%]" />
+                  <col className="w-[12%]" />
                 </colgroup>
                 <thead>
                   <tr>
-                    <th className="px-2 py-2 text-[8pt]">No.</th>
+                    <th className="px-2 py-2 text-[8pt]">Folio</th>
                     <th className="px-2 py-2 text-[8pt]">Fecha</th>
-                    {showReportVehicleColumn && <th className="px-2 py-2 text-[8pt]">Vehiculo</th>}
-                    <th className="px-2 py-2 text-[8pt]">Servicio</th>
+                    <th className="px-2 py-2 text-[8pt]">Servicio / Descripción</th>
                     <th className="px-2 py-2 text-[8pt]">Proveedor</th>
+                    <th className="px-2 py-2 text-[8pt]">Odómetro</th>
                     <th className="px-2 py-2 text-[8pt]">Estado</th>
-                    <th className="px-2 py-2 text-[8pt]">Cotizacion</th>
+                    <th className="px-2 py-2 text-[8pt]">Cotización</th>
                     <th className="px-2 py-2 text-[8pt]">Factura</th>
-                    <th className="px-2 py-2 text-[8pt]">Pago</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {sortedRecords.map((record) => {
-                    const vehicle = vehicles.find(v => v.id === record.vehicleId);
-                    return (
+                  {historyRecords.map((record) => (
                       <tr key={record.id}>
                         <td className="px-2 py-2 text-center font-black text-blue-700 align-top">{record.consecutiveNumber || '---'}</td>
                         <td className="px-2 py-2 text-center font-bold text-text-muted align-top whitespace-nowrap">{record.date ? new Date(record.date).toLocaleDateString('es-ES') : '---'}</td>
-                        {showReportVehicleColumn && <td className="px-2 py-2 font-bold uppercase align-top break-words">{vehicle?.model || '---'}</td>}
-                        <td className="px-2 py-2 font-bold uppercase align-top break-words">{record.serviceType || '---'}</td>
+                        <td className="px-2 py-2 align-top break-words">
+                          <p className="font-black uppercase">{record.serviceType || '---'}</p>
+                          {record.description && <p className="text-[7pt] text-text-muted mt-1">{record.description}</p>}
+                        </td>
                         <td className="px-2 py-2 font-bold uppercase align-top break-words">{record.provider || '---'}</td>
+                        <td className="px-2 py-2 text-right font-bold align-top whitespace-nowrap">{(Number(record.odometer) || 0).toLocaleString('es-MX')} km</td>
                         <td className="report-status-cell px-2 py-2 font-black uppercase align-top text-[9px] leading-tight whitespace-normal">{statusMap[record.status] || record.status}</td>
                         <td className="px-2 py-2 text-right font-black align-top whitespace-nowrap">${(Number(record.quoteCost) || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td>
                         <td className="px-2 py-2 text-right font-black align-top whitespace-nowrap">
                           {(Number(record.invoiceAmount) || 0) > 0 ? `$${(Number(record.invoiceAmount) || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}` : 'PENDIENTE'}
                           {record.invoiceNumber && <p className="text-[7pt] font-bold text-text-muted uppercase">#{record.invoiceNumber}</p>}
+                          {record.paymentMethod && <p className="text-[7pt] font-bold text-text-muted uppercase">{record.paymentMethod}</p>}
                         </td>
-                        <td className="px-2 py-2 font-bold uppercase align-top break-words">{record.paymentMethod || '---'}</td>
                       </tr>
-                    );
-                  })}
-                  {sortedRecords.length === 0 && (
+                  ))}
+                  {historyRecords.length === 0 && (
                     <tr>
-                      <td colSpan={showReportVehicleColumn ? 9 : 8} className="text-center font-bold text-text-muted py-8">Sin registros para el filtro seleccionado.</td>
+                      <td colSpan={8} className="text-center font-bold text-text-muted py-8">Sin registros para el rango seleccionado.</td>
                     </tr>
                   )}
                 </tbody>
@@ -1292,24 +1437,6 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
            </div>
         </div>
       )}
-    </div>
-  );
-};
-
-const MaintStat: React.FC<{ label: string, value: string, icon: string, color: string }> = ({ label, value, icon, color }) => {
-  const colorMap: any = {
-    blue: 'bg-blue-50 text-blue-600 border-blue-100',
-    amber: 'bg-amber-50 text-amber-600 border-amber-100',
-    rose: 'bg-rose-50 text-rose-600 border-rose-100',
-    green: 'bg-green-50 text-green-600 border-green-100'
-  };
-  return (
-    <div className={`bg-surface p-6 rounded-3xl border shadow-sm group hover:scale-[1.02] transition-all duration-300 ${colorMap[color]}`}>
-      <div className="flex items-center justify-between mb-4">
-        <p className="text-text-muted text-[10px] font-black uppercase tracking-widest">{label}</p>
-        <span className="material-symbols-outlined text-xl">{icon}</span>
-      </div>
-      <p className="text-text text-2xl font-black tracking-tighter">{value}</p>
     </div>
   );
 };

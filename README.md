@@ -51,7 +51,6 @@ Aplicación web para la administración integral del parque vehicular del Sistem
 | **Vite** | Build tool y servidor de desarrollo |
 | **TypeScript** | Tipado estático |
 | **Recharts** | Gráficos y visualizaciones |
-| **react-to-pdf** | Generación de PDFs |
 | **Google Sheets API** | Base de datos |
 
 ---
@@ -71,10 +70,10 @@ git clone <url-del-repositorio>
 cd gestion-de-parque-vehicular-ft-google-sheets
 
 # Instalar dependencias
-npm install
+pnpm install
 
 # Iniciar servidor de desarrollo
-npm run dev
+pnpm run dev
 ```
 
 ---
@@ -98,11 +97,11 @@ npm run dev
 
 ```bash
 # Desarrollo
-npm run dev
+pnpm run dev
 
 # Producción
-npm run build
-npm run preview
+pnpm run build
+pnpm run preview
 ```
 
 ---
@@ -276,13 +275,7 @@ Para el primer acceso:
 
 ## Capturas de Pantalla
 
-Ver carpeta `screenshots/` para ver ejemplos de cada módulo:
-- Dashboard
-- Gestión de vehículos
-- Bitácoras de viaje
-- Reportes
-- Inspecciones
-- Y más...
+Ver carpeta `screenshots/` para consultar ejemplos visuales del sistema.
 
 ---
 
