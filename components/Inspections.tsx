@@ -246,7 +246,7 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
             padding: 0;
             margin: 0;
             background: white !important;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: Aptos, "Segoe UI", system-ui, sans-serif;
             font-size: 10pt;
             line-height: 1.4;
           }
@@ -321,7 +321,7 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
           
           #inspection-printable th {
             background-color: #f8fafc !important;
-            font-weight: 800;
+            font-weight: 700;
             text-transform: uppercase;
             font-size: 8pt;
             letter-spacing: 0.05em;
@@ -343,7 +343,7 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
             color: white !important;
             padding: 6px 12px;
             font-size: 9pt;
-            font-weight: 800;
+            font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.1em;
             margin-bottom: 1rem;

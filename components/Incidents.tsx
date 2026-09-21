@@ -310,7 +310,7 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, incidentTypes = [], se
               padding: 0 !important;
               margin: 0 !important;
               background: white !important;
-              font-family: 'Inter', sans-serif;
+              font-family: Aptos, "Segoe UI", sans-serif;
               box-shadow: none !important;
               overflow: visible !important;
             }
@@ -355,7 +355,7 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, incidentTypes = [], se
                right: 1.5cm;
                text-align: center;
                font-size: 7pt;
-               font-weight: 800;
+                font-weight: 700;
                color: #94a3b8;
                text-transform: uppercase;
                letter-spacing: 0.18em;
@@ -419,7 +419,7 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, incidentTypes = [], se
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[1080px] text-left">
+          <table className="data-table data-table-incidents w-full min-w-[1180px] text-left">
             <thead className="bg-surface border-b border-border">
               <tr>
                 <SortableTh label="Folio" sortKey="folio" sortConfig={sortConfig} onSort={requestSort} className="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-text-muted" />
@@ -455,12 +455,12 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, incidentTypes = [], se
                         {typeLabel}
                       </span>
                     </td>
-                    <td className="px-5 py-4 align-top max-w-[320px]">
-                      <p className="text-sm font-black text-text leading-snug">{incident.title}</p>
+                    <td className="px-5 py-4 align-top min-w-[380px] max-w-[460px]">
+                      <p className="text-sm font-black text-text leading-snug line-clamp-2">{incident.title}</p>
                       <p className="text-xs font-medium text-text-muted leading-relaxed mt-1 line-clamp-2">{incident.description}</p>
                     </td>
-                    <td className="px-5 py-4 align-top">
-                      <p className="text-xs font-bold text-text max-w-[180px] truncate">{driver?.name || incident.driverId || '---'}</p>
+                    <td className="px-5 py-4 align-top min-w-[220px]">
+                      <p className="text-xs font-bold text-text max-w-[220px] truncate whitespace-nowrap">{driver?.name || incident.driverId || '---'}</p>
                     </td>
                     <td className="px-5 py-4 align-top">
                       <span className={`inline-flex items-center rounded-md border px-2.5 py-1 text-[10px] font-black uppercase tracking-widest whitespace-nowrap ${statusBadgeClasses[incident.status] || 'bg-surface-subtle text-text border-border'}`}>
@@ -850,13 +850,12 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, incidentTypes = [], se
 };
 
 const SummaryCard: React.FC<{ label: string, value: string, trend?: string, icon?: string, color: string }> = ({ label, value, trend, icon, color }) => {
-  const borderColors: any = { green: 'border-l-green-500', blue: 'border-l-blue-500', amber: 'border-l-amber-500', rose: 'border-l-rose-500', purple: 'border-l-purple-500' };
   return (
-    <div className={`bg-surface p-6 rounded-2xl border border-border border-l-4 ${borderColors[color]}`}>
+    <div data-tone={color} className="bg-surface p-6 rounded-2xl border border-border">
       <p className="text-text-muted text-[10px] font-black uppercase tracking-[0.15em]">{label}</p>
       <div className="flex items-center justify-between mt-2.5">
         <span className="text-3xl font-black tracking-tighter text-text">{value}</span>
-        {trend ? <span className="text-green-600 bg-green-50 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">{trend}</span> : <span className="material-symbols-outlined text-slate-200 text-2xl">{icon}</span>}
+        {trend ? <span className="text-green-600 bg-green-50 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">{trend}</span> : <span className="material-symbols-outlined text-text-muted text-2xl">{icon}</span>}
       </div>
     </div>
   );

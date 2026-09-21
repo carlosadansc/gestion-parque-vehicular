@@ -1,5 +1,5 @@
 /**
- * API FLOTA PRO v9.6 - Bajas de vehículos y catálogos
+ * API FLOTA PRO v9.13 - Eliminaciones exclusivas para administradores
  */
 
 const CONFIG = {
@@ -23,7 +23,8 @@ const CONFIG = {
     "Incidencias": ["id", "consecutiveNumber", "date", "type", "title", "description", "vehicleId", "driverId", "status"],
     "Planeacion": ["id", "date", "vehicleId", "driverId", "areaId", "notes", "departureTime", "arrivalTime", "destination", "status"],
     "Areas": ["id", "name", "description"],
-    "BitacorasViaje": ["id", "date", "departureTime", "arrivalTime", "driverId", "vehicleId", "initialOdometer", "finalOdometer", "destination", "areaId", "notes", "initialFuelLevel", "finalFuelLevel"],
+    "BitacorasViaje": ["id", "date", "departureTime", "arrivalTime", "driverId", "vehicleId", "initialOdometer", "finalOdometer", "destination", "areaId", "notes", "initialFuelLevel", "finalFuelLevel", "signatureName", "signatureData", "requestId", "status"],
+    "SolicitudesVehiculo": ["id", "filledDate", "travelDate", "requesterName", "areaId", "vehicleId", "passengers", "departureTime", "returnTime", "activity", "signatureName", "signatureData", "status", "travelLogId"],
     "Mantenimiento": ["id", "consecutiveNumber", "date", "vehicleId", "serviceType", "description", "quoteNumber", "quoteCost", "paymentMethod", "invoiceNumber", "invoiceAmount", "odometer", "provider", "entryDate", "exitDate", "status", "estimatedDeliveryDate", "internalDocumentNumber", "providerContact"],
     "TiposMantenimiento": ["id", "name"],
     "TiposIncidencia": ["id", "name", "value"],
@@ -54,6 +55,8 @@ const ACTION_TO_SHEET = {
   "area": "Areas",
   "delete-area": "Areas",
   "travel-log": "BitacorasViaje",
+  "vehicle-request": "SolicitudesVehiculo",
+  "update-vehicle-request": "SolicitudesVehiculo",
   "update-travel-log": "BitacorasViaje",
   "maintenance": "Mantenimiento",
   "update-maintenance": "Mantenimiento",
@@ -90,6 +93,7 @@ function doGet() {
     incidents: data.incidencias,
     plannings: data.planeacion,
     areas: data.areas,
+    vehicleRequests: data.solicitudesvehiculo,
     travelLogs: data.bitacorasviaje,
     maintenanceRecords: data.mantenimiento,
     maintenanceTypes: data.tiposmantenimiento,
@@ -143,6 +147,7 @@ function doPost(e) {
 
     if (action === "delete-vehicle" || action === "delete-area" || action === "delete-maintenance-type" || action === "delete-supplier") {
       if (!payload.id) throw new Error("El id es obligatorio para eliminar.");
+      ensureAdminActor(ss, payload.actorId);
       deleteRowById(sheet, payload.id, headersInSheet);
       return jsonResponse({ status: "success" });
     }
@@ -159,6 +164,21 @@ function doPost(e) {
   } catch (err) {
     return jsonResponse({ status: "error", message: String(err && err.message ? err.message : err) });
   }
+}
+
+function ensureAdminActor(ss, actorId) {
+  if (!actorId) throw new Error("Solo un administrador puede eliminar registros.");
+  const usersSheet = getOrCreateSheet(ss, "Usuarios");
+  const headers = getSheetHeaders(usersSheet);
+  const data = usersSheet.getDataRange().getValues();
+  const idIndex = headers.indexOf("id");
+  const roleIndex = headers.indexOf("role");
+  if (idIndex === -1 || roleIndex === -1) throw new Error("No se pudo validar el administrador.");
+
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][idIndex]) === String(actorId) && String(data[i][roleIndex]).toLowerCase() === "admin") return;
+  }
+  throw new Error("Solo un administrador puede eliminar registros.");
 }
 
 function parsePostBody(e) {
@@ -331,6 +351,35 @@ function getSheetHeaders(sheet) {
   });
 }
 
+var TIME_COLUMNS = {
+  departureTime: true,
+  arrivalTime: true,
+  returnTime: true
+};
+
+function normalizeSheetValue(header, value) {
+  if (TIME_COLUMNS[header]) return normalizeSheetTime(value);
+  return value;
+}
+
+function normalizeSheetTime(value) {
+  if (value instanceof Date) {
+    return Utilities.formatDate(value, Session.getScriptTimeZone(), "HH:mm");
+  }
+  if (typeof value === "number" && isFinite(value)) {
+    var totalMinutes = Math.round(value * 24 * 60) % (24 * 60);
+    return String(Math.floor(totalMinutes / 60)).padStart(2, "0") + ":" +
+      String(totalMinutes % 60).padStart(2, "0");
+  }
+  var raw = String(value == null ? "" : value).trim();
+  var isoMatch = raw.match(/T(\d{2}):(\d{2})/);
+  if (isoMatch) return isoMatch[1] + ":" + isoMatch[2];
+  var timeMatch = raw.match(/^(\d{1,2}):(\d{2})/);
+  if (timeMatch) return String(Number(timeMatch[1])).padStart(2, "0") + ":" + timeMatch[2];
+  return raw;
+}
+
+// Lectura de datos: conserva esta declaración junto con el bloque siguiente.
 function getSheetData(ss, name) {
   const sheet = ss.getSheetByName(name);
   if (!sheet) return [];
@@ -340,7 +389,7 @@ function getSheetData(ss, name) {
   return values.map(function(row) {
     const obj = {};
     headers.forEach(function(h, i) {
-      if (h) obj[h] = row[i];
+      if (h) obj[h] = normalizeSheetValue(h, row[i]);
     });
     return obj;
   });

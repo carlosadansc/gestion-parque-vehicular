@@ -6,6 +6,8 @@
   INCIDENTS = "incidents",
   PLANNING = "planning",
   TRAVEL_LOGS = "travel_logs",
+  VEHICLE_REQUESTS = "vehicle_requests",
+  TABLET_HOME = "tablet_home",
   MAINTENANCE = "maintenance",
   CATALOGS = "catalogs",
   INSPECTIONS = "inspections",
@@ -15,7 +17,7 @@
   REPORTS = "reports",
 }
 
-export type UserRole = "admin" | "fleet_manager" | "operator" | "viewer";
+export type UserRole = "admin" | "fleet_manager" | "operator" | "auxiliary" | "viewer";
 
 export interface User {
   id: string;
@@ -186,6 +188,27 @@ export interface TravelLog {
   notes?: string;
   initialFuelLevel?: number; // 0-100 percentage
   finalFuelLevel?: number; // 0-100 percentage
+  signatureName?: string;
+  signatureData?: string;
+  requestId?: string;
+  status?: 'started' | 'completed';
+}
+
+export interface VehicleRequest {
+  id: string;
+  filledDate: string;
+  travelDate: string;
+  requesterName: string;
+  areaId: string;
+  vehicleId: string;
+  passengers: number;
+  departureTime: string;
+  returnTime: string;
+  activity: string;
+  signatureName: string;
+  signatureData?: string;
+  travelLogId?: string;
+  status: "pending" | "approved" | "rejected" | "completed";
 }
 
 export interface MaintenanceType {

@@ -107,10 +107,10 @@ const Dashboard: React.FC<DashboardProps> = ({ vehicles = [], fuelEntries = [], 
     });
     
     return [
-      { name: 'Mecánica', value: counts.mechanical, color: '#3b82f6' }, // Blue
-      { name: 'Tránsito', value: counts.traffic, color: '#f59e0b' },   // Amber
-      { name: 'Accidente', value: counts.accident, color: '#ef4444' }, // Red
-      { name: 'Otros', value: counts.theft, color: '#8b5cf6' },        // Purple
+      { name: 'Mecánica', value: counts.mechanical, color: '#8f1f3d' },
+      { name: 'Tránsito', value: counts.traffic, color: '#9b681c' },
+      { name: 'Accidente', value: counts.accident, color: '#a23b48' },
+      { name: 'Otros', value: counts.theft, color: '#748291' },
     ].filter(d => d.value > 0);
   }, [incidents]);
 
@@ -131,10 +131,10 @@ const Dashboard: React.FC<DashboardProps> = ({ vehicles = [], fuelEntries = [], 
   }, [fuelEntries, vehicles]);
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700 pb-10">
+    <div className="dashboard-view space-y-8 animate-in fade-in duration-700 pb-10">
       
       {/* HEADER DE BIENVENIDA */}
-      <div className="page-header mb-6">
+      <div className="page-header dashboard-header mb-6">
         <div>
           <h2 className="page-title">Panel General</h2>
           <p className="page-subtitle">Resumen ejecutivo del estado de la flota vehicular</p>
@@ -147,9 +147,9 @@ const Dashboard: React.FC<DashboardProps> = ({ vehicles = [], fuelEntries = [], 
       </div>
 
       {/* KPI CARDS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="dashboard-kpi-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {/* Salud de Flota */}
-        <div className="bg-secondary rounded-xl p-5 text-white relative overflow-hidden">
+        <div className="dashboard-kpi dashboard-kpi-featured bg-secondary rounded-xl p-5 text-white relative overflow-hidden">
           <div className="absolute top-3 right-3 opacity-10">
             <span className="material-symbols-outlined ui-icon text-6xl">health_and_safety</span>
           </div>
@@ -165,7 +165,7 @@ const Dashboard: React.FC<DashboardProps> = ({ vehicles = [], fuelEntries = [], 
         </div>
 
         {/* Disponibilidad */}
-        <div className="bg-surface rounded-xl p-5 border border-border">
+        <div className="dashboard-kpi bg-surface rounded-xl p-5 border border-border">
           <div className="flex justify-between items-start mb-3">
              <div className="size-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
                <span className="material-symbols-outlined filled ui-icon text-xl">directions_car</span>
@@ -183,7 +183,7 @@ const Dashboard: React.FC<DashboardProps> = ({ vehicles = [], fuelEntries = [], 
         </div>
 
         {/* Costo por KM */}
-        <div className="bg-surface rounded-xl p-5 border border-border">
+        <div className="dashboard-kpi bg-surface rounded-xl p-5 border border-border">
           <div className="flex justify-between items-start mb-3">
              <div className="size-10 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
                <span className="material-symbols-outlined filled ui-icon text-xl">local_gas_station</span>
@@ -198,7 +198,7 @@ const Dashboard: React.FC<DashboardProps> = ({ vehicles = [], fuelEntries = [], 
         </div>
 
         {/* Incidencias Críticas */}
-        <div className="bg-surface rounded-xl p-5 border border-border">
+        <div className="dashboard-kpi bg-surface rounded-xl p-5 border border-border">
           <div className="flex justify-between items-start mb-3">
              <div className="size-10 rounded-lg bg-rose-50 flex items-center justify-center text-rose-500">
                <span className="material-symbols-outlined filled ui-icon text-xl">warning</span>
@@ -217,7 +217,7 @@ const Dashboard: React.FC<DashboardProps> = ({ vehicles = [], fuelEntries = [], 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         {/* Gráfico Financiero */}
-        <div className="lg:col-span-2 bg-surface p-8 md:p-10 rounded-[2.5rem] border border-border">
+        <div className="dashboard-panel lg:col-span-2 bg-surface p-8 md:p-10 rounded-[2.5rem] border border-border">
           <div className="flex justify-between items-center mb-8">
             <div>
               <h3 className="text-xl md:text-2xl font-black text-text tracking-tight">Tendencia de Gastos</h3>
@@ -232,27 +232,27 @@ const Dashboard: React.FC<DashboardProps> = ({ vehicles = [], fuelEntries = [], 
               <AreaChart data={financialData}>
                 <defs>
                   <linearGradient id="colorCost" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#135bec" stopOpacity={0.2}/>
-                    <stop offset="95%" stopColor="#135bec" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#8f1f3d" stopOpacity={0.18}/>
+                    <stop offset="95%" stopColor="#8f1f3d" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 11, fontWeight: 700, fill: '#94a3b8'}} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{fontSize: 11, fontWeight: 700, fill: '#94a3b8'}} tickFormatter={(val) => `$${val/1000}k`} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e3e0da" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 11, fontWeight: 700, fill: '#748291'}} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{fontSize: 11, fontWeight: 700, fill: '#748291'}} tickFormatter={(val) => `$${val/1000}k`} />
                 <Tooltip 
                   contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 30px -5px rgba(0,0,0,0.1)', padding: '12px' }}
-                  itemStyle={{ fontWeight: 900, color: '#135bec', fontSize: '12px' }}
+                  itemStyle={{ fontWeight: 900, color: '#8f1f3d', fontSize: '12px' }}
                   cursor={{ stroke: '#cbd5e1', strokeWidth: 1, strokeDasharray: '4 4' }}
                   formatter={(value: number) => [`$${value.toLocaleString()}`, 'Gasto']}
                 />
-                <Area type="monotone" dataKey="value" stroke="#135bec" strokeWidth={4} fillOpacity={1} fill="url(#colorCost)" />
+                <Area type="monotone" dataKey="value" stroke="#8f1f3d" strokeWidth={3} fillOpacity={1} fill="url(#colorCost)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* Gráfico de Incidencias */}
-        <div className="bg-surface p-8 md:p-10 rounded-[2.5rem] border border-border flex flex-col">
+        <div className="dashboard-panel bg-surface p-8 md:p-10 rounded-[2.5rem] border border-border flex flex-col">
           <div className="mb-6">
             <h3 className="text-xl md:text-2xl font-black text-text tracking-tight">Incidencias</h3>
             <p className="text-xs font-bold text-text-muted uppercase tracking-widest mt-1">Distribución por Tipo</p>
@@ -303,7 +303,7 @@ const Dashboard: React.FC<DashboardProps> = ({ vehicles = [], fuelEntries = [], 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
         {/* Top Gastos */}
-        <div className="card overflow-hidden">
+        <div className="dashboard-panel card overflow-hidden">
            <div className="p-8 md:p-10 border-b border-border bg-surface-subtle/50">
               <h3 className="text-lg md:text-xl font-black text-text tracking-tight">Mayores Consumidores</h3>
               <p className="text-xs font-bold text-text-muted uppercase tracking-widest mt-1">Vehículos con mayor gasto acumulado</p>
@@ -329,7 +329,7 @@ const Dashboard: React.FC<DashboardProps> = ({ vehicles = [], fuelEntries = [], 
         </div>
 
         {/* Actividad Reciente (Refinada) */}
-        <div className="card overflow-hidden">
+        <div className="dashboard-panel card overflow-hidden">
            <div className="p-8 md:p-10 border-b border-border bg-surface-subtle/50">
               <h3 className="text-lg md:text-xl font-black text-text tracking-tight">Bitácora Reciente</h3>
               <p className="text-xs font-bold text-text-muted uppercase tracking-widest mt-1">Últimos movimientos registrados</p>

@@ -89,7 +89,17 @@ pnpm run dev
 5. Pegar el código y guardar
 6. Implementar como aplicación web (Deploy > New deployment)
 7. Copiar la URL del deployment (formato: `https://script.google.com/macros/s/.../exec`)
-8. Pegar la URL en la configuración de la aplicación
+8. Crear un archivo `.env.local` en la raíz del proyecto a partir de `.env.example`
+9. Guardar la URL en `VITE_GOOGLE_APPS_SCRIPT_URL`
+10. Ejecutar el build de producción y distribuir la aplicación; los usuarios ya no tendrán que capturar la URL
+
+Ejemplo:
+
+```env
+VITE_GOOGLE_APPS_SCRIPT_URL=https://script.google.com/macros/s/TU_ID_DE_DEPLOYMENT/exec
+```
+
+La variable se inyecta durante el build. La aplicación no ofrece captura manual: si falta o es inválida, el login mostrará un error de configuración.
 
 ---
 

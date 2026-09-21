@@ -1,9 +1,10 @@
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { View, Vehicle, Driver, FuelEntry, FuelAcquisition, FuelDelivery, Incident, Planning, Area, TravelLog, MaintenanceRecord, AppSetting, User, VehicleInspection, MaintenanceType, IncidentType, Supplier } from './types';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { View, Vehicle, Driver, FuelEntry, FuelAcquisition, FuelDelivery, Incident, Planning, Area, TravelLog, VehicleRequest, MaintenanceRecord, AppSetting, User, VehicleInspection, MaintenanceType, IncidentType, Supplier } from './types';
 import { VEHICLES as initialVehicles, DRIVERS as initialDrivers, INCIDENTS as initialIncidents, FUEL_HISTORY as initialFuel } from './constants';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
+import { NotificationItem } from './components/NotificationCenter';
 import Dashboard from './components/Dashboard';
 import Vehicles from './components/Vehicles';
 import Drivers from './components/Drivers';
@@ -17,8 +18,12 @@ import Inspections from './components/Inspections';
 import Users from './components/Users';
 import Reports from './components/Reports';
 import Catalogs from './components/Catalogs';
+import TabletTravelLog from './components/TabletTravelLog';
+import VehicleRequests from './components/VehicleRequests';
+import TabletModuleChooser from './components/TabletModuleChooser';
 import { googleSheets } from './services/googleSheets';
 import { verifyPassword } from './utils/password';
+import { formatDate, toDateInputValue, toTimeInputValue } from './utils/dateTime';
 
 const DEFAULT_SETTINGS: AppSetting[] = [
   { key: 'APP_NAME', value: 'DIF La Paz Flota' },
@@ -61,8 +66,16 @@ const PLANNING_STATUS_SET = new Set<NonNullable<Planning['status']>>(['scheduled
 const MAINTENANCE_STATUS_SET = new Set<MaintenanceRecord['status']>(['scheduled', 'in-progress', 'completed', 'cancelled']);
 const FUEL_ACQUISITION_STATUS_SET = new Set<NonNullable<FuelAcquisition['status']>>(['active', 'cancelled']);
 const MAINTENANCE_PAYMENT_METHOD_SET = new Set<NonNullable<MaintenanceRecord['paymentMethod']>>(['transferencia', 'efectivo']);
-const USER_ROLE_SET = new Set<User['role']>(['admin', 'fleet_manager', 'operator', 'viewer']);
+const USER_ROLE_SET = new Set<User['role']>(['admin', 'fleet_manager', 'operator', 'auxiliary', 'viewer']);
 const USER_STATUS_SET = new Set<User['status']>(['active', 'inactive']);
+
+const normalizeUserRole = (role: unknown): User['role'] => {
+  const value = String(role || '').trim().toLowerCase();
+  if (value === 'administrador' || value === 'administrator') return 'admin';
+  if (value === 'encargado de parque vehicular' || value === 'fleet manager') return 'fleet_manager';
+  if (USER_ROLE_SET.has(value as User['role'])) return value as User['role'];
+  return 'viewer';
+};
 
 const hasText = (value?: string | null): boolean => typeof value === 'string' && value.trim().length > 0;
 const hasValue = (value: unknown): boolean => value !== undefined && value !== null && !(typeof value === 'string' && value.trim() === '');
@@ -81,13 +94,12 @@ const ensure = (condition: boolean, message: string): void => {
 
 const isValidDateValue = (value?: string): boolean => {
   if (!hasText(value)) return false;
-  return !Number.isNaN(new Date(value as string).getTime());
+  return Boolean(toDateInputValue(value));
 };
 
 const isValidTimeValue = (value?: string): boolean => {
   if (!hasText(value)) return false;
-  if (/^\d{2}:\d{2}(:\d{2})?$/.test(value as string)) return true;
-  return isValidDateValue(value);
+  return Boolean(toTimeInputValue(value));
 };
 
 const validateVehiclePayload = (vehicle: Omit<Vehicle, 'id'> | Vehicle, driverList: Driver[]) => {
@@ -307,7 +319,7 @@ const validateInspectionPayload = (inspection: Omit<VehicleInspection, 'id'> | V
 
 const stripPasswordFromUser = (user: User): User => {
   const { password: _password, ...sessionUser } = user;
-  return sessionUser;
+  return { ...sessionUser, role: normalizeUserRole(user.role) };
 };
 
 const App: React.FC = () => {
@@ -322,7 +334,6 @@ const App: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState('');
   const [setupError, setSetupError] = useState('');
-  const [serviceUrlInput, setServiceUrlInput] = useState(googleSheets.getServiceUrl());
   const [isBootstrapping, setIsBootstrapping] = useState(false);
   const [bootstrapForm, setBootstrapForm] = useState({
     name: '',
@@ -345,6 +356,8 @@ const App: React.FC = () => {
   const [fuelDeliveries, setFuelDeliveries] = useState<FuelDelivery[]>([]);
   const [plannings, setPlannings] = useState<Planning[]>([]);
   const [areas, setAreas] = useState<Area[]>([]);
+  const [vehicleRequests, setVehicleRequests] = useState<VehicleRequest[]>([]);
+  const [activeTravelLogRequest, setActiveTravelLogRequest] = useState<VehicleRequest | null>(null);
   const [travelLogs, setTravelLogs] = useState<TravelLog[]>([]);
   const [maintenanceRecords, setMaintenanceRecords] = useState<MaintenanceRecord[]>([]);
   const [maintenanceTypes, setMaintenanceTypes] = useState<MaintenanceType[]>(DEFAULT_MAINTENANCE_TYPES);
@@ -354,6 +367,62 @@ const App: React.FC = () => {
   const [appSettings, setAppSettings] = useState<AppSetting[]>(DEFAULT_SETTINGS);
   const [appUsers, setAppUsers] = useState<User[]>([]);
   const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const requestActionInFlightRef = useRef(new Set<string>());
+
+  const notifications = useMemo<NotificationItem[]>(() => {
+    const next: NotificationItem[] = [];
+    const vehicleById = new Map<string, Vehicle>(vehicles.map(vehicle => [vehicle.id, vehicle]));
+
+    vehicleRequests
+      .filter(request => request.status === 'pending')
+      .slice(0, 5)
+      .forEach(request => {
+        const vehicle = vehicleById.get(request.vehicleId);
+        next.push({
+          id: `request-pending-${request.id}`,
+          title: 'Solicitud de vehículo pendiente',
+          message: `${request.requesterName || 'Solicitud sin nombre'} · ${vehicle?.plate || 'Vehículo por asignar'}`,
+          icon: 'assignment',
+          tone: 'warning',
+          view: View.VEHICLE_REQUESTS,
+          timestamp: `${formatDate(request.travelDate)} · ${toTimeInputValue(request.departureTime) || 'Sin hora'}`
+        });
+      });
+
+    vehicleRequests
+      .filter(request => request.status === 'approved')
+      .slice(0, 5)
+      .forEach(request => {
+        const linkedLog = travelLogs.find(log => log.id === request.travelLogId || log.requestId === request.id);
+        if (linkedLog?.status === 'completed') return;
+        next.push({
+          id: `request-started-${request.id}`,
+          title: 'Bitácora pendiente de cierre',
+          message: `${request.requesterName || 'Solicitud aprobada'} · completa los datos de regreso`,
+          icon: 'route',
+          tone: 'info',
+          view: View.TRAVEL_LOGS,
+          timestamp: `${formatDate(request.travelDate)} · ${toTimeInputValue(request.departureTime) || 'Viaje iniciado'}`
+        });
+      });
+
+    incidents
+      .filter(incident => incident.status === 'critical')
+      .slice(0, 5)
+      .forEach(incident => {
+        next.push({
+          id: `incident-critical-${incident.id}`,
+          title: 'Incidencia crítica sin atender',
+          message: `${incident.title} · ${incident.vehicleId || 'Vehículo no identificado'}`,
+          icon: 'report_problem',
+          tone: 'danger',
+          view: View.INCIDENTS,
+          timestamp: formatDate(incident.date)
+        });
+      });
+
+    return next.slice(0, 12);
+  }, [incidents, vehicleRequests, vehicles, travelLogs]);
 
   const pushToast = useCallback((message: string, type: ToastType = 'info', durationMs = 3000) => {
     const trimmed = message.trim();
@@ -450,6 +519,7 @@ const App: React.FC = () => {
         if (data.fuelDeliveries) setFuelDeliveries(data.fuelDeliveries);
         if (data.incidents) setIncidents(data.incidents);
         if (data.plannings) setPlannings(data.plannings);
+        if (data.vehicleRequests) setVehicleRequests(data.vehicleRequests);
         if (data.areas) setAreas(data.areas);
         if (data.travelLogs) setTravelLogs(data.travelLogs);
         if (data.maintenanceRecords) setMaintenanceRecords(data.maintenanceRecords);
@@ -478,16 +548,13 @@ const App: React.FC = () => {
     );
   }, [pushToast, handleSync]);
 
-  const saveServiceUrlFromLogin = () => {
-    const trimmedUrl = serviceUrlInput.trim();
-    if (!trimmedUrl) {
-      setLoginError('Captura la URL de Google Apps Script.');
+  const ensureServiceUrlConfigured = () => {
+    if (!googleSheets.isEnvironmentConfigured()) {
+      setLoginError('La aplicación no tiene configurada la variable VITE_GOOGLE_APPS_SCRIPT_URL.');
       return false;
     }
-    googleSheets.setServiceUrl(trimmedUrl);
-    setServiceUrlInput(trimmedUrl);
     if (!googleSheets.isValidScriptUrl()) {
-      setLoginError('La URL debe contener script.google.com/macros/s/.../exec.');
+      setLoginError('La variable VITE_GOOGLE_APPS_SCRIPT_URL no contiene una URL válida de Apps Script.');
       return false;
     }
     setLoginError('');
@@ -504,7 +571,7 @@ const App: React.FC = () => {
       return;
     }
 
-    if (!saveServiceUrlFromLogin()) return;
+    if (!ensureServiceUrlConfigured()) return;
 
     const name = bootstrapForm.name.trim();
     const username = bootstrapForm.username.trim();
@@ -571,7 +638,7 @@ const App: React.FC = () => {
       return;
     }
 
-    if (!saveServiceUrlFromLogin()) return;
+    if (!ensureServiceUrlConfigured()) return;
 
     setIsSyncing(true);
     try {
@@ -607,6 +674,7 @@ const App: React.FC = () => {
 
       if (authenticatedUser) {
         setCurrentUser(authenticatedUser);
+        if (authenticatedUser.role === 'auxiliary') setCurrentView(View.TABLET_HOME);
         localStorage.setItem('fleet_pro_user', JSON.stringify(authenticatedUser));
         setIsSyncing(false);
         return;
@@ -651,14 +719,22 @@ const App: React.FC = () => {
     payload: Parameters<typeof googleSheets.pushData>[1],
     operation: 'guardar' | 'actualizar' | 'eliminar'
   ) => {
-    const saved = await googleSheets.pushData(action, payload);
+    const payloadToPersist = operation === 'eliminar'
+      ? { ...payload, actorId: currentUser?.id || '' }
+      : payload;
+    const saved = await googleSheets.pushData(action, payloadToPersist);
     if (!saved) {
       setSyncStatus('error');
-      throw new Error(`No se pudo ${operation} en Google Sheets. Verifica la URL en Configuracion.`);
+      const detail = googleSheets.getLastError();
+      throw new Error(detail ? `No se pudo ${operation} en Google Sheets: ${detail}` : `No se pudo ${operation} en Google Sheets. Verifica la configuración.`);
     }
   };
 
-  const canManageVehiclesAndCatalogs = () => currentUser?.role === 'admin' || currentUser?.role === 'fleet_manager';
+  const canManageVehiclesAndCatalogs = () => {
+    const role = String(currentUser?.role || '').trim().toLowerCase();
+    return role === 'admin' || role === 'fleet_manager';
+  };
+  const canDeleteRecords = () => String(currentUser?.role || '').trim().toLowerCase() === 'admin';
 
   // --- VEHICLE HANDLERS WITH SYNC ---
 
@@ -746,7 +822,7 @@ const App: React.FC = () => {
   };
 
   const handleDeleteVehicle = async (id: string) => {
-    ensure(canManageVehiclesAndCatalogs(), 'No tienes permisos para eliminar vehículos.');
+    ensure(canDeleteRecords(), 'Solo un administrador puede eliminar registros.');
     const vehicle = vehicles.find(item => item.id === id);
     ensure(Boolean(vehicle), 'El vehículo que intentas eliminar no existe.');
     const previousVehicles = vehicles;
@@ -1083,6 +1159,7 @@ const App: React.FC = () => {
   const handleDeleteArea = async (id: string) => {
     const previousAreas = areas;
     try {
+    ensure(canDeleteRecords(), 'Solo un administrador puede eliminar registros.');
     ensure(hasText(id), 'No se pudo identificar el área a eliminar.');
     ensure(areas.some(a => a.id === id), 'El área que intentas eliminar no existe.');
     setAreas(areas.filter(a => a.id !== id));
@@ -1095,39 +1172,158 @@ const App: React.FC = () => {
 
   const handleAddTravelLog = async (newLog: Omit<TravelLog, 'id'>) => {
     const previousTravelLogs = travelLogs;
+    const previousVehicleRequests = vehicleRequests;
     try {
     const formatted = { 
       ...newLog, 
       destination: newLog.destination.toUpperCase(), 
-      notes: newLog.notes?.toUpperCase() 
+      notes: newLog.notes?.toUpperCase(),
+      status: newLog.status || 'completed'
     };
     validateTravelLogPayload(formatted, vehicles, drivers, areas);
     const logWithId = { ...formatted, id: `T-${Date.now()}` };
     setTravelLogs([logWithId, ...travelLogs]);
     await persistOrThrow('travel-log', logWithId, 'guardar');
+    if (newLog.requestId) {
+      const linkedRequest = vehicleRequests.find(request => request.id === newLog.requestId);
+      if (linkedRequest) {
+        const completedRequest: VehicleRequest = {
+          ...linkedRequest,
+          status: 'completed',
+          travelLogId: logWithId.id
+        };
+        setVehicleRequests(vehicleRequests.map(request => request.id === completedRequest.id ? completedRequest : request));
+        await persistOrThrow('update-vehicle-request', completedRequest, 'actualizar');
+      }
+    }
     } catch (error) {
       setTravelLogs(previousTravelLogs);
+      setVehicleRequests(previousVehicleRequests);
       throw error;
     }
   };
 
   const handleUpdateTravelLog = async (updatedLog: TravelLog) => {
     const previousTravelLogs = travelLogs;
+    const previousVehicleRequests = vehicleRequests;
     try {
     const formatted = { 
       ...updatedLog, 
       destination: updatedLog.destination.toUpperCase(), 
-      notes: updatedLog.notes?.toUpperCase() 
+      notes: updatedLog.notes?.toUpperCase(),
+      status: updatedLog.status === 'started' ? 'completed' : (updatedLog.status || 'completed')
     };
     ensure(hasText(updatedLog.id), 'No se pudo identificar la bitácora a actualizar.');
     ensure(travelLogs.some(t => t.id === updatedLog.id), 'La bitácora que intentas actualizar no existe.');
     validateTravelLogPayload(formatted, vehicles, drivers, areas);
     setTravelLogs(travelLogs.map(t => t.id === updatedLog.id ? formatted : t));
     await persistOrThrow('update-travel-log', formatted, 'actualizar');
+    if (formatted.requestId) {
+      const linkedRequest = vehicleRequests.find(request => request.id === formatted.requestId);
+      if (linkedRequest && (linkedRequest.status !== 'completed' || linkedRequest.travelLogId !== formatted.id)) {
+        const completedRequest: VehicleRequest = {
+          ...linkedRequest,
+          status: 'completed',
+          travelLogId: formatted.id
+        };
+        setVehicleRequests(vehicleRequests.map(request => request.id === completedRequest.id ? completedRequest : request));
+        await persistOrThrow('update-vehicle-request', completedRequest, 'actualizar');
+      }
+    }
     } catch (error) {
       setTravelLogs(previousTravelLogs);
+      setVehicleRequests(previousVehicleRequests);
       throw error;
     }
+  };
+
+  const handleAddVehicleRequest = async (newRequest: Omit<VehicleRequest, 'id' | 'status'>) => {
+    const previousVehicleRequests = vehicleRequests;
+    try {
+      const formatted = {
+        ...newRequest,
+        requesterName: newRequest.requesterName.toUpperCase(),
+        activity: newRequest.activity.toUpperCase(),
+        signatureName: newRequest.signatureName.toUpperCase()
+      };
+      const requestWithId: VehicleRequest = {
+        ...formatted,
+        id: 'VR-' + Date.now(),
+        status: 'pending'
+      };
+      setVehicleRequests([requestWithId, ...vehicleRequests]);
+      await persistOrThrow('vehicle-request', requestWithId, 'guardar');
+    } catch (error) {
+      setVehicleRequests(previousVehicleRequests);
+      throw error;
+    }
+  };
+
+  const handleUpdateVehicleRequest = async (updatedRequest: VehicleRequest) => {
+    const previousVehicleRequests = vehicleRequests;
+    const previousTravelLogs = travelLogs;
+    const requestKey = String(updatedRequest.id || '');
+    ensure(!requestActionInFlightRef.current.has(requestKey), 'Esta solicitud ya se está procesando.');
+    requestActionInFlightRef.current.add(requestKey);
+    try {
+      ensure(canManageVehiclesAndCatalogs(), 'No tienes permisos para aprobar solicitudes.');
+      ensure(hasText(updatedRequest.id), 'No se pudo identificar la solicitud a actualizar.');
+      ensure(vehicleRequests.some(request => request.id === updatedRequest.id), 'La solicitud que intentas actualizar no existe.');
+
+      let requestToSave = updatedRequest;
+      const linkedLog = travelLogs.find(log =>
+        log.id === updatedRequest.travelLogId || log.requestId === updatedRequest.id
+      );
+      if (updatedRequest.status === 'approved' && !updatedRequest.travelLogId) {
+        const startedLog: TravelLog = linkedLog || {
+          id: 'T-' + Date.now(),
+          date: updatedRequest.travelDate,
+          departureTime: '',
+          arrivalTime: '',
+          driverId: '',
+          vehicleId: updatedRequest.vehicleId,
+          initialOdometer: 0,
+          finalOdometer: 0,
+          destination: updatedRequest.activity,
+          areaId: updatedRequest.areaId,
+          notes: 'SOLICITUD ' + updatedRequest.id,
+          initialFuelLevel: 100,
+          finalFuelLevel: 100,
+          requestId: updatedRequest.id,
+          status: 'started'
+        };
+        if (!linkedLog) {
+          setTravelLogs(previous => [startedLog, ...previous]);
+          await persistOrThrow('travel-log', startedLog, 'guardar');
+        }
+        requestToSave = { ...updatedRequest, travelLogId: startedLog.id };
+      }
+
+      setVehicleRequests(vehicleRequests.map(request => request.id === requestToSave.id ? requestToSave : request));
+      const requestPatch = {
+        id: requestToSave.id,
+        status: requestToSave.status,
+        ...(requestToSave.travelLogId ? { travelLogId: requestToSave.travelLogId } : {})
+      };
+      await persistOrThrow('update-vehicle-request', requestPatch, 'actualizar');
+    } catch (error) {
+      setVehicleRequests(previousVehicleRequests);
+      setTravelLogs(previousTravelLogs);
+      throw error;
+    } finally {
+      requestActionInFlightRef.current.delete(requestKey);
+    }
+  };
+
+  const handleStartTravelLogFromRequest = (request: VehicleRequest) => {
+    const linkedLog = travelLogs.find(log => log.id === request.travelLogId || log.requestId === request.id);
+    if (linkedLog) {
+      setActiveTravelLogRequest(null);
+      setCurrentView(View.TRAVEL_LOGS);
+      return;
+    }
+    setActiveTravelLogRequest(request);
+    setCurrentView(View.TRAVEL_LOGS);
   };
 
   const handleAddMaintenance = async (newRecord: Omit<MaintenanceRecord, 'id'>) => {
@@ -1208,7 +1404,7 @@ const App: React.FC = () => {
   };
 
   const handleDeleteMaintenanceType = async (id: string) => {
-    ensure(canManageVehiclesAndCatalogs(), 'No tienes permisos para eliminar registros del catálogo.');
+    ensure(canDeleteRecords(), 'Solo un administrador puede eliminar registros.');
     ensure(maintenanceTypes.some(type => type.id === id), 'El tipo de servicio que intentas eliminar no existe.');
     ensure(!maintenanceRecords.some(record => record.serviceType === maintenanceTypes.find(type => type.id === id)?.name), 'No se puede eliminar un tipo de servicio con mantenimientos registrados.');
     const previousMaintenanceTypes = maintenanceTypes;
@@ -1287,7 +1483,7 @@ const App: React.FC = () => {
   };
 
   const handleDeleteSupplier = async (id: string) => {
-    ensure(canManageVehiclesAndCatalogs(), 'No tienes permisos para eliminar registros del catálogo.');
+    ensure(canDeleteRecords(), 'Solo un administrador puede eliminar registros.');
     ensure(suppliers.some(supplier => supplier.id === id), 'El proveedor que intentas eliminar no existe.');
     const supplier = suppliers.find(item => item.id === id);
     ensure(!maintenanceRecords.some(record => normalizeCatalogName(record.provider || '') === normalizeCatalogName(supplier?.name || '')), 'No se puede eliminar un proveedor con mantenimientos registrados.');
@@ -1376,7 +1572,7 @@ const App: React.FC = () => {
             drivers={drivers}
             searchQuery={searchQuery}
             settings={appSettings}
-            canManageDeletions={canManageVehiclesAndCatalogs()}
+            canManageDeletions={canDeleteRecords()}
             onAddVehicle={async (payload) => executeWithToast(
               () => handleAddVehicle(payload),
               'Vehiculo registrado correctamente.',
@@ -1511,7 +1707,7 @@ const App: React.FC = () => {
             maintenanceTypes={maintenanceTypes}
             suppliers={suppliers}
             searchQuery={searchQuery}
-            canManageDeletions={canManageVehiclesAndCatalogs()}
+            canManageDeletions={canDeleteRecords()}
             onAddMaintenanceType={async (payload) => executeWithToast(
               () => handleAddMaintenanceType(payload),
               'Tipo de servicio registrado correctamente.',
@@ -1563,8 +1759,33 @@ const App: React.FC = () => {
               'No se pudo actualizar la bitácora.'
             )}
             onSync={handleSyncWithToast}
+            initialRequest={activeTravelLogRequest}
+            onInitialRequestHandled={() => setActiveTravelLogRequest(null)}
           />
         );
+      case View.VEHICLE_REQUESTS:
+        return (
+          <VehicleRequests
+            requests={vehicleRequests}
+            vehicles={vehicles}
+            areas={areas}
+            settings={appSettings}
+            currentUser={currentUser!}
+            onAddRequest={async (payload) => executeWithToast(
+              () => handleAddVehicleRequest(payload),
+              'Solicitud registrada correctamente.',
+              'No se pudo registrar la solicitud.'
+            )}
+            onSync={handleSyncWithToast}
+            onUpdateRequestStatus={canManageVehiclesAndCatalogs() ? async (payload) => executeWithToast(
+              () => handleUpdateVehicleRequest(payload),
+              'Solicitud actualizada correctamente.',
+              'No se pudo actualizar la solicitud.'
+            ) : undefined}
+            onStartTravelLog={canManageVehiclesAndCatalogs() ? handleStartTravelLogFromRequest : undefined}
+          />
+        );
+
       case View.PLANNING:
         return (
           <PlanningComponent
@@ -1573,6 +1794,7 @@ const App: React.FC = () => {
             drivers={drivers}
             areas={areas}
             settings={appSettings}
+            canManageDeletions={canDeleteRecords()}
             onAddPlanning={async (payload) => executeWithToast(
               () => handleAddPlanning(payload),
               'Asignacion registrada correctamente.',
@@ -1652,7 +1874,6 @@ const App: React.FC = () => {
           <Settings
             settings={appSettings}
             onUpdateSetting={handleUpdateSetting}
-            onUrlChange={handleSyncWithToast}
           />
         );
       default:
@@ -1663,7 +1884,7 @@ const App: React.FC = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-surface flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        <div className="loading-spinner h-12 w-12 animate-spin" aria-label="Cargando"></div>
       </div>
     );
   }
@@ -1676,37 +1897,6 @@ const App: React.FC = () => {
             <img alt="DIF" className="w-14 h-14 object-contain mb-4" src="/images/logo-dif.png" />
             <h1 className="text-xl font-semibold text-text">{settingsMap['APP_NAME'] || 'Flota Pro'}</h1>
             <p className="text-xs text-text-muted mt-1">DIF La Paz - Control Vehicular</p>
-          </div>
-
-          <div className="space-y-1.5 mb-4">
-            <label className="form-label">URL Google Apps Script</label>
-            <input
-              type="url"
-              className="form-input"
-              placeholder="https://script.google.com/macros/s/.../exec"
-              value={serviceUrlInput}
-              onChange={e => setServiceUrlInput(e.target.value)}
-            />
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={saveServiceUrlFromLogin}
-                className="flex-1 btn-secondary py-2 rounded-lg font-medium text-xs"
-              >
-                Guardar URL
-              </button>
-              <button
-                type="button"
-                disabled={isSyncing}
-                onClick={async () => {
-                  if (!saveServiceUrlFromLogin()) return;
-                  await handleSyncWithToast();
-                }}
-                className="flex-1 bg-text text-surface py-2 rounded-lg font-medium text-xs hover:opacity-90 transition-opacity disabled:opacity-50"
-              >
-                {isSyncing ? 'Sincronizando...' : 'Sincronizar'}
-              </button>
-            </div>
           </div>
 
           <form onSubmit={handleLogin} autoComplete="off" className="space-y-4">
@@ -1801,6 +1991,65 @@ const App: React.FC = () => {
     );
   }
 
+  if (currentUser.role === 'auxiliary') {
+    if (currentView === View.TABLET_HOME) {
+      return (
+        <TabletModuleChooser
+          settings={appSettings}
+          currentUser={currentUser}
+          onOpenRequest={() => setCurrentView(View.VEHICLE_REQUESTS)}
+          onOpenTravelLog={() => setCurrentView(View.TRAVEL_LOGS)}
+          onLogout={handleLogout}
+        />
+      );
+    }
+
+  if (currentUser.role === 'auxiliary' && currentView === View.VEHICLE_REQUESTS) {
+    return (
+      <VehicleRequests
+        variant="tablet"
+        requests={vehicleRequests}
+        vehicles={vehicles}
+        areas={areas}
+        settings={appSettings}
+        currentUser={currentUser}
+        onAddRequest={async (payload) => executeWithToast(
+          () => handleAddVehicleRequest(payload),
+          'Solicitud registrada correctamente.',
+          'No se pudo registrar la solicitud.'
+        )}
+        onSync={handleSyncWithToast}
+        onLogout={handleLogout}
+        onOpenTravelLog={() => setCurrentView(View.TRAVEL_LOGS)}
+      />
+    );
+  }
+
+    return (
+      <TabletTravelLog
+        travelLogs={travelLogs}
+        vehicles={vehicles}
+        drivers={drivers}
+        areas={areas}
+        settings={appSettings}
+        currentUser={currentUser}
+        onAddTravelLog={async (payload) => executeWithToast(
+          () => handleAddTravelLog(payload),
+          'Bitácora registrada correctamente.',
+          'No se pudo registrar la bitácora.'
+        )}
+        onSync={handleSyncWithToast}
+        onUpdateTravelLog={async (payload) => executeWithToast(
+          () => handleUpdateTravelLog(payload),
+          'Viaje completado correctamente.',
+          'No se pudo completar el viaje.'
+        )}
+        onLogout={handleLogout}
+        onOpenRequests={() => setCurrentView(View.VEHICLE_REQUESTS)}
+      />
+    );
+  }
+
   return (
     <div className="flex h-screen overflow-hidden bg-surface-subtle transition-colors">
       <Sidebar activeView={currentView} onViewChange={v => { setCurrentView(v); setSearchQuery(''); }} appName={settingsMap['APP_NAME'] || 'Flota Pro'} currentUser={currentUser} onLogout={handleLogout} />
@@ -1815,9 +2064,15 @@ const App: React.FC = () => {
           onSearchChange={setSearchQuery} 
           darkMode={darkMode}
           onToggleDarkMode={toggleDarkMode}
+          notifications={notifications}
+          notificationUserKey={currentUser?.username}
+          onOpenNotification={(notification) => {
+            setCurrentView(notification.view);
+            setSearchQuery('');
+          }}
         />
-        <div className="flex-1 overflow-y-auto p-6">
-          <div className="max-w-7xl mx-auto">{renderContent()}</div>
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          <div className="max-w-[1440px] mx-auto w-full">{renderContent()}</div>
         </div>
       </main>
       <div className="fixed top-4 right-4 z-[220] space-y-2 pointer-events-none w-[min(92vw,360px)]">

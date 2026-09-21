@@ -16,19 +16,26 @@ export interface SyncData {
   maintenanceTypes?: any[];
   incidentTypes?: any[];
   suppliers?: any[];
+  vehicleRequests?: any[];
 }
 
-class GoogleSheetsService {
-  private serviceUrl: string = localStorage.getItem('fleet_pro_service_url') || '';
+const configuredServiceUrl = import.meta.env.VITE_GOOGLE_APPS_SCRIPT_URL?.trim() || '';
 
-  setServiceUrl(url: string) {
-    const cleanUrl = url.trim();
-    this.serviceUrl = cleanUrl;
-    localStorage.setItem('fleet_pro_service_url', cleanUrl);
-  }
+class GoogleSheetsService {
+  private serviceUrl: string = configuredServiceUrl;
+  private lastErrorMessage = '';
+
 
   getServiceUrl() {
     return this.serviceUrl;
+  }
+
+  getLastError() {
+    return this.lastErrorMessage;
+  }
+
+  isEnvironmentConfigured() {
+    return Boolean(configuredServiceUrl);
   }
 
   isValidScriptUrl() {
@@ -62,8 +69,10 @@ class GoogleSheetsService {
     }
   }
 
-  async pushData(type: 'fuel' | 'update-fuel' | 'fuel-acquisition' | 'update-fuel-acquisition' | 'fuel-delivery' | 'update-fuel-delivery' | 'incident' | 'update-incident' | 'vehicle' | 'delete-vehicle' | 'driver' | 'planning' | 'update-planning' | 'area' | 'delete-area' | 'travel-log' | 'update-travel-log' | 'update-vehicle' | 'update-driver' | 'maintenance' | 'update-maintenance' | 'user' | 'update-user' | 'update-setting' | 'inspection' | 'update-inspection' | 'maintenance-type' | 'update-maintenance-type' | 'delete-maintenance-type' | 'incident-type' | 'update-incident-type' | 'supplier' | 'update-supplier' | 'delete-supplier', payload: any): Promise<boolean> {
+  async pushData(type: 'fuel' | 'update-fuel' | 'fuel-acquisition' | 'update-fuel-acquisition' | 'fuel-delivery' | 'update-fuel-delivery' | 'incident' | 'update-incident' | 'vehicle' | 'delete-vehicle' | 'driver' | 'planning' | 'update-planning' | 'area' | 'delete-area' | 'travel-log' | 'update-travel-log' | 'vehicle-request' | 'update-vehicle-request' | 'update-vehicle' | 'update-driver' | 'maintenance' | 'update-maintenance' | 'user' | 'update-user' | 'update-setting' | 'inspection' | 'update-inspection' | 'maintenance-type' | 'update-maintenance-type' | 'delete-maintenance-type' | 'incident-type' | 'update-incident-type' | 'supplier' | 'update-supplier' | 'delete-supplier', payload: any): Promise<boolean> {
+    this.lastErrorMessage = '';
     if (!this.serviceUrl || !this.isValidScriptUrl()) {
+      this.lastErrorMessage = 'La URL de Apps Script no está configurada o no es válida.';
       return false;
     }
     
@@ -83,7 +92,8 @@ class GoogleSheetsService {
       });
 
       if (!response.ok) {
-        console.error(`Error al enviar datos: HTTP ${response.status}`);
+        this.lastErrorMessage = `El servidor respondió con HTTP ${response.status}.`;
+        console.error(this.lastErrorMessage);
         return false;
       }
 
@@ -93,16 +103,27 @@ class GoogleSheetsService {
       try {
         const parsed = JSON.parse(responseText);
         if (parsed?.status && parsed.status !== 'success') {
-          console.error('Error devuelto por Apps Script:', parsed?.message || parsed?.status);
+          this.lastErrorMessage = parsed?.message || parsed?.status || 'Apps Script rechazó la operación.';
+          console.error('Error devuelto por Apps Script:', this.lastErrorMessage);
           return false;
         }
       } catch (_) {
-        // Some deployments may return plain text; successful HTTP is enough in that case.
+        if (responseText.trim().startsWith('<')) {
+          const plainText = responseText
+            .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+            .replace(/<[^>]*>/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+          this.lastErrorMessage = plainText.slice(-500) || 'Apps Script devolvió una respuesta inválida.';
+          console.error('Respuesta inválida de Apps Script:', this.lastErrorMessage);
+          return false;
+        }
       }
 
       return true;
     } catch (error) {
-      console.error('Error al enviar datos:', error);
+      this.lastErrorMessage = error instanceof Error ? error.message : 'No se pudo conectar con Apps Script.';
+      console.error('Error al enviar datos:', this.lastErrorMessage);
       return false;
     }
   }

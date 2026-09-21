@@ -15,6 +15,7 @@ const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUs
   const [isSaving, setIsSaving] = useState(false);
   const [formError, setFormError] = useState('');
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     username: '',
@@ -46,6 +47,7 @@ const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUs
 
   const handleEdit = (user: User) => {
     setFormError('');
+    setShowPassword(false);
     setEditingUser(user);
     setFormData({
       name: String(user.name ?? ''),
@@ -59,6 +61,7 @@ const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUs
 
   const handleOpenNew = () => {
     setFormError('');
+    setShowPassword(false);
     setEditingUser(null);
     setFormData({ name: '', username: '', password: '', role: 'operator', status: 'active' });
     setShowModal(true);
@@ -104,6 +107,7 @@ const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUs
       case 'admin': return 'ADMINISTRADOR';
       case 'fleet_manager': return 'ENCARGADO DE PARQUE VEHICULAR';
       case 'operator': return 'OPERADOR';
+      case 'auxiliary': return 'AUXILIAR · CAPTURA DE BITÁCORA';
       case 'viewer': return 'OBSERVADOR';
       default: return role.toUpperCase();
     }
@@ -183,6 +187,7 @@ const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUs
                     <span className={`inline-flex px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest border ${
                       user.role === 'admin' ? 'bg-indigo-50 text-indigo-700 border-indigo-100' :
                       user.role === 'operator' ? 'bg-blue-50 text-blue-700 border-blue-100' :
+                      user.role === 'auxiliary' ? 'bg-amber-50 text-amber-700 border-amber-100' :
                       'bg-surface-subtle text-text-muted border-border'
                     }`}>
                       {getRoleLabel(user.role)}
@@ -246,15 +251,28 @@ const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUs
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Contraseña</label>
-                  <input 
-                    type="password"
-                    disabled={isSaving} 
-                    autoComplete="new-password"
-                    className="w-full bg-surface-subtle border border-border rounded-2xl px-6 py-4 font-bold text-sm outline-none focus:ring-4 focus:ring-primary/10 transition-all" 
-                    placeholder={editingUser ? "Omitir para no cambiar" : "••••••••"}
-                    value={formData.password} 
-                    onChange={e => handleInputChange('password', e.target.value)} 
-                  />
+                  <div className="relative">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      disabled={isSaving}
+                      autoComplete="new-password"
+                      className="w-full bg-surface-subtle border border-border rounded-2xl px-6 py-4 pr-14 font-bold text-sm outline-none focus:ring-4 focus:ring-primary/10 transition-all"
+                      placeholder={editingUser ? "Omitir para no cambiar" : "••••••••"}
+                      value={formData.password}
+                      onChange={e => handleInputChange('password', e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      disabled={isSaving}
+                      onClick={() => setShowPassword(prev => !prev)}
+                      aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted hover:text-text transition-colors"
+                    >
+                      <span className="material-symbols-outlined ui-icon text-xl" aria-hidden="true">
+                        {showPassword ? 'visibility_off' : 'visibility'}
+                      </span>
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -268,6 +286,7 @@ const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUs
                     onChange={e => handleInputChange('role', e.target.value)}
                   >
                     <option value="operator">OPERADOR (CAPTURA)</option>
+                    <option value="auxiliary">AUXILIAR (CAPTURA DE BITÁCORA EN TABLET)</option>
                     <option value="fleet_manager">ENCARGADO DE PARQUE VEHICULAR</option>
                     <option value="viewer">OBSERVADOR (LECTURA)</option>
                     <option value="admin">ADMINISTRADOR (TOTAL)</option>

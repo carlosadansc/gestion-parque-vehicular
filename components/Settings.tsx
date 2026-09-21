@@ -1,18 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { AppSetting } from '../types';
-import { googleSheets } from '../services/googleSheets';
 
 interface SettingsProps {
   settings: AppSetting[];
   onUpdateSetting: (key: string, value: string) => void;
-  onUrlChange?: () => void;
 }
 
-const Settings: React.FC<SettingsProps> = ({ settings, onUpdateSetting, onUrlChange }) => {
-  const [serviceUrl, setServiceUrl] = useState(googleSheets.getServiceUrl());
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
-  const [urlError, setUrlError] = useState('');
+const Settings: React.FC<SettingsProps> = ({ settings, onUpdateSetting }) => {
   const [copyStatus, setCopyStatus] = useState<'idle' | 'copied' | 'error'>('idle');
   const [localSettings, setLocalSettings] = useState<Record<string, string>>({});
 
@@ -22,23 +17,6 @@ const Settings: React.FC<SettingsProps> = ({ settings, onUpdateSetting, onUrlCha
     setLocalSettings(map);
   }, [settings]);
 
-  const handleSaveUrl = () => {
-    if (!serviceUrl.includes('script.google.com/macros/s/') || !serviceUrl.includes('/exec')) {
-      setUrlError('La URL debe terminar en /exec.');
-      setSaveStatus('error');
-      setTimeout(() => setSaveStatus('idle'), 3000);
-      return;
-    }
-
-    setUrlError('');
-    setSaveStatus('saving');
-    googleSheets.setServiceUrl(serviceUrl);
-    setTimeout(() => {
-      setSaveStatus('saved');
-      if (onUrlChange) onUrlChange();
-      setTimeout(() => setSaveStatus('idle'), 2000);
-    }, 800);
-  };
 
   const handleUpdate = (key: string, value: string) => {
     setLocalSettings(prev => ({ ...prev, [key]: value }));
@@ -47,7 +25,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onUpdateSetting, onUrlCha
 
 const appsScriptCode = `
 /**
- * API FLOTA PRO v9.6 - Bajas de vehículos y catálogos
+ * API FLOTA PRO v9.13 - Eliminaciones exclusivas para administradores
  */
 
 const CONFIG = {
@@ -71,7 +49,8 @@ const CONFIG = {
     "Incidencias": ["id", "consecutiveNumber", "date", "type", "title", "description", "vehicleId", "driverId", "status"],
     "Planeacion": ["id", "date", "vehicleId", "driverId", "areaId", "notes", "departureTime", "arrivalTime", "destination", "status"],
     "Areas": ["id", "name", "description"],
-    "BitacorasViaje": ["id", "date", "departureTime", "arrivalTime", "driverId", "vehicleId", "initialOdometer", "finalOdometer", "destination", "areaId", "notes", "initialFuelLevel", "finalFuelLevel"],
+    "BitacorasViaje": ["id", "date", "departureTime", "arrivalTime", "driverId", "vehicleId", "initialOdometer", "finalOdometer", "destination", "areaId", "notes", "initialFuelLevel", "finalFuelLevel", "signatureName", "signatureData", "requestId", "status"],
+    "SolicitudesVehiculo": ["id", "filledDate", "travelDate", "requesterName", "areaId", "vehicleId", "passengers", "departureTime", "returnTime", "activity", "signatureName", "signatureData", "status", "travelLogId"],
     "Mantenimiento": ["id", "consecutiveNumber", "date", "vehicleId", "serviceType", "description", "quoteNumber", "quoteCost", "paymentMethod", "invoiceNumber", "invoiceAmount", "odometer", "provider", "entryDate", "exitDate", "status", "estimatedDeliveryDate", "internalDocumentNumber", "providerContact"],
     "TiposMantenimiento": ["id", "name"],
     "TiposIncidencia": ["id", "name", "value"],
@@ -103,6 +82,8 @@ const ACTION_TO_SHEET = {
   "delete-area": "Areas",
   "travel-log": "BitacorasViaje",
   "update-travel-log": "BitacorasViaje",
+  "vehicle-request": "SolicitudesVehiculo",
+  "update-vehicle-request": "SolicitudesVehiculo",
   "maintenance": "Mantenimiento",
   "update-maintenance": "Mantenimiento",
   "maintenance-type": "TiposMantenimiento",
@@ -139,6 +120,7 @@ function doGet() {
     plannings: data.planeacion,
     areas: data.areas,
     travelLogs: data.bitacorasviaje,
+    vehicleRequests: data.solicitudesvehiculo,
     maintenanceRecords: data.mantenimiento,
     maintenanceTypes: data.tiposmantenimiento,
     incidentTypes: data.tiposincidencia,
@@ -191,6 +173,7 @@ function doPost(e) {
 
     if (action === "delete-vehicle" || action === "delete-area" || action === "delete-maintenance-type" || action === "delete-supplier") {
       if (!payload.id) throw new Error("El id es obligatorio para eliminar.");
+      ensureAdminActor(ss, payload.actorId);
       deleteRowById(sheet, payload.id, headersInSheet);
       return jsonResponse({ status: "success" });
     }
@@ -207,6 +190,21 @@ function doPost(e) {
   } catch (err) {
     return jsonResponse({ status: "error", message: String(err && err.message ? err.message : err) });
   }
+}
+
+function ensureAdminActor(ss, actorId) {
+  if (!actorId) throw new Error("Solo un administrador puede eliminar registros.");
+  const usersSheet = getOrCreateSheet(ss, "Usuarios");
+  const headers = getSheetHeaders(usersSheet);
+  const data = usersSheet.getDataRange().getValues();
+  const idIndex = headers.indexOf("id");
+  const roleIndex = headers.indexOf("role");
+  if (idIndex === -1 || roleIndex === -1) throw new Error("No se pudo validar el administrador.");
+
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][idIndex]) === String(actorId) && String(data[i][roleIndex]).toLowerCase() === "admin") return;
+  }
+  throw new Error("Solo un administrador puede eliminar registros.");
 }
 
 function parsePostBody(e) {
@@ -379,6 +377,35 @@ function getSheetHeaders(sheet) {
   });
 }
 
+var TIME_COLUMNS = {
+  departureTime: true,
+  arrivalTime: true,
+  returnTime: true
+};
+
+function normalizeSheetValue(header, value) {
+  if (TIME_COLUMNS[header]) return normalizeSheetTime(value);
+  return value;
+}
+
+function normalizeSheetTime(value) {
+  if (value instanceof Date) {
+    return Utilities.formatDate(value, Session.getScriptTimeZone(), "HH:mm");
+  }
+  if (typeof value === "number" && isFinite(value)) {
+    var totalMinutes = Math.round(value * 24 * 60) % (24 * 60);
+    return String(Math.floor(totalMinutes / 60)).padStart(2, "0") + ":" +
+      String(totalMinutes % 60).padStart(2, "0");
+  }
+  var raw = String(value == null ? "" : value).trim();
+  var isoMatch = raw.match(/T(\d{2}):(\d{2})/);
+  if (isoMatch) return isoMatch[1] + ":" + isoMatch[2];
+  var timeMatch = raw.match(/^(\d{1,2}):(\d{2})/);
+  if (timeMatch) return String(Number(timeMatch[1])).padStart(2, "0") + ":" + timeMatch[2];
+  return raw;
+}
+
+// Lectura de datos: conserva esta declaración junto con el bloque siguiente.
 function getSheetData(ss, name) {
   const sheet = ss.getSheetByName(name);
   if (!sheet) return [];
@@ -388,7 +415,7 @@ function getSheetData(ss, name) {
   return values.map(function(row) {
     const obj = {};
     headers.forEach(function(h, i) {
-      if (h) obj[h] = row[i];
+      if (h) obj[h] = normalizeSheetValue(h, row[i]);
     });
     return obj;
   });
@@ -465,19 +492,9 @@ function getSheetData(ss, name) {
               <h3 className="text-sm font-black flex items-center gap-2 uppercase tracking-widest"><span className="material-symbols-outlined text-primary">bolt</span>Configuración Google Sheets</h3>
             </div>
             <div className="p-8 space-y-8">
-              <div className="space-y-3">
-                <label className="text-[11px] font-black text-text-muted uppercase tracking-widest ml-1">URL /exec</label>
-                <div className={`flex rounded-xl border transition-all ${saveStatus === 'error' ? 'border-rose-500 ring-4 ring-rose-50' : 'border-border focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/10'}`}>
-                  <input className="flex-1 text-text text-sm font-bold p-4 bg-transparent outline-none" placeholder="https://script.google.com/macros/s/.../exec" value={serviceUrl} onChange={(e) => { setServiceUrl(e.target.value); if (urlError) setUrlError(''); }} />
-                  <button onClick={handleSaveUrl} disabled={saveStatus === 'saving'} className="bg-primary text-white px-6 font-black text-[10px] uppercase tracking-widest hover:opacity-90 transition-all">{saveStatus === 'saving' ? 'Guardando...' : 'Actualizar'}</button>
-                </div>
-                {urlError && (
-                  <p className="text-xs font-bold text-rose-600">{urlError}</p>
-                )}
-              </div>
               <div className="bg-secondary rounded-xl p-6 shadow-inner">
                 <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-[10pt] font-black text-primary uppercase tracking-[0.2em] mb-4">Apps Script (v9.6 - Bajas de vehículos y catálogos)</h4>
+                  <h4 className="text-[10pt] font-black text-primary uppercase tracking-[0.2em] mb-4">Apps Script (v9.13 - Eliminaciones exclusivas para administradores)</h4>
                   <button onClick={async () => {
                     try {
                       await navigator.clipboard.writeText(appsScriptCode);

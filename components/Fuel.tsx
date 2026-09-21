@@ -711,7 +711,7 @@ const Fuel: React.FC<FuelProps> = ({
               padding: 0; 
               margin: 0;
               background: white !important; 
-              font-family: 'Inter', sans-serif;
+              font-family: Aptos, "Segoe UI", system-ui, sans-serif;
             }
             .no-print { display: none !important; }
             /* Ensure tables fit on landscape page */

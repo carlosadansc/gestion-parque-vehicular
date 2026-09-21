@@ -20,13 +20,14 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange, appName, cu
     { id: View.MAINTENANCE, label: 'Mantenimiento', icon: 'handyman' },
     { id: View.PLANNING, label: 'Planeación', icon: 'calendar_month' },
     { id: View.TRAVEL_LOGS, label: 'Bitácora', icon: 'route' },
+    { id: View.VEHICLE_REQUESTS, label: 'Solicitudes', icon: 'assignment' },
     { id: View.FUEL, label: 'Combustible', icon: 'local_gas_station' },
     { id: View.INCIDENTS, label: 'Incidencias', icon: 'report_problem' },
     { id: View.CATALOGS, label: 'Catálogos', icon: 'category' },
   ];
 
   const navButtonClass = (isActive: boolean, extra = '') =>
-    `group flex items-center gap-3 px-3 py-2.5 rounded-md text-left text-sm transition-colors ${
+    `group flex items-center gap-3 px-3.5 py-3 rounded-xl text-left text-sm transition-colors ${
       isActive ? 'bg-primary text-white' : 'text-text-muted hover:text-text hover:bg-surface-subtle'
     } ${extra}`.trim();
 
@@ -37,10 +38,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange, appName, cu
 
   return (
     <aside 
-      className="w-60 flex flex-col shrink-0 z-50 bg-surface border-r border-border transition-colors transition-opacity"
+      className="w-64 flex flex-col shrink-0 z-50 bg-surface border-r border-border shadow-[8px_0_24px_-24px_rgb(15_23_42_/_0.35)] transition-colors transition-opacity"
     >
-      <div className="p-4 flex-1 flex flex-col min-h-0 h-full">
-        <div className="flex items-center gap-3 mb-6">
+      <div className="p-5 flex-1 flex flex-col min-h-0 h-full">
+        <div className="flex items-center gap-3 mb-8">
           <img alt="DIF" className="w-10 h-10 object-contain" src="/images/logo-dif.png" />
           <div className="flex flex-col min-w-0">
             <h1 className="text-text text-sm font-medium truncate">{appName}</h1>
@@ -48,7 +49,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange, appName, cu
           </div>
         </div>
 
-        <nav className="flex flex-col gap-0.5 flex-1 overflow-y-auto min-h-0">
+        <nav className="flex flex-col gap-1 flex-1 overflow-y-auto min-h-0">
           {menuItems.map((item) => (
             <button
               key={item.id}
@@ -62,7 +63,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange, appName, cu
           
           {currentUser?.role === 'admin' && (
             <>
-              <div className="my-3 border-t border-border"></div>
+              <div className="my-4 border-t border-border"></div>
               <button
                 onClick={() => onViewChange(View.USERS)}
                 className={navButtonClass(activeView === View.USERS)}
@@ -82,9 +83,9 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange, appName, cu
           </button>
         </nav>
 
-        <div className="mt-4 pt-4 border-t border-border">
+        <div className="mt-6 pt-5 border-t border-border">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center text-white text-xs font-medium">
+            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white text-xs font-semibold shadow-sm">
               {currentUser?.name?.[0]?.toUpperCase() || 'U'}
             </div>
             <div className="flex flex-col min-w-0 flex-1">
@@ -92,7 +93,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange, appName, cu
               <p className="text-text-muted text-xs">{currentUser?.role === 'admin' ? 'Admin' : 'Usuario'}</p>
             </div>
           </div>
-          <button onClick={onLogout} className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-md text-text-muted hover:text-text hover:bg-surface-subtle transition-colors text-sm">
+          <button onClick={onLogout} className="w-full flex items-center justify-center gap-2 min-h-10 px-3 rounded-xl text-text-muted hover:text-text hover:bg-surface-subtle transition-colors text-sm">
             <span className="material-symbols-outlined ui-icon text-[18px]">logout</span>
             Cerrar Sesión
           </button>

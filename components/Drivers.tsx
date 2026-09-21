@@ -191,7 +191,7 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
             padding: 0; 
             margin: 0;
             background: white !important; 
-            font-family: 'Inter', sans-serif;
+            font-family: Aptos, "Segoe UI", system-ui, sans-serif;
           }
           .no-print { display: none !important; }
           @page { margin: 0.5cm; size: letter; }
@@ -231,7 +231,7 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
         </div>
 
         <div className="overflow-auto max-h-[62vh] custom-scrollbar">
-          <table className="table-professional table-sticky-header table-density-compact">
+          <table className="table-professional table-driver-directory table-sticky-header table-density-compact">
             <thead>
               <tr>
                 <SortableTh label="Chofer" sortKey="driver" sortConfig={sortConfig} onSort={requestSort} />
@@ -260,8 +260,8 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
                       </div>
                     </td>
                     <td>
-                      <span className="text-sm text-text-muted">{driver.licenseType}</span>
-                      <p className="text-xs text-text-muted">{driver.licenseNumber}</p>
+                      <span className="text-sm text-text-muted">{driver.licenseType || '—'}</span>
+                      <p className="text-xs text-text-muted">{driver.licenseNumber || '—'}</p>
                     </td>
                     <td>
                       <span className="text-sm text-text-muted">{driver.phone}</span>
@@ -269,8 +269,8 @@ const Drivers: React.FC<DriversProps> = ({ drivers, vehicles, searchQuery, onAdd
                     <td>
                       {assignedVehicle ? (
                         <div>
-                          <p className="text-sm font-medium text-text">{assignedVehicle.model}</p>
-                          <p className="text-xs text-text-muted">{assignedVehicle.plate}</p>
+                          <p className="text-sm font-medium text-text">{assignedVehicle.model || '—'}</p>
+                          <p className="text-xs text-text-muted">{assignedVehicle.plate || '—'}</p>
                         </div>
                       ) : (
                         <span className="text-sm text-text-muted">Sin asignar</span>

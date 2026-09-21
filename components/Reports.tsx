@@ -27,6 +27,7 @@ import {
   Vehicle,
   VehicleInspection
 } from '../types';
+import { timeToMinutes, toDateInputValue } from '../utils/dateTime';
 
 interface ReportsProps {
   vehicles: Vehicle[];
@@ -73,13 +74,13 @@ const INSPECTION_SCORE: Record<string, number> = {
 };
 
 const normalizeDateInput = (value: string) => {
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? null : date;
+  const normalized = toDateInputValue(value);
+  return normalized ? new Date(`${normalized}T12:00:00`) : null;
 };
 
 const toMonthKey = (value: string) => {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return null;
+  const date = normalizeDateInput(value);
+  if (!date || Number.isNaN(date.getTime())) return null;
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   return `${year}-${month}`;
@@ -94,18 +95,7 @@ const formatMonth = (key: string) => {
 const getTravelDurationHours = (departure?: string, arrival?: string): number => {
   if (!departure || !arrival) return 0;
 
-  const parseTime = (value: string) => {
-    if (value.includes('T')) {
-      const parsed = new Date(value);
-      if (Number.isNaN(parsed.getTime())) return null;
-      return parsed.getHours() * 60 + parsed.getMinutes();
-    }
-
-    const slice = value.length >= 5 ? value.slice(0, 5) : value;
-    const [h, m] = slice.split(':').map(Number);
-    if (!Number.isFinite(h) || !Number.isFinite(m)) return null;
-    return h * 60 + m;
-  };
+  const parseTime = (value: string) => timeToMinutes(value);
 
   const start = parseTime(departure);
   const end = parseTime(arrival);
@@ -740,15 +730,9 @@ const ChartWrap: React.FC<{ children: React.ReactNode; className?: string }> = (
 );
 
 const KpiCard: React.FC<{ title: string; value: string; hint: string; tone: 'blue' | 'green' | 'amber' | 'rose' }> = ({ title, value, hint, tone }) => {
-  const leftBorder = {
-    blue: 'border-l-blue-500',
-    green: 'border-l-emerald-500',
-    amber: 'border-l-amber-500',
-    rose: 'border-l-rose-500'
-  }[tone];
 
   return (
-    <div className={`bg-surface border border-border border-l-4 ${leftBorder} rounded-xl p-4`}>
+    <div data-tone={tone} className="bg-surface border border-border rounded-xl p-4">
       <p className="text-[10px] font-black text-text-muted uppercase tracking-widest">{title}</p>
       <p className="text-2xl font-black text-text mt-2">{value}</p>
       <p className="text-xs font-bold text-text-muted mt-1">{hint}</p>

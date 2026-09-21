@@ -2,6 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { Planning, Vehicle, Driver, Area, AppSetting } from '../types';
+import { formatTime as formatTimeValue, toTimeInputValue as normalizeTimeValue } from '../utils/dateTime';
 
 interface PlanningProps {
   plannings: Planning[];
@@ -13,6 +14,7 @@ interface PlanningProps {
   onUpdatePlanning: (p: Planning) => Promise<void>;
   onAddArea: (a: Omit<Area, 'id'>) => Promise<void>;
   onDeleteArea: (id: string) => Promise<void>;
+  canManageDeletions: boolean;
 }
 
 type ViewMode = 'week' | 'day' | 'month';
@@ -24,9 +26,7 @@ const formatTime = (time: string | undefined) => {
   // Si viene en formato ISO (ej. 1899-12-30T14:05:00.000Z)
   if (time.includes('T')) {
     try {
-      const date = new Date(time);
-      // Usamos en-US para forzar formato 12h con AM/PM limpiamente, aunque el resto de la app sea es-ES
-      return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+      return formatTimeValue(time);
     } catch (e) {
       return time;
     }
@@ -62,18 +62,11 @@ const toTimeInputValue = (value: unknown): string => {
   if (!raw) return '';
   if (/^\d{2}:\d{2}$/.test(raw)) return raw;
   if (/^\d{2}:\d{2}:\d{2}$/.test(raw)) return raw.slice(0, 5);
-  if (raw.includes('T')) {
-    const parsed = new Date(raw);
-    if (!Number.isNaN(parsed.getTime())) {
-      const hh = String(parsed.getHours()).padStart(2, '0');
-      const mm = String(parsed.getMinutes()).padStart(2, '0');
-      return `${hh}:${mm}`;
-    }
-  }
+  if (raw.includes('T')) return normalizeTimeValue(raw);
   return '';
 };
 
-const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drivers, areas, onAddPlanning, onUpdatePlanning, onAddArea, onDeleteArea }) => {
+const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drivers, areas, onAddPlanning, onUpdatePlanning, onAddArea, onDeleteArea, canManageDeletions }) => {
   const [viewMode, setViewMode] = useState<ViewMode>('week');
   const [statusFilter, setStatusFilter] = useState<'all' | 'scheduled' | 'completed' | 'cancelled'>('all');
   const [showModal, setShowModal] = useState(false);
@@ -476,7 +469,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
             margin: 0 !important;
             padding: 0 !important;
             background: white !important;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: Aptos, "Segoe UI", system-ui, sans-serif;
             font-size: 10pt;
             line-height: 1.4;
             overflow: visible !important;
@@ -573,7 +566,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
           
           #planning-printable th {
             background-color: #f1f5f9 !important;
-            font-weight: 800;
+            font-weight: 700;
             text-transform: uppercase;
             font-size: 8pt;
             letter-spacing: 0.05em;
@@ -582,7 +575,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
           /* Day header rows */
           #planning-printable .day-header {
             background-color: #e2e8f0 !important;
-            font-weight: 800;
+            font-weight: 700;
           }
           
           /* ========================================
@@ -601,7 +594,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
             color: white !important;
             padding: 6px 12px;
             font-size: 9pt;
-            font-weight: 800;
+            font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.1em;
             margin-bottom: 1rem;
@@ -978,13 +971,15 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
                       <div className="size-8 rounded-md bg-blue-100 text-blue-600 flex items-center justify-center"><span className="material-symbols-outlined ui-icon text-base">location_on</span></div>
                       <span className="text-sm font-bold text-slate-800">{a.name}</span>
                     </div>
-                    <button 
-                      onClick={() => handleDeleteArea(a.id)}
-                      className="size-8 rounded-md hover:bg-rose-100 text-text-muted hover:text-rose-600 flex items-center justify-center transition-colors"
-                      title="Eliminar área"
-                    >
-                      <span className="material-symbols-outlined ui-icon text-base">delete</span>
-                    </button>
+                    {canManageDeletions && (
+                      <button 
+                        onClick={() => handleDeleteArea(a.id)}
+                        className="size-8 rounded-md hover:bg-rose-100 text-text-muted hover:text-rose-600 flex items-center justify-center transition-colors"
+                        title="Eliminar área"
+                      >
+                        <span className="material-symbols-outlined ui-icon text-base">delete</span>
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>

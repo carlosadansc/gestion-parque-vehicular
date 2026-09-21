@@ -1,7 +1,8 @@
 
-import React, { useState, useMemo } from 'react';
-import { TravelLog, Vehicle, Driver, Area, AppSetting } from '../types';
+import React, { useEffect, useState, useMemo } from 'react';
+import { TravelLog, Vehicle, Driver, Area, AppSetting, VehicleRequest } from '../types';
 import { SortableTh, useSortableData } from '../utils/tableSort';
+import { formatTime as formatTimeValue, toTimeInputValue as normalizeTimeValue } from '../utils/dateTime';
 
 interface TravelLogsProps {
   travelLogs: TravelLog[];
@@ -12,6 +13,8 @@ interface TravelLogsProps {
   onAddTravelLog: (log: Omit<TravelLog, 'id'>) => Promise<void>;
   onUpdateTravelLog: (log: TravelLog) => Promise<void>;
   onSync: () => void;
+  initialRequest?: VehicleRequest | null;
+  onInitialRequestHandled?: () => void;
 }
 
 // Helper para formato de hora 12h (AM/PM)
@@ -21,8 +24,7 @@ const formatTime = (time: string | undefined) => {
   // Si viene en formato ISO
   if (time.includes('T')) {
     try {
-      const date = new Date(time);
-      return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+      return formatTimeValue(time);
     } catch (e) {
       return time;
     }
@@ -59,14 +61,7 @@ const toTimeInputValue = (value: unknown): string => {
   if (!raw) return '';
   if (/^\d{2}:\d{2}$/.test(raw)) return raw;
   if (/^\d{2}:\d{2}:\d{2}$/.test(raw)) return raw.slice(0, 5);
-  if (raw.includes('T')) {
-    const parsed = new Date(raw);
-    if (!Number.isNaN(parsed.getTime())) {
-      const hh = String(parsed.getHours()).padStart(2, '0');
-      const mm = String(parsed.getMinutes()).padStart(2, '0');
-      return `${hh}:${mm}`;
-    }
-  }
+  if (raw.includes('T')) return normalizeTimeValue(raw);
   return '';
 };
 
@@ -75,11 +70,7 @@ const calculateDuration = (start: string, end: string) => {
 
   // Normalizar cualquier formato a HH:MM para cálculo
   const extractTime = (t: string) => {
-    if (t.includes('T')) {
-        const d = new Date(t);
-        if (isNaN(d.getTime())) return '00:00';
-        return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
-    }
+    if (t.includes('T')) return normalizeTimeValue(t) || '00:00';
     // Si viene HH:MM:SS recortamos, si es HH:MM lo dejamos
     return t.length > 5 ? t.substring(0, 5) : t;
   };
@@ -108,7 +99,7 @@ const calculateDuration = (start: string, end: string) => {
   return `${hLabel} ${mLabel}`.trim();
 };
 
-const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [], drivers = [], areas = [], settings = [], onAddTravelLog, onUpdateTravelLog, onSync }) => {
+const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [], drivers = [], areas = [], settings = [], onAddTravelLog, onUpdateTravelLog, onSync, initialRequest, onInitialRequestHandled }) => {
   const [showModal, setShowModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [viewingLog, setViewingLog] = useState<TravelLog | null>(null);
@@ -139,8 +130,32 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
     areaId: '',
     notes: '',
     initialFuelLevel: 100,
-    finalFuelLevel: 100
+    finalFuelLevel: 100,
+    requestId: ''
   });
+
+  useEffect(() => {
+    if (!initialRequest) return;
+    setFormError('');
+    setEditingLog(null);
+    setFormData({
+      date: toDateInputValue(initialRequest.travelDate, new Date().toISOString().split('T')[0]),
+      departureTime: '',
+      arrivalTime: '',
+      driverId: '',
+      vehicleId: String(initialRequest.vehicleId ?? '').trim(),
+      initialOdometer: '',
+      finalOdometer: '',
+      destination: String(initialRequest.activity ?? ''),
+      areaId: String(initialRequest.areaId ?? '').trim(),
+      notes: 'Solicitud ' + initialRequest.id,
+      initialFuelLevel: 100,
+      finalFuelLevel: 100,
+      requestId: initialRequest.id
+    });
+    setShowModal(true);
+    onInitialRequestHandled?.();
+  }, [initialRequest]);
 
   type TravelLogSortKey = 'date' | 'unit' | 'destination' | 'odometer';
   const travelLogSortAccessors = useMemo<Record<TravelLogSortKey, (log: TravelLog) => unknown>>(() => ({
@@ -181,7 +196,8 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
         areaId: formData.areaId,
         notes: formData.notes,
         initialFuelLevel: Number(formData.initialFuelLevel),
-        finalFuelLevel: Number(formData.finalFuelLevel)
+        finalFuelLevel: Number(formData.finalFuelLevel),
+        requestId: formData.requestId || undefined
       };
 
       if (editingLog) {
@@ -218,7 +234,8 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
       areaId: String(log.areaId ?? '').trim(),
       notes: String(log.notes ?? ''),
       initialFuelLevel: Number.isFinite(Number(log.initialFuelLevel)) ? Number(log.initialFuelLevel) : 100,
-      finalFuelLevel: Number.isFinite(Number(log.finalFuelLevel)) ? Number(log.finalFuelLevel) : 100
+      finalFuelLevel: Number.isFinite(Number(log.finalFuelLevel)) ? Number(log.finalFuelLevel) : 100,
+      requestId: String(log.requestId ?? '')
     });
     setShowModal(true);
   };
@@ -243,7 +260,8 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
       areaId: '', 
       notes: '',
       initialFuelLevel: 100,
-      finalFuelLevel: 100
+      finalFuelLevel: 100,
+      requestId: ''
     });
   };
 
@@ -289,7 +307,7 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
              padding: 0;
              margin: 0;
              background: white !important;
-             font-family: 'Inter', sans-serif;
+             font-family: Aptos, "Segoe UI", system-ui, sans-serif;
            }
            #blank-bitacora-printable, #blank-bitacora-printable * {
              visibility: visible;
@@ -362,7 +380,7 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
                 const vehicle = vehicles.find(v => v.id === log.vehicleId);
                 const driver = drivers.find(d => d.id === log.driverId);
                 const area = areas.find(a => a.id === log.areaId);
-                const isComplete = log.arrivalTime && log.finalOdometer && Number(log.finalOdometer) > 0;
+                const isComplete = log.status === 'completed' || Boolean(log.arrivalTime && Number(log.finalOdometer) > 0);
                 
                 return (
                   <tr key={log.id} className="hover:bg-surface-subtle/50 transition-colors group">
@@ -778,7 +796,8 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
                <div className="signature-section absolute bottom-[1.5cm] left-[1.5cm] right-[1.5cm]">
                    <div className="grid grid-cols-2 gap-24 text-center">
                        <div className="signature-line border-t-2 border-slate-900 pt-4">
-                           <p className="text-[9pt] font-black uppercase text-text">{selectedDriver?.name || 'OPERADOR RESPONSABLE'}</p>
+                           {selectedLog.signatureData && <img src={selectedLog.signatureData} alt="Firma digital" className="mx-auto mb-2 h-14 max-w-[220px] object-contain" />}
+                           <p className="text-[9pt] font-black uppercase text-text">{selectedLog.signatureName || selectedDriver?.name || 'OPERADOR RESPONSABLE'}</p>
                            <p className="text-[7pt] font-bold text-text-muted mt-1 uppercase tracking-widest">Operador</p>
                            <p className="text-[7pt] font-bold text-text-muted uppercase tracking-widest">Salida / Llegada</p>
                        </div>

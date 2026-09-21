@@ -209,7 +209,7 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
             padding: 0 !important;
             margin: 0 !important;
             background: white !important;
-            font-family: 'Inter', sans-serif !important;
+            font-family: Aptos, "Segoe UI", system-ui, sans-serif !important;
             z-index: 9999 !important;
           }
           .no-print {
@@ -448,7 +448,7 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
                           <button 
                             type="button"
                             onClick={() => removeAccessory(index)}
-                            className="size-5 rounded hover:bg-rose-100 text-slate-300 hover:text-rose-500 flex items-center justify-center transition-all"
+                            className="size-5 rounded hover:bg-rose-100 text-primary/60 hover:text-rose-600 flex items-center justify-center transition-all"
                           >
                             <span className="material-symbols-outlined ui-icon text-xs">close</span>
                           </button>
