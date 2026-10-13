@@ -335,6 +335,7 @@ const App: React.FC = () => {
   const [loginError, setLoginError] = useState('');
   const [setupError, setSetupError] = useState('');
   const [isBootstrapping, setIsBootstrapping] = useState(false);
+  const [initialConfigurationStatus, setInitialConfigurationStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const [bootstrapForm, setBootstrapForm] = useState({
     name: '',
     username: '',
@@ -486,8 +487,10 @@ const App: React.FC = () => {
       document.documentElement.classList.add('dark');
     }
 
-    // Auto-sync with Google Sheets on app start
-    handleSync();
+    // Verify the saved users before offering initial administrator setup.
+    void handleSync().then((loaded) => {
+      setInitialConfigurationStatus(loaded ? 'ready' : 'error');
+    });
   }, []);
 
   const toggleDarkMode = () => {
@@ -511,7 +514,7 @@ const App: React.FC = () => {
     setSyncStatus('pending');
     try {
       const data = await googleSheets.fetchData();
-      if (data) {
+      if (data && Array.isArray(data.users)) {
         if (data.vehicles) setVehicles(data.vehicles);
         if (data.drivers) setDrivers(data.drivers);
         if (data.fuelEntries) setFuelEntries(data.fuelEntries);
@@ -527,7 +530,7 @@ const App: React.FC = () => {
         if (data.incidentTypes && data.incidentTypes.length > 0) setIncidentTypes(data.incidentTypes);
         if (data.suppliers && data.suppliers.length > 0) setSuppliers(data.suppliers);
         if (data.settings && data.settings.length > 0) setAppSettings(data.settings);
-        if (data.users) setAppUsers(data.users);
+        setAppUsers(data.users);
         if (data.inspections) setInspections(data.inspections);
         setSyncStatus('synced');
         return true;
@@ -548,6 +551,12 @@ const App: React.FC = () => {
     );
   }, [pushToast, handleSync]);
 
+  const retryInitialConfiguration = async () => {
+    setInitialConfigurationStatus('loading');
+    const loaded = await handleSync();
+    setInitialConfigurationStatus(loaded ? 'ready' : 'error');
+  };
+
   const ensureServiceUrlConfigured = () => {
     if (!googleSheets.isEnvironmentConfigured()) {
       setLoginError('La aplicación no tiene configurada la variable VITE_GOOGLE_APPS_SCRIPT_URL.');
@@ -565,6 +574,11 @@ const App: React.FC = () => {
     e.preventDefault();
     setSetupError('');
     setLoginError('');
+
+    if (initialConfigurationStatus !== 'ready') {
+      setSetupError('Espera a que se confirme la configuración de la cuenta.');
+      return;
+    }
 
     if (appUsers.length > 0) {
       setSetupError('Ya hay usuarios registrados. Inicia sesion con una cuenta existente.');
@@ -1939,7 +1953,32 @@ const App: React.FC = () => {
             </button>
           </form>
 
-          {appUsers.length === 0 && (
+          {initialConfigurationStatus === 'loading' && (
+            <div role="status" aria-live="polite" className="mt-6 border-t border-border pt-6">
+              <p className="flex items-center justify-center gap-2 text-xs font-semibold text-text-muted">
+                <span className="loading-spinner h-4 w-4 animate-spin" aria-hidden="true"></span>
+                Cargando configuraciones...
+              </p>
+            </div>
+          )}
+
+          {initialConfigurationStatus === 'error' && (
+            <div role="alert" className="mt-6 border-t border-border pt-6 space-y-3">
+              <p className="text-xs text-text-muted text-center">
+                No se pudo confirmar si ya existe un administrador. Revisa la conexión con Google Sheets e inténtalo de nuevo.
+              </p>
+              <button
+                type="button"
+                onClick={retryInitialConfiguration}
+                disabled={isSyncing}
+                className="w-full border border-border text-text py-2.5 rounded-lg font-medium text-sm hover:bg-surface-subtle transition-colors disabled:opacity-60"
+              >
+                {isSyncing ? 'Cargando configuraciones...' : 'Reintentar'}
+              </button>
+            </div>
+          )}
+
+          {initialConfigurationStatus === 'ready' && appUsers.length === 0 && (
             <form onSubmit={handleBootstrapAdmin} autoComplete="off" className="mt-6 border-t border-border pt-6 space-y-3">
               <p className="text-xs font-semibold text-text">Configuracion inicial: crear administrador</p>
               <input
