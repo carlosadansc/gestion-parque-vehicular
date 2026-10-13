@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AppSetting, Area, Driver, TravelLog, User, Vehicle } from '../types';
-import { formatDate as formatDateValue, toTimeInputValue } from '../utils/dateTime';
+import { formatDate as formatDateValue, getLocalDateInputValue, toDateInputValue, toTimeInputValue } from '../utils/dateTime';
 
 const DEFAULT_LOGO_SRC = '/images/logo-dif.png';
 
@@ -44,7 +44,7 @@ type TabletFormData = {
   requestId: string;
 };
 
-const today = () => new Date().toISOString().split('T')[0];
+const today = () => getLocalDateInputValue();
 
 const initialFormData = (): TabletFormData => ({
   date: today(),
@@ -66,7 +66,7 @@ const initialFormData = (): TabletFormData => ({
 const formatDate = (value: string) => formatDateValue(value);
 
 const formDataFromLog = (log: TravelLog): TabletFormData => ({
-  date: String(log.date || '').slice(0, 10) || today(),
+  date: toDateInputValue(log.date, today()),
   departureTime: toTimeInputValue(log.departureTime),
   arrivalTime: toTimeInputValue(log.arrivalTime),
   driverId: String(log.driverId || ''),

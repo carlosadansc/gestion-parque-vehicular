@@ -3,6 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { FuelEntry, FuelAcquisition, FuelDelivery, Vehicle, Driver, AppSetting, Area, Supplier } from '../types';
 import { SortableTh, useSortableData } from '../utils/tableSort';
+import { formatDate, formatDateTime, getLocalDateInputValue, toDateInputValue } from '../utils/dateTime';
 
 interface FuelProps {
   fuelHistory: FuelEntry[];
@@ -27,17 +28,6 @@ type FuelLoadSortKey = 'date' | 'vehicle' | 'odometer' | 'liters' | 'performance
 type FuelAcquisitionSortKey = 'consecutive' | 'folio' | 'invoice' | 'invoiceDate' | 'type' | 'validity' | 'description' | 'area' | 'supplier' | 'amount';
 type FuelDeliverySortKey = 'consecutive' | 'date' | 'acquisition' | 'type' | 'area' | 'purpose' | 'recipient' | 'amount';
 
-const toDateInputValue = (value: unknown, fallback = ''): string => {
-  if (!value) return fallback;
-  const raw = String(value).trim();
-  if (!raw) return fallback;
-  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
-  if (/^\d{4}-\d{2}-\d{2}T/.test(raw)) return raw.slice(0, 10);
-  const parsed = new Date(raw);
-  if (Number.isNaN(parsed.getTime())) return fallback;
-  return parsed.toISOString().slice(0, 10);
-};
-
 const Fuel: React.FC<FuelProps> = ({
   fuelHistory = [],
   fuelAcquisitions = [],
@@ -55,7 +45,7 @@ const Fuel: React.FC<FuelProps> = ({
   onSync,
   settings = []
 }) => {
-  const today = new Date().toISOString().split('T')[0];
+  const today = getLocalDateInputValue();
   const [activeTab, setActiveTab] = useState<'loads' | 'acquisitions' | 'deliveries'>('loads');
   const [showModal, setShowModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -132,7 +122,7 @@ const Fuel: React.FC<FuelProps> = ({
     setFormError('');
     setEditingEntry(entry);
     setFormData({
-      date: toDateInputValue(entry.date, new Date().toISOString().split('T')[0]),
+      date: toDateInputValue(entry.date, today),
       vehicleId: String(entry.vehicleId ?? '').trim(),
       driverId: String(entry.driverId ?? '').trim(),
       liters: entry.liters !== undefined && entry.liters !== null ? String(entry.liters) : '',
@@ -189,9 +179,7 @@ const Fuel: React.FC<FuelProps> = ({
 
     return {
       processedHistory: historyWithPerformance.sort((a, b) => {
-        const dateA = a.date ? new Date(a.date).getTime() : 0;
-        const dateB = b.date ? new Date(b.date).getTime() : 0;
-        return dateB - dateA;
+        return toDateInputValue(b.date).localeCompare(toDateInputValue(a.date));
       }),
       globalAveragePerformance: performanceCount > 0 ? totalPerformanceSum / performanceCount : 0
     };
@@ -239,9 +227,7 @@ const Fuel: React.FC<FuelProps> = ({
         return withinStart && withinEnd && matchesType;
       })
       .sort((a, b) => {
-        const aMs = new Date(String(a.date || '')).getTime();
-        const bMs = new Date(String(b.date || '')).getTime();
-        return bMs - aMs;
+      return toDateInputValue(b.date).localeCompare(toDateInputValue(a.date));
       });
   }, [fuelAcquisitions, acquisitionFilters]);
   const acquisitionTotals = useMemo(() => {
@@ -308,7 +294,7 @@ const Fuel: React.FC<FuelProps> = ({
             : resolvedType === 'voucher');
         return withinStart && withinEnd && matchesType;
       })
-      .sort((a, b) => new Date(String(b.date || '')).getTime() - new Date(String(a.date || '')).getTime());
+      .sort((a, b) => toDateInputValue(b.date).localeCompare(toDateInputValue(a.date)));
   }, [fuelDeliveries, fuelAcquisitions, deliveryFilters]);
 
   const acquisitionSortAccessors = useMemo<Record<FuelAcquisitionSortKey, (entry: FuelAcquisition) => unknown>>(() => ({
@@ -404,7 +390,7 @@ const Fuel: React.FC<FuelProps> = ({
       }
 
       setFormData({ 
-        date: new Date().toISOString().split('T')[0],
+        date: getLocalDateInputValue(),
         vehicleId: '', 
         driverId: '', 
         liters: '', 
@@ -445,13 +431,13 @@ const Fuel: React.FC<FuelProps> = ({
     setAcquisitionError('');
     setEditingAcquisition(entry);
     setAcquisitionForm({
-      date: toDateInputValue(entry.date, new Date().toISOString().split('T')[0]),
+      date: toDateInputValue(entry.date, today),
       internalFolio: String(entry.internalFolio || ''),
       invoiceNumber: String(entry.invoiceNumber || ''),
       invoiceDate: toDateInputValue(entry.invoiceDate),
       isQr: Boolean(entry.isQr),
-      validFrom: toDateInputValue(entry.validFrom, new Date().toISOString().split('T')[0]),
-      validTo: toDateInputValue(entry.validTo, new Date().toISOString().split('T')[0]),
+      validFrom: toDateInputValue(entry.validFrom, today),
+      validTo: toDateInputValue(entry.validTo, today),
       description: String(entry.description || ''),
       amount: Number(entry.amount) ? String(entry.amount) : '',
       area: String(entry.area || ''),
@@ -474,7 +460,7 @@ const Fuel: React.FC<FuelProps> = ({
       setAcquisitionError('Debes capturar el rango de vigencia.');
       return;
     }
-    if (new Date(acquisitionForm.validFrom).getTime() > new Date(acquisitionForm.validTo).getTime()) {
+    if (acquisitionForm.validFrom > acquisitionForm.validTo) {
       setAcquisitionError('La fecha final no puede ser menor a la inicial.');
       return;
     }
@@ -1115,7 +1101,7 @@ const Fuel: React.FC<FuelProps> = ({
                 return (
                   <tr key={entry.id}>
                     <td className="font-medium">
-                      {entry.date ? new Date(entry.date).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }) : '---'}
+                      {entry.date ? formatDate(entry.date) : '---'}
                     </td>
                     <td>
                       <p className="font-medium text-text">{vehicle?.plate || entry.vehicleId || 'S/P'}</p>
@@ -1177,14 +1163,14 @@ const Fuel: React.FC<FuelProps> = ({
                   <td className="col-consecutive font-black text-blue-700">{entry.consecutiveNumber || '---'}</td>
                   <td className="col-folio font-medium truncate" title={entry.internalFolio || 'S/N'}>{entry.internalFolio || 'S/N'}</td>
                   <td className="col-invoice font-medium truncate" title={entry.invoiceNumber || 'S/N'}>{entry.invoiceNumber || 'S/N'}</td>
-                  <td className="col-invoice-date text-xs font-bold text-text-muted">{entry.invoiceDate ? new Date(entry.invoiceDate).toLocaleDateString() : '---'}</td>
+                  <td className="col-invoice-date text-xs font-bold text-text-muted">{entry.invoiceDate ? formatDate(entry.invoiceDate) : '---'}</td>
                   <td className="col-type">
                     <span className={`badge ${entry.status === 'cancelled' ? 'badge-error' : entry.isQr ? 'badge-success' : 'badge-warning'}`}>
                       {entry.status === 'cancelled' ? 'CANCELADA' : entry.isQr ? 'QR' : 'VALES'}
                     </span>
                   </td>
                   <td className="col-validity text-xs font-bold text-text-muted">
-                    {entry.validFrom ? new Date(entry.validFrom).toLocaleDateString() : '---'} - {entry.validTo ? new Date(entry.validTo).toLocaleDateString() : '---'}
+                    {entry.validFrom ? formatDate(entry.validFrom) : '---'} - {entry.validTo ? formatDate(entry.validTo) : '---'}
                   </td>
                   <td className="col-description font-medium">
                     <span className="table-description-clamp" title={entry.description}>
@@ -1255,7 +1241,7 @@ const Fuel: React.FC<FuelProps> = ({
                 return (
                 <tr key={entry.id}>
                   <td className="font-black text-amber-700">{entry.consecutiveNumber || '---'}</td>
-                  <td className="font-medium">{entry.date ? new Date(entry.date).toLocaleDateString('es-ES') : '---'}</td>
+                  <td className="font-medium">{entry.date ? formatDate(entry.date) : '---'}</td>
                   <td>
                     <p className="font-medium text-text">ADQ #{entry.acquisitionConsecutiveNumber || acquisition?.consecutiveNumber || '---'}</p>
                     <p className="text-xs text-text-muted">Folio: {(entry.acquisitionInternalFolio || acquisition?.internalFolio || 'S/N').toUpperCase()}</p>
@@ -1841,11 +1827,11 @@ const Fuel: React.FC<FuelProps> = ({
                   </p>
                   <p className="text-[8pt] font-black text-text-muted uppercase tracking-widest mt-1">
                     Rango: {acquisitionFilters.startDate || acquisitionFilters.endDate
-                      ? `${acquisitionFilters.startDate ? new Date(`${acquisitionFilters.startDate}T00:00:00`).toLocaleDateString('es-ES') : 'Inicio'} - ${acquisitionFilters.endDate ? new Date(`${acquisitionFilters.endDate}T00:00:00`).toLocaleDateString('es-ES') : 'Hoy'}`
+                      ? `${acquisitionFilters.startDate ? formatDate(acquisitionFilters.startDate) : 'Inicio'} - ${acquisitionFilters.endDate ? formatDate(acquisitionFilters.endDate) : 'Hoy'}`
                       : 'Todas las fechas'}
                   </p>
                   <p className="text-[9pt] text-text-muted font-bold mt-2">
-                    Emision: {new Date().toLocaleDateString('es-ES', {year: 'numeric', month: 'long', day: 'numeric'})}
+                    Emisión: {formatDate(new Date())}
                   </p>
                 </div>
               </div>
@@ -1888,14 +1874,14 @@ const Fuel: React.FC<FuelProps> = ({
                       <tr key={`${entry.id || 'acq'}-${idx}`} className="border-b border-slate-300">
                         <td className="px-2 py-2 text-[8pt] font-black text-blue-700 text-center">{entry.consecutiveNumber || '---'}</td>
                         <td className="px-2 py-2 text-[8pt] font-bold text-center text-text-muted">
-                          {entry.date ? new Date(entry.date).toLocaleDateString('es-ES') : '---'}
+                          {entry.date ? formatDate(entry.date) : '---'}
                         </td>
                         <td className="px-2 py-2 text-[8pt] font-bold text-text uppercase">{entry.internalFolio || 'S/N'}</td>
                         <td className="px-2 py-2 text-[8pt] font-bold text-text uppercase">{entry.invoiceNumber || 'S/N'}</td>
-                        <td className="px-2 py-2 text-[8pt] font-bold text-text-muted text-center">{entry.invoiceDate ? new Date(entry.invoiceDate).toLocaleDateString('es-ES') : '---'}</td>
+                        <td className="px-2 py-2 text-[8pt] font-bold text-text-muted text-center">{entry.invoiceDate ? formatDate(entry.invoiceDate) : '---'}</td>
                         <td className="px-2 py-2 text-[8pt] font-black uppercase text-center">{entry.status === 'cancelled' ? 'CANCELADA' : entry.isQr ? 'QR' : 'VALE'}</td>
                         <td className="px-2 py-2 text-[8pt] font-bold text-text-muted">
-                          {(entry.validFrom ? new Date(entry.validFrom).toLocaleDateString('es-ES') : '---')} - {(entry.validTo ? new Date(entry.validTo).toLocaleDateString('es-ES') : '---')}
+                          {(entry.validFrom ? formatDate(entry.validFrom) : '---')} - {(entry.validTo ? formatDate(entry.validTo) : '---')}
                         </td>
                         <td className="px-2 py-2 text-[8pt] font-bold text-text uppercase">{entry.area || '---'}</td>
                         <td className="px-2 py-2 text-[8pt] font-bold text-text uppercase">{entry.supplier || '---'}</td>
@@ -1959,11 +1945,11 @@ const Fuel: React.FC<FuelProps> = ({
                   </p>
                   <p className="text-[8pt] font-black text-text-muted uppercase tracking-widest mt-1">
                     Rango: {deliveryFilters.startDate || deliveryFilters.endDate
-                      ? `${deliveryFilters.startDate ? new Date(`${deliveryFilters.startDate}T00:00:00`).toLocaleDateString('es-ES') : 'Inicio'} - ${deliveryFilters.endDate ? new Date(`${deliveryFilters.endDate}T00:00:00`).toLocaleDateString('es-ES') : 'Hoy'}`
+                      ? `${deliveryFilters.startDate ? formatDate(deliveryFilters.startDate) : 'Inicio'} - ${deliveryFilters.endDate ? formatDate(deliveryFilters.endDate) : 'Hoy'}`
                       : 'Todas las fechas'}
                   </p>
                   <p className="text-[9pt] text-text-muted font-bold mt-2">
-                    Emision: {new Date().toLocaleDateString('es-ES', {year: 'numeric', month: 'long', day: 'numeric'})}
+                    Emisión: {formatDate(new Date())}
                   </p>
                 </div>
               </div>
@@ -2005,7 +1991,7 @@ const Fuel: React.FC<FuelProps> = ({
                       return (
                       <tr key={`${entry.id || 'delivery'}-${idx}`} className="border-b border-slate-300">
                         <td className="px-2 py-2 text-[8pt] font-black text-amber-700 text-center">{entry.consecutiveNumber || '---'}</td>
-                        <td className="px-2 py-2 text-[8pt] font-bold text-center text-text-muted">{entry.date ? new Date(entry.date).toLocaleDateString('es-ES') : '---'}</td>
+                        <td className="px-2 py-2 text-[8pt] font-bold text-center text-text-muted">{entry.date ? formatDate(entry.date) : '---'}</td>
                         <td className="px-2 py-2 text-[8pt] font-bold text-text uppercase">ADQ #{entry.acquisitionConsecutiveNumber || '---'}</td>
                         <td className="px-2 py-2 text-[8pt] font-black uppercase text-center">{deliveryType === 'qr' ? 'QR' : 'VALE'}</td>
                         <td className="px-2 py-2 text-[8pt] font-bold text-text uppercase">{entry.area || '---'}</td>
@@ -2084,7 +2070,7 @@ const Fuel: React.FC<FuelProps> = ({
                     No. <span className="font-black text-amber-700 text-lg ml-1">{selectedDelivery.consecutiveNumber || '---'}</span>
                   </p>
                   <p className="text-[9pt] text-text-muted font-bold mt-1">
-                    Fecha: {selectedDelivery.date ? new Date(selectedDelivery.date).toLocaleDateString('es-ES', {year: 'numeric', month: 'long', day: 'numeric'}) : '---'}
+                    Fecha: {selectedDelivery.date ? formatDate(selectedDelivery.date) : '---'}
                   </p>
                 </div>
               </div>
@@ -2185,22 +2171,22 @@ const Fuel: React.FC<FuelProps> = ({
                     FACTURA: <span className="font-black text-text text-lg ml-1">{(selectedAcquisition.invoiceNumber || 'S/N').toUpperCase()}</span>
                   </p>
                   <p className="text-xs font-bold text-text-muted">
-                    FECHA FACTURA: <span className="font-black text-text text-lg ml-1">{selectedAcquisition.invoiceDate ? new Date(selectedAcquisition.invoiceDate).toLocaleDateString('es-ES') : '---'}</span>
+                    FECHA FACTURA: <span className="font-black text-text text-lg ml-1">{selectedAcquisition.invoiceDate ? formatDate(selectedAcquisition.invoiceDate) : '---'}</span>
                   </p>
                   <p className="text-[9pt] text-text-muted font-bold mt-1">
-                    Fecha: {selectedAcquisition.date ? new Date(selectedAcquisition.date).toLocaleDateString('es-ES', {year: 'numeric', month: 'long', day: 'numeric'}) : '---'}
+                    Fecha: {selectedAcquisition.date ? formatDate(selectedAcquisition.date) : '---'}
                   </p>
                   <p className="text-[8pt] text-slate-300 font-bold mt-1">
-                    Generado: {new Date().toLocaleDateString('es-ES', {day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'})}
+                    Generado: {formatDateTime(new Date())}
                   </p>
                 </div>
               </div>
 
               <div className="bg-surface-subtle border border-border rounded-lg p-4 mb-6">
                 <div className="grid grid-cols-2 gap-3 text-[9pt]">
-                  <p><span className="font-black text-text-muted uppercase tracking-wider">Fecha Registro:</span> <span className="font-bold text-text">{selectedAcquisition.date ? new Date(selectedAcquisition.date).toLocaleDateString('es-ES') : '---'}</span></p>
+                  <p><span className="font-black text-text-muted uppercase tracking-wider">Fecha Registro:</span> <span className="font-bold text-text">{selectedAcquisition.date ? formatDate(selectedAcquisition.date) : '---'}</span></p>
                   <p><span className="font-black text-text-muted uppercase tracking-wider">Área:</span> <span className="font-bold text-text">{selectedAcquisition.area}</span></p>
-                  <p><span className="font-black text-text-muted uppercase tracking-wider">Rango Vigencia:</span> <span className="font-bold text-text">{selectedAcquisition.validFrom ? new Date(selectedAcquisition.validFrom).toLocaleDateString('es-ES') : '---'} - {selectedAcquisition.validTo ? new Date(selectedAcquisition.validTo).toLocaleDateString('es-ES') : '---'}</span></p>
+                  <p><span className="font-black text-text-muted uppercase tracking-wider">Rango Vigencia:</span> <span className="font-bold text-text">{selectedAcquisition.validFrom ? formatDate(selectedAcquisition.validFrom) : '---'} - {selectedAcquisition.validTo ? formatDate(selectedAcquisition.validTo) : '---'}</span></p>
                   <p><span className="font-black text-text-muted uppercase tracking-wider">Modalidad:</span> <span className="font-bold text-text">{selectedAcquisition.isQr ? 'CÓDIGO QR' : 'VALES'}</span></p>
                 </div>
               </div>
@@ -2294,7 +2280,7 @@ const Fuel: React.FC<FuelProps> = ({
                     <div className="inline-block bg-secondary text-white px-4 py-1.5 font-black text-[10pt] uppercase tracking-widest rounded-sm mb-2">
                         Bitácora General
                     </div>
-                    <p className="text-[9pt] text-text-muted font-bold mt-1">Fecha de Emisión: {new Date().toLocaleDateString('es-ES', {year: 'numeric', month: 'long', day: 'numeric'})}</p>
+                    <p className="text-[9pt] text-text-muted font-bold mt-1">Fecha de Emisión: {formatDate(new Date())}</p>
                   </div>
                 </div>
 
@@ -2333,7 +2319,7 @@ const Fuel: React.FC<FuelProps> = ({
                         return (
                           <tr key={idx} className="border-b border-slate-300">
                             <td className="px-2 py-2 text-[8pt] font-bold text-center text-text-muted">
-                              {entry.date ? new Date(entry.date).toLocaleDateString('es-ES') : '-'}
+                              {entry.date ? formatDate(entry.date) : '-'}
                             </td>
                             <td className="px-2 py-2 text-[8pt] font-black text-text uppercase">
                               {vehicle?.plate || '---'} ({vehicle?.model || ''})

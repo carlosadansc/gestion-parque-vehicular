@@ -27,7 +27,7 @@ import {
   Vehicle,
   VehicleInspection
 } from '../types';
-import { timeToMinutes, toDateInputValue } from '../utils/dateTime';
+import { getLocalDateInputValue, timeToMinutes, toDateInputValue, toDateTimeLocalInputValue } from '../utils/dateTime';
 
 interface ReportsProps {
   vehicles: Vehicle[];
@@ -78,6 +78,13 @@ const normalizeDateInput = (value: string) => {
   return normalized ? new Date(`${normalized}T12:00:00`) : null;
 };
 
+const getInspectionTimestamp = (value: unknown): number => {
+  const localDateTime = toDateTimeLocalInputValue(value);
+  if (!localDateTime) return Number.NEGATIVE_INFINITY;
+  const timestamp = new Date(localDateTime).getTime();
+  return Number.isNaN(timestamp) ? Number.NEGATIVE_INFINITY : timestamp;
+};
+
 const toMonthKey = (value: string) => {
   const date = normalizeDateInput(value);
   if (!date || Number.isNaN(date.getTime())) return null;
@@ -124,8 +131,8 @@ const Reports: React.FC<ReportsProps> = ({
 }) => {
   const [activeSection, setActiveSection] = useState<ReportSection>('executive');
   const [dateRange, setDateRange] = useState({
-    start: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0],
-    end: new Date().toISOString().split('T')[0]
+    start: getLocalDateInputValue(new Date(new Date().getFullYear(), new Date().getMonth(), 1)),
+    end: getLocalDateInputValue()
   });
   const [selectedVehicleId, setSelectedVehicleId] = useState('all');
 
@@ -134,11 +141,15 @@ const Reports: React.FC<ReportsProps> = ({
     const endDate = normalizeDateInput(dateRange.end);
     if (!startDate || !endDate) return null;
 
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    end.setHours(23, 59, 59, 999);
-
-    return { start, end };
+    if (startDate > endDate) return null;
+    const startYear = startDate.getFullYear();
+    const startMonth = startDate.getMonth() + 1;
+    const startDay = startDate.getDate();
+    const endYear = endDate.getFullYear();
+    const endMonth = endDate.getMonth() + 1;
+    const endDay = endDate.getDate();
+    const dayCount = (Date.UTC(endYear, endMonth - 1, endDay) - Date.UTC(startYear, startMonth - 1, startDay)) / 86400000 + 1;
+    return { start: startDate, end: endDate, dayCount };
   }, [dateRange]);
 
   const selectedVehicles = useMemo(() => {
@@ -149,10 +160,10 @@ const Reports: React.FC<ReportsProps> = ({
   const selectedVehicleSet = useMemo(() => new Set(selectedVehicles.map(v => v.id)), [selectedVehicles]);
 
   const inRange = (value: string) => {
+    if (dateRange.start && dateRange.end && !parsedRange) return false;
     if (!parsedRange) return true;
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return false;
-    return date >= parsedRange.start && date <= parsedRange.end;
+    const date = toDateInputValue(value);
+    return Boolean(date) && date >= parsedRange.start && date <= parsedRange.end;
   };
 
   const isVehicleMatch = (vehicleId: string) => selectedVehicleId === 'all' || selectedVehicleSet.has(vehicleId);
@@ -172,20 +183,24 @@ const Reports: React.FC<ReportsProps> = ({
 
   const previousWindow = useMemo(() => {
     if (!parsedRange) return null;
-    const duration = parsedRange.end.getTime() - parsedRange.start.getTime();
-    const prevEnd = new Date(parsedRange.start.getTime() - 1);
-    const prevStart = new Date(prevEnd.getTime() - duration);
+    const prevEndDate = normalizeDateInput(parsedRange.start);
+    if (!prevEndDate) return null;
+    prevEndDate.setDate(prevEndDate.getDate() - 1);
+    const prevStartDate = new Date(prevEndDate);
+    prevStartDate.setDate(prevStartDate.getDate() - parsedRange.dayCount + 1);
+    const prevStart = getLocalDateInputValue(prevStartDate);
+    const prevEnd = getLocalDateInputValue(prevEndDate);
 
     const fuel = fuelEntries.filter(item => {
-      const date = new Date(item.date);
+      const date = toDateInputValue(item.date);
       return date >= prevStart && date <= prevEnd && isVehicleMatch(item.vehicleId);
     });
     const maintenance = maintenanceRecords.filter(item => {
-      const date = new Date(item.date);
+      const date = toDateInputValue(item.date);
       return date >= prevStart && date <= prevEnd && isVehicleMatch(item.vehicleId);
     });
     const logs = travelLogs.filter(item => {
-      const date = new Date(item.date);
+      const date = toDateInputValue(item.date);
       return date >= prevStart && date <= prevEnd && isVehicleMatch(item.vehicleId);
     });
 
@@ -429,7 +444,7 @@ const Reports: React.FC<ReportsProps> = ({
 
     filtered.inspection.forEach(item => {
       const current = latestByVehicle[item.vehicleId];
-      if (!current || new Date(item.date).getTime() > new Date(current.date).getTime()) {
+      if (!current || getInspectionTimestamp(item.date) > getInspectionTimestamp(current.date)) {
         latestByVehicle[item.vehicleId] = item;
       }
     });

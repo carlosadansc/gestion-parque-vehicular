@@ -152,7 +152,7 @@ const validateFuelAcquisitionPayload = (entry: Omit<FuelAcquisition, 'id'> | Fue
   }
   ensure(isValidDateValue(entry.validFrom), 'La fecha inicial de vigencia no es válida.');
   ensure(isValidDateValue(entry.validTo), 'La fecha final de vigencia no es válida.');
-  ensure(new Date(entry.validFrom).getTime() <= new Date(entry.validTo).getTime(), 'La fecha final no puede ser menor a la inicial.');
+  ensure(toDateInputValue(entry.validFrom) <= toDateInputValue(entry.validTo), 'La fecha final no puede ser menor a la inicial.');
   ensure(hasText(entry.description), 'La descripción de la adquisición es obligatoria.');
   ensure(hasText(entry.area), 'El área destino es obligatoria.');
   ensure(hasText(entry.supplier), 'El proveedor es obligatorio.');

@@ -5,6 +5,7 @@ import {
   Cell, PieChart, Pie
 } from 'recharts';
 import { Vehicle, Driver, FuelEntry, Incident } from '../types';
+import { formatDate, toDateInputValue } from '../utils/dateTime';
 
 interface DashboardProps {
   vehicles: Vehicle[];
@@ -89,8 +90,10 @@ const Dashboard: React.FC<DashboardProps> = ({ vehicles = [], fuelEntries = [], 
       const key = `${months[d.getMonth()]}`;
       
       const monthlyEntries = fuelEntries.filter(f => {
-        const fDate = new Date(f.date);
-        return fDate.getMonth() === d.getMonth() && fDate.getFullYear() === d.getFullYear();
+        const dateKey = toDateInputValue(f.date);
+        if (!dateKey) return false;
+        const [year, month] = dateKey.split('-').map(Number);
+        return month - 1 === d.getMonth() && year === d.getFullYear();
       });
 
       const cost = monthlyEntries.reduce((acc, curr) => acc + (Number(curr.cost) || 0), 0);
@@ -339,7 +342,7 @@ const Dashboard: React.FC<DashboardProps> = ({ vehicles = [], fuelEntries = [], 
               {[
                 ...incidents.slice(0, 3).map(i => ({...i, metaType: 'incident'})),
                 ...fuelEntries.slice(0, 3).map(f => ({...f, metaType: 'fuel'}))
-              ].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 5).map((item: any) => (
+              ].sort((a: any, b: any) => toDateInputValue(b.date).localeCompare(toDateInputValue(a.date))).slice(0, 5).map((item: any) => (
                  <div key={`${item.metaType}-${item.id}`} className="flex gap-4 p-4 hover:bg-surface-subtle rounded-2xl transition-colors">
                      <div className={`size-10 rounded-full flex items-center justify-center shrink-0 ${item.metaType === 'incident' ? 'bg-rose-50 text-rose-500' : 'bg-blue-50 text-blue-500'}`}>
                        <span className="material-symbols-outlined ui-icon text-lg">{item.metaType === 'incident' ? 'warning' : 'local_gas_station'}</span>
@@ -350,7 +353,7 @@ const Dashboard: React.FC<DashboardProps> = ({ vehicles = [], fuelEntries = [], 
                             {item.metaType === 'incident' ? item.title : `Carga: ${item.liters} Litros`}
                           </p>
                           <span className="text-[9px] font-bold text-text-muted uppercase tracking-widest">
-                            {new Date(item.date).toLocaleDateString()}
+                            {formatDate(item.date)}
                           </span>
                        </div>
                        <p className="text-[10px] font-medium text-text-muted mt-0.5 line-clamp-1">

@@ -1,5 +1,6 @@
 /**
- * API FLOTA PRO v9.13 - Eliminaciones exclusivas para administradores
+ * API FLOTA PRO v9.14 - Fechas/horas locales; eliminación exclusiva para administradores
+ * Conserva las fechas de calendario y utiliza la zona horaria de la hoja para lecturas.
  */
 
 const CONFIG = {
@@ -55,9 +56,9 @@ const ACTION_TO_SHEET = {
   "area": "Areas",
   "delete-area": "Areas",
   "travel-log": "BitacorasViaje",
+  "update-travel-log": "BitacorasViaje",
   "vehicle-request": "SolicitudesVehiculo",
   "update-vehicle-request": "SolicitudesVehiculo",
-  "update-travel-log": "BitacorasViaje",
   "maintenance": "Mantenimiento",
   "update-maintenance": "Mantenimiento",
   "maintenance-type": "TiposMantenimiento",
@@ -74,13 +75,14 @@ const ACTION_TO_SHEET = {
 
 function doGet() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const spreadsheetTimeZone = ss.getSpreadsheetTimeZone() || Session.getScriptTimeZone();
   Object.keys(CONFIG.sheets).forEach(function(name) {
     getOrCreateSheet(ss, name);
   });
 
   const data = {};
   Object.keys(CONFIG.sheets).forEach(function(name) {
-    data[name.toLowerCase()] = getSheetData(ss, name);
+    data[name.toLowerCase()] = getSheetData(ss, name, spreadsheetTimeZone);
   });
 
   return jsonResponse({
@@ -93,8 +95,8 @@ function doGet() {
     incidents: data.incidencias,
     plannings: data.planeacion,
     areas: data.areas,
-    vehicleRequests: data.solicitudesvehiculo,
     travelLogs: data.bitacorasviaje,
+    vehicleRequests: data.solicitudesvehiculo,
     maintenanceRecords: data.mantenimiento,
     maintenanceTypes: data.tiposmantenimiento,
     incidentTypes: data.tiposincidencia,
@@ -357,22 +359,79 @@ var TIME_COLUMNS = {
   returnTime: true
 };
 
-function normalizeSheetValue(header, value) {
-  if (TIME_COLUMNS[header]) return normalizeSheetTime(value);
+var DATE_ONLY_COLUMNS_BY_SHEET = {
+  "Vehiculos": { date_registered: true },
+  "Combustible": { date: true },
+  "CombustibleAdquisiciones": { invoiceDate: true, date: true, validFrom: true, validTo: true },
+  "CombustibleEntregas": { date: true },
+  "Planeacion": { date: true },
+  "BitacorasViaje": { date: true },
+  "SolicitudesVehiculo": { filledDate: true, travelDate: true },
+  "Mantenimiento": { date: true, exitDate: true, estimatedDeliveryDate: true }
+};
+
+var DATE_TIME_COLUMNS_BY_SHEET = {
+  "Revisiones": { date: true },
+  "Incidencias": { date: true },
+  "Mantenimiento": { entryDate: true },
+  "Usuarios": { lastLogin: true }
+};
+
+function normalizeSheetValue(sheetName, header, value, timeZone) {
+  if (TIME_COLUMNS[header]) return normalizeSheetTime(value, timeZone);
+
+  var dateOnlyColumns = DATE_ONLY_COLUMNS_BY_SHEET[sheetName] || {};
+  if (dateOnlyColumns[header]) return normalizeDateOnly(value, timeZone);
+
+  var dateTimeColumns = DATE_TIME_COLUMNS_BY_SHEET[sheetName] || {};
+  if (dateTimeColumns[header]) return normalizeDateTime(value, timeZone);
+
+  if (value instanceof Date) return value.toISOString();
   return value;
 }
 
-function normalizeSheetTime(value) {
+function normalizeDateOnly(value, timeZone) {
   if (value instanceof Date) {
-    return Utilities.formatDate(value, Session.getScriptTimeZone(), "HH:mm");
+    return Utilities.formatDate(value, timeZone, "yyyy-MM-dd");
   }
+  var raw = String(value == null ? "" : value).trim();
+  if (!raw) return raw;
+  var dateMatch = raw.match(/^(\d{4}-\d{2}-\d{2})(?:$|T| )/);
+  if (dateMatch) {
+    if (/[T ]/.test(raw) && /(?:Z|[+-]\d{2}:?\d{2})$/i.test(raw)) {
+      var zonedDate = new Date(raw);
+      if (!isNaN(zonedDate.getTime())) return Utilities.formatDate(zonedDate, timeZone, "yyyy-MM-dd");
+    }
+    return dateMatch[1];
+  }
+  return raw;
+}
+
+function normalizeDateTime(value, timeZone) {
+  if (value instanceof Date) return Utilities.formatDate(value, timeZone, "yyyy-MM-dd'T'HH:mm:ss");
+  var raw = String(value == null ? "" : value).trim();
+  if (!raw) return raw;
+  if (/[T ]/.test(raw) && /(?:Z|[+-]\d{2}:?\d{2})$/i.test(raw)) {
+    var zonedDate = new Date(raw);
+    if (!isNaN(zonedDate.getTime())) return Utilities.formatDate(zonedDate, timeZone, "yyyy-MM-dd'T'HH:mm:ss");
+  }
+  return raw;
+}
+
+function normalizeSheetTime(value, timeZone) {
+  if (value instanceof Date) return Utilities.formatDate(value, timeZone, "HH:mm");
   if (typeof value === "number" && isFinite(value)) {
-    var totalMinutes = Math.round(value * 24 * 60) % (24 * 60);
+    var totalMinutes = ((Math.round(value * 24 * 60) % (24 * 60)) + (24 * 60)) % (24 * 60);
     return String(Math.floor(totalMinutes / 60)).padStart(2, "0") + ":" +
       String(totalMinutes % 60).padStart(2, "0");
   }
   var raw = String(value == null ? "" : value).trim();
-  var isoMatch = raw.match(/T(\d{2}):(\d{2})/);
+  var zonedIsoMatch = raw.match(/^\d{4}-\d{2}-\d{2}[T ].*(?:Z|[+-]\d{2}:?\d{2})$/i);
+  if (zonedIsoMatch) {
+    var zonedDate = new Date(raw);
+    if (!isNaN(zonedDate.getTime())) return Utilities.formatDate(zonedDate, timeZone, "HH:mm");
+  }
+  var isoMatch = raw.match(/[T ](\d{2}):(\d{2})/);
   if (isoMatch) return isoMatch[1] + ":" + isoMatch[2];
   var timeMatch = raw.match(/^(\d{1,2}):(\d{2})/);
   if (timeMatch) return String(Number(timeMatch[1])).padStart(2, "0") + ":" + timeMatch[2];
@@ -380,7 +439,7 @@ function normalizeSheetTime(value) {
 }
 
 // Lectura de datos: conserva esta declaración junto con el bloque siguiente.
-function getSheetData(ss, name) {
+function getSheetData(ss, name, timeZone) {
   const sheet = ss.getSheetByName(name);
   if (!sheet) return [];
   const values = sheet.getDataRange().getValues();
@@ -389,7 +448,7 @@ function getSheetData(ss, name) {
   return values.map(function(row) {
     const obj = {};
     headers.forEach(function(h, i) {
-      if (h) obj[h] = normalizeSheetValue(h, row[i]);
+      if (h) obj[h] = normalizeSheetValue(name, h, row[i], timeZone);
     });
     return obj;
   });

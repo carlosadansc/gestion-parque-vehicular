@@ -2,7 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { Planning, Vehicle, Driver, Area, AppSetting } from '../types';
-import { formatTime as formatTimeValue, toTimeInputValue as normalizeTimeValue } from '../utils/dateTime';
+import { formatDateTime, formatTime, getLocalDateInputValue, toDateInputValue, toTimeInputValue } from '../utils/dateTime';
 
 interface PlanningProps {
   plannings: Planning[];
@@ -18,53 +18,6 @@ interface PlanningProps {
 }
 
 type ViewMode = 'week' | 'day' | 'month';
-
-// Helper para formato de hora 12h (AM/PM)
-const formatTime = (time: string | undefined) => {
-  if (!time) return '';
-  
-  // Si viene en formato ISO (ej. 1899-12-30T14:05:00.000Z)
-  if (time.includes('T')) {
-    try {
-      return formatTimeValue(time);
-    } catch (e) {
-      return time;
-    }
-  }
-
-  // Si viene en formato HH:MM
-  const [hoursStr, minutesStr] = time.split(':');
-  if (hoursStr && minutesStr) {
-    const hours = parseInt(hoursStr, 10);
-    const minutes = minutesStr.substring(0, 2);
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    const hour12 = hours % 12 || 12;
-    return `${hour12}:${minutes} ${ampm}`;
-  }
-  
-  return time;
-};
-
-const toDateInputValue = (value: unknown, fallback = ''): string => {
-  if (!value) return fallback;
-  const raw = String(value).trim();
-  if (!raw) return fallback;
-  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
-  if (/^\d{4}-\d{2}-\d{2}T/.test(raw)) return raw.slice(0, 10);
-  const parsed = new Date(raw);
-  if (Number.isNaN(parsed.getTime())) return fallback;
-  return parsed.toISOString().slice(0, 10);
-};
-
-const toTimeInputValue = (value: unknown): string => {
-  if (!value) return '';
-  const raw = String(value).trim();
-  if (!raw) return '';
-  if (/^\d{2}:\d{2}$/.test(raw)) return raw;
-  if (/^\d{2}:\d{2}:\d{2}$/.test(raw)) return raw.slice(0, 5);
-  if (raw.includes('T')) return normalizeTimeValue(raw);
-  return '';
-};
 
 const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drivers, areas, onAddPlanning, onUpdatePlanning, onAddArea, onDeleteArea, canManageDeletions }) => {
   const [viewMode, setViewMode] = useState<ViewMode>('week');
@@ -82,7 +35,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
   const [areaTouched, setAreaTouched] = useState<Record<string, boolean>>({});
   
   const [formData, setFormData] = useState({
-    date: new Date().toISOString().split('T')[0],
+    date: getLocalDateInputValue(),
     vehicleId: '',
     driverId: '',
     areaId: '',
@@ -207,7 +160,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
   }, [currentDate]);
 
   const getDayPlannings = (date: Date) => {
-    const dateStr = date.toISOString().split('T')[0];
+    const dateStr = getLocalDateInputValue(date);
     const filteredByDate = plannings.filter(p => toDateInputValue(p.date) === dateStr);
     const filteredByStatus = statusFilter === 'all'
       ? filteredByDate
@@ -275,7 +228,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
     setTouched({});
     setEditingPlanning(p);
     setFormData({
-      date: toDateInputValue(p.date, new Date().toISOString().split('T')[0]),
+      date: toDateInputValue(p.date, getLocalDateInputValue()),
       vehicleId: String(p.vehicleId ?? '').trim(),
       driverId: String(p.driverId ?? '').trim(),
       areaId: String(p.areaId ?? '').trim(),
@@ -298,7 +251,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
     setTouched({});
     setEditingPlanning(null);
     setFormData({ 
-      date: new Date().toISOString().split('T')[0], 
+      date: getLocalDateInputValue(),
       vehicleId: '', 
       driverId: '', 
       areaId: '', 
@@ -749,7 +702,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
                    <span className="material-symbols-outlined ui-icon text-4xl">event_note</span>
                 </div>
                 <p className="text-sm font-black uppercase tracking-widest">No hay actividades programadas para este día</p>
-                <button onClick={() => { setFormData({...formData, date: currentDate.toISOString().split('T')[0]}); setShowModal(true); }} className="mt-4 text-primary text-xs font-bold hover:underline">Programar Actividad</button>
+                <button onClick={() => { setFormData({...formData, date: getLocalDateInputValue(currentDate)}); setShowModal(true); }} className="mt-4 text-primary text-xs font-bold hover:underline">Programar Actividad</button>
               </div>
             )}
           </div>
@@ -839,7 +792,7 @@ const PlanningComponent: React.FC<PlanningProps> = ({ plannings, vehicles, drive
                       Semana: {weekDays[0].toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })} - {weekDays[6].toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}
                     </p>
                     <p className="text-[8pt] text-slate-300 font-bold mt-1">
-                      Generado: {new Date().toLocaleDateString('es-ES', {day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'})}
+                      Generado: {formatDateTime(new Date())}
                     </p>
                   </div>
                 </div>

@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { TravelLog, Vehicle, Driver, Area, AppSetting, VehicleRequest } from '../types';
 import { SortableTh, useSortableData } from '../utils/tableSort';
-import { formatTime as formatTimeValue, toTimeInputValue as normalizeTimeValue } from '../utils/dateTime';
+import { formatDate, formatTime, getLocalDateInputValue, timeToMinutes, toDateInputValue, toTimeInputValue } from '../utils/dateTime';
 
 interface TravelLogsProps {
   travelLogs: TravelLog[];
@@ -17,71 +17,17 @@ interface TravelLogsProps {
   onInitialRequestHandled?: () => void;
 }
 
-// Helper para formato de hora 12h (AM/PM)
-const formatTime = (time: string | undefined) => {
-  if (!time) return '';
-  
-  // Si viene en formato ISO
-  if (time.includes('T')) {
-    try {
-      return formatTimeValue(time);
-    } catch (e) {
-      return time;
-    }
-  }
-
-  // Si viene en formato HH:MM o HH:MM:SS
-  const [hoursStr, minutesStr] = time.split(':');
-  if (hoursStr && minutesStr) {
-    const hours = parseInt(hoursStr, 10);
-    const minutes = minutesStr.substring(0, 2);
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    const hour12 = hours % 12 || 12;
-    return `${hour12}:${minutes} ${ampm}`;
-  }
-  
-  return time;
-};
-
-// Helper robusto para calcular duración
-const toDateInputValue = (value: unknown, fallback = ''): string => {
-  if (!value) return fallback;
-  const raw = String(value).trim();
-  if (!raw) return fallback;
-  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
-  if (/^\d{4}-\d{2}-\d{2}T/.test(raw)) return raw.slice(0, 10);
-  const parsed = new Date(raw);
-  if (Number.isNaN(parsed.getTime())) return fallback;
-  return parsed.toISOString().slice(0, 10);
-};
-
-const toTimeInputValue = (value: unknown): string => {
-  if (!value) return '';
-  const raw = String(value).trim();
-  if (!raw) return '';
-  if (/^\d{2}:\d{2}$/.test(raw)) return raw;
-  if (/^\d{2}:\d{2}:\d{2}$/.test(raw)) return raw.slice(0, 5);
-  if (raw.includes('T')) return normalizeTimeValue(raw);
-  return '';
-};
-
 const calculateDuration = (start: string, end: string) => {
   if (!start || !end) return null;
 
-  // Normalizar cualquier formato a HH:MM para cálculo
-  const extractTime = (t: string) => {
-    if (t.includes('T')) return normalizeTimeValue(t) || '00:00';
-    // Si viene HH:MM:SS recortamos, si es HH:MM lo dejamos
-    return t.length > 5 ? t.substring(0, 5) : t;
-  };
+  const extractTime = (t: string) => toTimeInputValue(t) || '00:00';
 
   const s = extractTime(start);
   const e = extractTime(end);
 
-  const startDate = new Date(`2000-01-01T${s}`);
-  const endDate = new Date(`2000-01-01T${e}`);
-  
-  let diff = endDate.getTime() - startDate.getTime();
+  const startMinutes = timeToMinutes(s) ?? 0;
+  const endMinutes = timeToMinutes(e) ?? 0;
+  let diff = (endMinutes - startMinutes) * 60 * 1000;
   
   // Si da negativo (ej. Salida 23:00, Llegada 01:00), sumamos 24 horas
   if (diff < 0) diff += 24 * 60 * 60 * 1000; 
@@ -119,7 +65,7 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
   }, [settings]);
 
   const [formData, setFormData] = useState({
-    date: new Date().toISOString().split('T')[0],
+    date: getLocalDateInputValue(),
     departureTime: '',
     arrivalTime: '',
     driverId: '',
@@ -139,7 +85,7 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
     setFormError('');
     setEditingLog(null);
     setFormData({
-      date: toDateInputValue(initialRequest.travelDate, new Date().toISOString().split('T')[0]),
+      date: toDateInputValue(initialRequest.travelDate, getLocalDateInputValue()),
       departureTime: '',
       arrivalTime: '',
       driverId: '',
@@ -223,7 +169,7 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
     setFormError('');
     setEditingLog(log);
     setFormData({
-      date: toDateInputValue(log.date, new Date().toISOString().split('T')[0]),
+      date: toDateInputValue(log.date, getLocalDateInputValue()),
       departureTime: toTimeInputValue(log.departureTime),
       arrivalTime: toTimeInputValue(log.arrivalTime),
       driverId: String(log.driverId ?? '').trim(),
@@ -249,7 +195,7 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
     setFormError('');
     setEditingLog(null);
     setFormData({ 
-      date: new Date().toISOString().split('T')[0], 
+      date: getLocalDateInputValue(),
       departureTime: '', 
       arrivalTime: '', 
       driverId: '', 
@@ -386,7 +332,7 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
                   <tr key={log.id} className="hover:bg-surface-subtle/50 transition-colors group">
                     <td className="px-8 py-5">
                       <p className="font-black text-text text-sm tracking-tight">
-                        {log.date ? new Date(log.date).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }) : '---'}
+                        {log.date ? formatDate(log.date) : '---'}
                       </p>
                       <div className="flex items-center gap-2 mt-1">
                         <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded ${isComplete ? 'bg-surface-subtle text-text-muted' : 'bg-blue-100 text-blue-600 animate-pulse'}`}>
@@ -707,7 +653,7 @@ const TravelLogs: React.FC<TravelLogsProps> = ({ travelLogs = [], vehicles = [],
                         Ficha Técnica de Viaje
                     </div>
                     <p className="text-xs font-bold text-text-muted">FOLIO: <span className="font-black text-text text-lg ml-1">{(selectedLog.id || '---').slice(-6).toUpperCase()}</span></p>
-                    <p className="text-[9pt] text-text-muted font-bold mt-1">Fecha: {new Date(selectedLog.date).toLocaleDateString('es-ES', {year: 'numeric', month: 'long', day: 'numeric'})}</p>
+                    <p className="text-[9pt] text-text-muted font-bold mt-1">Fecha: {formatDate(selectedLog.date)}</p>
                   </div>
               </div>
 

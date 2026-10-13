@@ -2,6 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { VehicleInspection, Vehicle, User, AppSetting } from '../types';
 import { SortableTh, useSortableData } from '../utils/tableSort';
+import { formatDate, formatDateTime, formatTime, getLocalDateInputValue, getLocalDateTimeInputValue, toDateTimeLocalInputValue } from '../utils/dateTime';
 
 interface InspectionsProps {
   inspections: VehicleInspection[];
@@ -11,23 +12,6 @@ interface InspectionsProps {
   currentUser: User | null;
   settings?: AppSetting[];
 }
-
-const toDateTimeLocalValue = (value: unknown, fallback = ''): string => {
-  if (!value) return fallback;
-  const raw = String(value).trim();
-  if (!raw) return fallback;
-  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(raw)) return raw;
-  if (/^\d{4}-\d{2}-\d{2}T/.test(raw)) return raw.slice(0, 16);
-  const parsed = new Date(raw);
-  if (Number.isNaN(parsed.getTime())) return fallback;
-  const localDate = new Date(parsed.getTime() - (parsed.getTimezoneOffset() * 60000));
-  return localDate.toISOString().slice(0, 16);
-};
-
-const toDateInputValue = (value: Date): string => {
-  const localDate = new Date(value.getTime() - (value.getTimezoneOffset() * 60000));
-  return localDate.toISOString().slice(0, 10);
-};
 
 const DAILY_REVISION_RUBRICS = [
   'Motor',
@@ -57,7 +41,7 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
   const [showDailyRevisionModal, setShowDailyRevisionModal] = useState(false);
   const [showDailyRevisionPrint, setShowDailyRevisionPrint] = useState(false);
   const [dailyRevisionDate, setDailyRevisionDate] = useState(() => new Date());
-  const [dailyRevisionDateInput, setDailyRevisionDateInput] = useState(() => toDateInputValue(new Date()));
+  const [dailyRevisionDateInput, setDailyRevisionDateInput] = useState(() => getLocalDateInputValue());
   const [dailyRevisionVehicleId, setDailyRevisionVehicleId] = useState('');
   const [formError, setFormError] = useState('');
 
@@ -68,7 +52,7 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
   }, [settings]);
 
   const initialFormState = {
-    date: new Date().toISOString().slice(0, 16), // datetime-local format
+    date: getLocalDateTimeInputValue(),
     vehicleId: '',
     inspectorName: currentUser?.name || '',
     odometer: '',
@@ -105,7 +89,7 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
 
       setShowModal(false);
       setEditingInspection(null);
-      setFormData({ ...initialFormState, date: new Date().toISOString().slice(0, 16), inspectorName: currentUser?.name || '' });
+      setFormData({ ...initialFormState, date: getLocalDateTimeInputValue(), inspectorName: currentUser?.name || '' });
       setFormError('');
     } catch (err) {
       const message = err instanceof Error ? err.message : "Error al guardar la revisión";
@@ -131,22 +115,13 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
     requestSort
   } = useSortableData(inspections, inspectionSortAccessors, { key: 'date', direction: 'desc' });
 
-  // Helper para formato de hora
-  const formatDateTime = (isoDate: string) => {
-    if (!isoDate) return '---';
-    try {
-      const d = new Date(isoDate);
-      return d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
-    } catch { return isoDate; }
-  };
-
   const handleEdit = (insp: VehicleInspection) => {
     setFormError('');
     setEditingInspection(insp);
     setFormData({
       ...initialFormState,
       ...insp,
-      date: toDateTimeLocalValue(insp.date, new Date().toISOString().slice(0, 16)),
+      date: toDateTimeLocalInputValue(insp.date, getLocalDateTimeInputValue()),
       vehicleId: String(insp.vehicleId ?? '').trim(),
       inspectorName: String(insp.inspectorName ?? ''),
       odometer: insp.odometer !== undefined && insp.odometer !== null ? String(insp.odometer) : '',
@@ -178,7 +153,7 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
   const handleOpenDailyRevisionModal = () => {
     if (!availableDailyRevisionVehicles.length) return;
     setDailyRevisionVehicleId(availableDailyRevisionVehicles[0].id);
-    setDailyRevisionDateInput(toDateInputValue(new Date()));
+    setDailyRevisionDateInput(getLocalDateInputValue());
     setShowDailyRevisionModal(true);
   };
 
@@ -862,8 +837,8 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
                         Reporte de Revisión
                     </div>
                     <p className="text-xs font-bold text-text-muted">FOLIO: <span className="font-black text-text text-lg ml-1">{(selectedInspection.id || '---').slice(-6).toUpperCase()}</span></p>
-                    <p className="text-[9pt] text-text-muted font-bold mt-1">Fecha: {new Date(selectedInspection.date).toLocaleDateString('es-ES', {year: 'numeric', month: 'long', day: 'numeric'})}</p>
-                    <p className="text-[8pt] text-slate-300 font-bold mt-1">Generado: {new Date().toLocaleDateString('es-ES', {day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'})}</p>
+                    <p className="text-[9pt] text-text-muted font-bold mt-1">Fecha: {formatDate(selectedInspection.date)}</p>
+                    <p className="text-[8pt] text-slate-300 font-bold mt-1">Generado: {formatDateTime(new Date())}</p>
                   </div>
                 </div>
 
@@ -892,7 +867,7 @@ const Inspections: React.FC<InspectionsProps> = ({ inspections, vehicles, onAddI
                             </tr>
                             <tr>
                                 <td className="py-3 text-[9pt] font-black text-text-muted uppercase">Hora de Inspección</td>
-                                <td className="py-3 text-[11pt] font-bold text-text">{new Date(selectedInspection.date).toLocaleTimeString('es-ES', {hour: '2-digit', minute: '2-digit', hour12: true})}</td>
+                                <td className="py-3 text-[11pt] font-bold text-text">{formatTime(selectedInspection.date)}</td>
                             </tr>
                         </tbody>
                     </table>

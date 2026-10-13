@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { toDateInputValue } from './dateTime';
 
 export type SortDirection = 'asc' | 'desc';
 
@@ -18,10 +19,16 @@ const parseDateValue = (value: unknown): number | null => {
   if (typeof value !== 'string') return null;
   const trimmed = value.trim();
   if (!trimmed) return null;
-  if (!/^\d{4}-\d{2}-\d{2}/.test(trimmed) && !trimmed.includes('/')) return null;
+  const dateKey = toDateInputValue(trimmed);
+  if (!dateKey) return null;
 
-  const time = new Date(trimmed).getTime();
-  return Number.isNaN(time) ? null : time;
+  if (/[T ]\d{1,2}:\d{2}/.test(trimmed)) {
+    const time = new Date(trimmed).getTime();
+    return Number.isNaN(time) ? null : time;
+  }
+
+  const [year, month, day] = dateKey.split('-').map(Number);
+  return Date.UTC(year, month - 1, day);
 };
 
 export const compareSortValues = (left: unknown, right: unknown): number => {

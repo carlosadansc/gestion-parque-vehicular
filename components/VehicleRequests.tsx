@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AppSetting, Area, User, Vehicle, VehicleRequest } from '../types';
-import { formatDate, formatTime, timeToMinutes } from '../utils/dateTime';
+import { formatDate, formatTime, getLocalDateInputValue, timeToMinutes } from '../utils/dateTime';
 
 const DEFAULT_LOGO_SRC = '/images/logo-dif.png';
 
@@ -37,8 +37,8 @@ const requestSteps = [
 ] as const;
 
 const initialFormData = (): RequestFormData => ({
-  filledDate: new Date().toISOString().split('T')[0],
-  travelDate: new Date().toISOString().split('T')[0],
+  filledDate: getLocalDateInputValue(),
+  travelDate: getLocalDateInputValue(),
   requesterName: '',
   areaId: '',
   vehicleId: '',

@@ -2,6 +2,7 @@
 import React, { useMemo, useState } from 'react';
 import { Incident, Vehicle, Driver, AppSetting, IncidentType } from '../types';
 import { SortableTh, useSortableData } from '../utils/tableSort';
+import { formatDate, formatDateTime } from '../utils/dateTime';
 
 const CUSTOM_INCIDENT_TYPE_VALUE = '__custom_incident_type__';
 const DEFAULT_INCIDENT_TYPES = [
@@ -447,7 +448,7 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, incidentTypes = [], se
                     </td>
                     <td className="px-5 py-4 align-top">
                       <p className="text-xs font-bold text-text-muted whitespace-nowrap">
-                        {new Date(incident.date).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}
+                        {formatDate(incident.date)}
                       </p>
                     </td>
                     <td className="px-5 py-4 align-top">
@@ -709,7 +710,7 @@ const Incidents: React.FC<IncidentsProps> = ({ incidents, incidentTypes = [], se
                               <td className="py-2 text-[9pt] font-black text-text-muted uppercase w-48">Tipo de Incidencia</td>
                               <td className="py-2 text-[11pt] font-bold text-text uppercase">{typeMap[selectedIncident.type] || selectedIncident.type}</td>
                               <td className="py-2 text-[9pt] font-black text-text-muted uppercase w-32 text-right pr-4">Fecha Evento</td>
-                              <td className="py-2 text-[11pt] font-bold text-text">{new Date(selectedIncident.date).toLocaleDateString('es-ES', {day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit'})}</td>
+                              <td className="py-2 text-[11pt] font-bold text-text">{formatDateTime(selectedIncident.date)}</td>
                           </tr>
                           <tr className="border-b border-border">
                               <td className="py-2 text-[9pt] font-black text-text-muted uppercase">Unidad Involucrada</td>

@@ -3,6 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { MaintenanceRecord, Vehicle, AppSetting, MaintenanceType, Supplier } from '../types';
 import { SortableTh, useSortableData } from '../utils/tableSort';
+import { formatDate, formatDateTime, getLocalDateInputValue, getLocalDateTimeInputValue, toDateInputValue, toDateTimeLocalInputValue } from '../utils/dateTime';
 
 interface MaintenanceProps {
   records: MaintenanceRecord[];
@@ -22,49 +23,8 @@ interface MaintenanceHistoryParams {
   endDate: string;
 }
 
-const toDateInputValue = (value: unknown, fallback = ''): string => {
-  if (!value) return fallback;
-  const raw = String(value).trim();
-  if (!raw) return fallback;
-  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
-  if (/^\d{4}-\d{2}-\d{2}T/.test(raw)) return raw.slice(0, 10);
-  const parsed = new Date(raw);
-  if (Number.isNaN(parsed.getTime())) return fallback;
-  return parsed.toISOString().slice(0, 10);
-};
-
-const toDateTimeLocalValue = (value: unknown, fallback = ''): string => {
-  if (!value) return fallback;
-  const raw = String(value).trim();
-  if (!raw) return fallback;
-  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(raw)) return raw;
-  if (/^\d{4}-\d{2}-\d{2}T/.test(raw)) return raw.slice(0, 16);
-  const parsed = new Date(raw);
-  if (Number.isNaN(parsed.getTime())) return fallback;
-  const localDate = new Date(parsed.getTime() - (parsed.getTimezoneOffset() * 60000));
-  return localDate.toISOString().slice(0, 16);
-};
-
 const normalizeDateKey = (value: unknown): string => {
-    const raw = String(value ?? '').trim();
-    const isoMatch = raw.match(/(\d{4})-(\d{2})-(\d{2})/);
-    if (isoMatch) return `${isoMatch[1]}-${isoMatch[2]}-${isoMatch[3]}`;
-
-    const match = raw.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/);
-    if (match) {
-      const day = match[1].padStart(2, '0');
-      const month = match[2].padStart(2, '0');
-      return `${match[3]}-${month}-${day}`;
-    }
-
-    if (value instanceof Date && !Number.isNaN(value.getTime())) {
-      const year = value.getFullYear();
-      const month = String(value.getMonth() + 1).padStart(2, '0');
-      const day = String(value.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    }
-
-    return toDateInputValue(value);
+  return toDateInputValue(value);
 };
 
 const getMaintenanceDateKeys = (record: MaintenanceRecord): string[] => {
@@ -110,7 +70,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
   }, [settings]);
 
   const [formData, setFormData] = useState({
-    date: new Date().toISOString().split('T')[0],
+    date: getLocalDateInputValue(),
     vehicleId: '',
     serviceType: '',
     description: '',
@@ -122,7 +82,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
     odometer: '',
     provider: '', // Nombre Comercial
     providerContact: '', // Encargado
-    entryDate: new Date().toISOString().slice(0, 16),
+    entryDate: getLocalDateTimeInputValue(),
     exitDate: '',
     estimatedDeliveryDate: '',
     internalDocumentNumber: '',
@@ -254,7 +214,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
     setFormError('');
     setEditingRecord(record);
     setFormData({
-      date: toDateInputValue(record.date, new Date().toISOString().split('T')[0]),
+      date: toDateInputValue(record.date, getLocalDateInputValue()),
       vehicleId: String(record.vehicleId ?? '').trim(),
       serviceType: String(record.serviceType ?? ''),
       description: String(record.description ?? ''),
@@ -266,7 +226,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
       odometer: record.odometer !== undefined && record.odometer !== null ? String(record.odometer) : '',
       provider: String(record.provider ?? '').trim(),
       providerContact: String(record.providerContact ?? ''),
-      entryDate: toDateTimeLocalValue(record.entryDate, new Date().toISOString().slice(0, 16)),
+      entryDate: toDateTimeLocalInputValue(record.entryDate, getLocalDateTimeInputValue()),
       exitDate: toDateInputValue(record.exitDate),
       estimatedDeliveryDate: toDateInputValue(record.estimatedDeliveryDate),
       internalDocumentNumber: String(record.internalDocumentNumber ?? ''),
@@ -281,7 +241,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
   };
 
   const handleOpenHistoryModal = () => {
-    const today = new Date().toISOString().slice(0, 10);
+    const today = getLocalDateInputValue();
     setHistoryVehicleId(filterVehicleId !== 'todos' ? filterVehicleId : '');
     setHistoryStartDate(filterStartDate || `${today.slice(0, 4)}-01-01`);
     setHistoryEndDate(filterEndDate || today);
@@ -362,7 +322,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
     setFormError('');
     setEditingRecord(null);
     setFormData({ 
-      date: new Date().toISOString().split('T')[0], 
+      date: getLocalDateInputValue(),
       vehicleId: '', 
       serviceType: '', 
       description: '', 
@@ -374,7 +334,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
       odometer: '', 
       provider: '',
       providerContact: '',
-      entryDate: new Date().toISOString().slice(0, 16), 
+      entryDate: getLocalDateTimeInputValue(),
       exitDate: '',
       estimatedDeliveryDate: '',
       internalDocumentNumber: '',
@@ -791,7 +751,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                         {record.consecutiveNumber && <p className="text-[9px] font-black text-blue-600 uppercase tracking-wider">N° {record.consecutiveNumber}</p>}
                         {record.internalDocumentNumber && <p className="text-[9px] font-black text-indigo-600 uppercase tracking-wider">OFICIO: {record.internalDocumentNumber}</p>}
                       </div>
-                      <p className="text-[10px] text-text-muted font-bold uppercase tracking-wider">{new Date(record.date).toLocaleDateString()}</p>
+                      <p className="text-[10px] text-text-muted font-bold uppercase tracking-wider">{formatDate(record.date)}</p>
                     </td>
                     <td className="px-8 py-5">
                       <p className="font-black text-text text-[13px] tracking-tight">{vehicle?.plate || 'S/P'} - {vehicle?.model || 'Desconocido'}</p>
@@ -809,7 +769,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                       </span>
                       {record.status === 'in-progress' && record.estimatedDeliveryDate && (
                         <p className="text-[9px] font-bold text-text-muted mt-1 uppercase">
-                          Entr. Est.: {new Date(record.estimatedDeliveryDate).toLocaleDateString()}
+                          Entr. Est.: {formatDate(record.estimatedDeliveryDate)}
                         </p>
                       )}
                     </td>
@@ -1332,9 +1292,9 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                   <p className="text-[8pt] font-black text-text-muted uppercase tracking-widest mt-1">Vehículo: {historyVehicle.model || historyVehicle.brand || '---'}</p>
                   <p className="text-[8pt] font-black text-text-muted uppercase tracking-widest mt-1">Placas: {historyVehicle.plate || '---'} · No. Eco: {historyVehicle.economicNumber || '---'}</p>
                   <p className="text-[8pt] font-black text-text-muted uppercase tracking-widest mt-1">
-                    Rango: {new Date(`${historyParams.startDate}T00:00:00`).toLocaleDateString('es-ES')} - {new Date(`${historyParams.endDate}T00:00:00`).toLocaleDateString('es-ES')}
+                    Rango: {formatDate(historyParams.startDate)} - {formatDate(historyParams.endDate)}
                   </p>
-                  <p className="text-[8pt] text-text-muted font-bold mt-1">Emision: {new Date().toLocaleDateString('es-ES', {year: 'numeric', month: 'long', day: 'numeric'})}</p>
+                  <p className="text-[8pt] text-text-muted font-bold mt-1">Emisión: {formatDate(new Date())}</p>
                 </div>
               </div>
 
@@ -1384,7 +1344,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                   {historyRecords.map((record) => (
                       <tr key={record.id}>
                         <td className="px-2 py-2 text-center font-black text-blue-700 align-top">{record.consecutiveNumber || '---'}</td>
-                        <td className="px-2 py-2 text-center font-bold text-text-muted align-top whitespace-nowrap">{record.date ? new Date(record.date).toLocaleDateString('es-ES') : '---'}</td>
+                        <td className="px-2 py-2 text-center font-bold text-text-muted align-top whitespace-nowrap">{record.date ? formatDate(record.date) : '---'}</td>
                         <td className="px-2 py-2 align-top break-words">
                           <p className="font-black uppercase">{record.serviceType || '---'}</p>
                           {record.description && <p className="text-[7pt] text-text-muted mt-1">{record.description}</p>}
@@ -1448,8 +1408,8 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                     </div>
                     <p className="text-xs font-bold text-text-muted">No. <span className="font-black text-blue-600 text-lg ml-1">{(selectedRecord.consecutiveNumber || '---')}</span></p>
                     <p className="text-xs font-bold text-text-muted">FOLIO INTERNO: <span className="font-black text-text text-lg ml-1">{(selectedRecord.internalDocumentNumber || 'S/N').toUpperCase()}</span></p>
-                    <p className="text-[9pt] text-text-muted font-bold mt-1">Fecha: {new Date(selectedRecord.date).toLocaleDateString('es-ES', {year: 'numeric', month: 'long', day: 'numeric'})}</p>
-                    <p className="text-[8pt] text-slate-300 font-bold mt-1">Generado: {new Date().toLocaleDateString('es-ES', {day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'})}</p>
+                    <p className="text-[9pt] text-text-muted font-bold mt-1">Fecha: {formatDate(selectedRecord.date)}</p>
+                    <p className="text-[8pt] text-slate-300 font-bold mt-1">Generado: {formatDateTime(new Date())}</p>
                   </div>
                 </div>
 
@@ -1470,7 +1430,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                                 <td className="py-3 text-[9pt] font-black text-text-muted uppercase">Kilometraje</td>
                                 <td className="py-3 text-[11pt] font-bold text-text">{(Number(selectedRecord.odometer) || 0).toLocaleString()} km</td>
                                 <td className="py-3 text-[9pt] font-black text-text-muted uppercase text-right pr-4">Fecha Ingreso</td>
-                                <td className="py-3 text-[11pt] font-bold text-text">{selectedRecord.entryDate ? new Date(selectedRecord.entryDate).toLocaleDateString('es-ES', {day: '2-digit', month: 'short', year: 'numeric'}) : '---'}</td>
+                                <td className="py-3 text-[11pt] font-bold text-text">{selectedRecord.entryDate ? formatDateTime(selectedRecord.entryDate) : '---'}</td>
                             </tr>
                         </tbody>
                     </table>

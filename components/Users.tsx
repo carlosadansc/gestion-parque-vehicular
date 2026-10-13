@@ -2,6 +2,7 @@
 import React, { useMemo, useState } from 'react';
 import { User, UserRole } from '../types';
 import { SortableTh, useSortableData } from '../utils/tableSort';
+import { formatDateTime } from '../utils/dateTime';
 
 interface UsersProps {
   users: User[];
@@ -195,7 +196,7 @@ const Users: React.FC<UsersProps> = ({ users, onAddUser, onUpdateUser, currentUs
                   </td>
                   <td>
                     <p className="text-xs font-bold text-text-muted">
-                      {user.lastLogin ? new Date(user.lastLogin).toLocaleString('es-ES') : 'Nunca ha ingresado'}
+                      {user.lastLogin ? formatDateTime(user.lastLogin) : 'Nunca ha ingresado'}
                     </p>
                   </td>
                   <td className="text-right">
