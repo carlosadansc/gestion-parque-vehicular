@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { MaintenanceRecord, Vehicle, AppSetting, MaintenanceType, Supplier } from '../types';
 import { SortableTh, useSortableData } from '../utils/tableSort';
@@ -39,6 +39,184 @@ const normalizePaymentMethodValue = (value: unknown): '' | 'transferencia' | 'ef
   if (raw.startsWith('transf')) return 'transferencia';
   if (raw === 'efectivo' || raw === 'cash') return 'efectivo';
   return '';
+};
+
+interface SearchableDropdownOption {
+  value: string;
+  label: string;
+}
+
+interface SearchableDropdownProps {
+  id: string;
+  label: string;
+  value: string;
+  options: SearchableDropdownOption[];
+  placeholder: string;
+  helperText: string;
+  disabled: boolean;
+  listboxClassName?: string;
+  onValueChange: (value: string) => void;
+}
+
+const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
+  id,
+  label,
+  value,
+  options,
+  placeholder,
+  helperText,
+  disabled,
+  listboxClassName = '',
+  onValueChange
+}) => {
+  const selectedOption = options.find(option => option.value === value);
+  const [searchValue, setSearchValue] = useState(selectedOption?.label || '');
+  const [isOpen, setIsOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
+
+  useEffect(() => {
+    if (!isOpen) setSearchValue(selectedOption?.label || '');
+  }, [isOpen, selectedOption?.label, value]);
+
+  const normalizedSearch = searchValue.trim().toLocaleLowerCase('es');
+  const filteredOptions = options.filter(option => option.label.toLocaleLowerCase('es').includes(normalizedSearch));
+  const listboxId = `${id}-options`;
+  const helpId = `${id}-help`;
+
+  const selectOption = (option: SearchableDropdownOption) => {
+    setSearchValue(option.label);
+    onValueChange(option.value);
+    setIsOpen(false);
+    setActiveIndex(-1);
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      setIsOpen(true);
+      setActiveIndex(index => filteredOptions.length === 0 ? -1 : Math.min(index + 1, filteredOptions.length - 1));
+      return;
+    }
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      setIsOpen(true);
+      setActiveIndex(index => filteredOptions.length === 0
+        ? -1
+        : index <= 0 ? filteredOptions.length - 1 : index - 1);
+      return;
+    }
+    if (event.key === 'Enter' && isOpen && filteredOptions.length > 0) {
+      event.preventDefault();
+      const optionIndex = activeIndex < 0 ? 0 : Math.min(activeIndex, filteredOptions.length - 1);
+      selectOption(filteredOptions[optionIndex]);
+      return;
+    }
+    if (event.key === 'Escape' && isOpen) {
+      event.preventDefault();
+      setIsOpen(false);
+      setSearchValue(selectedOption?.label || '');
+      setActiveIndex(-1);
+    }
+  };
+
+  return (
+    <div className="space-y-2">
+      <label htmlFor={id} className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">{label}</label>
+      <div className="relative">
+        <input
+          id={id}
+          type="text"
+          disabled={disabled}
+          autoComplete="off"
+          role="combobox"
+          aria-required="true"
+          aria-autocomplete="list"
+          aria-expanded={isOpen}
+          aria-controls={listboxId}
+          aria-activedescendant={isOpen && activeIndex >= 0 ? `${id}-option-${activeIndex}` : undefined}
+          aria-describedby={helpId}
+          aria-invalid={Boolean(searchValue.trim() && !value)}
+          className="w-full bg-surface-subtle border border-border rounded-md pl-4 pr-12 py-3 text-sm font-bold text-text outline-none focus:bg-surface focus:border-primary transition-all"
+          placeholder={placeholder}
+          value={searchValue}
+          onFocus={() => {
+            setSearchValue('');
+            setIsOpen(true);
+            setActiveIndex(-1);
+          }}
+          onClick={() => setIsOpen(true)}
+          onBlur={() => {
+            setIsOpen(false);
+            setSearchValue(selectedOption?.label || '');
+            setActiveIndex(-1);
+          }}
+          onKeyDown={handleKeyDown}
+          onChange={event => {
+            setSearchValue(event.target.value);
+            onValueChange('');
+            setIsOpen(true);
+            setActiveIndex(-1);
+          }}
+        />
+        <button
+          type="button"
+          disabled={disabled}
+          aria-label={isOpen ? `Cerrar lista de ${label.toLocaleLowerCase('es')}` : `Mostrar opciones de ${label.toLocaleLowerCase('es')}`}
+          aria-controls={listboxId}
+          aria-expanded={isOpen}
+          className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-text-muted hover:text-text disabled:opacity-50"
+          onMouseDown={event => event.preventDefault()}
+          onClick={() => {
+            if (isOpen) {
+              setIsOpen(false);
+              setSearchValue(selectedOption?.label || '');
+            } else {
+              setSearchValue('');
+              setIsOpen(true);
+              setActiveIndex(-1);
+            }
+          }}
+        >
+          <span className="material-symbols-outlined" aria-hidden="true">{isOpen ? 'expand_less' : 'expand_more'}</span>
+        </button>
+      </div>
+      <div
+        id={listboxId}
+        role="listbox"
+        aria-label={`${label}: opciones disponibles`}
+        hidden={!isOpen}
+        className={`max-h-52 overflow-y-auto rounded-md border border-border bg-surface text-text shadow-md ${listboxClassName}`}
+      >
+        {filteredOptions.length > 0 ? filteredOptions.map((option, index) => (
+          <button
+            id={`${id}-option-${index}`}
+            key={option.value}
+            type="button"
+            role="option"
+            tabIndex={-1}
+            aria-selected={value === option.value}
+            className={`flex min-h-11 w-full items-center justify-between gap-3 border-b border-border px-4 py-3 text-left text-sm font-bold text-text transition-colors last:border-b-0 hover:bg-surface-subtle focus-visible:bg-surface-subtle ${
+              value === option.value ? 'bg-primary/10 text-primary' : activeIndex === index ? 'bg-surface-subtle' : ''
+            }`}
+            onMouseDown={event => event.preventDefault()}
+            onMouseEnter={() => setActiveIndex(index)}
+            onClick={() => selectOption(option)}
+          >
+            <span>{option.label}</span>
+            {value === option.value && <span className="material-symbols-outlined text-primary" aria-hidden="true">check</span>}
+          </button>
+        )) : (
+          <p role="status" className="bg-surface-subtle px-4 py-3 text-xs font-semibold text-text-muted">
+            {options.length > 0 ? 'No se encontraron opciones.' : 'No hay opciones registradas.'}
+          </p>
+        )}
+      </div>
+      <p id={helpId} className="text-[10px] font-semibold text-text-muted ml-1">{helperText}</p>
+      {searchValue.trim() && !value && (
+        <p className="text-[10px] font-bold text-rose-600 ml-1">Selecciona una opción de la lista para continuar.</p>
+      )}
+    </div>
+  );
 };
 
 const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], searchQuery = '', maintenanceTypes = [], suppliers = [], settings = [], onAddRecord, onUpdateRecord }) => {
@@ -141,6 +319,41 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
     });
     return Array.from(providerSet).sort((a, b) => a.localeCompare(b, 'es'));
   }, [records, suppliers]);
+
+  const formProviderOptions = useMemo(() => {
+    const providerSet = new Set<string>();
+    suppliers.forEach(supplier => {
+      const name = String(supplier.name || '').trim();
+      if (name) providerSet.add(name);
+    });
+    const currentProvider = String(editingRecord?.provider || '').trim();
+    if (currentProvider) providerSet.add(currentProvider);
+    return Array.from(providerSet).sort((a, b) => a.localeCompare(b, 'es'));
+  }, [editingRecord, suppliers]);
+
+  const formProviderDropdownOptions = useMemo<SearchableDropdownOption[]>(() => (
+    formProviderOptions.map(provider => ({ value: provider, label: provider }))
+  ), [formProviderOptions]);
+
+  const formServiceTypeDropdownOptions = useMemo<SearchableDropdownOption[]>(() => {
+    const serviceTypes = new Set<string>();
+    maintenanceTypes.forEach(type => {
+      const name = String(type.name || '').trim();
+      if (name) serviceTypes.add(name);
+    });
+    const currentServiceType = String(editingRecord?.serviceType || '').trim();
+    if (currentServiceType) serviceTypes.add(currentServiceType);
+    return Array.from(serviceTypes)
+      .sort((a, b) => a.localeCompare(b, 'es'))
+      .map(serviceType => ({ value: serviceType, label: serviceType }));
+  }, [editingRecord, maintenanceTypes]);
+
+  const vehicleDropdownOptions = useMemo<SearchableDropdownOption[]>(() => (
+    vehicles.map(vehicle => ({
+      value: vehicle.id,
+      label: vehicle.model || 'Desconocido'
+    }))
+  ), [vehicles]);
 
   const selectedFilterVehicle = useMemo(() => (
     filterVehicleId === 'todos' ? null : vehicles.find(vehicle => vehicle.id === filterVehicleId) || null
@@ -277,7 +490,18 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError('');
-    if (!formData.vehicleId || !formData.provider) return;
+    if (!vehicleDropdownOptions.some(option => option.value === formData.vehicleId)) {
+      setFormError('Selecciona un vehículo de la lista para registrar el mantenimiento.');
+      return;
+    }
+    if (!formServiceTypeDropdownOptions.some(option => option.value === formData.serviceType)) {
+      setFormError('Selecciona un tipo de servicio de la lista.');
+      return;
+    }
+    if (!formData.provider || !formProviderOptions.includes(formData.provider)) {
+      setFormError('Selecciona un proveedor existente en la lista.');
+      return;
+    }
 
     setIsSaving(true);
     try {
@@ -864,30 +1088,38 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Vehículo</label>
-                        <select required disabled={isSaving} className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all" value={formData.vehicleId} onChange={e => setFormData({...formData, vehicleId: e.target.value})}>
-                          <option value="">Seleccionar...</option>
-                          {vehicles.map(v => (<option key={v.id} value={v.id}>{v.plate} - {v.model}</option>))}
-                        </select>
-                      </div>
+                      <SearchableDropdown
+                        id="maintenance-vehicle"
+                        label="Vehículo"
+                        value={formData.vehicleId}
+                        options={vehicleDropdownOptions}
+                        placeholder="Buscar vehículo..."
+                        helperText="Escribe para filtrar y selecciona un vehículo."
+                        disabled={isSaving}
+                        listboxClassName="w-[calc(100%_+_4rem)] max-w-[calc(100vw_-_2rem)]"
+                        onValueChange={vehicleId => {
+                          setFormData(previous => ({ ...previous, vehicleId }));
+                          setFormError('');
+                        }}
+                      />
                       <div className="space-y-2">
                         <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Kilometraje (Km)</label>
                         <input type="number" required disabled={isSaving} className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all" value={formData.odometer} onChange={e => setFormData({...formData, odometer: e.target.value})} />
                       </div>
                     </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Tipo de Servicio</label>
-                        <select required disabled={isSaving} className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all truncate" value={formData.serviceType} onChange={e => setFormData({...formData, serviceType: e.target.value})}>
-                            <option value="">Seleccionar tipo...</option>
-                            {formData.serviceType && !maintenanceTypes.some(t => t.name === formData.serviceType) && (
-                              <option value={formData.serviceType}>{formData.serviceType}</option>
-                            )}
-                            {maintenanceTypes.map(t => (
-                                <option key={t.id} value={t.name}>{t.name}</option>
-                            ))}
-                        </select>
-                    </div>
+                      <SearchableDropdown
+                        id="maintenance-service-type"
+                        label="Tipo de Servicio"
+                        value={formData.serviceType}
+                        options={formServiceTypeDropdownOptions}
+                        placeholder="Buscar tipo de servicio..."
+                        helperText="Escribe para filtrar y selecciona un tipo de la lista."
+                        disabled={isSaving}
+                        onValueChange={serviceType => {
+                          setFormData(previous => ({ ...previous, serviceType }));
+                          setFormError('');
+                        }}
+                      />
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Descripción del Problema</label>
                       <textarea rows={4} disabled={isSaving} className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none resize-none focus:bg-surface focus:border-primary transition-all" placeholder="Describe el problema o servicio requerido..." value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
@@ -903,31 +1135,31 @@ const Maintenance: React.FC<MaintenanceProps> = ({ records = [], vehicles = [], 
                   </div>
 
                   <div className="bg-surface p-6 rounded-2xl border border-border space-y-4">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Proveedor / Taller</label>
-                      <select
-                        required
-                        disabled={isSaving}
-                        className="w-full bg-surface-subtle border border-border rounded-md px-4 py-3 text-sm font-bold outline-none focus:bg-surface focus:border-primary transition-all truncate"
-                        value={formData.provider}
-                        onChange={e => {
-                          const selectedSupplier = suppliers.find(s => s.name === e.target.value);
-                          setFormData({
-                            ...formData,
-                            provider: e.target.value,
-                            providerContact: selectedSupplier?.contact || ''
-                          });
-                        }}
-                      >
-                        <option value="">Seleccionar proveedor...</option>
-                        {formData.provider && !suppliers.some(s => s.name === formData.provider) && (
-                          <option value={formData.provider}>{formData.provider}</option>
-                        )}
-                        {suppliers.map(s => (
-                          <option key={s.id} value={s.name}>{s.name}</option>
-                        ))}
-                      </select>
-                    </div>
+                    <SearchableDropdown
+                      id="maintenance-provider"
+                      label="Proveedor / Taller"
+                      value={formData.provider}
+                      options={formProviderDropdownOptions}
+                      placeholder="Buscar proveedor..."
+                      helperText="Escribe para filtrar y selecciona un proveedor."
+                      disabled={isSaving}
+                      onValueChange={provider => {
+                        const selectedSupplier = suppliers.find(supplier => String(supplier.name || '').trim() === provider);
+                        const editingProvider = String(editingRecord?.provider || '').trim();
+                        const retainedContact = provider && provider === editingProvider
+                          ? String(editingRecord?.providerContact || '')
+                          : '';
+
+                        setFormData(previous => ({
+                          ...previous,
+                          provider,
+                          providerContact: provider
+                            ? selectedSupplier ? String(selectedSupplier.contact || '') : retainedContact
+                            : ''
+                        }));
+                        setFormError('');
+                      }}
+                    />
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">
                         Encargado 
