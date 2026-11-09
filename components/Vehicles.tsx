@@ -42,6 +42,7 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
     economicNumber: '', inventory: '', condition: 'Bueno', location: '', vin: '', odometer: '',
     brand: '', year: new Date().getFullYear().toString(), type: '', line: '', color: '',
     cylinders: '4', fuelType: 'Gasolina',
+    batteryBrand: '', batterySerialNumber: '', oilType: '',
     engineStatus: 'Bien', clutchStatus: 'Bien', transmissionStatus: 'Bien', shifterStatus: 'Bien',
     steeringStatus: 'Bien', suspensionStatus: 'Bien', tempGaugeStatus: 'Bien', oilGaugeStatus: 'Bien',
     tiresStatus: 'Bien', shocksStatus: 'Bien', brakesStatus: 'Bien', batteryStatus: 'Bien',
@@ -87,6 +88,9 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
       assignedDriverId: String(vehicle.assignedDriverId ?? '').trim(),
       status: (String(vehicle.status ?? 'active').trim() as Vehicle['status']),
       image: String(vehicle.image ?? ''),
+      batteryBrand: String(vehicle.batteryBrand ?? ''),
+      batterySerialNumber: String(vehicle.batterySerialNumber ?? ''),
+      oilType: String(vehicle.oilType ?? ''),
       year: (vehicle.year || new Date().getFullYear()).toString(),
       odometer: (vehicle.odometer || 0).toString(),
       cylinders: (vehicle.cylinders || 4).toString(),
@@ -139,6 +143,9 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
         plate: formData.plate.toUpperCase(),
         model: formData.model.toUpperCase(),
         color: formData.color.toUpperCase(),
+        batteryBrand: String(formData.batteryBrand ?? '').trim(),
+        batterySerialNumber: String(formData.batterySerialNumber ?? '').trim(),
+        oilType: String(formData.oilType ?? '').trim(),
         accessories_notes: accessoriesList.join(', '),
         image: formData.image || `https://picsum.photos/seed/${formData.plate}/200`
       } as any;
@@ -390,6 +397,7 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
                   <InputField label="Kilometraje Actual" value={formData.odometer} onChange={v => setFormData({...formData, odometer: v})} type="number" />
                   <SelectField label="Combustible" value={formData.fuelType} onChange={v => setFormData({...formData, fuelType: v})} options={[{v:'Gasolina', l:'Gasolina'}, {v:'Diiesel', l:'Diiesel'}, {v:'Hibrido', l:'Hibrido'}]} />
                   <InputField label="Cilindros" value={formData.cylinders} onChange={v => setFormData({...formData, cylinders: v})} type="number" />
+                  <InputField label="Tipo de aceite" value={formData.oilType} onChange={v => setFormData({...formData, oilType: v})} placeholder="5W-30" />
                   <div className="col-span-1 md:col-span-3">
                     <InputField label="Serie VIN" value={formData.vin} onChange={v => setFormData({...formData, vin: v})} />
                   </div>
@@ -397,7 +405,16 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
               )}
 
               {activeTab === 'condition' && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6 animate-in slide-in-from-left-4">
+                <div className="space-y-6 animate-in slide-in-from-left-4">
+                  <div className="rounded-xl border border-border bg-surface-subtle p-5">
+                    <h4 className="mb-4 text-xs font-black uppercase tracking-wider text-primary">9. Datos de batería</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <ConditionInput label="Estado / Condición" value={formData.batteryStatus} onChange={v => setFormData({...formData, batteryStatus: v})} />
+                      <InputField label="Marca de batería" value={formData.batteryBrand} onChange={v => setFormData({...formData, batteryBrand: v})} />
+                      <InputField label="Número de serie de batería" value={formData.batterySerialNumber} onChange={v => setFormData({...formData, batterySerialNumber: v})} />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                   <ConditionInput label="1. Motor" value={formData.engineStatus} onChange={v => setFormData({...formData, engineStatus: v})} />
                   <ConditionInput label="2. Transmisión" value={formData.transmissionStatus} onChange={v => setFormData({...formData, transmissionStatus: v})} />
                   <ConditionInput label="3. Clutch" value={formData.clutchStatus} onChange={v => setFormData({...formData, clutchStatus: v})} />
@@ -406,7 +423,6 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
                   <ConditionInput label="6. Suspensión" value={formData.suspensionStatus} onChange={v => setFormData({...formData, suspensionStatus: v})} />
                   <ConditionInput label="7. Amortiguadores" value={formData.shocksStatus} onChange={v => setFormData({...formData, shocksStatus: v})} />
                   <ConditionInput label="8. Llantas" value={formData.tiresStatus} onChange={v => setFormData({...formData, tiresStatus: v})} />
-                  <ConditionInput label="9. Batería" value={formData.batteryStatus} onChange={v => setFormData({...formData, batteryStatus: v})} />
                   <ConditionInput label="10. Luces" value={formData.lightsStatus} onChange={v => setFormData({...formData, lightsStatus: v})} />
                   <ConditionInput label="11. Limpiadores" value={formData.wipersStatus} onChange={v => setFormData({...formData, wipersStatus: v})} />
                   <ConditionInput label="12. Claxon" value={formData.hornStatus} onChange={v => setFormData({...formData, hornStatus: v})} />
@@ -414,6 +430,7 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
                   <ConditionInput label="14. Velocímetro" value={formData.speedoStatus} onChange={v => setFormData({...formData, speedoStatus: v})} />
                   <ConditionInput label="15. Medidor Temp." value={formData.tempGaugeStatus} onChange={v => setFormData({...formData, tempGaugeStatus: v})} />
                   <ConditionInput label="16. Medidor Aceite" value={formData.oilGaugeStatus} onChange={v => setFormData({...formData, oilGaugeStatus: v})} />
+                  </div>
                 </div>
               )}
 
@@ -570,6 +587,18 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
                              <div className="text-[10pt] font-bold text-text">{selectedForPrint.cylinders} Cilindros / {selectedForPrint.fuelType}</div>
                          </div>
                          <div className="border-b border-border pb-1">
+                             <div className="text-[8pt] font-black text-text-muted uppercase">Marca de batería</div>
+                             <div className="text-[10pt] font-bold text-text">{selectedForPrint.batteryBrand || '---'}</div>
+                         </div>
+                         <div className="border-b border-border pb-1">
+                             <div className="text-[8pt] font-black text-text-muted uppercase">Serie de batería</div>
+                             <div className="text-[10pt] font-bold text-text font-mono tracking-wider">{selectedForPrint.batterySerialNumber || '---'}</div>
+                         </div>
+                         <div className="border-b border-border pb-1">
+                             <div className="text-[8pt] font-black text-text-muted uppercase">Tipo de aceite</div>
+                             <div className="text-[10pt] font-bold text-text">{selectedForPrint.oilType || '---'}</div>
+                         </div>
+                         <div className="border-b border-border pb-1">
                              <div className="text-[8pt] font-black text-text-muted uppercase">Color</div>
                              <div className="text-[10pt] font-bold text-text">{selectedForPrint.color}</div>
                          </div>
@@ -598,7 +627,7 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, drivers, searchQuery, onA
                       <ConditionPrint label="7. Amortiguadores" status={selectedForPrint.shocksStatus} />
                       <ConditionPrint label="8. Llantas" status={selectedForPrint.tiresStatus} />
                       
-                      <ConditionPrint label="9. Batería" status={selectedForPrint.batteryStatus} />
+                      <ConditionPrint label="9. Batería · Estado/Condición" status={selectedForPrint.batteryStatus} />
                       <ConditionPrint label="10. Luces" status={selectedForPrint.lightsStatus} />
                       <ConditionPrint label="11. Limpiadores" status={selectedForPrint.wipersStatus} />
                       <ConditionPrint label="12. Claxon" status={selectedForPrint.hornStatus} />

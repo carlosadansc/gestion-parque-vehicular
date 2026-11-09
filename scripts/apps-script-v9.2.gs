@@ -1,5 +1,6 @@
 /**
- * API FLOTA PRO v9.14 - Fechas/horas locales; eliminación exclusiva para administradores
+ * API FLOTA PRO v9.15 - Fechas/horas locales; datos de batería y aceite en vehículos
+ * Cambio v9.15: agrega marca y número de serie de batería, y tipo de aceite a Vehiculos.
  * Conserva las fechas de calendario y utiliza la zona horaria de la hoja para lecturas.
  */
 
@@ -7,7 +8,7 @@ const CONFIG = {
   sheets: {
     "Vehiculos": [
       "id", "plate", "model", "assignedDriverId", "status", "image", "date_registered",
-      "economicNumber", "inventory", "condition", "location", "vin", "odometer", "brand", "year", "type", "line", "color", "cylinders", "fuelType",
+      "economicNumber", "inventory", "condition", "location", "vin", "odometer", "brand", "year", "type", "line", "color", "cylinders", "fuelType", "batteryBrand", "batterySerialNumber", "oilType",
       "engineStatus", "clutchStatus", "transmissionStatus", "shifterStatus", "steeringStatus", "suspensionStatus", "tempGaugeStatus", "oilGaugeStatus",
       "tiresStatus", "shocksStatus", "brakesStatus", "batteryStatus", "lightsStatus", "hornStatus", "wipersStatus", "speedoStatus",
       "observations", "accessories_notes"

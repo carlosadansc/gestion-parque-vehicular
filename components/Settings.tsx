@@ -25,7 +25,8 @@ const Settings: React.FC<SettingsProps> = ({ settings, onUpdateSetting }) => {
 
 const appsScriptCode = `
 /**
- * API FLOTA PRO v9.14 - Fechas/horas locales; eliminación exclusiva para administradores
+ * API FLOTA PRO v9.15 - Fechas/horas locales; datos de batería y aceite en vehículos
+ * Cambio v9.15: agrega marca y número de serie de batería, y tipo de aceite a Vehiculos.
  * Conserva las fechas de calendario y utiliza la zona horaria de la hoja para lecturas.
  */
 
@@ -33,7 +34,7 @@ const CONFIG = {
   sheets: {
     "Vehiculos": [
       "id", "plate", "model", "assignedDriverId", "status", "image", "date_registered",
-      "economicNumber", "inventory", "condition", "location", "vin", "odometer", "brand", "year", "type", "line", "color", "cylinders", "fuelType",
+      "economicNumber", "inventory", "condition", "location", "vin", "odometer", "brand", "year", "type", "line", "color", "cylinders", "fuelType", "batteryBrand", "batterySerialNumber", "oilType",
       "engineStatus", "clutchStatus", "transmissionStatus", "shifterStatus", "steeringStatus", "suspensionStatus", "tempGaugeStatus", "oilGaugeStatus",
       "tiresStatus", "shocksStatus", "brakesStatus", "batteryStatus", "lightsStatus", "hornStatus", "wipersStatus", "speedoStatus",
       "observations", "accessories_notes"
@@ -553,7 +554,7 @@ function getSheetData(ss, name, timeZone) {
             <div className="p-8 space-y-8">
               <div className="bg-secondary rounded-xl p-6 shadow-inner">
                 <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-[10pt] font-black text-primary uppercase tracking-[0.2em] mb-4">Apps Script (v9.13 - Eliminaciones exclusivas para administradores)</h4>
+                  <h4 className="text-[10pt] font-black text-primary uppercase tracking-[0.2em] mb-4">Apps Script (v9.15 - Datos de batería y aceite)</h4>
                   <button onClick={async () => {
                     try {
                       await navigator.clipboard.writeText(appsScriptCode);

@@ -61,6 +61,9 @@ export interface Vehicle {
   color?: string;
   cylinders?: number;
   fuelType?: string;
+  batteryBrand?: string;
+  batterySerialNumber?: string;
+  oilType?: string;
   // Condiciones Mecánicas (JSON Request)
   engineStatus?: string;
   clutchStatus?: string;

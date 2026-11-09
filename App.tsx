@@ -106,6 +106,11 @@ const validateVehiclePayload = (vehicle: Omit<Vehicle, 'id'> | Vehicle, driverLi
   ensure(hasText(vehicle.plate), 'La placa es obligatoria.');
   ensure(hasText(vehicle.model), 'El modelo es obligatorio.');
   ensure(VEHICLE_STATUS_SET.has(vehicle.status), 'El estado del vehículo no es válido.');
+  ensure(
+    [vehicle.batteryBrand, vehicle.batterySerialNumber, vehicle.oilType]
+      .every(value => value === undefined || typeof value === 'string'),
+    'Los datos de batería y el tipo de aceite deben ser texto.'
+  );
 
   if (hasText(vehicle.assignedDriverId)) {
     ensure(driverList.some(d => d.id === vehicle.assignedDriverId), 'El chofer asignado no existe.');
